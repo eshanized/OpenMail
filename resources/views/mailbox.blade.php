@@ -1,10 +1,20 @@
-@extends('layouts.app')
+@extends('layouts.mailbox')
 
-@section('title', 'Mailbox')
+@section('sidebar')
+    <livewire:mailbox.folder-sidebar />
+@endsection
 
 @section('content')
-    <div class="text-center">
-        <h2 class="text-3xl font-extrabold text-gray-900">Welcome, {{ auth()->user()->name }}!</h2>
-        <p class="mt-4 text-lg text-gray-600">Your mailbox will appear here in Phase 2.</p>
+    <div x-data="{ selected: [] }">
+        @if(isset($uid))
+            <livewire:mailbox.message-viewer
+                :folderPath="$folderPath"
+                :uid="$uid"
+            />
+        @else
+            <livewire:mailbox.message-list
+                :folderPath="$folderPath ?? 'INBOX'"
+            />
+        @endif
     </div>
 @endsection

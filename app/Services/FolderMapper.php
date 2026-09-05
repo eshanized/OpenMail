@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Webklex\PHPIMAP\Client;
 use Webklex\PHPIMAP\Folder;
 
 class FolderMapper
@@ -57,5 +58,63 @@ class FolderMapper
             return ucfirst($role);
         }
         return $folder->name;
+    }
+
+    /**
+     * Get the Sent folder path using SPECIAL-USE or heuristic.
+     *
+     * @param Client $client
+     * @return string|null
+     */
+    public function getSentFolderPath(Client $client): ?string
+    {
+        $folders = $client->getFolders();
+        foreach ($folders as $folder) {
+            $attributes = $folder->attributes ?? [];
+            if (in_array('\\Sent', $attributes)) {
+                return $folder->path;
+            }
+        }
+
+        // Fallback to heuristic names
+        $fallbackNames = ['Sent', 'Sent Messages', 'Sent Items'];
+        foreach ($fallbackNames as $name) {
+            foreach ($folders as $folder) {
+                if (strcasecmp($folder->name, $name) === 0) {
+                    return $folder->path;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the Drafts folder path using SPECIAL-USE or heuristic.
+     *
+     * @param Client $client
+     * @return string|null
+     */
+    public function getDraftsFolderPath(Client $client): ?string
+    {
+        $folders = $client->getFolders();
+        foreach ($folders as $folder) {
+            $attributes = $folder->attributes ?? [];
+            if (in_array('\\Drafts', $attributes)) {
+                return $folder->path;
+            }
+        }
+
+        // Fallback to heuristic names
+        $fallbackNames = ['Drafts', 'Draft'];
+        foreach ($fallbackNames as $name) {
+            foreach ($folders as $folder) {
+                if (strcasecmp($folder->name, $name) === 0) {
+                    return $folder->path;
+                }
+            }
+        }
+
+        return null;
     }
 }

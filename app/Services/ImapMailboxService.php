@@ -10,6 +10,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Carbon;
 use App\Models\Folder as FolderModel;
 use App\Models\MessageMetadata;
 
@@ -348,5 +349,206 @@ class ImapMailboxService
         }
 
         return 'Trash';
+    }
+
+    /**
+     * Append a message to an IMAP folder.
+     *
+     * @param string $folderPath The folder path
+     * @param string $mimeMessage The raw MIME message string
+     * @param array $flags IMAP flags to set
+     * @param Carbon|null $internalDate Internal date for the message
+     * @return string|null The UID of the appended message
+     */
+    public function appendMessage(string $folderPath, string $mimeMessage, array $flags = [], ?Carbon $internalDate = null): ?string
+    {
+        $client = $this->getClient();
+
+        try {
+            $folder = $client->getFolder($folderPath);
+            if (!$folder) {
+                throw new \Exception("Folder not found: {$folderPath}");
+            }
+
+            // Ensure \Seen flag is included by default
+            $options = array_merge(['\\Seen'], $flags);
+            $date = $internalDate?->format('d-M-Y H:i:s O');
+
+            $result = $folder->appendMessage($mimeMessage, $options, $date);
+
+            // Parse UID from result (webklex returns array with uid/uidvalidity)
+            return $this->parseAppendUid($result);
+        } finally {
+            $client->disconnect();
+        }
+    }
+
+    /**
+     * Append message to Sent folder.
+     *
+     * @param string $mimeMessage The raw MIME message string
+     * @return string|null The UID of the appended message
+     */
+    public function appendToSent(string $mimeMessage): ?string
+    {
+        $sentFolder = app(FolderMapper::class)->getSentFolderPath($this->getClient());
+
+        if (!$sentFolder) {
+            throw new \Exception('Sent folder not found');
+        }
+
+        return $this->appendMessage($sentFolder, $mimeMessage, ['\\Seen'], now());
+    }
+
+    /**
+     * Append message to Drafts folder.
+     *
+     * @param string $mimeMessage The raw MIME message string
+     * @param string|null $existingUid UID of existing draft to replace
+     * @return string|null The UID of the appended message
+     */
+    public function appendToDrafts(string $mimeMessage, ?string $existingUid = null): ?string
+    {
+        $client = $this->getClient();
+
+        try {
+            $draftsFolder = app(FolderMapper::class)->getDraftsFolderPath($client);
+
+            if (!$draftsFolder) {
+                throw new \Exception('Drafts folder not found');
+            }
+
+            $folder = $client->getFolder($draftsFolder);
+
+            // If existing UID provided, delete the old draft first
+            if ($existingUid) {
+                $oldMessage = $folder->query()->getMessageByUid($existingUid);
+                if ($oldMessage) {
+                    $oldMessage->delete(true); // true = expunge
+                }
+            }
+
+            return $this->appendMessage($draftsFolder, $mimeMessage, ['\\Draft'], now());
+        } finally {
+            $client->disconnect();
+        }
+    }
+
+    /**
+     * Delete a message from Drafts folder by UID.
+     *
+     * @param string $uid The message UID
+     * @return bool True if deleted
+     */
+    public function deleteFromDrafts(string $uid): bool
+    {
+        $client = $this->getClient();
+
+        try {
+            $draftsFolder = app(FolderMapper::class)->getDraftsFolderPath($client);
+
+            if (!$draftsFolder) {
+                return false;
+            }
+
+            $folder = $client->getFolder($draftsFolder);
+            $message = $folder->query()->getMessageByUid($uid);
+
+            if ($message) {
+                $message->delete(true); // expunge
+                return true;
+            }
+
+            return false;
+        } finally {
+            $client->disconnect();
+        }
+    }
+
+    /**
+     * Search for recent recipients from Sent and Inbox folders.
+     *
+     * @param int $limit Maximum number of recipients to return
+     * @return array Array of ['email' => ..., 'name' => ..., 'frequency' => ...]
+     */
+    public function searchRecipients(int $limit = 100): array
+    {
+        $client = $this->getClient();
+        $sinceDate = now()->subDays(30)->format('d-M-Y');
+        $emails = [];
+
+        try {
+            // Search Sent folder
+            $sentFolder = app(FolderMapper::class)->getSentFolderPath($client);
+            if ($sentFolder) {
+                try {
+                    $sentMessages = $client->getFolder($sentFolder)
+                        ->query()
+                        ->since($sinceDate)
+                        ->all()
+                        ->get();
+
+                    foreach ($sentMessages as $msg) {
+                        foreach ($msg->getTo() as $addr) {
+                            $emails[] = ['email' => $addr->mail, 'name' => $addr->personal ?? ''];
+                        }
+                        foreach ($msg->getCc() as $addr) {
+                            $emails[] = ['email' => $addr->mail, 'name' => $addr->personal ?? ''];
+                        }
+                    }
+                } catch (\Exception) {
+                    // Ignore folder access errors
+                }
+            }
+
+            // Search Inbox for From addresses (replies received)
+            try {
+                $inboxMessages = $client->getFolder('INBOX')
+                    ->query()
+                    ->since($sinceDate)
+                    ->all()
+                    ->get();
+
+                foreach ($inboxMessages as $msg) {
+                    foreach ($msg->getFrom() as $addr) {
+                        $emails[] = ['email' => $addr->mail, 'name' => $addr->personal ?? ''];
+                    }
+                }
+            } catch (\Exception) {
+                // Ignore folder access errors
+            }
+
+            // Aggregate by email frequency
+            $aggregated = collect($emails)
+                ->groupBy('email')
+                ->map(function ($group) {
+                    return [
+                        'email' => $group->first()['email'],
+                        'name' => $group->first()['name'],
+                        'frequency' => $group->count(),
+                    ];
+                })
+                ->values()
+                ->sortByDesc('frequency')
+                ->take($limit)
+                ->values()
+                ->toArray();
+
+            return $aggregated;
+        } finally {
+            $client->disconnect();
+        }
+    }
+
+    /**
+     * Parse UID from webklex appendMessage result.
+     *
+     * @param array $result
+     * @return string|null
+     */
+    private function parseAppendUid(array $result): ?string
+    {
+        // webklex returns: ['uid' => 123, 'uidvalidity' => 456] or similar
+        return isset($result['uid']) ? (string) $result['uid'] : null;
     }
 }

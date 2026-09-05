@@ -54,4 +54,16 @@ return [
     'default_encryption' => 'ssl',
     'default_imap_port' => 993,
     'default_smtp_port' => 465,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Compose & Send Settings
+    |--------------------------------------------------------------------------
+    */
+
+    'undo_send_delay' => env('OPENMAIL_UNDO_SEND_DELAY', 10), // seconds, 5-30 range
+    'sent_folder' => env('OPENMAIL_SENT_FOLDER', 'Sent'),
+    'drafts_folder' => env('OPENMAIL_DRAFTS_FOLDER', 'Drafts'),
+    'max_attachment_size_mb' => 25,
+    'max_total_attachment_size_mb' => 50,
 ];

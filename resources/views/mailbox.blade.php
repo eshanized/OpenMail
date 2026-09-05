@@ -16,5 +16,8 @@
                 :folderPath="$folderPath ?? 'INBOX'"
             />
         @endif
+
+        {{-- Composer Modal --}}
+        <livewire:mailbox.composer />
     </div>
 @endsection

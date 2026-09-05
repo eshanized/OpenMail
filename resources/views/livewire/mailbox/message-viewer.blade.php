@@ -86,6 +86,45 @@
 
             {{-- Action buttons --}}
             <div class="mt-4 pt-4 border-t border-gray-100 flex flex-wrap items-center gap-2">
+                {{-- Reply --}}
+                <button
+                    wire:click="reply"
+                    wire:loading.attr="disabled"
+                    class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 flex items-center gap-1"
+                    title="Reply"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                    </svg>
+                    Reply
+                </button>
+
+                {{-- Reply All --}}
+                <button
+                    wire:click="replyAll"
+                    wire:loading.attr="disabled"
+                    class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 flex items-center gap-1"
+                    title="Reply All"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9h2a2 2 0 012 2v6a2 2 0 01-2 2H7a2 2 0 01-2-2v-2M7 13v-2a2 2 0 012-2h6l-4-4" />
+                    </svg>
+                    Reply All
+                </button>
+
+                {{-- Forward --}}
+                <button
+                    wire:click="forward"
+                    wire:loading.attr="disabled"
+                    class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 flex items-center gap-1"
+                    title="Forward"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                    Forward
+                </button>
+
                 {{-- Star toggle --}}
                 <button
                     wire:click="toggleStar"

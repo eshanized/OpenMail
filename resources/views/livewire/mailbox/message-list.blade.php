@@ -29,13 +29,31 @@
     clearSelection() {
         this.selected = new Set();
         @this.set('selectedUids', []);
+    },
+    openComposer() {
+        @this.dispatch('openComposer', { mode: 'compose' });
     }
-}">
-    {{-- Bulk action toolbar --}}
-    <livewire:mailbox.message-toolbar
-        :selectedUids="$selectedUids"
-        :folderPath="$folderPath"
-    />
+};">
+    {{-- Toolbar with Compose button --}}
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-2">
+            <button
+                @click="openComposer"
+                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2"
+            >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828L18 9.828l6.586 6.586a2 2 0 002.828-2.828L10.828 2.172a2 2 0 00-2.828 0L2.172 9.828a2 2 0 000 2.828l6.586 6.586a2 2 0 102.828-2.828z"></path>
+                </svg>
+                Compose
+            </button>
+        </div>
+
+        {{-- Bulk action toolbar --}}
+        <livewire:mailbox.message-toolbar
+            :selectedUids="$selectedUids"
+            :folderPath="$folderPath"
+        />
+    </div>
 
     {{-- Sort controls --}}
     <div class="mb-4 flex flex-wrap items-center gap-2 text-sm">

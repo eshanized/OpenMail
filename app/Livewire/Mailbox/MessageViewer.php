@@ -206,6 +206,46 @@ class MessageViewer extends Component
         $this->redirect(route('mailbox', ['folderPath' => $this->folderPath]), navigate: true);
     }
 
+    public function reply(): void
+    {
+        $this->dispatch('openComposer', [
+            'mode' => 'reply',
+            'message' => $this->getMessageDataForComposer(),
+        ]);
+    }
+
+    public function replyAll(): void
+    {
+        $this->dispatch('openComposer', [
+            'mode' => 'replyAll',
+            'message' => $this->getMessageDataForComposer(),
+        ]);
+    }
+
+    public function forward(): void
+    {
+        $this->dispatch('openComposer', [
+            'mode' => 'forward',
+            'message' => $this->getMessageDataForComposer(),
+        ]);
+    }
+
+    protected function getMessageDataForComposer(): array
+    {
+        return [
+            'message_id' => $this->messageId,
+            'references' => $this->references,
+            'from_email' => $this->fromAddress,
+            'from_name' => $this->fromDisplay,
+            'to_address' => $this->toDisplay,
+            'cc_address' => $this->ccDisplay,
+            'subject' => $this->subject,
+            'date_formatted' => $this->formattedDate,
+            'html_body' => $this->sanitizedHtml,
+            'text_body' => $this->textBody,
+        ];
+    }
+
     public function render()
     {
         return view('livewire.mailbox.message-viewer', [

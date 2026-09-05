@@ -5,12 +5,12 @@
 OpenMail delivers a self-hosted webmail application in 5 phases, progressing from a working setup wizard and authentication system through core mailbox reading, message composition, organizational features, and finally security hardening with UI polish. Each phase builds a complete technical layer that the next phase depends on.
 
 ## Phases
-
-- [x] **Phase 1: Foundation & Setup Wizard** - Project scaffold, MailProvider interface, database schema, authentication, 8-step setup wizard (completed 2026-09-05)
-- [ ] **Phase 2: Mailbox Core** - Folder navigation, message list, message viewer with HTML sanitization, attachment handling
-- [ ] **Phase 3: Compose & Send** - Full composer, Reply/Reply All/Forward, draft autosave, signatures, SMTP sending
-- [ ] **Phase 4: Organization & Intelligence** - Full-text search, contacts with autocomplete, message threading, labels
-- [ ] **Phase 5: Security & Polish** - CSP headers, rate limiting, audit logging, theme toggle, density settings, profile management
+ 
+ - [x] **Phase 1: Foundation & Setup Wizard** - Project scaffold, MailProvider interface, database schema, authentication, 8-step setup wizard (completed 2026-09-05)
+ - [x] **Phase 2: Mailbox Core** - Folder navigation, message list, message viewer with HTML sanitization, attachment handling (completed 2026-09-06)
+ - [ ] **Phase 3: Compose & Send** - Full composer, Reply/Reply All/Forward, draft autosave, signatures, SMTP sending
+ - [ ] **Phase 4: Organization & Intelligence** - Full-text search, contacts with autocomplete, message threading, labels
+ - [ ] **Phase 5: Security & Polish** - CSP headers, rate limiting, audit logging, theme toggle, density settings, profile management
 
 ## Phase Details
 
@@ -36,24 +36,24 @@ Plans:
 - [x] 01-03-PLAN.md — IMAP authentication guard, session management, login throttling, security
 
 ### Phase 2: Mailbox Core
-
-**Goal**: Users can browse folders and read messages — the core mailbox experience works end-to-end
-**Depends on**: Phase 1
-**Requirements**: MAIL-01 through MAIL-04, MSG-01 through MSG-07, VIEW-01 through VIEW-10, DB-03, DB-04
-**Success Criteria** (what must be TRUE):
-
-  1. User can navigate between Inbox, Sent, Drafts, Trash, Spam, Archive, and custom folders
-  2. Message list displays sender, subject, timestamp, read/unread state, star, and attachment indicators with pagination
-  3. User can open a message and see rendered HTML (in sandboxed iframe) or plain text with headers
-  4. User can download attachments from messages without path traversal or filename issues
-  5. Bulk selection (checkbox, shift-click, select all) works on the message list
-
-**Plans**: 2 plans
-
-Plans:
-
-- [ ] 02-01-PLAN.md — Core mailbox infrastructure: DB schema, IMAP service, folder sidebar, message list with pagination (tracer)
-- [ ] 02-02-PLAN.md — Message viewer, dual HTML sanitization, attachments, actions, bulk selection toolbar
+ 
+ **Goal**: Users can browse folders and read messages — the core mailbox experience works end-to-end
+ **Depends on**: Phase 1
+ **Requirements**: MAIL-01 through MAIL-04, MSG-01 through MSG-07, VIEW-01 through VIEW-10, DB-03, DB-04
+ **Success Criteria** (what must be TRUE):
+ 
+   1. User can navigate between Inbox, Sent, Drafts, Trash, Spam, Archive, and custom folders
+   2. Message list displays sender, subject, timestamp, read/unread state, star, and attachment indicators with pagination
+   3. User can open a message and see rendered HTML (in sandboxed iframe) or plain text with headers
+   4. User can download attachments from messages without path traversal or filename issues
+   5. Bulk selection (checkbox, shift-click, select all) works on the message list
+ 
+ **Plans**: 2/2 plans executed
+ 
+ Plans:
+ 
+ - [x] 02-01-PLAN.md — Core mailbox infrastructure: DB schema, IMAP service, folder sidebar, message list with pagination (tracer)
+ - [x] 02-02-PLAN.md — Message viewer, dual HTML sanitization, attachments, actions, bulk selection toolbar
 
 ### Phase 3: Compose & Send
 
@@ -108,7 +108,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Setup Wizard | 3/3 | Complete    | 2026-09-05 |
-| 2. Mailbox Core | 0/TBD | Not started | - |
+| 2. Mailbox Core | 2/2 | Complete    | 2026-09-06 |
 | 3. Compose & Send | 0/TBD | Not started | - |
 | 4. Organization & Intelligence | 0/TBD | Not started | - |
 | 5. Security & Polish | 0/TBD | Not started | - |

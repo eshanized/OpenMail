@@ -1,19 +1,19 @@
 ---
 gsd_state_version: 1.0
-current_phase: 2
+current_phase: 02
 current_phase_name: Mailbox Core
-status: planning
-stopped_at: Phase 2 context gathered
-last_updated: "2026-09-05T12:54:47.648Z"
-last_activity: 2026-09-05
-last_activity_desc: Phase 01 complete, transitioned to Phase 2
-state_head: 236b64cd7d3921127522cbc7fb06da53737a5aa2
+status: executing
+stopped_at: Completed 02-02-PLAN.md
+last_updated: "2026-09-06T12:45:00Z"
+last_activity: 2026-09-06
+last_activity_desc: Completed Phase 02 Plan 2 (Message Viewer & Actions)
+state_head: 1de28fd
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
-  percent: 20
+  total_plans: 5
+  completed_plans: 4
+  percent: 25
 ---
 
 # Project State
@@ -23,22 +23,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-05)
 
 **Core value:** Provide a secure, modern webmail interface that any organization can deploy on their existing mail infrastructure with zero command-line interaction.
-**Current focus:** Phase 01 — Foundation & Setup Wizard
+**Current focus:** Phase 02 — Mailbox Core
 
 ## Current Position
 
-Phase: 2 — Mailbox Core
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-05 — Phase 01 complete, transitioned to Phase 2
+Phase: 02 (Mailbox Core) — EXECUTING
+Plan: 2 of 2
+Status: Phase 02 complete — Ready for Phase 03
+Last activity: 2026-09-06 — Completed Phase 02 Plan 2
 
-Progress: ░░░░░░░░░░ 0%
+Progress: ████░░░░░░ 40%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 3
+- Total plans completed: 4
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -47,6 +47,7 @@ Progress: ░░░░░░░░░░ 0%
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 | 3 | - | - |
+| 02 | 2 | - | - |
 
 **Recent Trend:**
 
@@ -66,6 +67,14 @@ Recent decisions affecting current work:
 - Phase 1: webklex/php-imap for IMAP, Symfony Mailer for SMTP, php-mime-mail-parser for MIME
 - Phase 1: HTMLPurifier (server) + DOMPurify (client) dual sanitization strategy
 - Phase 1: Database-only sessions/cache (no Redis) for shared hosting compatibility
+- Phase 2 Plan 1: IMAP SPECIAL-USE folder mapping with name-based heuristic fallback
+- Phase 2 Plan 1: Database caching of folder counts with UIDVALIDITY-based invalidation
+- Phase 2 Plan 1: Alpine.js bulk selection with shift-click range selection
+- Phase 2 Plan 2: Extracted message data as simple types to avoid Livewire serialization issues with webklex Message objects
+- Phase 2 Plan 2: Dual sanitization pipeline: HTMLPurifier (server) → DOMPurify (client) → sandboxed iframe
+- Phase 2 Plan 2: Remote images blocked by default via data-src rewrite with user opt-in
+- Phase 2 Plan 2: Attachment downloads use UUID-prefixed filenames and MIME type validation
+- Phase 2 Plan 2: Bulk operations use IMAP STORE/COPY with UID sets
 
 ### Pending Todos
 
@@ -83,6 +92,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-05T12:54:47.601Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-mailbox-core/02-CONTEXT.md
+Last session: 2026-09-06T12:45:00Z
+Stopped at: Completed 02-02-PLAN.md
+Resume file: None

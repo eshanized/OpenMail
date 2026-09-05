@@ -250,12 +250,12 @@ class ComposerServiceTest extends TestCase
         $imapService = $this->createMock(ImapMailboxService::class);
         $sanitizer = $this->createMock(MessageSanitizer::class);
 
-        $deleteFromDraftsCalled = false;
+        $deleteFromSentCalled = false;
         $appendToDraftsCalled = false;
 
-        $imapService->method('deleteFromDrafts')
-            ->willReturnCallback(function () use (&$deleteFromDraftsCalled) {
-                $deleteFromDraftsCalled = true;
+        $imapService->method('deleteFromSent')
+            ->willReturnCallback(function () use (&$deleteFromSentCalled) {
+                $deleteFromSentCalled = true;
                 return true;
             });
 
@@ -281,7 +281,7 @@ class ComposerServiceTest extends TestCase
         $result = $service->undoSend($pendingSend->id, $this->user->id);
 
         $this->assertTrue($result);
-        $this->assertTrue($deleteFromDraftsCalled);
+        $this->assertTrue($deleteFromSentCalled);
         $this->assertTrue($appendToDraftsCalled);
 
         $pendingSend->refresh();

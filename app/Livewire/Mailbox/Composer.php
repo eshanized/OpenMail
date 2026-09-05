@@ -127,9 +127,16 @@ class Composer extends Component
 
             if ($result['success']) {
                 $this->dispatch('toast', 'Message sent', 'success');
-                $this->dispatch('undo-send', ['delay' => config('openmail.undo_send_delay', 10)]);
+                // For successful immediate send, show undo toast with the configured delay
+                $this->showUndoToast = true;
+                $this->pendingSendId = null; // No pending send ID for immediate sends
+                $this->undoSendDelay = config('openmail.undo_send_delay', 10) * 1000; // Convert to ms for toast
             } else {
                 $this->dispatch('toast', 'Message queued for sending', 'warning');
+                // For queued sends, the pending_send_id is in the result
+                $this->showUndoToast = true;
+                $this->pendingSendId = $result['pending_send_id'] ?? null;
+                $this->undoSendDelay = config('openmail.undo_send_delay', 10) * 1000;
             }
 
             $this->dispatch('composer-sent');
@@ -235,6 +242,89 @@ class Composer extends Component
     {
         unset($this->attachments[$index]);
         $this->attachments = array_values($this->attachments);
+    }
+
+    public function updatedBodyHtml(): void
+    {
+        // Dispatch browser event for LocalStorage autosave (debounced client-side)
+        $this->dispatch('autosave-draft', [
+            'compositionId' => $this->compositionId,
+            'to' => $this->to,
+            'cc' => $this->cc,
+            'bcc' => $this->bcc,
+            'subject' => $this->subject,
+            'body' => $this->bodyHtml,
+            'mode' => $this->mode,
+            'replyToMessage' => $this->replyToMessage,
+        ]);
+    }
+
+    public function saveDraftToLocalStorage(): void
+    {
+        // Dispatch browser event to save to LocalStorage
+        $this->dispatch('save-to-localstorage', [
+            'key' => 'openmail:draft:' . $this->compositionId,
+            'data' => [
+                'compositionId' => $this->compositionId,
+                'to' => $this->to,
+                'cc' => $this->cc,
+                'bcc' => $this->bcc,
+                'subject' => $this->subject,
+                'body' => $this->bodyHtml,
+                'mode' => $this->mode,
+                'replyToMessage' => $this->replyToMessage,
+                'savedAt' => now()->toISOString(),
+            ],
+        ]);
+    }
+
+    public function loadDraftFromLocalStorage(string $compositionId): void
+    {
+        $this->dispatch('load-from-localstorage', [
+            'key' => 'openmail:draft:' . $compositionId,
+        ]);
+    }
+
+    public function syncDraftToImap(): void
+    {
+        try {
+            $result = app(ComposerService::class)->saveDraft(
+                auth()->id(),
+                $this->getComposerData(),
+                $this->draftUid
+            );
+
+            if ($result['success'] && $result['draft_uid']) {
+                $this->draftUid = $result['draft_uid'];
+                $this->autosaveStatus = 'saved';
+                $this->lastSavedAt = now()->toISOString();
+            }
+        } catch (\Exception $e) {
+            $this->autosaveStatus = 'error';
+        }
+    }
+
+    public function deleteDraftFromImap(): void
+    {
+        if ($this->draftUid) {
+            try {
+                app(ComposerService::class)->imapService->deleteFromDrafts($this->draftUid);
+            } catch (\Exception) {
+                // Ignore errors
+            }
+        }
+    }
+
+    public function undoSend(): void
+    {
+        if ($this->pendingSendId) {
+            $result = app(ComposerService::class)->undoSend($this->pendingSendId, auth()->id());
+            if ($result) {
+                $this->dispatch('toast', 'Message moved to Drafts', 'success');
+            }
+        }
+        $this->showUndoToast = false;
+        $this->pendingSendId = null;
     }
 
     public function syncBodyFromEditor(string $html): void

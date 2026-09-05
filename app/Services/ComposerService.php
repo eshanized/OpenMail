@@ -125,7 +125,7 @@ class ComposerService
         } catch (\Exception $e) {
             // On SMTP failure: queue for retry (per D-18)
             $delay = config('openmail.undo_send_delay', 10);
-            PendingSend::create([
+            $pendingSend = PendingSend::create([
                 'user_id' => $userId,
                 'message_json' => $data,
                 'mime_message' => $mimeString,
@@ -135,7 +135,7 @@ class ComposerService
                 'retry_count' => 0,
             ]);
 
-            return ['success' => false, 'queued' => true, 'sent_uid' => $sentUid];
+            return ['success' => false, 'queued' => true, 'sent_uid' => $sentUid, 'pending_send_id' => $pendingSend->id];
         }
     }
 
@@ -180,10 +180,7 @@ class ComposerService
 
         // If message was appended to Sent folder, delete it
         if ($pendingSend->sent_folder_uid) {
-            $this->imapService->deleteFromDrafts($pendingSend->sent_folder_uid);
-            // Note: In a real implementation, we'd also try to delete from Sent folder
-            // but the current deleteFromDrafts only handles Drafts. We'll need to add
-            // a deleteFromSent method or generalize the delete method.
+            $this->imapService->deleteFromSent($pendingSend->sent_folder_uid);
         }
 
         // Move to Drafts folder (per D-24)

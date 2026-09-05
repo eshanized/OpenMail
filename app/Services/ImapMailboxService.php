@@ -466,6 +466,37 @@ class ImapMailboxService
     }
 
     /**
+     * Delete a message from Sent folder by UID.
+     *
+     * @param string $uid The message UID
+     * @return bool True if deleted
+     */
+    public function deleteFromSent(string $uid): bool
+    {
+        $client = $this->getClient();
+
+        try {
+            $sentFolder = app(FolderMapper::class)->getSentFolderPath($client);
+
+            if (!$sentFolder) {
+                return false;
+            }
+
+            $folder = $client->getFolder($sentFolder);
+            $message = $folder->query()->getMessageByUid($uid);
+
+            if ($message) {
+                $message->delete(true); // expunge
+                return true;
+            }
+
+            return false;
+        } finally {
+            $client->disconnect();
+        }
+    }
+
+    /**
      * Search for recent recipients from Sent and Inbox folders.
      *
      * @param int $limit Maximum number of recipients to return

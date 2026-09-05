@@ -27,12 +27,12 @@ OpenMail delivers a self-hosted webmail application in 5 phases, progressing fro
   4. Sessions persist across browser tabs and expire after configured timeout
   5. IMAP/SMTP connection testing in the wizard reports success or specific failure
 
-**Plans**: 1/3 plans executed
+**Plans**: 2/3 plans executed
 
 Plans:
 
 - [x] 01-01-PLAN.md — Laravel scaffold, DB schema, install lock, services, login/wizard stubs (tracer)
-- [ ] 01-02-PLAN.md — Full 8-step setup wizard with mail config, auto-detection, verification suite
+- [x] 01-02-PLAN.md — Full 8-step setup wizard with mail config, auto-detection, verification suite
 - [ ] 01-03-PLAN.md — IMAP authentication guard, session management, login throttling, security
 
 ### Phase 2: Mailbox Core
@@ -102,7 +102,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Setup Wizard | 1/3 | In Progress|  |
+| 1. Foundation & Setup Wizard | 2/3 | In Progress|  |
 | 2. Mailbox Core | 0/TBD | Not started | - |
 | 3. Compose & Send | 0/TBD | Not started | - |
 | 4. Organization & Intelligence | 0/TBD | Not started | - |

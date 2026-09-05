@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\SetupController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\LogoutController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -13,12 +14,7 @@ Route::get('/', function () {
 
 Route::get('/install', [SetupController::class, 'show'])->name('install');
 Route::get('/login', [LoginController::class, 'show'])->name('login');
-Route::post('/logout', function () {
-    auth()->logout();
-    request()->session()->invalidate();
-    request()->session()->regenerateToken();
-    return redirect('/login');
-})->name('logout');
+Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/mailbox', function () {

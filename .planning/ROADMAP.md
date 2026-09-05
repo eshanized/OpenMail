@@ -48,7 +48,12 @@ Plans:
   4. User can download attachments from messages without path traversal or filename issues
   5. Bulk selection (checkbox, shift-click, select all) works on the message list
 
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+
+- [ ] 02-01-PLAN.md — Core mailbox infrastructure: DB schema, IMAP service, folder sidebar, message list with pagination (tracer)
+- [ ] 02-02-PLAN.md — Message viewer, dual HTML sanitization, attachments, actions, bulk selection toolbar
 
 ### Phase 3: Compose & Send
 

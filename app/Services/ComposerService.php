@@ -5,7 +5,7 @@ namespace App\Services;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Part\DataPart;
-use Symfony\Component\Mime\Header\Headers;
+use Symfony\Component\Mime\Header\UnstructuredHeader;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -56,23 +56,28 @@ class ComposerService
         // Attach files
         foreach ($data['attachments'] ?? [] as $att) {
             $email->attach(
-                DataPart::fromPath($att['path'])
-                    ->withDisposition('attachment')
-                    ->setFilename($att['name'])
-                    ->withMimeType($att['mime'] ?? 'application/octet-stream')
+                DataPart::fromPath(
+                    $att['path'],
+                    $att['name'],
+                    $att['mime'] ?? 'application/octet-stream'
+                )->setDisposition('attachment')
             );
         }
 
         // Generate Message-ID
-        $messageId = '<' . Str::uuid() . '@' . config('app.domain', 'openmail.local') . '>';
-        $email->getHeaders()->addMessageId($messageId);
+        $messageId = Str::uuid() . '@' . config('app.domain', 'openmail.local');
+        $email->getHeaders()->add(new \Symfony\Component\Mime\Header\IdentificationHeader('Message-ID', $messageId));
 
         // For replies/forwards: set In-Reply-To and References headers
         if (!empty($data['in_reply_to'])) {
-            $email->getHeaders()->addHeader(new \Symfony\Component\Mime\Header\InReplyToHeader($data['in_reply_to']));
+            // Remove angle brackets if present
+            $inReplyTo = trim($data['in_reply_to'], '<>');
+            $email->getHeaders()->add(new \Symfony\Component\Mime\Header\IdentificationHeader('In-Reply-To', $inReplyTo));
         }
         if (!empty($data['references'])) {
-            $email->getHeaders()->addHeader(new \Symfony\Component\Mime\Header\ReferencesHeader($data['references']));
+            // Remove angle brackets from each reference
+            $refs = array_map(fn($r) => trim($r, '<>'), explode(' ', $data['references']));
+            $email->getHeaders()->add(new \Symfony\Component\Mime\Header\IdentificationHeader('References', $refs));
         }
 
         return $email;

@@ -9,7 +9,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Setup & Installation
 
-- [ ] **SETUP-01**: Graphical setup wizard detects fresh installation and enters install mode
+- [x] **SETUP-01**: Graphical setup wizard detects fresh installation and enters install mode
 - [ ] **SETUP-02**: System requirements check (PHP version, extensions, permissions, database driver)
 - [ ] **SETUP-03**: Database configuration form with connection testing
 - [ ] **SETUP-04**: IMAP/SMTP configuration with connection testing and port/encryption validation
@@ -20,18 +20,18 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **SETUP-09**: Final verification suite (config, database, IMAP, SMTP, filesystem, encryption)
 - [ ] **SETUP-10**: Installation lock prevents re-running setup on existing installation
 - [ ] **SETUP-11**: Resumable installation state (browser close preserves progress)
-- [ ] **SETUP-12**: Shared hosting compatible (no CLI/SSH required for installation)
+- [x] **SETUP-12**: Shared hosting compatible (no CLI/SSH required for installation)
 
 ### Authentication
 
-- [ ] **AUTH-01**: User can log in with email/password via IMAP authentication
+- [x] **AUTH-01**: User can log in with email/password via IMAP authentication
 - [ ] **AUTH-02**: Secure application session created after successful IMAP auth
 - [ ] **AUTH-03**: Login throttling with progressive delays after failed attempts
 - [ ] **AUTH-04**: Session rotation after authentication
 - [ ] **AUTH-05**: CSRF protection on all forms
 - [ ] **AUTH-06**: Secure cookies (HttpOnly, SameSite, Secure flags)
 - [ ] **AUTH-07**: Session invalidation on logout
-- [ ] **AUTH-08**: TLS enforcement for IMAP/SMTP connections
+- [x] **AUTH-08**: TLS enforcement for IMAP/SMTP connections
 
 ### Mailbox
 
@@ -138,11 +138,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Database & Infrastructure
 
-- [ ] **DB-01**: MySQL/MariaDB schema for application state
-- [ ] **DB-02**: Database sessions (no Redis dependency)
+- [x] **DB-01**: MySQL/MariaDB schema for application state
+- [x] **DB-02**: Database sessions (no Redis dependency)
 - [ ] **DB-03**: Database caching for folder metadata
 - [ ] **DB-04**: Message metadata storage (folder, UID, Message-ID, flags)
-- [ ] **DB-05**: Application settings storage
+- [x] **DB-05**: Application settings storage
 
 ## v2 Requirements
 
@@ -196,7 +196,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SETUP-01 | Phase 1 | Pending |
+| SETUP-01 | Phase 1 | Complete |
 | SETUP-02 | Phase 1 | Pending |
 | SETUP-03 | Phase 1 | Pending |
 | SETUP-04 | Phase 1 | Pending |
@@ -207,15 +207,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SETUP-09 | Phase 1 | Pending |
 | SETUP-10 | Phase 1 | Pending |
 | SETUP-11 | Phase 1 | Pending |
-| SETUP-12 | Phase 1 | Pending |
-| AUTH-01 | Phase 1 | Pending |
+| SETUP-12 | Phase 1 | Complete |
+| AUTH-01 | Phase 1 | Complete |
 | AUTH-02 | Phase 1 | Pending |
 | AUTH-03 | Phase 1 | Pending |
 | AUTH-04 | Phase 1 | Pending |
 | AUTH-05 | Phase 1 | Pending |
 | AUTH-06 | Phase 1 | Pending |
 | AUTH-07 | Phase 1 | Pending |
-| AUTH-08 | Phase 1 | Pending |
+| AUTH-08 | Phase 1 | Complete |
 | MAIL-01 | Phase 2 | Pending |
 | MAIL-02 | Phase 2 | Pending |
 | MAIL-03 | Phase 2 | Pending |
@@ -289,13 +289,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SET-04 | Phase 5 | Pending |
 | SET-05 | Phase 5 | Pending |
 | SET-06 | Phase 5 | Pending |
-| DB-01 | Phase 1 | Pending |
-| DB-02 | Phase 1 | Pending |
+| DB-01 | Phase 1 | Complete |
+| DB-02 | Phase 1 | Complete |
 | DB-03 | Phase 2 | Pending |
 | DB-04 | Phase 2 | Pending |
-| DB-05 | Phase 1 | Pending |
+| DB-05 | Phase 1 | Complete |
 
 **Coverage:**
+
 - v1 requirements: 95 total
 - Mapped to phases: 95
 - Unmapped: 0 ✓

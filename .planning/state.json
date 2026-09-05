@@ -6,7 +6,7 @@
     {
       "number": "1",
       "name": "Foundation & Setup Wizard",
-      "status": "in_progress"
+      "status": "complete"
     },
     {
       "number": "2",
@@ -31,8 +31,8 @@
   ],
   "next": {
     "command": "/gsd:progress --next",
-    "label": "Advance to the next step",
-    "reason": "Phase 1 of 5 · 0% · executing"
+    "label": "Advance to the next step (plan phase 2)",
+    "reason": "Phase 2 of 5 — needs a plan"
   },
-  "updated_at": "2026-09-05T11:27:54.318Z"
+  "updated_at": "2026-09-05T12:06:43.309Z"
 }

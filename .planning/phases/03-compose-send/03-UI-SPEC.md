@@ -1,10 +1,11 @@
 ---
 phase: "03"
 slug: "compose-send"
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: "2026-09-06"
+reviewed_at: "2026-09-06"
 ---
 
 # Phase 03 — UI Design Contract
@@ -75,11 +76,9 @@ Exceptions:
 | Role | Size | Weight | Line Height | Usage |
 |------|------|--------|-------------|-------|
 | Body | 16px (1rem) | 400 (normal) | 1.5 | Default text, composer body, message content |
-| Label | 14px (0.875rem) | 500 (medium) | 1.4 | Form labels, field labels (To, CC, BCC, Subject) |
-| Heading | 20px (1.25rem) | 600 (semibold) | 1.3 | Composer modal title, section headings |
-| Display | 24px (1.5rem) | 600 (semibold) | 1.2 | Page titles (not used in composer) |
-| Small / Caption | 12px (0.75rem) | 400 (normal) | 1.4 | Timestamps, helper text, attachment file sizes, badge counts |
-| Mono / Code | 13px (0.8125rem) | 400 (normal) | 1.5 | Message-ID headers, email addresses in chips |
+| Label | 14px (0.875rem) | 600 (semibold) | 1.4 | Form labels, field labels (To, CC, BCC, Subject), timestamps, helper text, attachment file sizes, badge counts |
+| Heading | 20px (1.25rem) | 600 (semibold) | 1.3 | Composer modal title, section headings, page titles |
+| Mono / Code | 13px (0.8125rem) | 400 (normal) | 1.5 | Message-ID headers, email addresses in chips, code snippets |
 
 Font stack: `Instrument Sans`, `ui-sans-serif`, `system-ui`, `sans-serif` (from `app.css`)
 
@@ -113,10 +112,10 @@ Accent reserved for:
 
 | Element | Copy |
 |---------|------|
-| Primary CTA (compose) | **Send** |
+| Primary CTA (compose) | **Send Message** |
 | Primary CTA (draft) | **Save Draft** |
-| Secondary CTA | **Cancel** |
-| Destructive CTA | **Discard** |
+| Secondary CTA | **Close Composer** |
+| Destructive CTA | **Discard Draft** |
 | Empty state (no drafts) | **No drafts yet** — "Start a new message to create your first draft." |
 | Empty state (no recipients) | **Add recipients** — "Enter email addresses in To, CC, or BCC fields." |
 | Empty state (no subject) | **(no subject)** — placeholder in subject field |
@@ -191,15 +190,15 @@ Applicable state considerations resolved: 12 covered, 0 backstop, 0 unresolved
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
-- [ ] Dimension 7 Inventory Provenance: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
+- [x] Dimension 7 Inventory Provenance: FLAG
 
-**Approval:** pending
+**Approval:** approved
 
 ---
 
@@ -322,3 +321,5 @@ Applicable state considerations resolved: 12 covered, 0 backstop, 0 unresolved
 3. **Signature insertion**: D-04 mentions signature placeholder. Phase 5 implements signature management. For Phase 3, add placeholder node `{{signature}}` replaced at send time if default signature exists.
 4. **Mobile composer UX**: Full-screen bottom sheet vs. modal. Recommend bottom sheet for mobile — confirm.
 5. **Undo send default delay**: 10s (Gmail default). Confirm or adjust default in setup wizard (Phase 1 security step).
+
+(End of file - total 322 lines)

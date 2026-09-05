@@ -3,6 +3,10 @@
         open: false,
         showCc: false,
         showBcc: false,
+        autosaveTimer: null,
+        imapSyncTimer: null,
+        tiptapEditor: null,
+        tiptapToolbar: null,
         init() {
             this.$watch('$wire.isOpen', (value) => {
                 this.open = value;
@@ -10,13 +14,43 @@
                     document.body.style.overflow = 'hidden';
                     this.$nextTick(() => {
                         this.$refs.toInput?.focus();
+                        this.initTiptap();
                     });
                 } else {
                     document.body.style.overflow = '';
+                    this.destroyTiptap();
                 }
             });
             this.$watch('$wire.showCc', (value) => { this.showCc = value; });
             this.$watch('$wire.showBcc', (value) => { this.showBcc = value; });
+            this.$watch('$wire.autosaveStatus', (value) => { this.autosaveStatus = value; });
+
+            // Listen for autosave events from Livewire
+            Livewire.on('autosave-draft', (data) => {
+                this.saveToLocalStorage(data);
+            });
+
+            // Listen for undo-send toast
+            Livewire.on('undo-send', (data) => {
+                this.showUndoToast(data.delay);
+            });
+
+            // Listen for clear draft storage
+            Livewire.on('clear-draft-storage', (data) => {
+                localStorage.removeItem('openmail:draft:' + data.compositionId);
+            });
+
+            // Load draft from LocalStorage on mount
+            this.loadFromLocalStorage();
+
+            // Handle keyboard shortcuts
+            document.addEventListener('keydown', this.handleKeydown.bind(this));
+        },
+        destroy() {
+            this.destroyTiptap();
+            if (this.autosaveTimer) clearTimeout(this.autosaveTimer);
+            if (this.imapSyncTimer) clearInterval(this.imapSyncTimer);
+            document.removeEventListener('keydown', this.handleKeydown);
         },
         handleKeydown(event) {
             if (!this.open) return;
@@ -32,7 +66,93 @@
                 event.preventDefault();
                 this.$wire.saveDraft();
             }
-        }
+        },
+        async initTiptap() {
+            const { initTiptapEditor, createToolbar } = await import('../../js/components/TiptapEditor.js');
+            const editorEl = this.$refs.editor;
+            const toolbarEl = this.$refs.toolbar;
+
+            if (!editorEl || !toolbarEl) return;
+
+            this.tiptapEditor = await initTiptapEditor(editorEl, {
+                onUpdate: (html) => {
+                    this.$wire.syncBodyFromEditor(html);
+                    this.triggerAutosave();
+                },
+                initialContent: @js($bodyHtml ?: $body),
+            });
+
+            this.tiptapToolbar = createToolbar(this.tiptapEditor.editor, toolbarEl);
+        },
+        destroyTiptap() {
+            if (this.tiptapEditor) {
+                this.tiptapEditor.destroy();
+                this.tiptapEditor = null;
+            }
+            if (this.tiptapToolbar) {
+                this.tiptapToolbar.destroy();
+                this.tiptapToolbar = null;
+            }
+        },
+        triggerAutosave() {
+            if (this.autosaveTimer) clearTimeout(this.autosaveTimer);
+            this.autosaveTimer = setTimeout(() => {
+                this.$dispatch('autosave-draft', {
+                    compositionId: @js($compositionId),
+                    to: @entangle('to').defer,
+                    cc: @entangle('cc').defer,
+                    bcc: @entangle('bcc').defer,
+                    subject: @entangle('subject').defer,
+                    body: @entangle('bodyHtml').defer,
+                    mode: @js($mode),
+                    replyToMessage: @js($replyToMessage),
+                });
+            }, 1500);
+        },
+        saveToLocalStorage(data) {
+            const key = 'openmail:draft:' + data.compositionId;
+            localStorage.setItem(key, JSON.stringify({
+                ...data,
+                savedAt: Date.now(),
+            }));
+            this.$wire.autosaveStatus = 'saved';
+            this.$wire.lastSavedAt = new Date().toISOString();
+
+            // Start IMAP sync interval if not already running
+            if (!this.imapSyncTimer) {
+                this.imapSyncTimer = setInterval(() => {
+                    this.$wire.syncDraftToImap();
+                }, 30000); // Every 30 seconds
+            }
+        },
+        loadFromLocalStorage() {
+            const key = 'openmail:draft:' + @js($compositionId);
+            const stored = localStorage.getItem(key);
+            if (stored) {
+                try {
+                    const data = JSON.parse(stored);
+                    // Check if draft is recent (within 24 hours)
+                    if (Date.now() - data.savedAt < 24 * 60 * 60 * 1000) {
+                        this.$wire.loadDraftFromLocalStorage(data);
+                    }
+                } catch (e) {
+                    console.warn('Failed to load draft from LocalStorage:', e);
+                }
+            }
+        },
+        showUndoToast(delay) {
+            this.$wire.undoSendDelay = delay;
+            this.$wire.showUndoToast = true;
+        },
+        closeWithConfirm() {
+            if (this.tiptapEditor && this.tiptapEditor.getHTML().trim()) {
+                if (confirm('This draft has unsaved changes. Are you sure you want to discard it?')) {
+                    this.$wire.discardDraft();
+                }
+            } else {
+                this.$wire.discardDraft();
+            }
+        },
     }"
     x-show="open"
     class="fixed inset-0 z-40"
@@ -200,28 +320,37 @@
                     @enderror
                 </div>
 
-                {{-- Body --}}
+                {{-- Body with Tiptap Editor --}}
                 <div class="mb-6">
                     <label for="composer-body" class="block text-sm font-medium text-gray-700 mb-1">Message</label>
                     <div class="border border-gray-300 rounded-md overflow-hidden">
-                        {{-- Toolbar placeholder --}}
-                        <div class="border-b border-gray-200 bg-gray-50 px-3 py-2 flex flex-wrap gap-1">
-                            <span class="text-xs text-gray-500 self-center mr-2">Rich text editor (Tiptap) will be integrated in Plan 2</span>
-                            <span class="text-xs text-gray-400">Press Ctrl+Enter to send</span>
-                        </div>
+                        {{-- Toolbar --}}
+                        <div x-ref="toolbar" class="tiptap-toolbar-container"></div>
+                        {{-- Editor --}}
+                        <div x-ref="editor" class="tiptap-editor"></div>
                         {{-- Hidden textarea for Livewire sync --}}
                         <textarea
                             id="composer-body"
-                            wire:model="body"
-                            class="w-full min-h-[300px] px-3 py-3 border-0 focus:outline-none resize-none text-sm"
-                            placeholder="Start writing…"
-                            @keydown.ctrl.enter.prevent="$wire.send()"
-                            @keydown.meta.enter.prevent="$wire.send()"
+                            wire:model="bodyHtml"
+                            class="hidden"
+                            aria-hidden="true"
                         ></textarea>
                     </div>
                     @error('body')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
+                </div>
+
+                {{-- Autosave Status Indicator --}}
+                <div class="mb-4 flex items-center justify-between">
+                    <span class="text-xs text-gray-500" x-data="{ status: @entangle('autosaveStatus') }">
+                        <span x-show="status === 'saving'" class="flex items-center gap-1">
+                            <svg class="animate-spin h-3 w-3" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                            Saving...
+                        </span>
+                        <span x-show="status === 'saved'">Saved @if($lastSavedAt) {{ \Carbon\Carbon::parse($lastSavedAt)->diffForHumans() }} @else just now @endif</span>
+                        <span x-show="status === 'error'" class="text-red-600">Save failed</span>
+                    </span>
                 </div>
 
                 {{-- Attachments --}}
@@ -232,6 +361,11 @@
                     <div
                         class="border-2 border-dashed border-gray-300 hover:border-blue-400 rounded-lg p-8 text-center transition-colors cursor-pointer"
                         wire:loading.class="opacity-50"
+                        x-data="{ dragOver: false }"
+                        @dragover.prevent="dragOver = true"
+                        @dragleave.prevent="dragOver = false"
+                        @drop.prevent="dragOver = false; handleDrop($event)"
+                        :class="{ 'border-blue-500 bg-blue-50': dragOver }"
                     >
                         <input
                             type="file"
@@ -302,64 +436,32 @@
 
                 {{-- Reply/Forward Quoted Message Preview --}}
                 @if($mode !== 'compose' && $replyToMessage)
-                    <div class="border-t border-gray-200 pt-4" x-data="{ quoteOpen: false }">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-sm font-medium text-gray-700">
-                                @if($mode === 'forward')
-                                    Forwarded Message
-                                @else
-                                    Quoted Message
-                                @endif
-                            </span>
-                            <button
-                                type="button"
-                                @click="quoteOpen = !quoteOpen"
-                                class="text-sm text-blue-600 hover:text-blue-800"
-                            >
-                                <span x-show="!quoteOpen">Show quoted text</span>
-                                <span x-show="quoteOpen">Hide quoted text</span>
-                            </button>
-                        </div>
-                        <div x-show="quoteOpen" x-transition class="border-l-4 border-blue-200 pl-4 ml-4 text-sm text-gray-600">
-                            <div class="text-xs text-gray-500 mb-1">
-                                On {{ $replyToMessage['date_formatted'] ?? $replyToMessage['date'] ?? '' }},
-                                {{ $replyToMessage['from_name'] ?? '' }} <{{ $replyToMessage['from_email'] ?? '' }}> wrote:
-                            </div>
-                            <blockquote class="quote-block">
-                                {!! $replyToMessage['html_body'] ?? nl2br(e($replyToMessage['text_body'] ?? '')) !!}
-                            </blockquote>
-                        </div>
-                    </div>
+                    <x-composer-quote
+                        :attribution="'On ' . ($replyToMessage['date_formatted'] ?? $replyToMessage['date'] ?? '') . ', ' . ($replyToMessage['from_name'] ?? '') . ' <' . ($replyToMessage['from_email'] ?? '') . '> wrote:'"
+                        :quoted-html="$replyToMessage['html_body'] ?? nl2br(e($replyToMessage['text_body'] ?? ''))"
+                        :uid="'composer-quote-' . $compositionId"
+                    />
                 @endif
             </form>
         </div>
     </div>
 
-    {{-- Toast Notifications (handled by parent mailbox view) --}}
+    {{-- Undo Send Toast --}}
+    @if($showUndoToast)
+        <x-undo-send-toast :delay="$undoSendDelay" :pending-send-id="$pendingSendId" />
+    @endif
+
     @push('scripts')
         <script>
-            // Listen for toast events from Livewire
             document.addEventListener('livewire:load', () => {
                 Livewire.on('toast', (message, type = 'info') => {
-                    // Dispatch to parent component's toast handler
                     window.dispatchEvent(new CustomEvent('openmail-toast', {
                         detail: { message, type }
                     }));
                 });
 
                 Livewire.on('composer-sent', () => {
-                    // Clear any draft storage
                     localStorage.removeItem('openmail:draft:' + @js($compositionId));
-                });
-
-                Livewire.on('undo-send', (data) => {
-                    window.dispatchEvent(new CustomEvent('openmail-undo-send', {
-                        detail: data
-                    }));
-                });
-
-                Livewire.on('clear-draft-storage', (data) => {
-                    localStorage.removeItem('openmail:draft:' + data.compositionId);
                 });
             });
         </script>

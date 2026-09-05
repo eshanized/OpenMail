@@ -19,6 +19,8 @@ class Composer extends Component
     public string $bcc = '';
     public string $subject = '';
     public string $body = '';
+    public string $bodyHtml = '';
+    public string $bodyText = '';
     public array $attachments = [];
     public ?array $replyToMessage = null;
     public string $compositionId;
@@ -26,6 +28,11 @@ class Composer extends Component
     public bool $sending = false;
     public bool $showCc = false;
     public bool $showBcc = false;
+    public string $autosaveStatus = 'idle'; // idle, saving, saved, error
+    public ?string $lastSavedAt = null;
+    public bool $showUndoToast = false;
+    public ?int $pendingSendId = null;
+    public int $undoSendDelay = 10;
 
     protected $listeners = [
         'openComposer' => 'openComposer',
@@ -186,7 +193,8 @@ class Composer extends Component
             'cc' => $this->cc,
             'bcc' => $this->bcc,
             'subject' => $this->subject,
-            'body' => $this->body,
+            'body' => $this->bodyHtml ?: $this->body,
+            'bodyText' => $this->bodyText,
             'attachments' => $attachments,
             'in_reply_to' => $this->replyToMessage['message_id'] ?? null,
             'references' => $this->buildReferences($this->replyToMessage),
@@ -229,6 +237,13 @@ class Composer extends Component
         $this->attachments = array_values($this->attachments);
     }
 
+    public function syncBodyFromEditor(string $html): void
+    {
+        $this->bodyHtml = $html;
+        // Also keep body for backward compatibility with plain text fallback
+        $this->body = strip_tags($html);
+    }
+
     protected function resetForm(): void
     {
         $this->to = '';
@@ -236,6 +251,8 @@ class Composer extends Component
         $this->bcc = '';
         $this->subject = '';
         $this->body = '';
+        $this->bodyHtml = '';
+        $this->bodyText = '';
         $this->attachments = [];
         $this->replyToMessage = null;
         $this->draftUid = null;
@@ -243,6 +260,10 @@ class Composer extends Component
         $this->showBcc = false;
         $this->compositionId = (string) Str::uuid();
         $this->sending = false;
+        $this->autosaveStatus = 'idle';
+        $this->lastSavedAt = null;
+        $this->showUndoToast = false;
+        $this->pendingSendId = null;
         $this->resetValidation();
     }
 

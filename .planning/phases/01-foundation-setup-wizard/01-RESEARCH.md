@@ -744,22 +744,16 @@ class SystemRequirementsChecker
 | A4 | The `config/imap.php` file is auto-published by `webklex/laravel-imap` | Standard Stack | Would need to publish manually via `vendor:publish` |
 | A5 | Database cache driver supports `RateLimiter` atomic operations | Common Pitfalls | Would need file-based cache or different throttling approach |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should the wizard write .env directly or use a config service?**
-   - What we know: Laravel apps read .env on boot; config cache must be cleared after .env changes
-   - What's unclear: Whether to write .env directly (simple) or use a config abstraction (more robust)
-   - Recommendation: Write .env directly (matching WordPress-style simplicity), then clear config cache via `Cache::flush()` — this is the standard pattern for self-hosted PHP installers
+   - **RESOLVED:** Write .env directly using a structured line-by-line approach (read existing .env, update matching keys, append new keys, preserve comments). Clear config cache via `Artisan::call('config:clear')` after writes. This matches the WordPress-style simplicity required for shared hosting deployment.
 
 2. **Should the IMAP guard cache successful authentication?**
-   - What we know: IMAP auth on every request adds latency (100-300ms per request)
-   - What's unclear: Whether to cache IMAP auth status in session or validate on every request
-   - Recommendation: Validate IMAP on login only; store session token for subsequent requests. This matches AUTH-02 ("secure application session created after successful IMAP auth")
+   - **RESOLVED:** Validate IMAP credentials only on login (AUTH-01). Store the authenticated session token for subsequent requests. The IMAP password is encrypted with `Crypt::encrypt()` and stored in the session for future IMAP connections (e.g., fetching folders). This matches AUTH-02 and avoids per-request IMAP latency.
 
 3. **How to handle IMAP password storage for the session?**
-   - What we know: "Never store mailbox passwords in plaintext" (PROJECT.md constraint)
-   - What's unclear: Whether to encrypt the IMAP password in the session or re-prompt
-   - Recommendation: Encrypt the IMAP password using Laravel's `Crypt` facade and store in the session. This allows the app to reconnect to IMAP without re-prompting the user. The encrypted value is never written to disk.
+   - **RESOLVED:** Encrypt the IMAP password using Laravel's `Crypt` facade before storing in the session: `session()->put('openmail:imap_password', Crypt::encrypt($password))`. The encrypted value is never written to disk or database. On logout, the session is invalidated (AUTH-07) which destroys the encrypted password.
 
 ## Environment Availability
 

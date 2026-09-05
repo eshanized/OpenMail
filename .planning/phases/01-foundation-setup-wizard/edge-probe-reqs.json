@@ -1,0 +1,94 @@
+[
+  {
+    "id": "SETUP-01",
+    "text": "Graphical setup wizard detects fresh installation and enters install mode"
+  },
+  {
+    "id": "SETUP-02",
+    "text": "System requirements check (PHP version, extensions, permissions, database driver)"
+  },
+  {
+    "id": "SETUP-03",
+    "text": "Database configuration form with connection testing"
+  },
+  {
+    "id": "SETUP-04",
+    "text": "IMAP/SMTP configuration with connection testing and port/encryption validation"
+  },
+  {
+    "id": "SETUP-05",
+    "text": "Automatic mail configuration detection for common domains"
+  },
+  {
+    "id": "SETUP-06",
+    "text": "Application configuration (name, organization, domain, timezone)"
+  },
+  {
+    "id": "SETUP-07",
+    "text": "Administrator account creation with strong password validation"
+  },
+  {
+    "id": "SETUP-08",
+    "text": "Security configuration defaults (HTTPS, secure cookies, session lifetime, rate limiting)"
+  },
+  {
+    "id": "SETUP-09",
+    "text": "Final verification suite (config, database, IMAP, SMTP, filesystem, encryption)"
+  },
+  {
+    "id": "SETUP-10",
+    "text": "Installation lock prevents re-running setup on existing installation"
+  },
+  {
+    "id": "SETUP-11",
+    "text": "Resumable installation state (browser close preserves progress)"
+  },
+  {
+    "id": "SETUP-12",
+    "text": "Shared hosting compatible (no CLI/SSH required for installation)"
+  },
+  {
+    "id": "AUTH-01",
+    "text": "User can log in with email/password via IMAP authentication"
+  },
+  {
+    "id": "AUTH-02",
+    "text": "Secure application session created after successful IMAP auth"
+  },
+  {
+    "id": "AUTH-03",
+    "text": "Login throttling with progressive delays after failed attempts"
+  },
+  {
+    "id": "AUTH-04",
+    "text": "Session rotation after authentication"
+  },
+  {
+    "id": "AUTH-05",
+    "text": "CSRF protection on all forms"
+  },
+  {
+    "id": "AUTH-06",
+    "text": "Secure cookies (HttpOnly, SameSite, Secure flags)"
+  },
+  {
+    "id": "AUTH-07",
+    "text": "Session invalidation on logout"
+  },
+  {
+    "id": "AUTH-08",
+    "text": "TLS enforcement for IMAP/SMTP connections"
+  },
+  {
+    "id": "DB-01",
+    "text": "MySQL/MariaDB schema for application state"
+  },
+  {
+    "id": "DB-02",
+    "text": "Database sessions (no Redis dependency)"
+  },
+  {
+    "id": "DB-05",
+    "text": "Application settings storage"
+  }
+]

@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Services\ComposerService;
 use App\Services\MessageSanitizer;
+use App\Services\ContactAutocompleteService;
 use Illuminate\Support\Str;
 
 class Composer extends Component
@@ -229,6 +230,28 @@ class Composer extends Component
     {
         $this->validate();
 
+        $allowedMimes = [
+            'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.ms-powerpoint',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'text/plain', 'text/csv',
+            'application/zip', 'application/x-zip-compressed',
+        ];
+
+        foreach ($this->attachments as $attachment) {
+            $mime = $attachment->getMimeType();
+            if (!in_array($mime, $allowedMimes)) {
+                $this->addError('attachments', "File type not allowed: {$attachment->getClientOriginalName()} ({$mime})");
+                $this->attachments = [];
+                return;
+            }
+        }
+
         $totalSize = collect($this->attachments)->sum('getSize');
         $maxTotalSize = config('openmail.max_total_attachment_size_mb', 50) * 1024 * 1024;
 
@@ -325,6 +348,21 @@ class Composer extends Component
         }
         $this->showUndoToast = false;
         $this->pendingSendId = null;
+    }
+
+    public function searchContacts(string $query): array
+    {
+        if (strlen($query) < 1) {
+            return [];
+        }
+
+        return app(ContactAutocompleteService::class)->search(auth()->id(), $query, 10)->toArray();
+    }
+
+    public function refreshContactCache(): void
+    {
+        $count = app(ContactAutocompleteService::class)->refreshCache(auth()->id());
+        $this->dispatch('toast', "Contact cache refreshed ({$count} contacts)", 'success');
     }
 
     public function syncBodyFromEditor(string $html): void

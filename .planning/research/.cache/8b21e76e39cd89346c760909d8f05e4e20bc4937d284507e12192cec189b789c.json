@@ -1,0 +1,1 @@
+{"content":"php-mime-mail-parser 10.x: highest performance, requires mailparse PECL extension, PHP 8.2+. zbateson/mail-mime-parser 4.x: pure PHP alternative, no extension needed, slightly slower. Choose based on hosting extension availability.","source":"web","provider":"exa","confidence":"HIGH","fetched_at":"2026-09-05T08:21:32.718Z","ttl":86400000,"kind":"web"}

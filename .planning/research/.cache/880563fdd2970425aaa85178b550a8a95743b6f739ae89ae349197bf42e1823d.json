@@ -1,0 +1,1 @@
+{"content":"Laravel Scout ships with database engine using MySQL FULLTEXT indexes + LIKE clauses. SCOUT_DRIVER=database. No external service needed. Documentation says for most applications this is all you need. Perfect for shared hosting.","source":"web","provider":"exa","confidence":"HIGH","fetched_at":"2026-09-05T08:21:32.856Z","ttl":86400000,"kind":"web"}

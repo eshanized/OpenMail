@@ -68,7 +68,12 @@ Plans:
   4. User can send an email via SMTP and it appears in the Sent folder
   5. Undo send delay (configurable 5-30s) prevents accidental immediate delivery
 
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+
+- [ ] 03-01-PLAN.md — Core compose-send infrastructure: DB schema, ComposerService, basic composer modal UI (tracer)
+- [ ] 03-02-PLAN.md — Tiptap rich text editor, draft autosave, undo send, recipient autocomplete
 
 ### Phase 4: Organization & Intelligence
 
@@ -109,6 +114,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Foundation & Setup Wizard | 3/3 | Complete    | 2026-09-05 |
 | 2. Mailbox Core | 2/2 | Complete    | 2026-09-06 |
-| 3. Compose & Send | 0/TBD | Not started | - |
+| 3. Compose & Send | 0/2 | Not started | - |
 | 4. Organization & Intelligence | 0/TBD | Not started | - |
 | 5. Security & Polish | 0/TBD | Not started | - |

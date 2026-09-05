@@ -3,6 +3,9 @@
 use App\Http\Controllers\SetupController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
+use App\Livewire\Mailbox\FolderSidebar;
+use App\Livewire\Mailbox\MessageList;
+use App\Livewire\Mailbox\MessageViewer;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -20,6 +23,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/mailbox', function () {
         return view('mailbox');
     })->name('mailbox');
+
+    Route::get('/mailbox/{folderPath}/{uid}', function (string $folderPath, int $uid) {
+        return view('mailbox', [
+            'folderPath' => $folderPath,
+            'uid' => $uid,
+        ]);
+    })->name('message.show')->where('folderPath', '.*')->where('uid', '[0-9]+');
 });
 
 Route::get('/up', function () {

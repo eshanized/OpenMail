@@ -15,16 +15,29 @@ class ImapConnectionTester
         string $password
     ): array {
         try {
-            $config = [
-                'host' => $host,
-                'port' => $port,
-                'encryption' => $encryption,
-                'username' => $username,
-                'password' => $password,
-                'protocol' => 'imap',
-                'timeout' => 10,
-                'validate_cert' => true,
-            ];
+            $config = new \Webklex\PHPIMAP\Config([
+                'default' => 'default',
+                'accounts' => [
+                    'default' => [
+                        'host' => $host,
+                        'port' => $port,
+                        'encryption' => $encryption,
+                        'username' => $username,
+                        'password' => $password,
+                        'protocol' => 'imap',
+                        'timeout' => 10,
+                        'validate_cert' => true,
+                    ]
+                ],
+                'masks' => [
+                    'message' => \Webklex\PHPIMAP\Support\Masks\MessageMask::class,
+                    'attachment' => \Webklex\PHPIMAP\Support\Masks\AttachmentMask::class,
+                ],
+                'events' => [
+                    'message' => [],
+                    'folder' => [],
+                ]
+            ]);
 
             $client = new Client($config);
             $client->connect();

@@ -1,0 +1,86 @@
+<?php
+
+namespace App\Services;
+
+use HTMLPurifier;
+use HTMLPurifier_Config;
+
+class MessageSanitizer
+{
+    private ?HTMLPurifier $purifier = null;
+
+    private function getPurifier(): HTMLPurifier
+    {
+        if ($this->purifier !== null) {
+            return $this->purifier;
+        }
+
+        $config = HTMLPurifier_Config::createDefault();
+        $config->set('HTML.Doctype', 'HTML 4.01 Transitional');
+        $config->set('HTML.AllowedElements', [
+            'p', 'br', 'a', 'img', 'table', 'tr', 'td', 'th', 'div', 'span',
+            'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote',
+            'pre', 'code', 'strong', 'em', 'u', 's', 'sub', 'sup'
+        ]);
+        $config->set('HTML.AllowedAttributes', [
+            'a.href', 'a.target', 'a.rel', 'a.title',
+            'img.src', 'img.alt', 'img.width', 'img.height', 'img.style',
+            'table.border', 'table.cellpadding', 'table.cellspacing', 'table.width',
+            'td.colspan', 'td.rowspan', 'td.width', 'td.height',
+            'th.colspan', 'th.rowspan', 'th.width', 'th.height',
+            'div.style', 'span.style', 'p.style',
+            'h1.style', 'h2.style', 'h3.style', 'h4.style', 'h5.style', 'h6.style',
+            'ul.style', 'ol.style', 'li.style',
+            'blockquote.style', 'pre.style', 'code.style',
+            'strong.style', 'em.style', 'u.style', 's.style', 'sub.style', 'sup.style'
+        ]);
+        $config->set('CSS.AllowedProperties', [
+            'color', 'background-color', 'font-size', 'font-family', 'font-weight',
+            'font-style', 'text-align', 'text-decoration', 'margin', 'margin-top',
+            'margin-right', 'margin-bottom', 'margin-left', 'padding', 'padding-top',
+            'padding-right', 'padding-bottom', 'padding-left', 'border', 'border-top',
+            'border-right', 'border-bottom', 'border-left', 'width', 'height',
+            'float', 'clear'
+        ]);
+        $config->set('URI.AllowedSchemes', ['http', 'https', 'mailto']);
+        $config->set('AutoFormat.AutoParagraph', true);
+        $config->set('AutoFormat.RemoveEmpty', true);
+        $config->set('Core.Encoding', 'UTF-8');
+
+        $this->purifier = new HTMLPurifier($config);
+        return $this->purifier;
+    }
+
+    public function sanitizeHtml(string $html): string
+    {
+        return $this->getPurifier()->purify($html);
+    }
+
+    public function sanitizeText(string $text): string
+    {
+        return e($text);
+    }
+
+    public function blockRemoteImages(string $html): string
+    {
+        $dom = new \DOMDocument();
+        libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        libxml_clear_errors();
+
+        foreach ($dom->getElementsByTagName('img') as $img) {
+            $src = $img->getAttribute('src');
+            if ($src && (str_starts_with($src, 'http://') || str_starts_with($src, 'https://'))) {
+                $img->removeAttribute('src');
+                $img->setAttribute('data-src', $src);
+            }
+        }
+
+        $body = $dom->getElementsByTagName('body')->item(0);
+        if ($body) {
+            return $dom->saveHTML($body);
+        }
+
+        return $dom->saveHTML();
+    }
+}

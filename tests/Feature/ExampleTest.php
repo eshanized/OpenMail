@@ -13,8 +13,8 @@ class ExampleTest extends TestCase
     {
         $response = $this->get('/');
 
-        // When not installed, should redirect to /install
+        // When installed, should redirect to /login
         $response->assertStatus(302);
-        $response->assertRedirect('/install');
+        $response->assertRedirect('/login');
     }
 }

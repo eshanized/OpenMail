@@ -35,24 +35,24 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Mailbox
 
-- [ ] **MAIL-01**: Folder navigation (Inbox, Sent, Drafts, Trash, Spam, Archive)
+- [x] **MAIL-01**: Folder navigation (Inbox, Sent, Drafts, Trash, Spam, Archive)
 - [ ] **MAIL-02**: Custom folder display where supported by mail server
 - [ ] **MAIL-03**: Folder metadata caching (unread counts, total messages)
-- [ ] **MAIL-04**: Create/rename/delete custom folders
+- [x] **MAIL-04**: Create/rename/delete custom folders
 
 ### Message List
 
-- [ ] **MSG-01**: Display sender, recipients, subject, timestamp for each message
+- [x] **MSG-01**: Display sender, recipients, subject, timestamp for each message
 - [ ] **MSG-02**: Read/unread visual state
 - [ ] **MSG-03**: Star/flag indicator
 - [ ] **MSG-04**: Attachment indicator
 - [ ] **MSG-05**: Pagination with configurable page size
 - [ ] **MSG-06**: Bulk selection (checkbox, shift-click, select all)
-- [ ] **MSG-07**: Sort by date, sender, subject, size
+- [x] **MSG-07**: Sort by date, sender, subject, size
 
 ### Message Viewer
 
-- [ ] **VIEW-01**: Plain-text rendering
+- [x] **VIEW-01**: Plain-text rendering
 - [ ] **VIEW-02**: Sanitized HTML rendering in sandboxed iframe
 - [ ] **VIEW-03**: Message headers/metadata display
 - [ ] **VIEW-04**: Attachment list with download
@@ -61,7 +61,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **VIEW-07**: Delete (move to Trash)
 - [ ] **VIEW-08**: Move to folder
 - [ ] **VIEW-09**: Remote image blocking (block by default, user opt-in)
-- [ ] **VIEW-10**: Print-friendly view
+- [x] **VIEW-10**: Print-friendly view
 
 ### Composer
 
@@ -140,8 +140,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **DB-01**: MySQL/MariaDB schema for application state
 - [x] **DB-02**: Database sessions (no Redis dependency)
-- [ ] **DB-03**: Database caching for folder metadata
-- [ ] **DB-04**: Message metadata storage (folder, UID, Message-ID, flags)
+- [x] **DB-03**: Database caching for folder metadata
+- [x] **DB-04**: Message metadata storage (folder, UID, Message-ID, flags)
 - [x] **DB-05**: Application settings storage
 
 ## v2 Requirements
@@ -216,18 +216,18 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-06 | Phase 1 | Pending |
 | AUTH-07 | Phase 1 | Pending |
 | AUTH-08 | Phase 1 | Complete |
-| MAIL-01 | Phase 2 | Pending |
+| MAIL-01 | Phase 2 | Complete |
 | MAIL-02 | Phase 2 | Pending |
 | MAIL-03 | Phase 2 | Pending |
-| MAIL-04 | Phase 2 | Pending |
-| MSG-01 | Phase 2 | Pending |
+| MAIL-04 | Phase 2 | Complete |
+| MSG-01 | Phase 2 | Complete |
 | MSG-02 | Phase 2 | Pending |
 | MSG-03 | Phase 2 | Pending |
 | MSG-04 | Phase 2 | Pending |
 | MSG-05 | Phase 2 | Pending |
 | MSG-06 | Phase 2 | Pending |
-| MSG-07 | Phase 2 | Pending |
-| VIEW-01 | Phase 2 | Pending |
+| MSG-07 | Phase 2 | Complete |
+| VIEW-01 | Phase 2 | Complete |
 | VIEW-02 | Phase 2 | Pending |
 | VIEW-03 | Phase 2 | Pending |
 | VIEW-04 | Phase 2 | Pending |
@@ -236,7 +236,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | VIEW-07 | Phase 2 | Pending |
 | VIEW-08 | Phase 2 | Pending |
 | VIEW-09 | Phase 2 | Pending |
-| VIEW-10 | Phase 2 | Pending |
+| VIEW-10 | Phase 2 | Complete |
 | COMP-01 | Phase 3 | Pending |
 | COMP-02 | Phase 3 | Pending |
 | COMP-03 | Phase 3 | Pending |
@@ -291,8 +291,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SET-06 | Phase 5 | Pending |
 | DB-01 | Phase 1 | Complete |
 | DB-02 | Phase 1 | Complete |
-| DB-03 | Phase 2 | Pending |
-| DB-04 | Phase 2 | Pending |
+| DB-03 | Phase 2 | Complete |
+| DB-04 | Phase 2 | Complete |
 | DB-05 | Phase 1 | Complete |
 
 **Coverage:**

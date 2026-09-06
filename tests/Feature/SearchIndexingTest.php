@@ -264,7 +264,7 @@ class SearchIndexingTest extends TestCase
             'folder_path' => 'INBOX',
             'date' => now(),
         ]);
-        $taggedMessage->labels()->attach($label->id);
+        $taggedMessage->labels()->attach($label->id, ['user_id' => $this->user->id]);
 
         MessageMetadata::factory()->create([
             'user_id' => $this->user->id,
@@ -392,5 +392,52 @@ class SearchIndexingTest extends TestCase
         // This should not throw an exception
         $results = $service->search($this->user->id, '+test -bad *query "exact"');
         $this->assertNotNull($results);
+    }
+
+    /** @test */
+    public function sanitize_query_strips_fulltext_boolean_operators(): void
+    {
+        $service = new SearchService();
+
+        // FULLTEXT boolean operators: + - > < * " ( ) ~
+        $malicious = '+important -junk >large <small *wildcard "phrase" (group) ~fuzzy';
+        $sanitized = $service->sanitizeQuery($malicious);
+
+        // All boolean operators should be removed
+        $this->assertStringNotContainsString('+', $sanitized);
+        $this->assertStringNotContainsString('-', $sanitized);
+        $this->assertStringNotContainsString('>', $sanitized);
+        $this->assertStringNotContainsString('<', $sanitized);
+        $this->assertStringNotContainsString('*', $sanitized);
+        $this->assertStringNotContainsString('"', $sanitized);
+        $this->assertStringNotContainsString('(', $sanitized);
+        $this->assertStringNotContainsString(')', $sanitized);
+        $this->assertStringNotContainsString('~', $sanitized);
+
+        // Keywords should be preserved
+        $this->assertStringContainsString('important', $sanitized);
+        $this->assertStringContainsString('junk', $sanitized);
+        $this->assertStringContainsString('wildcard', $sanitized);
+        $this->assertStringContainsString('phrase', $sanitized);
+        $this->assertStringContainsString('group', $sanitized);
+        $this->assertStringContainsString('fuzzy', $sanitized);
+    }
+
+    /** @test */
+    public function sanitize_query_normalizes_whitespace(): void
+    {
+        $service = new SearchService();
+
+        $result = $service->sanitizeQuery('  too   many    spaces  ');
+        $this->assertEquals('too many spaces', $result);
+    }
+
+    /** @test */
+    public function sanitize_query_returns_empty_for_only_operators(): void
+    {
+        $service = new SearchService();
+
+        $result = $service->sanitizeQuery('+-<>*()~');
+        $this->assertEquals('', trim($result));
     }
 }

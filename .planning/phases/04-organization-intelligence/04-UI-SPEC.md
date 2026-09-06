@@ -48,7 +48,7 @@ Declared values (must be multiples of 4):
 Exceptions:
 - Icon-only touch targets: 44px minimum (44x44px click area per WCAG)
 - Thread row vertical padding: 12px (3 * 4px) for denser message list
-- Search dropdown item padding: 10px vertical (non-multiple for compact list density)
+- Search dropdown item padding: 8px vertical (2 * 4px) for compact list density
 
 ---
 
@@ -57,17 +57,15 @@ Exceptions:
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 14px | 400 (regular) | 1.5 |
-| Label | 12px | 500 (medium) | 1.4 |
+| Label | 12px | 600 (semibold) | 1.4 |
 | Heading | 20px | 600 (semibold) | 1.2 |
 | Display | 28px | 600 (semibold) | 1.15 |
 
-Additional roles for Phase 4:
-| Role | Size | Weight | Line Height | Usage |
-|------|------|--------|-------------|-------|
-| Snippet | 13px | 400 | 1.4 | Message preview, search result snippets |
-| Badge/Count | 11px | 600 | 1.0 | Unread counts, label pills, filter badges |
-| Toolbar | 13px | 500 | 1.0 | Sort buttons, filter chips, toolbar actions |
-| Sidebar Item | 14px | 500 | 1.3 | Folder/Contact/Label sidebar rows |
+Mapping for Phase 4 roles (consolidated to 4 sizes, 2 weights):
+- Snippet → Body (14px, 400)
+- Badge/Count → Label (12px, 600)
+- Toolbar → Label (12px, 600)
+- Sidebar Item → Body (14px, 400)
 
 ---
 

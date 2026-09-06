@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
+use Laravel\Scout\Attributes\SearchUsingFullText;
+use Laravel\Scout\Attributes\SearchUsingPrefix;
 
 class MessageMetadata extends Model
 {
-    use HasFactory;
+    use HasFactory, Searchable;
 
     protected $table = 'message_metadata';
 
@@ -22,6 +25,7 @@ class MessageMetadata extends Model
         'to_address',
         'date',
         'snippet',
+        'body_text',
         'has_attachments',
         'is_seen',
         'is_flagged',
@@ -36,9 +40,93 @@ class MessageMetadata extends Model
         'size' => 'integer',
     ];
 
+    /**
+     * Get the index name for the model (per-user isolation per D-05).
+     */
+    public function searchableAs(): string
+    {
+        return 'message_metadata_' . $this->user_id;
+    }
+
+    /**
+     * Get the value that should be used to index the model (D-05 fields).
+     *
+     * @return array<string, mixed>
+     */
+    #[SearchUsingFullText(['subject', 'from_address', 'from_name', 'to_address', 'snippet', 'body_text'])]
+    #[SearchUsingPrefix(['message_id'])]
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'user_id' => $this->user_id,
+            'folder_path' => $this->folder_path,
+            'uid' => $this->uid,
+            'message_id' => $this->message_id,
+            'subject' => $this->subject,
+            'from_address' => $this->from_address,
+            'from_name' => $this->from_name,
+            'to_address' => $this->to_address,
+            'date' => $this->date?->timestamp,
+            'snippet' => $this->snippet,
+            'body_text' => $this->body_text,
+            'has_attachments' => $this->has_attachments,
+            'is_seen' => $this->is_seen,
+            'is_flagged' => $this->is_flagged,
+        ];
+    }
+
+    /**
+     * Determine if the model should be searchable.
+     */
+    public function shouldBeSearchable(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Extract first 500 chars of plain text from HTML or plain text body.
+     * Used during sync to populate body_text column (RESEARCH.md Open Question 2).
+     */
+    public static function extractBodyText(?string $htmlOrText): string
+    {
+        if (empty($htmlOrText)) {
+            return '';
+        }
+
+        // Strip HTML tags
+        $text = strip_tags($htmlOrText);
+
+        // Decode HTML entities
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        // Normalize whitespace (collapse multiple spaces/newlines to single space)
+        $text = preg_replace('/\s+/', ' ', $text);
+
+        // Trim
+        $text = trim($text);
+
+        // Truncate to 500 chars
+        if (mb_strlen($text) > 500) {
+            $text = mb_substr($text, 0, 500);
+        }
+
+        return $text;
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Labels attached to this message.
+     */
+    public function labels()
+    {
+        return $this->belongsToMany(Label::class, 'message_labels', 'message_metadata_id', 'label_id')
+            ->using(MessageLabel::class)
+            ->withPivot('user_id');
     }
 
     public function getFromDisplayAttribute(): string

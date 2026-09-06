@@ -82,10 +82,10 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Threading
 
 - [ ] **THR-01**: Conversation-style message grouping
-- [ ] **THR-02**: Standards-based threading (Message-ID, In-Reply-To, References)
-- [ ] **THR-03**: Subject normalization as fallback only
+- [x] **THR-02**: Standards-based threading (Message-ID, In-Reply-To, References)
+- [x] **THR-03**: Subject normalization as fallback only
 - [ ] **THR-04**: Thread expansion/collapse
-- [ ] **THR-05**: Stable rendering across different message sources
+- [x] **THR-05**: Stable rendering across different message sources
 
 ### Search
 
@@ -95,12 +95,12 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **SRCH-04**: Has attachment filter
 - [ ] **SRCH-05**: Read/unread filter
 - [ ] **SRCH-06**: Search result highlighting
-- [ ] **SRCH-07**: Application-level indexing (not IMAP-native only)
+- [x] **SRCH-07**: Application-level indexing (not IMAP-native only)
 
 ### Contacts
 
 - [ ] **CONT-01**: Recent recipients auto-populated
-- [ ] **CONT-02**: Contact storage (name, email, phone, notes)
+- [x] **CONT-02**: Contact storage (name, email, phone, notes)
 - [ ] **CONT-03**: Address autocomplete in composer
 - [ ] **CONT-04**: Contact editing
 - [ ] **CONT-05**: Contact groups
@@ -108,7 +108,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Labels & Organization
 
-- [ ] **LBL-01**: Gmail-style labels alongside folders
+- [x] **LBL-01**: Gmail-style labels alongside folders
 - [ ] **LBL-02**: Apply/remove labels from messages
 - [ ] **LBL-03**: Label sidebar with message counts
 - [ ] **LBL-04**: Color-coded labels
@@ -251,24 +251,24 @@ Which phases cover which requirements. Updated during roadmap creation.
 | COMP-12 | Phase 3 | Pending |
 | COMP-13 | Phase 3 | Pending |
 | THR-01 | Phase 4 | Pending |
-| THR-02 | Phase 4 | Pending |
-| THR-03 | Phase 4 | Pending |
+| THR-02 | Phase 4 | Complete |
+| THR-03 | Phase 4 | Complete |
 | THR-04 | Phase 4 | Pending |
-| THR-05 | Phase 4 | Pending |
+| THR-05 | Phase 4 | Complete |
 | SRCH-01 | Phase 4 | Pending |
 | SRCH-02 | Phase 4 | Pending |
 | SRCH-03 | Phase 4 | Pending |
 | SRCH-04 | Phase 4 | Pending |
 | SRCH-05 | Phase 4 | Pending |
 | SRCH-06 | Phase 4 | Pending |
-| SRCH-07 | Phase 4 | Pending |
+| SRCH-07 | Phase 4 | Complete |
 | CONT-01 | Phase 4 | Pending |
-| CONT-02 | Phase 4 | Pending |
+| CONT-02 | Phase 4 | Complete |
 | CONT-03 | Phase 4 | Pending |
 | CONT-04 | Phase 4 | Pending |
 | CONT-05 | Phase 4 | Pending |
 | CONT-06 | Phase 4 | Pending |
-| LBL-01 | Phase 4 | Pending |
+| LBL-01 | Phase 4 | Complete |
 | LBL-02 | Phase 4 | Pending |
 | LBL-03 | Phase 4 | Pending |
 | LBL-04 | Phase 4 | Pending |

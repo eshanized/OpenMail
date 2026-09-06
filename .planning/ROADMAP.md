@@ -8,7 +8,7 @@ OpenMail delivers a self-hosted webmail application in 5 phases, progressing fro
  
  - [x] **Phase 1: Foundation & Setup Wizard** - Project scaffold, MailProvider interface, database schema, authentication, 8-step setup wizard (completed 2026-09-05)
  - [x] **Phase 2: Mailbox Core** - Folder navigation, message list, message viewer with HTML sanitization, attachment handling (completed 2026-09-06)
- - [ ] **Phase 3: Compose & Send** - Full composer, Reply/Reply All/Forward, draft autosave, signatures, SMTP sending
+ - [x] **Phase 3: Compose & Send** - Full composer, Reply/Reply All/Forward, draft autosave, signatures, SMTP sending (completed 2026-09-06)
  - [ ] **Phase 4: Organization & Intelligence** - Full-text search, contacts with autocomplete, message threading, labels
  - [ ] **Phase 5: Security & Polish** - CSP headers, rate limiting, audit logging, theme toggle, density settings, profile management
 
@@ -68,27 +68,35 @@ Plans:
   4. User can send an email via SMTP and it appears in the Sent folder
   5. Undo send delay (configurable 5-30s) prevents accidental immediate delivery
 
-**Plans**: 2 plans
+**Plans**: 2/2 plans complete
 
 Plans:
 
-- [ ] 03-01-PLAN.md — Core compose-send infrastructure: DB schema, ComposerService, basic composer modal UI (tracer)
-- [ ] 03-02-PLAN.md — Tiptap rich text editor, draft autosave, undo send, recipient autocomplete
+- [x] 03-01-PLAN.md — Core compose-send infrastructure: DB schema, ComposerService, basic composer modal UI (tracer)
+- [x] 03-02-PLAN.md — Tiptap rich text editor, draft autosave, undo send, recipient autocomplete
 
 ### Phase 4: Organization & Intelligence
-
-**Goal**: Users can search, organize, and thread messages — the mailbox becomes smart and navigable
-**Depends on**: Phase 3
-**Requirements**: SRCH-01 through SRCH-07, CONT-01 through CONT-06, THR-01 through THR-05, LBL-01 through LBL-05
-**Success Criteria** (what must be TRUE):
-
-  1. User can search across subject, sender, recipients, and body with highlighted results
-  2. Composer autocomplete suggests contacts from recent recipients and stored address book
-  3. Related messages are grouped into conversation threads using Message-ID/In-Reply-To/References headers
-  4. User can apply, remove, and filter by color-coded labels alongside folder navigation
-  5. Search supports filtering by folder, date range, attachment presence, and read/unread status
-
-**Plans**: TBD
+ 
+ **Goal**: Users can search, organize, and thread messages — the mailbox becomes smart and navigable
+ **Depends on**: Phase 3
+ **Requirements**: SRCH-01 through SRCH-07, CONT-01 through CONT-06, THR-01 through THR-05, LBL-01 through LBL-05
+ **Success Criteria** (what must be TRUE):
+ 
+   1. User can search across subject, sender, recipients, and body with highlighted results
+   2. Composer autocomplete suggests contacts from recent recipients and stored address book
+   3. Related messages are grouped into conversation threads using Message-ID/In-Reply-To/References headers
+   4. User can apply, remove, and filter by color-coded labels alongside folder navigation
+   5. Search supports filtering by folder, date range, attachment presence, and read/unread status
+ 
+ **Plans**: 5/5 plans created
+ 
+ Plans:
+ 
+ - [ ] 04-01-PLAN.md — Database schema + ThreadBuilder JWZ algorithm + threaded message list (tracer)
+ - [ ] 04-02-PLAN.md — Scout full-text search, SearchService, instant dropdown, results page with filters
+ - [ ] 04-03-PLAN.md — Contact CRUD, groups, vCard import/export, unified autocomplete (local + IMAP)
+ - [ ] 04-04-PLAN.md — Labels CRUD, sidebar with counts, label chips, Archive action with undo
+ - [ ] 04-05-PLAN.md — Tabbed sidebar, thread toggle persistence, keyboard shortcuts, integration tests
 
 ### Phase 5: Security & Polish
 
@@ -114,6 +122,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Foundation & Setup Wizard | 3/3 | Complete    | 2026-09-05 |
 | 2. Mailbox Core | 2/2 | Complete    | 2026-09-06 |
-| 3. Compose & Send | 0/2 | Not started | - |
-| 4. Organization & Intelligence | 0/TBD | Not started | - |
+| 3. Compose & Send | 2/2 | Complete   | 2026-09-06 |
+| 4. Organization & Intelligence | 0/5 | Planned | - |
 | 5. Security & Polish | 0/TBD | Not started | - |

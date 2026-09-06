@@ -797,27 +797,27 @@ public function searchUnified(int $userId, string $query, int $limit = 10): Coll
 | A5 | Scout database engine handles 100K+ messages per user | Search Architecture | Performance degradation; mitigate with pagination + simplePaginate |
 | A6 | IMAP servers support \Archive SPECIAL-USE or "Archive" heuristic | Archive Action (D-14) | Archive fails silently; mitigate with FolderMapper fallback + user config |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Thread header fetching optimization**
+1. **Thread header fetching optimization** ✅ RESOLVED in Plan 01 (Task 1 + Task 2)
    - What we know: D-01 says "fetch headers for visible messages only"
-   - What's unclear: How to fetch headers for thread roots that aren't on current page?
-   - Recommendation: When building threads for page N, also fetch headers for Message-IDs found in References headers of visible messages. Cache in `thread_header_cache` table with TTL.
+   - What was unclear: How to fetch headers for thread roots that aren't on current page?
+   - Resolution: Added `thread_header_cache` table (migration 000007) with TTL (24 hours). ThreadBuilder (Plan 01 Task 2) queries cache for missing parent Message-IDs. If not cached, caller fetches from IMAP and populates cache. Implemented in `ThreadBuilder::resolveMissingParentsFromCache()`.
 
-2. **Search snippet generation**
+2. **Search snippet generation** ✅ RESOLVED in Plan 02 (Task 1)
    - What we know: Scout highlights matches in `toSearchableArray` fields
-   - What's unclear: How to generate contextual snippets (e.g., "…meeting at 3pm…") from body_text?
-   - Recommendation: Store first 500 chars of plain-text body in `body_text` column during sync; use Scout highlighting on that field.
+   - What was unclear: How to generate contextual snippets from body_text?
+   - Resolution: Added `body_text` column to message_metadata (migration 000006). `MessageMetadata::extractBodyText()` extracts first 500 chars of plain text during sync. Scout highlights on `body_text` field for contextual snippets.
 
-3. **Contact avatar generation**
+3. **Contact avatar generation** ✅ RESOLVED in Plan 03 (Task 1)
    - What we know: UI-SPEC shows "Avatar (initial, colored bg from hash)"
-   - What's unclear: Deterministic color-from-email algorithm?
-   - Recommendation: Use simple hash: `['bg-blue-500', 'bg-green-500', ...][crc32(strtolower($email)) % 10]`
+   - What was unclear: Deterministic color-from-email algorithm?
+   - Resolution: Contact model `colorFromEmail()` static method uses CRC32 modulo 10 against 10-color palette: `['bg-blue-500','bg-green-600','bg-red-600','bg-yellow-600','bg-purple-600','bg-pink-600','bg-orange-600','bg-teal-600','bg-indigo-600','bg-gray-500']`. Same email always produces same color.
 
-4. **Mobile sidebar behavior (D-19)**
+4. **Mobile sidebar behavior (D-19)** ✅ RESOLVED in Plan 09 (Task 1)
    - What we know: "Tabs become bottom navigation or drawer sections"
-   - What's unclear: Which approach? Bottom nav (fixed) vs drawer (slide-over)?
-   - Recommendation: Bottom navigation for <768px (matches UI-SPEC "fixed bottom, safe-area-inset"); 3 tabs = perfect fit.
+   - What was unclear: Which approach? Bottom nav (fixed) vs drawer (slide-over)?
+   - Resolution: Bottom navigation for <768px (fixed bottom, safe-area-inset-bottom, z-40). 3 equal-width buttons. Panels become full-screen drawers sliding up from bottom (x-transition, fixed inset-0 z-50). Backdrop click closes. Matches UI-SPEC exactly.
 
 ## Environment Availability
 

@@ -76,27 +76,31 @@ Plans:
 - [x] 03-02-PLAN.md — Tiptap rich text editor, draft autosave, undo send, recipient autocomplete
 
 ### Phase 4: Organization & Intelligence
- 
- **Goal**: Users can search, organize, and thread messages — the mailbox becomes smart and navigable
- **Depends on**: Phase 3
- **Requirements**: SRCH-01 through SRCH-07, CONT-01 through CONT-06, THR-01 through THR-05, LBL-01 through LBL-05
- **Success Criteria** (what must be TRUE):
- 
-   1. User can search across subject, sender, recipients, and body with highlighted results
-   2. Composer autocomplete suggests contacts from recent recipients and stored address book
-   3. Related messages are grouped into conversation threads using Message-ID/In-Reply-To/References headers
-   4. User can apply, remove, and filter by color-coded labels alongside folder navigation
-   5. Search supports filtering by folder, date range, attachment presence, and read/unread status
- 
- **Plans**: 5/5 plans created
- 
- Plans:
- 
- - [ ] 04-01-PLAN.md — Database schema + ThreadBuilder JWZ algorithm + threaded message list (tracer)
- - [ ] 04-02-PLAN.md — Scout full-text search, SearchService, instant dropdown, results page with filters
- - [ ] 04-03-PLAN.md — Contact CRUD, groups, vCard import/export, unified autocomplete (local + IMAP)
- - [ ] 04-04-PLAN.md — Labels CRUD, sidebar with counts, label chips, Archive action with undo
- - [ ] 04-05-PLAN.md — Tabbed sidebar, thread toggle persistence, keyboard shortcuts, integration tests
+  
+  **Goal**: Users can search, organize, and thread messages — the mailbox becomes smart and navigable
+  **Depends on**: Phase 3
+  **Requirements**: SRCH-01 through SRCH-07, CONT-01 through CONT-06, THR-01 through THR-05, LBL-01 through LBL-05
+  **Success Criteria** (what must be TRUE):
+  
+    1. User can search across subject, sender, recipients, and body with highlighted results
+    2. Composer autocomplete suggests contacts from recent recipients and stored address book
+    3. Related messages are grouped into conversation threads using Message-ID/In-Reply-To/References headers
+    4. User can apply, remove, and filter by color-coded labels alongside folder navigation
+    5. Search supports filtering by folder, date range, attachment presence, and read/unread status
+  
+**Plans**: 9/9 plans created
+
+   Plans:
+
+   - [ ] 04-01-PLAN.md — Database schema + ThreadBuilder JWZ algorithm + thread header cache (tracer)
+   - [ ] 04-02-PLAN.md — Scout searchable MessageMetadata + SearchService + real-time indexing
+   - [ ] 04-03-PLAN.md — Contact/ContactGroup models + ContactService + VCardService + unified autocomplete
+   - [ ] 04-04-PLAN.md — Label model + LabelService CRUD + message labeling + Archive helpers
+   - [ ] 04-05-PLAN.md — ThreadRow component + MessageList thread integration + thread toggle (tracer)
+   - [ ] 04-06-PLAN.md — SearchBar instant dropdown + SearchController results page + filters
+   - [ ] 04-07-PLAN.md — Contacts sidebar + ContactModal + Import/Export modal + Composer integration
+   - [ ] 04-08-PLAN.md — Labels sidebar + LabelModal + label-chips + Archive action + undo toast
+   - [ ] 04-09-PLAN.md — Tabbed sidebar + keyboard shortcuts + mobile bottom nav + integration tests
 
 ### Phase 5: Security & Polish
 
@@ -123,5 +127,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Foundation & Setup Wizard | 3/3 | Complete    | 2026-09-05 |
 | 2. Mailbox Core | 2/2 | Complete    | 2026-09-06 |
 | 3. Compose & Send | 2/2 | Complete   | 2026-09-06 |
-| 4. Organization & Intelligence | 0/5 | Planned | - |
+| 4. Organization & Intelligence | 0/9 | Planned | - |
 | 5. Security & Polish | 0/TBD | Not started | - |

@@ -1184,32 +1184,32 @@ class AppearanceTab extends Component
 | A5 | `Setting` model with user_id scoping works for per-user preferences (currently global) | Theme/Density Pattern | If `Setting` is global-only, need new `user_preferences` table or user_id column |
 | A6 | `auth.session` middleware enabled by default in Laravel 12 for session hardening | Session Hardening | If not enabled, must add to web middleware group in `bootstrap/app.php` |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **CSP `unsafe-inline` fallback removal timeline**
+1. **CSP `unsafe-inline` fallback removal timeline** — RESOLVED
    - What we know: Livewire 3/Alpine.js require `unsafe-inline` for inline scripts/styles currently
    - What's unclear: When can we safely remove fallback? Requires refactoring all inline code to nonce-based
-   - Recommendation: Keep fallback for v1; create follow-up task to audit inline scripts post-launch
+   - Resolution: Keep fallback for v1; create follow-up task to audit inline scripts post-launch
 
-2. **Audit log query UI (deferred to v2?)**
+2. **Audit log query UI (deferred to v2?)** — RESOLVED
    - What we know: D-05–D-08 cover storage and logging only; no UI for viewing logs
    - What's unclear: Whether admin needs log viewer in v1 or can wait
-   - Recommendation: Defer UI to v2; logs are queryable via SQL/Artisan for now
+   - Resolution: Defer UI to v2; logs are queryable via SQL/Artisan for now
 
-3. **Signature attachment support (images in signatures)**
+3. **Signature attachment support (images in signatures)** — RESOLVED
    - What we know: Tiptap supports images; Phase 3 composer handles attachments
    - What's unclear: Whether signatures should support inline images (hosted vs embedded)
-   - Recommendation: Text + formatting only for v1; images add storage/complexity
+   - Resolution: Text + formatting only for v1; images add storage/complexity
 
-4. **Active sessions list implementation (SET-05)**
+4. **Active sessions list implementation (SET-05)** — RESOLVED
    - What we know: Laravel `sessions` table stores session data; can query by `user_id`
    - What's unclear: Whether to show device/browser info (requires parsing user_agent)
-   - Recommendation: Basic list (IP, last activity, current) for v1; device parsing v2
+   - Resolution: Basic list (IP, last activity, current) for v1; device parsing v2
 
-5. **Reply behavior options (SET-04)**
+5. **Reply behavior options (SET-04)** — RESOLVED
    - What we know: "Reply behavior" is a SET-04 requirement
    - What's unclear: Exact options — "reply to sender", "reply to all", "smart reply"
-   - Recommendation: Implement "Reply to sender" (default) + "Reply to all" toggle; defer smart reply
+   - Resolution: Implement "Reply to sender" (default) + "Reply to all" toggle; defer smart reply
 
 ## Environment Availability
 

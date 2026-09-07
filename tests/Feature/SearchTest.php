@@ -142,4 +142,57 @@ class SearchTest extends TestCase
             ->call('instantSearch')
             ->assertSet('highlightedIndex', -1);
     }
+
+    /** @test */
+    public function test_highlight_after_sanitization_no_xss(): void
+    {
+        // Create message with XSS payload in subject and snippet
+        MessageMetadata::factory()->create([
+            'user_id' => $this->user->id,
+            'subject' => '<script>alert("xss")</script> Test subject',
+            'snippet' => '<img src=x onerror=alert("xss")> Test snippet content',
+            'folder_path' => 'INBOX',
+            'date' => now(),
+        ]);
+
+        $component = Livewire::test(SearchBar::class)
+            ->set('query', 'Test subject')
+            ->call('instantSearch');
+
+        $results = $component->get('results');
+        $this->assertCount(1, $results);
+
+        // The SearchService::highlightMatches should wrap the query in <mark> tags
+        // but the XSS payload should be sanitized via e() before highlighting
+        $searchService = app(\App\Services\SearchService::class);
+        $sanitizedSubject = e('<script>alert("xss")</script> Test subject');
+        $highlighted = $searchService->highlightMatches($sanitizedSubject, 'Test subject');
+
+        // The <script> tag should be HTML-entity-encoded, not raw
+        $this->assertStringContainsString('&lt;script&gt;', $highlighted);
+        $this->assertStringNotContainsString('<script>', $highlighted);
+        // The <mark> wrapping should be present for the highlighted match
+        $this->assertStringContainsString('<mark', $highlighted);
+        // Both words should be present (wrapped in <mark> tags)
+        $this->assertStringContainsString('Test', $highlighted);
+        $this->assertStringContainsString('subject', $highlighted);
+    }
+
+    /** @test */
+    public function test_highlight_after_sanitization_snippet_no_xss(): void
+    {
+        $searchService = app(\App\Services\SearchService::class);
+        $sanitizer = app(\App\Services\MessageSanitizer::class);
+
+        // Simulate the search results page sanitization pipeline
+        $rawSnippet = '<img src=x onerror=alert("xss")> Test snippet with meeting info';
+        $sanitizedSnippet = $sanitizer->sanitizeText($rawSnippet);
+        $highlighted = $searchService->highlightMatches($sanitizedSnippet, 'meeting');
+
+        // The <img> tag should be HTML-entity-encoded
+        $this->assertStringNotContainsString('<img', $highlighted);
+        // The <mark> wrapping should be present
+        $this->assertStringContainsString('<mark', $highlighted);
+        $this->assertStringContainsString('meeting', $highlighted);
+    }
 }

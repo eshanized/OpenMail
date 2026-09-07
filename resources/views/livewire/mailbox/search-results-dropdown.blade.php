@@ -27,8 +27,10 @@
                         </span>
                         <span class="text-gray-400 text-xs flex-shrink-0">{{ $result->formatted_date }}</span>
                     </div>
-                    <div class="text-sm font-medium text-gray-900 truncate mt-0.5" x-html="highlight(@js($result->subject ?? ''), query)"></div>
-                    <div class="text-sm text-gray-500 truncate mt-0.5" x-html="highlight(@js(mb_strimwidth($result->snippet ?? '', 0, 160, '...')), query)"></div>
+                    {{-- Subject: highlighted with <mark> tags after text sanitization --}}
+                    <div class="text-sm font-medium text-gray-900 truncate mt-0.5" x-html="highlight(@js(e($result->subject ?? '')), query)"></div>
+                    {{-- Snippet: sanitized via e() (HTML entity encoding) BEFORE highlight wrapping (SEC-01, T-04-07) --}}
+                    <div class="text-sm text-gray-500 truncate mt-0.5" x-html="highlight(@js(e(mb_strimwidth($result->snippet ?? '', 0, 160, '...'))), query)"></div>
                 </div>
             </div>
         </a>

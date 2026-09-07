@@ -223,13 +223,18 @@
                                                 </svg>
                                             @endif
                                         </div>
+                                        {{-- Subject: sanitized via e() (HTML entity encoding) THEN highlighted (SEC-01, T-04-07) --}}
                                         <div class="text-sm font-medium text-gray-900 truncate mt-0.5">
-                                            {!! app(\App\Services\SearchService::class)->highlightMatches($result->subject ?? '', $query) !!}
+                                            {!! app(\App\Services\SearchService::class)->highlightMatches(
+                                                e($result->subject ?? ''),
+                                                $query
+                                            ) !!}
                                         </div>
                                         <div class="flex items-center gap-2 mt-0.5">
                                             <span class="inline-flex items-center px-1.5 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-600">
                                                 {{ class_basename($result->folder_path) }}
                                             </span>
+                                            {{-- Snippet: sanitized via MessageSanitizer THEN highlighted (SEC-01, T-04-07) --}}
                                             <span class="text-sm text-gray-500 truncate">
                                                 {!! app(\App\Services\SearchService::class)->highlightMatches(
                                                     app(\App\Services\MessageSanitizer::class)->sanitizeText(mb_strimwidth($result->snippet ?? '', 0, 160, '...')),

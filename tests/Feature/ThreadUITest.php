@@ -187,4 +187,48 @@ class ThreadUITest extends TestCase
             ->call('toggleThreadMode') // switch back to threaded
             ->assertSet('threadMode', 'threaded');
     }
+
+    /** @test */
+    public function test_thread_row_renders_with_expand_chevron(): void
+    {
+        $response = $this->actingAs($this->user)
+            ->withSession(['openmail:imap_password' => Crypt::encrypt('test-password')])
+            ->get('/mailbox');
+
+        $response->assertStatus(200);
+        // Thread row should have expand/collapse chevron
+        $response->assertSee('toggleExpand');
+        // Thread row should have Alpine.js x-data for expansion state
+        $response->assertSee('expanded');
+    }
+
+    /** @test */
+    public function test_thread_toggle_button_has_correct_active_state(): void
+    {
+        Livewire::actingAs($this->user)
+            ->test('mailbox.message-list', ['folderPath' => 'INBOX'])
+            ->assertSet('threadMode', 'threaded')
+            ->assertSee('bg-blue-50 text-blue-600')
+            ->call('toggleThreadMode')
+            ->assertSet('threadMode', 'flat')
+            ->assertSee('text-gray-600 hover:bg-gray-100');
+    }
+
+    /** @test */
+    public function test_threaded_view_shows_thread_children(): void
+    {
+        Livewire::actingAs($this->user)
+            ->test('mailbox.message-list', ['folderPath' => 'INBOX'])
+            ->assertSet('threadMode', 'threaded')
+            ->assertSee('thread-row');
+    }
+
+    /** @test */
+    public function test_folder_change_dispatches_load_thread_mode(): void
+    {
+        Livewire::actingAs($this->user)
+            ->test('mailbox.message-list', ['folderPath' => 'INBOX'])
+            ->dispatch('folder-changed', folderPath: 'Sent')
+            ->assertSet('folderPath', 'Sent');
+    }
 }

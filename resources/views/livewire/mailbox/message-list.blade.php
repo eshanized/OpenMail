@@ -45,9 +45,31 @@
         @this.set('threadMode', mode);
         
         // Listen for thread mode changes from Livewire
-        window.addEventListener('thread-mode-changed', (e) => {
+        window.addEventListener('save-thread-mode', (e) => {
             if (e.detail.folderPath === '@js($folderPath)') {
                 localStorage.setItem(key, e.detail.mode);
+            }
+        });
+
+        // Keyboard shortcut: 't' to toggle thread mode (debounced 100ms per T-04-22)
+        let lastToggle = 0;
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 't' && !e.target.closest('input, textarea, select')) {
+                const now = Date.now();
+                if (now - lastToggle > 100) {
+                    lastToggle = now;
+                    @this.call('toggleThreadMode');
+                }
+            }
+        });
+
+        // Listen for load-thread-mode requests from Livewire (folder change)
+        window.addEventListener('load-thread-mode', (e) => {
+            if (e.detail.folderPath === '@js($folderPath)') {
+                const folderKey = `openmail:threadMode:${e.detail.folderPath}`;
+                const saved = localStorage.getItem(folderKey);
+                const defaultMode = '@js(in_array($folderPath, [\"INBOX\", \"Inbox\"]) ? \"threaded\" : \"flat\")';
+                @this.call('onThreadModeLoaded', saved || defaultMode);
             }
         });
     }

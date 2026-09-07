@@ -53,7 +53,7 @@ class ContactService
         }
 
         $contact->update($data);
-        return $contact->fresh();
+        return $contact->fresh() ?? $contact;
     }
 
     public function delete(Contact $contact): void

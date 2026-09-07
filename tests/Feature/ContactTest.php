@@ -283,4 +283,124 @@ class ContactTest extends TestCase
 
         $this->assertEquals($originalColor, $contact->avatar_color);
     }
+
+    /** @test */
+    public function test_contact_sidebar_loads_contacts(): void
+    {
+        $service = new ContactService();
+        $service->create($this->user->id, ['name' => 'Alice', 'email' => 'alice@example.com']);
+        $service->create($this->user->id, ['name' => 'Bob', 'email' => 'bob@example.com']);
+
+        $this->actingAs($this->user);
+        
+        $component = \Livewire\Livewire::test(\App\Livewire\Mailbox\ContactSidebar::class)
+            ->set('activeTab', true);
+
+        $component->assertSet('contacts', fn($contacts) => $contacts->count() === 2);
+    }
+
+    /** @test */
+    public function test_contact_sidebar_search(): void
+    {
+        $service = new ContactService();
+        $service->create($this->user->id, ['name' => 'Alice Smith', 'email' => 'alice@example.com']);
+        $service->create($this->user->id, ['name' => 'Bob Jones', 'email' => 'bob@example.com']);
+
+        $this->actingAs($this->user);
+        
+        $component = \Livewire\Livewire::test(\App\Livewire\Mailbox\ContactSidebar::class)
+            ->set('activeTab', true)
+            ->set('search', 'alice');
+
+        $component->assertSet('contacts', fn($contacts) => $contacts->count() === 1);
+    }
+
+    /** @test */
+    public function test_contact_modal_create(): void
+    {
+        $this->actingAs($this->user);
+        
+        $component = \Livewire\Livewire::test(\App\Livewire\Mailbox\ContactModal::class)
+            ->set('name', 'New Contact')
+            ->set('email', 'new@example.com')
+            ->call('save');
+
+        $this->assertDatabaseHas('contacts', [
+            'user_id' => $this->user->id,
+            'name' => 'New Contact',
+            'email' => 'new@example.com',
+        ]);
+    }
+
+    /** @test */
+    public function test_contact_modal_edit(): void
+    {
+        $service = new ContactService();
+        $contact = $service->create($this->user->id, [
+            'name' => 'Original Name',
+            'email' => 'original@example.com',
+        ]);
+
+        $this->actingAs($this->user);
+        
+        $component = \Livewire\Livewire::test(\App\Livewire\Mailbox\ContactModal::class, ['contact' => $contact])
+            ->set('name', 'Updated Name')
+            ->call('save');
+
+        $this->assertDatabaseHas('contacts', [
+            'id' => $contact->id,
+            'name' => 'Updated Name',
+        ]);
+    }
+
+    /** @test */
+    public function test_contact_modal_delete(): void
+    {
+        $service = new ContactService();
+        $contact = $service->create($this->user->id, [
+            'name' => 'To Delete',
+            'email' => 'delete@example.com',
+        ]);
+
+        $this->actingAs($this->user);
+        
+        $component = \Livewire\Livewire::test(\App\Livewire\Mailbox\ContactModal::class, ['contact' => $contact])
+            ->call('delete');
+
+        $this->assertDatabaseMissing('contacts', [
+            'id' => $contact->id,
+        ]);
+    }
+
+    /** @test */
+    public function test_contact_modal_validation(): void
+    {
+        $this->actingAs($this->user);
+        
+        $component = \Livewire\Livewire::test(\App\Livewire\Mailbox\ContactModal::class)
+            ->set('name', '')
+            ->set('email', 'not-an-email')
+            ->call('save');
+
+        $component->assertHasErrors(['name', 'email']);
+    }
+
+    /** @test */
+    public function test_contact_row_renders_correctly(): void
+    {
+        $service = new ContactService();
+        $contact = $service->create($this->user->id, [
+            'name' => 'Test Contact',
+            'email' => 'test@example.com',
+            'phone' => '+1234567890',
+        ]);
+
+        $this->actingAs($this->user);
+        
+        $component = \Livewire\Livewire::test(\App\Livewire\Mailbox\ContactRow::class, ['contact' => $contact]);
+
+        $component->assertSee('Test Contact');
+        $component->assertSee('test@example.com');
+        $component->assertSee('+1234567890');
+    }
 }

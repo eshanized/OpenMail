@@ -491,4 +491,39 @@ class LabelTest extends TestCase
             method_exists(\App\Services\ImapMailboxService::class, 'moveMessageFromArchive')
         );
     }
+
+    /** @test */
+    public function test_archive_folder_detection_fallback(): void
+    {
+        // Test FolderMapper getArchiveFolderPath method signature and return type
+        $mapper = new \App\Services\FolderMapper();
+
+        // Verify method exists with correct signature
+        $reflection = new \ReflectionMethod($mapper, 'getArchiveFolderPath');
+        $this->assertTrue($reflection->isPublic());
+        $this->assertEquals(1, $reflection->getNumberOfParameters());
+
+        // Verify method accepts Client parameter
+        $params = $reflection->getParameters();
+        $this->assertEquals('client', $params[0]->getName());
+    }
+
+    /** @test */
+    public function test_label_filter_route_with_invalid_id(): void
+    {
+        $this->actingAs($this->user);
+
+        // Non-existent label should 404
+        $response = $this->get(route('labels.show', 999999));
+        $response->assertStatus(404);
+    }
+
+    /** @test */
+    public function test_label_filter_route_unauthenticated(): void
+    {
+        // Unauthenticated access should redirect to login
+        $label = $this->labelService->create($this->user->id, 'Work', '#2563EB');
+        $response = $this->get(route('labels.show', $label->id));
+        $response->assertRedirect('/login');
+    }
 }

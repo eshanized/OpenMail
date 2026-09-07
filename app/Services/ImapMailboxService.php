@@ -572,63 +572,6 @@ class ImapMailboxService
     }
 
     /**
-     * Fetch message headers for threading (Message-ID, In-Reply-To, References, Subject, Date).
-     * Used to build thread trees for the current page + cross-folder thread roots.
-     *
-     * @param string $folderPath The IMAP folder path
-     * @param array $uids Array of UIDs to fetch headers for
-     * @return array<int, object> Array of message objects with header data
-     */
-    public function getThreadHeaders(string $folderPath, array $uids): array
-    {
-        if (empty($uids)) {
-            return [];
-        }
-
-        $client = $this->getClient();
-
-        try {
-            $folder = $client->getFolder($folderPath);
-            
-            // Fetch only headers we need for threading
-            $query = $folder->query()
-                ->uids($uids)
-                ->setFetchBody(false)
-                ->setFetchFlags(false)
-                ->leaveUnread();
-
-            $messages = $query->get();
-
-            $results = [];
-            foreach ($messages as $msg) {
-                $headers = $msg->getHeaders();
-                
-                $results[] = (object) [
-                    'uid' => $msg->getUid(),
-                    'message_id' => $headers->get('Message-ID')?->getValue() ?? '',
-                    'in_reply_to' => $headers->get('In-Reply-To')?->getValue() ?? '',
-                    'references' => $headers->get('References')?->getValue() ?? '',
-                    'subject' => $headers->get('Subject')?->getValue() ?? '',
-                    'date' => $headers->get('Date')?->getValue() ?? '',
-                    'from_address' => '',
-                    'from_name' => '',
-                    'to_address' => '',
-                    'is_seen' => $msg->isSeen(),
-                    'is_flagged' => $msg->isFlagged(),
-                    'has_attachments' => false,
-                    'snippet' => '',
-                    'folder_path' => $folderPath,
-                    'labels' => collect(),
-                ];
-            }
-
-            return $results;
-        } finally {
-            $client->disconnect();
-        }
-    }
-
-    /**
      * Parse UID from webklex appendMessage result.
      *
      * @param array $result

@@ -10,10 +10,21 @@ class FolderSidebar extends Component
 {
     public array $folders = [];
     public string $currentFolder = 'INBOX';
+    public string $activeTab = 'folders'; // 'folders' | 'contacts' | 'labels'
+
+    protected $listeners = [
+        'set-active-tab' => 'setActiveTab',
+    ];
 
     public function mount(): void
     {
         $this->loadFolders();
+    }
+
+    public function setActiveTab(string $tab): void
+    {
+        $this->activeTab = in_array($tab, ['folders', 'contacts', 'labels']) ? $tab : 'folders';
+        $this->dispatch('active-tab-changed', tab: $this->activeTab);
     }
 
     public function loadFolders(): void

@@ -117,4 +117,42 @@ class FolderMapper
 
         return null;
     }
+
+    /**
+     * Get the Archive folder path using SPECIAL-USE or heuristic.
+     * Falls back to creating "Archive" folder if not found.
+     *
+     * @param Client $client
+     * @return string|null
+     */
+    public function getArchiveFolderPath(Client $client): ?string
+    {
+        $folders = $client->getFolders();
+        foreach ($folders as $folder) {
+            $attributes = $folder->attributes ?? [];
+            if (in_array('\\Archive', $attributes)) {
+                return $folder->path;
+            }
+        }
+
+        // Fallback to heuristic names
+        $fallbackNames = ['Archive', 'Archived', 'Archive'];
+        foreach ($fallbackNames as $name) {
+            foreach ($folders as $folder) {
+                if (strcasecmp($folder->name, $name) === 0) {
+                    return $folder->path;
+                }
+            }
+        }
+
+        // Try to create the Archive folder
+        try {
+            $client->createFolder('Archive');
+            return 'Archive';
+        } catch (\Exception) {
+            // Folder may already exist or creation failed
+        }
+
+        return null;
+    }
 }

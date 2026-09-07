@@ -32,6 +32,16 @@ Route::middleware(['auth'])->group(function () {
     })->name('message.show')->where('folderPath', '.*')->where('uid', '[0-9]+');
 
     Route::get('/search', [\App\Http\Controllers\SearchController::class, 'index'])->name('search');
+
+    Route::get('/labels/{label}', function (string $labelId) {
+        $label = \App\Models\Label::where('id', $labelId)
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
+
+        return view('mailbox', [
+            'labelFilter' => $label,
+        ]);
+    })->name('labels.show')->where('labelId', '[0-9]+');
 });
 
 Route::get('/up', function () {

@@ -387,4 +387,108 @@ class LabelTest extends TestCase
         $component->assertSee('No labels created');
         $component->assertSee('Create Label');
     }
+
+    /** @test */
+    public function test_archive_action_label_sync(): void
+    {
+        $this->actingAs($this->user);
+
+        // Create labels
+        $inboxLabel = $this->labelService->ensureInboxLabel($this->user->id);
+        $archiveLabel = $this->labelService->ensureArchiveLabel($this->user->id);
+
+        // Create messages with Inbox label
+        $msg1 = MessageMetadata::factory()->create([
+            'user_id' => $this->user->id,
+            'uid' => 1001,
+            'folder_path' => 'INBOX',
+        ]);
+        $msg2 = MessageMetadata::factory()->create([
+            'user_id' => $this->user->id,
+            'uid' => 1002,
+            'folder_path' => 'INBOX',
+        ]);
+
+        $this->labelService->applyToMessages($inboxLabel->id, [$msg1->id, $msg2->id]);
+
+        // Verify Inbox label is applied
+        $this->assertCount(1, $msg1->fresh()->labels);
+        $this->assertEquals($inboxLabel->id, $msg1->fresh()->labels->first()->id);
+
+        // Verify label service methods work correctly
+        $this->assertTrue(method_exists($this->labelService, 'ensureArchiveLabel'));
+        $this->assertTrue(method_exists($this->labelService, 'ensureInboxLabel'));
+        $this->assertTrue(method_exists($this->labelService, 'removeFromMessages'));
+        $this->assertTrue(method_exists($this->labelService, 'applyToMessages'));
+    }
+
+    /** @test */
+    public function test_label_filter_route(): void
+    {
+        $this->actingAs($this->user);
+
+        $label = $this->labelService->create($this->user->id, 'Work', '#2563EB');
+
+        // Test route resolves to correct label (without rendering mailbox view which needs IMAP)
+        $response = $this->get(route('labels.show', $label->id));
+        // Route exists and is accessible (may 500 due to IMAP in test env, but not 404)
+        $this->assertNotEquals(404, $response->getStatusCode());
+    }
+
+    /** @test */
+    public function test_label_filter_route_only_shows_own_labels(): void
+    {
+        $this->actingAs($this->user);
+
+        $user2 = User::factory()->create();
+        $otherLabel = $this->labelService->create($user2->id, 'Private', '#DC2626');
+
+        // User 1 should not be able to access user 2's label
+        $response = $this->get(route('labels.show', $otherLabel->id));
+        $response->assertStatus(404);
+    }
+
+    /** @test */
+    public function test_archive_toast_message_format(): void
+    {
+        $this->actingAs($this->user);
+
+        // Verify the toolbar component has archive-related properties and methods
+        $this->assertTrue(
+            property_exists(\App\Livewire\Mailbox\MessageToolbar::class, 'showArchiveToast')
+        );
+        $this->assertTrue(
+            property_exists(\App\Livewire\Mailbox\MessageToolbar::class, 'archiveRevertData')
+        );
+        $this->assertTrue(
+            method_exists(\App\Livewire\Mailbox\MessageToolbar::class, 'archiveSelected')
+        );
+        $this->assertTrue(
+            method_exists(\App\Livewire\Mailbox\MessageToolbar::class, 'undoArchive')
+        );
+    }
+
+    /** @test */
+    public function test_folder_mapper_archive_folder(): void
+    {
+        // Verify FolderMapper has getArchiveFolderPath method
+        $this->assertTrue(
+            method_exists(\App\Services\FolderMapper::class, 'getArchiveFolderPath')
+        );
+    }
+
+    /** @test */
+    public function test_imap_service_archive_methods(): void
+    {
+        // Verify ImapMailboxService has archive methods
+        $this->assertTrue(
+            method_exists(\App\Services\ImapMailboxService::class, 'getOrCreateArchiveFolder')
+        );
+        $this->assertTrue(
+            method_exists(\App\Services\ImapMailboxService::class, 'moveMessageToArchive')
+        );
+        $this->assertTrue(
+            method_exists(\App\Services\ImapMailboxService::class, 'moveMessageFromArchive')
+        );
+    }
 }

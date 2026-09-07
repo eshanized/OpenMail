@@ -5,7 +5,27 @@
     x-data="{
         selectedUids: @js($selectedUids),
         showMoveDropdown: false,
+        archiveToast: false,
+        archiveMessage: '',
     }"
+    x-init="
+        $wire.on('messages-archived', (data) => {
+            archiveToast = true;
+            archiveMessage = data?.message || 'Message archived.';
+            setTimeout(() => { archiveToast = false; }, 5000);
+        });
+        $wire.on('messages-restored', () => {
+            archiveToast = false;
+        });
+        // Keyboard shortcut: 'e' to archive
+        window.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
+            if (e.key === 'e' && selectedUids.length > 0) {
+                e.preventDefault();
+                $wire.archiveSelected();
+            }
+        });
+    "
     class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex flex-wrap items-center gap-3"
     x-transition
 >
@@ -16,14 +36,15 @@
     <div class="flex items-center gap-2 flex-wrap">
         {{-- Archive --}}
         <button
-            wire:click="bulkMove('Archive')"
+            wire:click="archiveSelected"
             wire:loading.attr="disabled"
-            class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-            title="Archive"
+            class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 flex items-center gap-1"
+            title="Archive (e)"
         >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
             </svg>
+            Archive
         </button>
 
         {{-- Delete (Move to Trash) --}}
@@ -166,6 +187,27 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
+        </button>
+    </div>
+
+    {{-- Archive Undo Toast --}}
+    <div
+        x-show="archiveToast"
+        x-cloak
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 translate-y-2"
+        x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 translate-y-2"
+        class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3"
+    >
+        <span class="text-sm" x-text="archiveMessage || 'Message archived.'"></span>
+        <button
+            @click="$wire.undoArchive(); archiveToast = false;"
+            class="text-sm font-semibold text-blue-400 hover:text-blue-300 underline"
+        >
+            Undo
         </button>
     </div>
 </div>

@@ -639,4 +639,57 @@ class ImapMailboxService
             $client->disconnect();
         }
     }
+
+    /**
+     * Get or create the Archive folder path.
+     *
+     * @return string|null The Archive folder path
+     */
+    public function getOrCreateArchiveFolder(): ?string
+    {
+        $client = $this->getClient();
+
+        try {
+            $mapper = app(FolderMapper::class);
+            return $mapper->getArchiveFolderPath($client);
+        } finally {
+            $client->disconnect();
+        }
+    }
+
+    /**
+     * Move a message to the Archive folder.
+     *
+     * @param int $messageUid The message UID
+     * @param string $sourceFolder The source folder path
+     * @return bool True if successful
+     */
+    public function moveMessageToArchive(int $messageUid, string $sourceFolder): bool
+    {
+        $archivePath = $this->getOrCreateArchiveFolder();
+
+        if (!$archivePath) {
+            throw new \Exception('Could not find or create Archive folder');
+        }
+
+        return $this->moveMessages($sourceFolder, [$messageUid], $archivePath);
+    }
+
+    /**
+     * Move a message from Archive back to a source folder (for undo).
+     *
+     * @param int $messageUid The message UID
+     * @param string $sourceFolder The folder to move back to (e.g., INBOX)
+     * @return bool True if successful
+     */
+    public function moveMessageFromArchive(int $messageUid, string $sourceFolder): bool
+    {
+        $archivePath = $this->getOrCreateArchiveFolder();
+
+        if (!$archivePath) {
+            throw new \Exception('Could not find Archive folder');
+        }
+
+        return $this->moveMessages($archivePath, [$messageUid], $sourceFolder);
+    }
 }

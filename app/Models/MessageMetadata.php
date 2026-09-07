@@ -152,4 +152,20 @@ class MessageMetadata extends Model
             return $date->format('M j, Y');
         }
     }
+
+    /**
+     * Scope to filter messages that have a specific label.
+     */
+    public function scopeWithLabel(Builder $query, int $labelId): Builder
+    {
+        return $query->whereHas('labels', fn($q) => $q->where('labels.id', $labelId));
+    }
+
+    /**
+     * Scope to filter messages that don't have a specific label.
+     */
+    public function scopeWithoutLabel(Builder $query, int $labelId): Builder
+    {
+        return $query->whereDoesntHave('labels', fn($q) => $q->where('labels.id', $labelId));
+    }
 }

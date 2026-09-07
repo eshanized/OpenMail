@@ -93,11 +93,11 @@ Plans:
    Plans:
  
    - [x] 04-01-PLAN.md — Database schema + ThreadBuilder JWZ algorithm + thread header cache (tracer)
-   - [ ] 04-02-PLAN.md — Scout searchable MessageMetadata + SearchService + real-time indexing
+   - [x] 04-02-PLAN.md — Scout searchable MessageMetadata + SearchService + real-time indexing
    - [ ] 04-03-PLAN.md — Contact/ContactGroup models + ContactService + VCardService + unified autocomplete
    - [ ] 04-04-PLAN.md — Label model + LabelService CRUD + message labeling + Archive helpers
    - [ ] 04-05-PLAN.md — ThreadRow component + MessageList thread integration + thread toggle (tracer)
-   - [ ] 04-06-PLAN.md — SearchBar instant dropdown + SearchController results page + filters
+   - [x] 04-06-PLAN.md — SearchBar instant dropdown + SearchController results page + filters
    - [ ] 04-07-PLAN.md — Contacts sidebar + ContactModal + Import/Export modal + Composer integration
    - [ ] 04-08-PLAN.md — Labels sidebar + LabelModal + label-chips + Archive action + undo toast
    - [ ] 04-09-PLAN.md — Tabbed sidebar + keyboard shortcuts + mobile bottom nav + integration tests
@@ -127,5 +127,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Foundation & Setup Wizard | 3/3 | Complete    | 2026-09-05 |
 | 2. Mailbox Core | 2/2 | Complete    | 2026-09-06 |
 | 3. Compose & Send | 2/2 | Complete   | 2026-09-06 |
-| 4. Organization & Intelligence | 1/9 | In Progress | 2026-09-06 |
+| 4. Organization & Intelligence | 3/9 | In Progress | 2026-09-06 |
 | 5. Security & Polish | 0/TBD | Not started | - |

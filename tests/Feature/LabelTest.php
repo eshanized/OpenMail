@@ -7,6 +7,7 @@ use App\Models\MessageMetadata;
 use App\Models\User;
 use App\Services\LabelService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class LabelTest extends TestCase
@@ -237,5 +238,153 @@ class LabelTest extends TestCase
         // User 1 cannot delete user 2's label
         $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
         $this->labelService->delete($label2->id, $this->user->id);
+    }
+
+    /** @test */
+    public function test_sidebar_and_filter(): void
+    {
+        $this->actingAs($this->user);
+
+        // Create labels
+        $label1 = $this->labelService->create($this->user->id, 'Work', '#2563EB');
+        $label2 = $this->labelService->create($this->user->id, 'Personal', '#16A34A');
+
+        // Test LabelSidebar component renders with labels
+        $component = Livewire::test(\App\Livewire\Mailbox\LabelSidebar::class)
+            ->set('activeTab', true);
+
+        $component->assertOk();
+        $component->assertSee('Work');
+        $component->assertSee('Personal');
+
+        // Test selecting a label
+        $component->call('selectLabel', $label1->id)
+            ->assertSet('activeLabelId', (string) $label1->id);
+
+        // Clicking again deselects
+        $component->call('selectLabel', $label1->id)
+            ->assertSet('activeLabelId', null);
+    }
+
+    /** @test */
+    public function test_colors(): void
+    {
+        $this->actingAs($this->user);
+        $label = $this->labelService->create($this->user->id, 'Work', '#2563EB');
+
+        // Test LabelModal renders with 10-color palette
+        $component = Livewire::test(\App\Livewire\Mailbox\LabelModal::class);
+        $component->assertOk();
+
+        // Verify palette has all 10 colors
+        $palette = $component->get('palette');
+        $this->assertCount(10, $palette);
+        $this->assertArrayHasKey('Blue', $palette);
+        $this->assertArrayHasKey('Green', $palette);
+
+        // Test color selection
+        $component->call('selectColor', '#16A34A')
+            ->assertSet('color', '#16A34A');
+    }
+
+    /** @test */
+    public function test_label_chips_overflow(): void
+    {
+        // Create 5 labels
+        $labels = collect();
+        for ($i = 1; $i <= 5; $i++) {
+            $labels->push($this->labelService->create($this->user->id, "Label {$i}", '#2563EB'));
+        }
+
+        // Test rendering label-chips with max 3
+        $view = view('livewire.mailbox.label-chips', [
+            'labels' => $labels,
+            'maxDisplay' => 3,
+        ])->render();
+
+        // Should show first 3 labels
+        $this->assertStringContainsString('Label 1', $view);
+        $this->assertStringContainsString('Label 2', $view);
+        $this->assertStringContainsString('Label 3', $view);
+
+        // Should show overflow count (+2)
+        $this->assertStringContainsString('+2', $view);
+
+        // Should NOT show Label 4 and 5 directly (they're in popover)
+        // The overflow chip should be present
+        $this->assertStringContainsString('bg-gray-100', $view);
+    }
+
+    /** @test */
+    public function test_label_modal_create_and_edit(): void
+    {
+        $this->actingAs($this->user);
+
+        // Test creating a label via modal
+        $component = Livewire::test(\App\Livewire\Mailbox\LabelModal::class);
+
+        $component->call('openCreateModal')
+            ->assertSet('show', true)
+            ->assertSet('label', null);
+
+        $component->set('name', 'Test Label')
+            ->set('color', '#2563EB')
+            ->call('save');
+
+        // Verify label was created
+        $this->assertDatabaseHas('labels', [
+            'user_id' => $this->user->id,
+            'name' => 'Test Label',
+            'color' => '#2563EB',
+        ]);
+
+        // Test editing a label
+        $label = $this->labelService->create($this->user->id, 'Old Name', '#16A34A');
+
+        $component->call('openEditModal', $label)
+            ->assertSet('show', true)
+            ->assertSet('name', 'Old Name')
+            ->assertSet('color', '#16A34A');
+
+        $component->set('name', 'New Name')
+            ->call('save');
+
+        // Verify label was updated
+        $this->assertDatabaseHas('labels', [
+            'user_id' => $this->user->id,
+            'name' => 'New Name',
+            'color' => '#16A34A',
+        ]);
+    }
+
+    /** @test */
+    public function test_label_sidebar_delete_label(): void
+    {
+        $this->actingAs($this->user);
+        $label = $this->labelService->create($this->user->id, 'To Delete', '#DC2626');
+
+        $component = Livewire::test(\App\Livewire\Mailbox\LabelSidebar::class)
+            ->set('activeTab', true);
+
+        $component->call('deleteLabel', $label->id);
+
+        // Verify label was deleted
+        $this->assertDatabaseMissing('labels', [
+            'id' => $label->id,
+        ]);
+    }
+
+    /** @test */
+    public function test_label_sidebar_empty_state(): void
+    {
+        $this->actingAs($this->user);
+
+        // No labels created - should show empty state
+        $component = Livewire::test(\App\Livewire\Mailbox\LabelSidebar::class)
+            ->set('activeTab', true);
+
+        $component->assertOk();
+        $component->assertSee('No labels created');
+        $component->assertSee('Create Label');
     }
 }

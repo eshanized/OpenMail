@@ -3,12 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Services\SearchService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class SearchController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): View|RedirectResponse
     {
         $query = $request->input('q', '');
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Laravel\Scout\Searchable;
 use Laravel\Scout\Attributes\SearchUsingFullText;
 use Laravel\Scout\Attributes\SearchUsingPrefix;
@@ -19,6 +20,8 @@ class MessageMetadata extends Model
         'folder_path',
         'uid',
         'message_id',
+        'in_reply_to',
+        'references',
         'subject',
         'from_address',
         'from_name',
@@ -39,6 +42,58 @@ class MessageMetadata extends Model
         'has_attachments' => 'boolean',
         'size' => 'integer',
     ];
+
+    protected $appends = [
+        'thread_id',
+    ];
+
+    /**
+     * Thread children relationship (virtual - populated by ThreadBuilder).
+     * Not a database relationship; set at runtime when building threads.
+     */
+    public function getChildrenAttribute()
+    {
+        return $this->attributes['children'] ?? collect();
+    }
+
+    public function setChildrenAttribute($value)
+    {
+        $this->attributes['children'] = $value;
+    }
+
+    /**
+     * Latest message date in thread (virtual - populated by ThreadBuilder).
+     */
+    public function getLatestDateAttribute()
+    {
+        return $this->attributes['latestDate'] ?? $this->date;
+    }
+
+    public function setLatestDateAttribute($value)
+    {
+        $this->attributes['latestDate'] = $value;
+    }
+
+    /**
+     * Unread count in thread (virtual - populated by ThreadBuilder).
+     */
+    public function getUnreadCountAttribute()
+    {
+        return $this->attributes['unreadCount'] ?? ($this->is_seen ? 0 : 1);
+    }
+
+    public function setUnreadCountAttribute($value)
+    {
+        $this->attributes['unreadCount'] = $value;
+    }
+
+    /**
+     * Virtual thread_id for Alpine.js tracking (same as message_id for root, parent's message_id for children).
+     */
+    public function getThreadIdAttribute(): ?string
+    {
+        return $this->message_id;
+    }
 
     /**
      * Get the index name for the model (per-user isolation per D-05).

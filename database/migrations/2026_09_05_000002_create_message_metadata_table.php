@@ -17,12 +17,16 @@ return new class extends Migration
             $table->string('folder_path');
             $table->unsignedBigInteger('uid');
             $table->string('message_id')->nullable();
+            $table->string('in_reply_to')->nullable()->after('message_id');
+            $table->text('references')->nullable()->after('in_reply_to');
             $table->string('subject');
             $table->string('from_address');
             $table->string('from_name')->nullable();
             $table->string('to_address')->nullable();
             $table->dateTime('date');
             $table->string('snippet')->nullable();
+            $table->text('body_text')->nullable()->after('snippet');
+            $table->string('searchable_as')->nullable()->after('body_text');
             $table->boolean('has_attachments')->default(false);
             $table->boolean('is_seen')->default(false);
             $table->boolean('is_flagged')->default(false);

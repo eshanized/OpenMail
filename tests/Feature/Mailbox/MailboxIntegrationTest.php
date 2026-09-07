@@ -109,6 +109,10 @@ class MailboxIntegrationTest extends TestCase
         $mockService->shouldReceive('getMessages')
             ->andReturn(new LengthAwarePaginator([], 0, 25));
         
+        // Mock getThreadHeaders for threaded view
+        $mockService->shouldReceive('getThreadHeaders')
+            ->andReturn([]);
+        
         $this->app->instance(\App\Services\ImapMailboxService::class, $mockService);
         
         // Also bind the FolderMapper

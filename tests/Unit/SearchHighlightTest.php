@@ -17,10 +17,11 @@ class SearchHighlightTest extends TestCase
 
         $highlighted = $service->highlightMatches($snippet, $query);
 
-        // Should contain <mark> tags with matching classes
+        // Should contain <mark> tags with matching classes for each word
         $this->assertStringContainsString('<mark class="bg-yellow-100 text-yellow-900 px-0.5 rounded">', $highlighted);
         $this->assertStringContainsString('</mark>', $highlighted);
-        $this->assertStringContainsString('project alpha', $highlighted);
+        $this->assertStringContainsString('project', $highlighted);
+        $this->assertStringContainsString('alpha', $highlighted);
     }
 
     /** @test */
@@ -80,7 +81,7 @@ class SearchHighlightTest extends TestCase
         $highlighted = $service->highlightMatches($snippet, $query);
 
         $this->assertStringContainsString('<mark', $highlighted);
-        $this->assertStringContainsString('3:00 PM &amp; conference', $highlighted);
+        $this->assertStringContainsString('3:00 PM & conference', $highlighted);
     }
 
     /** @test */

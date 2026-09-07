@@ -32,8 +32,26 @@
     },
     openComposer() {
         @this.dispatch('openComposer', { mode: 'compose' });
+    },
+    
+    // Thread mode persistence via localStorage
+    initThreadMode() {
+        const key = `openmail:threadMode:${@js($folderPath)}`;
+        const saved = localStorage.getItem(key);
+        const defaultMode = '@js(in_array($folderPath, [\"INBOX\", \"Inbox\"]) ? \"threaded\" : \"flat\")';
+        const mode = saved || defaultMode;
+        
+        // Dispatch to Livewire to set initial mode
+        @this.set('threadMode', mode);
+        
+        // Listen for thread mode changes from Livewire
+        window.addEventListener('thread-mode-changed', (e) => {
+            if (e.detail.folderPath === '@js($folderPath)') {
+                localStorage.setItem(key, e.detail.mode);
+            }
+        });
     }
-};">
+};" x-init="initThreadMode()">
     {{-- Toolbar with Compose button --}}
     <div class="mb-4 flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-2">
@@ -45,6 +63,29 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828L18 9.828l6.586 6.586a2 2 0 002.828-2.828L10.828 2.172a2 2 0 00-2.828 0L2.172 9.828a2 2 0 000 2.828l6.586 6.586a2 2 0 102.828-2.828z"></path>
                 </svg>
                 Compose
+            </button>
+        </div>
+
+        {{-- Thread toggle button --}}
+        <div class="flex items-center gap-2">
+            <button
+                wire:click="toggleThreadMode"
+                class="px-3 py-1.5 rounded-lg transition-colors flex items-center gap-2
+                    {{ $threadMode === 'threaded' 
+                        ? 'bg-blue-50 text-blue-600 border border-blue-200' 
+                        : 'text-gray-600 hover:bg-gray-100 border border-gray-200' }}"
+                title="Threaded view (t)"
+            >
+                @if($threadMode === 'threaded')
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                    </svg>
+                @else
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                    </svg>
+                @endif
+                <span class="text-xs font-medium">{{ $threadMode === 'threaded' ? 'Threaded' : 'Flat' }}</span>
             </button>
         </div>
 
@@ -86,28 +127,48 @@
 
     {{-- Message list --}}
     <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        @if($messages->isEmpty())
+        @php
+            $isThreaded = $threadMode === 'threaded';
+            $isEmpty = $isThreaded ? empty($messages) : $messages->isEmpty();
+        @endphp
+        
+        @if($isEmpty)
             <div class="p-12 text-center text-gray-500">
                 <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                 </svg>
-                <p class="text-lg">No messages in this folder</p>
+                <p class="text-lg">{{ $isThreaded ? 'No conversations in this folder' : 'No messages in this folder' }}</p>
             </div>
         @else
-            <div class="divide-y divide-gray-100">
-                @foreach($messages as $message)
-                    <livewire:mailbox.message-row
-                        :message="$message"
-                        :selected="$selectedUids->contains($message->uid)"
-                        :key="$message->uid"
-                    />
-                @endforeach
-            </div>
+            @if($isThreaded)
+                {{-- Threaded view --}}
+                <div class="divide-y divide-gray-100">
+                    @foreach($messages as $thread)
+                        <x-mailbox.thread-row :thread="$thread" :depth="0" :isExpanded="false" />
+                    @endforeach
+                </div>
+                
+                {{-- Pagination for threaded view --}}
+                <div class="p-4 border-t border-gray-100">
+                    {{ $messages instanceof \Illuminate\Pagination\LengthAwarePaginator ? $messages->links() : '' }}
+                </div>
+            @else
+                {{-- Flat view --}}
+                <div class="divide-y divide-gray-100">
+                    @foreach($messages as $message)
+                        <livewire:mailbox.message-row
+                            :message="$message"
+                            :selected="$selectedUids->contains($message->uid)"
+                            :key="$message->uid"
+                        />
+                    @endforeach
+                </div>
 
-            {{-- Pagination --}}
-            <div class="p-4 border-t border-gray-100">
-                {{ $messages->links() }}
-            </div>
+                {{-- Pagination --}}
+                <div class="p-4 border-t border-gray-100">
+                    {{ $messages->links() }}
+                </div>
+            @endif
         @endif
     </div>
 

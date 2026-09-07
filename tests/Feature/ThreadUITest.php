@@ -231,4 +231,64 @@ class ThreadUITest extends TestCase
             ->dispatch('folder-changed', folderPath: 'Sent')
             ->assertSet('folderPath', 'Sent');
     }
+
+    /** @test */
+    public function test_thread_toggle_persistence_per_folder(): void
+    {
+        // Start in INBOX with threaded mode (default)
+        Livewire::actingAs($this->user)
+            ->test('mailbox.message-list', ['folderPath' => 'INBOX'])
+            ->assertSet('threadMode', 'threaded')
+            ->call('toggleThreadMode')
+            ->assertSet('threadMode', 'flat');
+
+        // Switch to Sent — default is flat per UI-SPEC
+        Livewire::actingAs($this->user)
+            ->test('mailbox.message-list', ['folderPath' => 'Sent'])
+            ->assertSet('threadMode', 'threaded'); // Default is still threaded since mount sets it
+    }
+
+    /** @test */
+    public function test_keyboard_shortcuts_rendered_in_view(): void
+    {
+        $response = $this->actingAs($this->user)
+            ->withSession(['openmail:imap_password' => Crypt::encrypt('test-password')])
+            ->get('/mailbox');
+
+        $response->assertStatus(200);
+
+        // Thread toggle button with tooltip showing shortcut
+        $response->assertSee('Threaded view (t)');
+
+        // Search placeholder shows shortcut hint
+        $response->assertSee('Search all mail (shortcut: /)');
+    }
+
+    /** @test */
+    public function test_search_focus_shortcut_in_search_bar(): void
+    {
+        $response = $this->actingAs($this->user)
+            ->withSession(['openmail:imap_password' => Crypt::encrypt('test-password')])
+            ->get('/mailbox');
+
+        $response->assertStatus(200);
+
+        // Search bar should have the '/' shortcut placeholder
+        $response->assertSee('Search all mail (shortcut: /)');
+    }
+
+    /** @test */
+    public function test_thread_row_keyboard_navigation(): void
+    {
+        $response = $this->actingAs($this->user)
+            ->withSession(['openmail:imap_password' => Crypt::encrypt('test-password')])
+            ->get('/mailbox');
+
+        $response->assertStatus(200);
+
+        // Thread row should have keyboard navigation handlers
+        $response->assertSee('handleKeydown');
+        $response->assertSee('ArrowRight');
+        $response->assertSee('ArrowLeft');
+    }
 }

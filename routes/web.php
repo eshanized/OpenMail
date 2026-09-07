@@ -30,6 +30,8 @@ Route::middleware(['auth'])->group(function () {
             'uid' => $uid,
         ]);
     })->name('message.show')->where('folderPath', '.*')->where('uid', '[0-9]+');
+
+    Route::get('/search', [\App\Http\Controllers\SearchController::class, 'index'])->name('search');
 });
 
 Route::get('/up', function () {

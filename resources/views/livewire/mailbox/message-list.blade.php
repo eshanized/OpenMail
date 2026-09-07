@@ -88,6 +88,11 @@
             </button>
         </div>
 
+        {{-- Search bar --}}
+        <div class="flex-1 max-w-lg mx-4">
+            <livewire:mailbox.search-bar />
+        </div>
+
         {{-- Thread toggle button --}}
         <div class="flex items-center gap-2">
             <button

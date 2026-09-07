@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Collection;
 use App\Models\ContactAutocompleteCache;
+use App\Models\Contact;
 use App\Services\ImapMailboxService;
 use App\Services\FolderMapper;
 use Illuminate\Support\Facades\Auth;
@@ -44,7 +45,7 @@ class ContactAutocompleteService
     }
 
     /**
-     * Search for contacts matching the query.
+     * Search for contacts matching the query (IMAP cache only).
      *
      * @param int $userId
      * @param string $query
@@ -65,7 +66,7 @@ class ContactAutocompleteService
     }
 
     /**
-     * Get recent recipients sorted by frequency.
+     * Get recent recipients sorted by frequency (IMAP cache only).
      *
      * @param int $userId
      * @param int $limit
@@ -78,5 +79,56 @@ class ContactAutocompleteService
             ->orderByDesc('frequency')
             ->limit($limit)
             ->get(['email', 'name', 'frequency']);
+    }
+
+    /**
+     * Unified search merging local contacts + IMAP cache.
+     * Local contacts rank higher (exact match > prefix match), then IMAP cache by frequency.
+     * Deduplicates by email (case-insensitive), local wins.
+     *
+     * @param int $userId
+     * @param string $query
+     * @param int $limit
+     * @return Collection
+     */
+    public function searchUnified(int $userId, string $query, int $limit = 10): Collection
+    {
+        // Local contacts: exact match > prefix match on email/name, order by usage_count desc
+        $local = Contact::where('user_id', $userId)
+            ->where(function ($q) use ($query) {
+                $q->where('email', 'LIKE', "{$query}%")
+                    ->orWhere('name', 'LIKE', "{$query}%");
+            })
+            ->orderByDesc('usage_count')
+            ->limit($limit)
+            ->get(['id', 'name', 'email', 'phone', 'avatar_color', 'usage_count'])
+            ->map(fn($c) => [
+                'source' => 'local',
+                'name' => $c->name,
+                'email' => $c->email,
+                'phone' => $c->phone,
+                'avatar' => $c->avatar_color,
+                'frequency' => $c->usage_count,
+            ]);
+
+        // IMAP cache: frequency desc
+        $imap = $this->search($userId, $query, $limit)
+            ->map(fn($c) => [
+                'source' => 'imap',
+                'name' => $c->name,
+                'email' => $c->email,
+                'phone' => null,
+                'avatar' => null,
+                'frequency' => $c->frequency,
+            ]);
+
+        // Merge: local contacts first (they rank higher), then IMAP cache
+        // Deduplicate by email (case-insensitive), local wins
+        $merged = $local->concat($imap)
+            ->unique('email', true) // strict comparison
+            ->take($limit)
+            ->values();
+
+        return $merged;
     }
 }

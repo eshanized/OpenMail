@@ -115,16 +115,17 @@ Plans:
   4. Audit log records login events, failed attempts, and send actions
   5. User can manage signatures and view/edit profile information
 
-**Plans**: 6/6 plans created
+**Plans**: 7/7 plans created
 
 Plans:
 
-- [ ] 05-01-PLAN.md — CSP headers (report-only), SecurityHeaders middleware, audit logging for auth (tracer)
-- [ ] 05-02-PLAN.md — Settings page scaffold + Appearance tab (theme/density) (tracer)
-- [ ] 05-03-PLAN.md — API rate limiting, session hardening, SSRF-safe URLs, MIME/attachment validation
-- [ ] 05-04-PLAN.md — Signature management: model, service, Settings tab + Tiptap modal
-- [ ] 05-05-PLAN.md — Settings tabs (Profile, Mail, Security) + Composer signature integration
-- [ ] 05-06-PLAN.md — Final polish, density/theme cross-mailbox verification, CSP enforcement prep
+- [ ] 05-01-PLAN.md — CSP infrastructure: config, nonce generator, presets, violation endpoint, SecurityHeaders middleware (tracer)
+- [ ] 05-02-PLAN.md — Audit logging: audit_logs table, AuditService, Login/Logout controller integration, prune command
+- [ ] 05-03-PLAN.md — Settings page scaffold + Appearance tab (theme/density) with live preview (tracer)
+- [ ] 05-04-PLAN.md — API rate limiting, session hardening, SSRF-safe URLs, MIME/attachment validation
+- [ ] 05-05-PLAN.md — Signature management: model, service, Settings tab + Tiptap modal, composer dropdown
+- [ ] 05-06-PLAN.md — Settings tabs (Profile, Mail, Security) + User/Setting model extensions
+- [ ] 05-07-PLAN.md — Final polish: density/theme cross-mailbox verification, CSP enforcement prep
 
 ## Progress
 
@@ -137,4 +138,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. Mailbox Core | 2/2 | Complete    | 2026-09-06 |
 | 3. Compose & Send | 2/2 | Complete   | 2026-09-06 |
 | 4. Organization & Intelligence | 3/9 | In Progress | 2026-09-06 |
-| 5. Security & Polish | 0/6 | Planned | - |
+| 5. Security & Polish | 0/7 | Planned | - |

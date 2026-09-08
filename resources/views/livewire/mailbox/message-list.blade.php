@@ -161,7 +161,11 @@
     </div>
 
     {{-- Message list --}}
-    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <div
+        wire:loading.remove
+        wire:target="onFolderChanged,setSort,toggleThreadMode"
+        class="bg-white rounded-lg border border-gray-200 overflow-hidden"
+    >
         @php
             $isThreaded = $threadMode === 'threaded';
             $isEmpty = $isThreaded ? empty($messages) : $messages->isEmpty();
@@ -207,10 +211,27 @@
         @endif
     </div>
 
-    {{-- Loading indicator --}}
-    <div wire:loading class="fixed inset-0 bg-white/80 z-50 flex items-center justify-center" style="display: none;">
-        <svg class="w-8 h-8 text-blue-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-        </svg>
+    {{-- Skeleton loading region (replaces full-viewport splash) --}}
+    <div
+        wire:loading
+        wire:target="onFolderChanged,setSort,toggleThreadMode"
+        class="divide-y divide-gray-100 dark:divide-white/5"
+        aria-hidden="true"
+        style="display: none;"
+    >
+        @foreach([1, 2, 3, 4, 5] as $i)
+            <div class="flex items-start gap-3 px-4 py-3">
+                <div class="h-9 w-9 rounded-full animate-shimmer"
+                     style="background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%); background-size: 200% 100%;"></div>
+                <div class="flex-1 space-y-2">
+                    <div class="h-3.5 w-3/4 rounded animate-shimmer"
+                         style="background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%); background-size: 200% 100%;"></div>
+                    <div class="h-3 w-32 rounded animate-shimmer"
+                         style="background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%); background-size: 200% 100%;"></div>
+                </div>
+                <div class="h-3 w-12 rounded animate-shimmer"
+                     style="background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%); background-size: 200% 100%;"></div>
+            </div>
+        @endforeach
     </div>
 </div>

@@ -79,7 +79,7 @@
                class="w-full pl-10 pr-10 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                placeholder="Search all mail (shortcut: /)"
                autocomplete="off">
-        <span x-show="loading" x-transition class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></span>
+        <span x-show="loading" x-transition class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full spin-animation"></span>
     </div>
 
     {{-- Instant search dropdown --}}

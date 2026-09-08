@@ -1,11 +1,18 @@
 <div class="space-y-6">
     <section>
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Signatures</h3>
+            <h3 class="text-lg font-semibold text-ink">Signatures</h3>
             <button
                 wire:click="openCreateModal"
-                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2"
-            >
+                class="group inline-flex items-center gap-2 rounded-lg
+                           bg-linear-to-r from-blue-600 to-purple-600
+                           px-4 py-2 text-sm font-semibold text-white
+                           shadow-glow
+                           transition duration-150 ease-out
+                           hover:scale-[1.02] hover:shadow-glow-strong
+                           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+                           focus-visible:ring-blue-600
+                           motion-reduce:transform-none motion-reduce:transition-none">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
@@ -14,7 +21,7 @@
         </div>
 
         @if($signatures->isEmpty())
-            <div class="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+            <div class="text-center py-12 glass-card rounded-lg border border-white/60 dark:border-white/10">
                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
                 </svg>
@@ -22,7 +29,7 @@
                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Create your first signature to use in outgoing emails.</p>
                 <button
                     wire:click="openCreateModal"
-                    class="mt-4 px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800"
+                    class="mt-4 px-4 py-2 text-sm font-medium text-primary hover:text-primary/80"
                 >
                     Create Signature
                 </button>
@@ -30,18 +37,18 @@
         @else
             <div class="space-y-3">
                 @foreach($signatures as $signature)
-                    <div class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-gray-300 dark:hover:border-gray-600 transition-colors">
+                    <div class="flex items-center justify-between p-4 glass-card border border-white/60 dark:border-white/10 rounded-lg hover:border-primary/50 dark:hover:border-primary/50 transition-colors">
                         <div class="flex items-center gap-3 min-w-0">
-                            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center flex-shrink-0">
-                                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="w-10 h-10 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
                                 </svg>
                             </div>
                             <div class="min-w-0">
-                                <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ $signature->name }}</p>
+                                <p class="text-sm font-medium text-ink truncate">{{ $signature->name }}</p>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
                                     @if($signature->is_default)
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary dark:bg-primary/20">
                                             Default
                                         </span>
                                     @else
@@ -54,7 +61,7 @@
                             @unless($signature->is_default)
                                 <button
                                     wire:click="setDefaultSignature({{ $signature->id }})"
-                                    class="px-3 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                    class="px-3 py-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
                                     title="Set as default"
                                 >
                                     Set Default
@@ -62,7 +69,7 @@
                             @endunless
                             <button
                                 wire:click="openEditModal({{ $signature->id }})"
-                                class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                                class="p-1 text-gray-400 hover:text-primary dark:hover:text-primary/80 transition-colors"
                                 title="Edit signature"
                             >
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -92,14 +99,14 @@
             <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
                 {{-- Backdrop --}}
                 <div
-                    class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                    class="fixed inset-0 bg-black/50 transition-opacity"
                     wire:click="closeModal"
                 ></div>
 
                 {{-- Modal panel --}}
-                <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="modal-title">
+                <div class="inline-block align-bottom glass-card max-w-2xl w-full shadow-xl transform transition-all sm:my-8 sm:align-middle sm:w-full">
+                    <div class="px-6 py-4 border-b border-white/60 dark:border-white/10">
+                        <h3 class="text-lg font-semibold text-ink" id="modal-title">
                             {{ $modalTitle }}
                         </h3>
                     </div>
@@ -107,14 +114,14 @@
                     <div class="px-6 py-4 space-y-4">
                         {{-- Name --}}
                         <div>
-                            <label for="sig-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            <label for="sig-name" class="block text-sm font-medium text-ink mb-1">
                                 Signature Name
                             </label>
                             <input
                                 type="text"
                                 id="sig-name"
                                 wire:model="name"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm dark:bg-gray-700 dark:text-white"
+                                class="glass-input w-full px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
                                 placeholder="e.g., Work, Personal"
                                 maxlength="100"
                             >
@@ -125,7 +132,7 @@
 
                         {{-- Tiptap Editor --}}
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            <label class="block text-sm font-medium text-ink mb-1">
                                 Signature Content
                             </label>
                             <x-tiptap-editor
@@ -143,30 +150,42 @@
                                 type="checkbox"
                                 id="sig-default"
                                 wire:model="isDefault"
-                                class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                class="h-4 w-4 text-primary border-gray-300 dark:border-gray-600 rounded focus:ring-primary"
                             >
-                            <label for="sig-default" class="text-sm text-gray-700 dark:text-gray-300">
+                            <label for="sig-default" class="text-sm text-ink">
                                 Set as default signature
                             </label>
                         </div>
                     </div>
 
-                    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-end gap-3">
+                    <div class="px-6 py-4 border-t border-white/60 dark:border-white/10 flex items-center justify-end gap-3">
                         <button
                             wire:click="closeModal"
-                            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                            class="px-4 py-2 text-sm font-medium text-ink bg-surface-raised dark:bg-surface-raised border border-white/60 dark:border-white/10 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                         >
                             Cancel
                         </button>
                         <button
                             wire:click="saveSignature"
-                            wire:loading.attr="disabled"
-                            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
-                        >
-                            <span wire:loading.remove wire:target="saveSignature">
+                            data-loading.attr="disabled"
+                            class="group inline-flex items-center gap-2 rounded-lg
+                                       bg-linear-to-r from-blue-600 to-purple-600
+                                       px-4 py-2 text-sm font-semibold text-white
+                                       shadow-glow
+                                       transition duration-150 ease-out
+                                       hover:scale-[1.02] hover:shadow-glow-strong
+                                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+                                       focus-visible:ring-blue-600
+                                       motion-reduce:transform-none motion-reduce:transition-none
+                                       disabled:opacity-50">
+                            <span data-loading.remove wire:target="saveSignature">
                                 {{ $editingSignatureId ? 'Update Signature' : 'Create Signature' }}
                             </span>
-                            <span wire:loading wire:target="saveSignature">
+                            <span data-loading wire:target="saveSignature" class="flex items-center gap-1">
+                                <svg class="spin-animation h-4 w-4" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
                                 Saving...
                             </span>
                         </button>

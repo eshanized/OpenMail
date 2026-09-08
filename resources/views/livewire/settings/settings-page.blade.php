@@ -1,6 +1,6 @@
-<div x-data="settingsTabs()" x-init="init()" class="max-w-4xl mx-auto">
+<div x-data="settingsTabs(@js(array_keys($tabs)))" x-init="init()" class="max-w-4xl mx-auto">
     {{-- Tab navigation --}}
-    <nav class="mb-6 border-b border-gray-200 dark:border-gray-700" role="tablist" aria-label="Settings">
+    <nav class="mb-6 border-b border-white/60 dark:border-white/10" role="tablist" aria-label="Settings">
         @foreach($tabs as $key => $label)
             <button
                 role="tab"
@@ -14,9 +14,9 @@
                 @keydown.arrow-left.prevent="focusPrevTab('{{ $key }}')"
                 @keydown.enter.prevent="selectTab('{{ $key }}')"
                 @keydown.space.prevent="selectTab('{{ $key }}')"
-                class="px-4 py-3 border-b-2 font-medium text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                class="px-4 py-3 border-b-2 font-medium text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
                     {{ $activeTab === $key
-                        ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                        ? 'border-primary text-primary'
                         : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300' }}"
             >
                 {{ $label }}
@@ -25,24 +25,26 @@
     </nav>
 
     {{-- Tab panels --}}
-    <div role="tabpanel" id="panel-{{ $activeTab }}" aria-labelledby="tab-{{ $activeTab }}">
-        @switch($activeTab)
-            @case('profile')
-                @livewire('settings.profile-tab')
-                @break
-            @case('mail')
-                @livewire('settings.mail-tab')
-                @break
-            @case('appearance')
-                @livewire('settings.appearance-tab')
-                @break
-            @case('security')
-                @livewire('settings.security-tab')
-                @break
-            @case('signatures')
-                @livewire('settings.signatures-tab')
-                @break
-        @endswitch
+    <div class="glass-card">
+        <div role="tabpanel" id="panel-{{ $activeTab }}" aria-labelledby="tab-{{ $activeTab }}">
+            @switch($activeTab)
+                @case('profile')
+                    @livewire('settings.profile-tab')
+                    @break
+                @case('mail')
+                    @livewire('settings.mail-tab')
+                    @break
+                @case('appearance')
+                    @livewire('settings.appearance-tab')
+                    @break
+                @case('security')
+                    @livewire('settings.security-tab')
+                    @break
+                @case('signatures')
+                    @livewire('settings.signatures-tab')
+                    @break
+            @endswitch
+        </div>
     </div>
 
     {{-- Live region for toast notifications --}}
@@ -53,48 +55,3 @@
          x-text="toastMessage">
     </div>
 </div>
-
-<script>
-    function settingsTabs() {
-        return {
-            toastMessage: '',
-            toastType: 'success',
-            tabs: @js(array_keys($tabs)),
-
-            init() {
-                // Listen for toast events from child components
-                this.$wire.on('toast', (message, type) => {
-                    this.showToast(message, type || 'success');
-                });
-            },
-
-            showToast(message, type = 'success') {
-                this.toastMessage = message;
-                this.toastType = type;
-                setTimeout(() => { this.toastMessage = ''; }, 3000);
-            },
-
-            focusNextTab(currentKey) {
-                const idx = this.tabs.indexOf(currentKey);
-                const next = this.tabs[(idx + 1) % this.tabs.length];
-                this.$nextTick(() => {
-                    const el = document.getElementById('tab-' + next);
-                    if (el) el.focus();
-                });
-            },
-
-            focusPrevTab(currentKey) {
-                const idx = this.tabs.indexOf(currentKey);
-                const prev = this.tabs[(idx - 1 + this.tabs.length) % this.tabs.length];
-                this.$nextTick(() => {
-                    const el = document.getElementById('tab-' + prev);
-                    if (el) el.focus();
-                });
-            },
-
-            selectTab(key) {
-                this.$wire.setTab(key);
-            }
-        }
-    }
-</script>

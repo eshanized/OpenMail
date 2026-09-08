@@ -145,7 +145,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 **Goal:** The app reads as one polished, Gmail-grade interface — gradient primary actions, glass surfaces, soft-tag badges, shimmer skeleton loading, route cross-fade, and the Plus Jakarta Sans typeface, on warm cream (light) / soft-dark (dark) surfaces with WCAG AA contrast in both themes
 **Requirements**: D-01 through D-16 (CONTEXT decisions; no req-ID set for this phase)
 **Depends on:** Phase 5
-**Plans:** 3/5 plans executed created
+**Plans:** 4/5 plans executed created
 
 Plans:
 **Wave 1**
@@ -159,7 +159,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 06-04-PLAN.md — Skeleton loading + Livewire 4 data-loading migration (wave 3)
+- [x] 06-04-PLAN.md — Skeleton loading + Livewire 4 data-loading migration (wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 

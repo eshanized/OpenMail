@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 current_phase: 6
 current_phase_name: 6 UI/UX Polish
 status: executing
-stopped_at: Completed 06-03-PLAN.md
-last_updated: "2026-09-08T21:17:41.500Z"
+stopped_at: Completed 06-04-PLAN.md
+last_updated: "2026-09-08T22:00:35.435Z"
 last_activity: 2026-09-09
 last_activity_desc: Phase 6 execution started
-state_head: 6bf7d4f687652992622f3db9061a45aa4013fcfd
+state_head: c1bb309c532788382fea30afc536104907127d69
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 28
-  completed_plans: 25
+  completed_plans: 26
   percent: 50
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-09-05)
 ## Current Position
 
 Phase: 6 (6 UI/UX Polish) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Last activity: 2026-09-09 — Phase 6 execution started
 
@@ -64,6 +64,7 @@ Progress: █████░░░░░ [█████░░░░░] 50%
 | Phase 6 P1 | 15 min | 3 tasks | 4 files |
 | Phase 6 P2 | 25 min | 2 tasks | 5 files |
 | Phase 6 P3 | 35 min | 3 tasks | 10 files |
+| Phase 6 P4 | 30 min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -99,6 +100,9 @@ Recent decisions affecting current work:
 - [Phase 6]: Soft-tag badges: unread uses blue-100/blue-600, overflow uses gray-100/gray-500 (AA on cream); label chips preserve validated inline hex — D-08 soft-tag pattern standardized; 600/500-level text stops floor-checked against cream contrast table
 - [Phase 6]: Primary actions (Compose, Send, Archive): gradient from-blue-600 to-purple-600 + glow + hover scale 1.02 + focus ring; Delete: solid red-600; secondary: neutral — UI-SPEC accent-reserved enforced — D-01/D-04/D-05/D-10 pattern expansion from tracer; gradient only on locked primary actions
 - [Phase 6]: Message rows: NO hover scale transform (Pitfall 6 + Gmail benchmark) — surface-tinted hover + left gradient accent + focus ring only; never animate backdrop-filter — Full-width list rows scaling causes layout shift; surface tint + accent bar is subtler and more professional
+- [Phase 6]: Message list skeleton uses wire:target="onFolderChanged,setSort,toggleThreadMode" + wire:loading.remove to satisfy 06-01 test needle — flips MessageListLoadingTest GREEN — Wire:target pins skeleton to exact list actions; wire:loading.remove on content replaces full-viewport splash
+- [Phase 6]: Livewire 4 data-loading migration: data-loading.attr/disabled, data-loading.remove, data-loading replace wire:loading equivalents in composer, message-toolbar, folder-sidebar — zero behavior change — Livewire 4 native attribute system replaces deprecated wire:loading alias; migration is attribute-only, zero behavior change
+- [Phase 6]: Accepted deprecated usage (out of scope): composer drop zone wire:loading.class; message-row star wire:loading.attr; label-modal, contact-import-modal, message-viewer, attachment-list wire:loading — per plan scope boundary — Per plan scope boundary, these views are out of scope for data-loading migration; noted in SUMMARY
 
 ### Pending Todos
 
@@ -116,6 +120,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-08T21:17:41.389Z
-Stopped at: Completed 06-03-PLAN.md
+Last session: 2026-09-08T22:00:35.313Z
+Stopped at: Completed 06-04-PLAN.md
 Resume file: None

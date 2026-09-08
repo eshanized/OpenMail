@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 current_phase: 6
 current_phase_name: 6 UI/UX Polish
 status: executing
-stopped_at: Completed 06-01-PLAN.md
-last_updated: "2026-09-08T20:42:55.846Z"
+stopped_at: Completed 06-02-PLAN.md
+last_updated: "2026-09-08T20:55:52.479Z"
 last_activity: 2026-09-09
 last_activity_desc: Phase 6 execution started
-state_head: 3c2809f499cfd089969ecd0c827a6a9bc224a5ec
+state_head: 0255af8e95db8b0248ab8f6035988ef305b3b31f
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 28
-  completed_plans: 23
+  completed_plans: 24
   percent: 50
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-09-05)
 ## Current Position
 
 Phase: 6 (6 UI/UX Polish) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-09-09 — Phase 6 execution started
 
@@ -62,6 +62,7 @@ Progress: █████░░░░░ [█████░░░░░] 50%
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 6 P1 | 15 min | 3 tasks | 4 files |
+| Phase 6 P2 | 25 min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -89,6 +90,10 @@ Recent decisions affecting current work:
 - [Phase 6]: Wave 0 test scaffold intentionally RED for implementation-guarding tests (MessageListLoadingTest, UiPolishTest methods 1-4); AppearanceTest and UiPolishTest methods 5-7 are GREEN regression guards — TDD contract: RED tests assert markup that only exists after plans 06-02/06-03/06-04 land; GREEN guards protect existing theme/density persistence and security invariants
 - [Phase 6]: Build gate script exits 1 today (fontsource not installed) — plan 06-02 installs @fontsource-variable/plus-jakarta-sans and flips gate to exit 0 — Objective font-delivery signal; gate validates manifest.json for fontsource + app.css + app.js entries
 - [Phase 6]: Fixed 3 pre-existing test infrastructure issues (Rule 2): @match syntax bug in appearance-tab.blade.php, HTTP test 302 redirect for CSP nonce, Setting value JSON encoding — Auto-fixed missing critical functionality blocking test execution; no production code changes
+- [Phase 6]: D-04 gradient implemented as from-blue-600 to-purple-600 (AA-passing 5.17/5.38) — locked 500-level stops reserved for decorative-large only — Discretion covers gradient stops and contrast; 500-level fails AA for 14px white text
+- [Phase 6]: D-12 route cross-fade implemented as theme-aware opaque overlay on livewire:navigating/navigated (true DOM cross-fade unsupported by Livewire 4 sync swap) — Livewire 4's HTML swap is synchronous; overlay delivers locked visual intent deterministically
+- [Phase 6]: D-16 density-regular line-height updated from 1.5 to 1.4 (both class block and utility duplicate); comfortable keeps 1.6 — D-16 requires 1.4 as base feel; prior 1.5 expectation knowingly updated
+- [Phase 6]: Dark token retargeting verified: :where(.dark) override of --color-surface retargets generated utilities without explicit dark: variants (A3 assumption resolved) — Research Assumption A3 was MEDIUM risk; native override works, no fallback needed
 
 ### Pending Todos
 
@@ -106,6 +111,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-08T20:42:55.747Z
-Stopped at: Completed 06-01-PLAN.md
+Last session: 2026-09-08T20:55:52.364Z
+Stopped at: Completed 06-02-PLAN.md
 Resume file: None

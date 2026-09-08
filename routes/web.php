@@ -47,3 +47,8 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/up', function () {
     return response('OK', 200)->header('Content-Type', 'text/plain');
 });
+
+// CSP violation reports (SEC-03, D-03) — rate-limited to prevent flooding
+Route::post('/csp-report', [\App\Http\Controllers\CspReportController::class, 'store'])
+    ->name('csp.report')
+    ->middleware('throttle:60,1');

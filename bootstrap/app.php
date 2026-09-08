@@ -11,6 +11,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Security headers on all responses (SEC-10)
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+
+        // CSP headers via spatie/laravel-csp (SEC-03)
+        $middleware->append(\Spatie\Csp\AddCspHeaders::class);
+
         $middleware->web(append: [
             \App\Http\Middleware\InstallLock::class,
         ]);

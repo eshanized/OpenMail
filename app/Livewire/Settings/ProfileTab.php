@@ -3,10 +3,14 @@
 namespace App\Livewire\Settings;
 
 use Livewire\Component;
+use Livewire\Attributes\Validate;
 
 class ProfileTab extends Component
 {
+    #[Validate('required|string|max:255')]
     public string $name = '';
+
+    #[Validate('required|email|max:255|unique:users,email,' . '::auth()->id()')]
     public string $email = '';
 
     public function mount(): void
@@ -17,6 +21,8 @@ class ProfileTab extends Component
 
     public function save(): void
     {
+        $this->validate();
+
         auth()->user()->update([
             'name' => $this->name,
             'email' => $this->email,

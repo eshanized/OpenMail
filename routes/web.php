@@ -54,6 +54,11 @@ Route::middleware(['auth'])->group(function () {
         return redirect()->route('settings');
     })->name('settings.signatures');
 
+    // Session revocation route (SET-05)
+    Route::post('/settings/sessions/revoke', [\App\Http\Controllers\Auth\LogoutController::class, 'revokeOtherSessions'])
+        ->middleware('throttle:10,1')
+        ->name('settings.sessions.revoke');
+
     // API routes with authenticated rate limiting (SEC-04)
     // Compose actions go through Livewire's update endpoint (throttled via Livewire middleware)
     // Search and Settings GET routes have per-route throttle middleware above

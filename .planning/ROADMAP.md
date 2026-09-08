@@ -139,3 +139,18 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 3. Compose & Send | 2/2 | Complete   | 2026-09-06 |
 | 4. Organization & Intelligence | 3/9 | In Progress | 2026-09-06 |
 | 5. Security & Polish | 0/7 | Planned | - |
+
+### Phase 6: 6 UI/UX Polish
+
+**Goal:** The app reads as one polished, Gmail-grade interface — gradient primary actions, glass surfaces, soft-tag badges, shimmer skeleton loading, route cross-fade, and the Plus Jakarta Sans typeface, on warm cream (light) / soft-dark (dark) surfaces with WCAG AA contrast in both themes
+**Requirements**: D-01 through D-16 (CONTEXT decisions; no req-ID set for this phase)
+**Depends on:** Phase 5
+**Plans:** 5/5 plans created
+
+Plans:
+
+- [ ] 06-01-PLAN.md — Wave 0 scaffolding: RED skeleton/appearance tests, UiPolishTest guard suite, fontsource build gate
+- [ ] 06-02-PLAN.md — Tracer: font, theme tokens, x-cloak fix, density 1.4, route-overlay fade, gradient Compose (wave 1)
+- [ ] 06-03-PLAN.md — Glass surfaces, soft-tag badges, gradient Send/Archive, hover glow (wave 2)
+- [ ] 06-04-PLAN.md — Skeleton loading + Livewire 4 data-loading migration (wave 3)
+- [ ] 06-05-PLAN.md — Settings polish, Alpine.data script migration, phase integration gate (wave 3)

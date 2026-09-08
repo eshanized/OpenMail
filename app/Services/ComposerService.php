@@ -29,6 +29,14 @@ class ComposerService
     {
         $user = $userId ? \App\Models\User::find($userId) : Auth::user();
 
+        // Auto-insert default signature if composing (not reply/forward) and no signature already in body
+        if (($data['mode'] ?? 'compose') === 'compose' && empty($data['signature_id'])) {
+            $defaultSig = app(SignatureService::class)->getDefault($user);
+            if ($defaultSig && $defaultSig->content_html && !str_contains($data['body'] ?? '', $defaultSig->content_html)) {
+                $data['body'] = ($data['body'] ?? '') . '<br><br>' . $defaultSig->content_html;
+            }
+        }
+
         $email = (new Email())
             ->from(new Address($user->email, $user->name ?? ''));
 

@@ -291,7 +291,15 @@
 
                 {{-- Body with Tiptap Editor --}}
                 <div class="mb-6">
-                    <label for="composer-body" class="block text-sm font-medium text-gray-700 mb-1">Message</label>
+                    <div class="flex items-center justify-between mb-1">
+                        <label for="composer-body" class="block text-sm font-medium text-gray-700">Message</label>
+                        @if($mode === 'compose')
+                            <x-signature-dropdown
+                                :signatures="$signatures ?? collect()"
+                                :default-signature="$defaultSignature"
+                            />
+                        @endif
+                    </div>
                     <div class="border border-gray-300 rounded-md overflow-hidden">
                         {{-- Toolbar --}}
                         <div x-ref="toolbar" class="tiptap-toolbar-container"></div>

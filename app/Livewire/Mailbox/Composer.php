@@ -6,7 +6,9 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Services\ComposerService;
 use App\Services\MessageSanitizer;
+use App\Services\SignatureService;
 use App\Services\ContactAutocompleteService;
+use App\Models\Signature;
 use Illuminate\Support\Str;
 
 class Composer extends Component
@@ -29,6 +31,8 @@ class Composer extends Component
     public bool $sending = false;
     public bool $showCc = false;
     public bool $showBcc = false;
+    public $signatures;
+    public ?array $defaultSignature = null;
     public string $autosaveStatus = 'idle'; // idle, saving, saved, error
     public ?string $lastSavedAt = null;
     public bool $showUndoToast = false;
@@ -49,16 +53,39 @@ class Composer extends Component
     public function mount(): void
     {
         $this->compositionId = (string) Str::uuid();
+        $this->loadSignatures();
+    }
+
+    public function loadSignatures(): void
+    {
+        $user = auth()->user();
+        if (!$user) return;
+
+        $service = app(SignatureService::class);
+        $this->signatures = $service->getAll($user);
+        $default = $service->getDefault($user);
+        $this->defaultSignature = $default ? [
+            'id' => $default->id,
+            'name' => $default->name,
+            'content_html' => $default->content_html,
+        ] : null;
     }
 
     public function openComposer(array $params = []): void
     {
         $this->resetForm();
+        $this->loadSignatures();
         $this->mode = $params['mode'] ?? 'compose';
 
         if (in_array($this->mode, ['reply', 'replyAll', 'forward']) && isset($params['message'])) {
             $this->replyToMessage = $params['message'];
             $this->populateFromMessage($params['message']);
+        }
+
+        // Auto-insert default signature on new compose (not reply/forward)
+        if ($this->mode === 'compose' && $this->defaultSignature && !empty($this->defaultSignature['content_html'])) {
+            $this->bodyHtml = '<br><br>' . $this->defaultSignature['content_html'];
+            $this->body = strip_tags($this->bodyHtml);
         }
 
         $this->isOpen = true;
@@ -370,6 +397,35 @@ class Composer extends Component
         $this->bodyHtml = $html;
         // Also keep body for backward compatibility with plain text fallback
         $this->body = strip_tags($html);
+    }
+
+    /**
+     * Set a signature in the composer body.
+     * Called by the signature-dropdown component.
+     */
+    public function setSignature(int $signatureId): void
+    {
+        $signature = Signature::where('id', $signatureId)
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if ($signature && $signature->content_html) {
+            $this->bodyHtml = $this->bodyHtml . '<br><br>' . $signature->content_html;
+            $this->body = strip_tags($this->bodyHtml);
+        }
+    }
+
+    /**
+     * Remove signature from composer body.
+     * Called by the signature-dropdown component.
+     */
+    public function removeSignature(): void
+    {
+        // Remove the last signature block (after the last <br><br> separator)
+        if (preg_match('/(<br><br>.*$)/s', $this->bodyHtml, $matches)) {
+            $this->bodyHtml = substr($this->bodyHtml, 0, -strlen($matches[1]));
+            $this->body = strip_tags($this->bodyHtml);
+        }
     }
 
     protected function resetForm(): void

@@ -50,8 +50,36 @@
     <div class="flex-1 overflow-y-auto">
         {{-- Folders Panel --}}
         <div x-show="activeTab === 'folders'" x-cloak>
+            {{-- Skeleton loading during refreshFolders --}}
+            <div
+                wire:loading
+                wire:target="refreshFolders"
+                class="space-y-1 p-2"
+                aria-hidden="true"
+                style="display: none;"
+            >
+                @foreach([1, 2, 3] as $i)
+                    <div class="flex items-center px-3 py-2">
+                        <div class="h-4 w-4 rounded animate-shimmer"
+                             style="background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%); background-size: 200% 100%;"></div>
+                        <div class="flex-1 min-w-0 space-y-1 ml-3">
+                            <div class="h-3 rounded animate-shimmer w-3/4"
+                                 style="background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%); background-size: 200% 100%;"></div>
+                            <div class="h-2 rounded animate-shimmer w-1/2"
+                                 style="background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%); background-size: 200% 100%;"></div>
+                        </div>
+                        <div class="h-2 w-8 rounded animate-shimmer"
+                             style="background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%); background-size: 200% 100%;"></div>
+                    </div>
+                @endforeach
+            </div>
+
             {{-- Standard folders --}}
-            <div class="space-y-1 p-2">
+            <div
+                wire:loading.remove
+                wire:target="refreshFolders"
+                class="space-y-1 p-2"
+            >
                 @foreach($folders as $folder)
                     @if($folder['role'])
                         <div
@@ -167,14 +195,14 @@
             <div class="mt-4 p-4 border-t border-white/60 dark:border-white/10">
                 <button
                     wire:click="refreshFolders"
-                    wire:loading.attr="disabled"
+                    data-loading.attr="disabled"
                     class="w-full text-sm text-gray-600 hover:text-gray-900 flex items-center justify-center space-x-2"
                 >
-                    <svg class="w-4 h-4" wire:loading remove wire:target="refreshFolders" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4" data-loading remove wire:target="refreshFolders" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                     </svg>
-                    <span wire:loading remove wire:target="refreshFolders">Refresh</span>
-                    <span wire:loading.attr="disabled" wire:target="refreshFolders">Refreshing...</span>
+                    <span data-loading remove wire:target="refreshFolders">Refresh</span>
+                    <span data-loading wire:target="refreshFolders">Refreshing...</span>
                 </button>
             </div>
         </div>

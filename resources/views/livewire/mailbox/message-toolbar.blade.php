@@ -37,7 +37,7 @@
         {{-- Archive --}}
         <button
             wire:click="archiveSelected"
-            wire:loading.attr="disabled"
+            data-loading.attr="disabled"
             class="group inline-flex items-center gap-1 rounded-lg
                        bg-linear-to-r from-blue-600 to-purple-600
                        px-3 py-1.5 text-sm font-semibold text-white
@@ -59,7 +59,7 @@
         {{-- Delete (Move to Trash) --}}
         <button
             wire:click="bulkDelete"
-            wire:loading.attr="disabled"
+            data-loading.attr="disabled"
             class="px-3 py-1.5 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-red-600"
             onclick="return confirm('Move selected messages to Trash?')"
         >
@@ -72,7 +72,7 @@
         {{-- Spam --}}
         <button
             wire:click="bulkMove('Spam')"
-            wire:loading.attr="disabled"
+            data-loading.attr="disabled"
             class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
             title="Mark as Spam"
         >
@@ -109,7 +109,7 @@
                     @if($folder['path'] !== $folderPath)
                         <button
                             wire:click="bulkMove('{{ $folder['path'] }}')"
-                            wire:loading.attr="disabled"
+                            data-loading.attr="disabled"
                             class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 flex items-center"
                         >
                             @if($folder['role'])
@@ -141,7 +141,7 @@
         {{-- Mark read --}}
         <button
             wire:click="bulkMarkRead"
-            wire:loading.attr="disabled"
+            data-loading.attr="disabled"
             class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
             title="Mark as read"
         >
@@ -154,7 +154,7 @@
         {{-- Mark unread --}}
         <button
             wire:click="bulkMarkUnread"
-            wire:loading.attr="disabled"
+            data-loading.attr="disabled"
             class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
             title="Mark as unread"
         >
@@ -166,7 +166,7 @@
         {{-- Star/Flag --}}
         <button
             wire:click="bulkStar"
-            wire:loading.attr="disabled"
+            data-loading.attr="disabled"
             class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
             title="Flag"
         >
@@ -178,7 +178,7 @@
         {{-- Unstar/Unflag --}}
         <button
             wire:click="bulkUnstar"
-            wire:loading.attr="disabled"
+            data-loading.attr="disabled"
             class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
             title="Unflag"
         >

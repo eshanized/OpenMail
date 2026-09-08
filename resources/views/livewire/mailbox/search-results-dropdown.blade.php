@@ -57,17 +57,23 @@
      class="absolute z-50 w-full mt-1 glass-card shadow-xl overflow-hidden"
      style="display: none;">
     @foreach([1, 2, 3] as $i)
-        <div class="px-4 py-3 border-t border-gray-100 first:border-t-0">
+        <div class="px-4 py-3 border-t border-gray-100 dark:border-white/5 first:border-t-0">
             <div class="flex items-start gap-3">
-                <div class="w-8 h-8 rounded-full bg-gray-200 animate-pulse flex-shrink-0"></div>
+                <div class="w-8 h-8 rounded-full animate-shimmer"
+                     style="background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%); background-size: 200% 100%;"></div>
                 <div class="flex-1 min-w-0 space-y-2">
                     <div class="flex items-center gap-2">
-                        <div class="h-3 bg-gray-200 rounded animate-pulse w-24"></div>
-                        <div class="h-3 bg-gray-200 rounded animate-pulse w-12"></div>
-                        <div class="h-3 bg-gray-200 rounded animate-pulse w-16"></div>
+                        <div class="h-3 bg-gray-200 dark:bg-white/10 rounded animate-shimmer w-24"
+                             style="background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%); background-size: 200% 100%;"></div>
+                        <div class="h-3 bg-gray-200 dark:bg-white/10 rounded animate-shimmer w-12"
+                             style="background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%); background-size: 200% 100%;"></div>
+                        <div class="h-3 bg-gray-200 dark:bg-white/10 rounded animate-shimmer w-16"
+                             style="background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%); background-size: 200% 100%;"></div>
                     </div>
-                    <div class="h-3 bg-gray-200 rounded animate-pulse w-3/4"></div>
-                    <div class="h-3 bg-gray-200 rounded animate-pulse w-1/2"></div>
+                    <div class="h-3 bg-gray-200 dark:bg-white/10 rounded animate-shimmer w-3/4"
+                         style="background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%); background-size: 200% 100%;"></div>
+                    <div class="h-3 bg-gray-200 dark:bg-white/10 rounded animate-shimmer w-1/2"
+                         style="background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.04) 75%); background-size: 200% 100%;"></div>
                 </div>
             </div>
         </div>

@@ -8,6 +8,7 @@ use App\Services\ComposerService;
 use App\Services\MessageSanitizer;
 use App\Services\SignatureService;
 use App\Services\ContactAutocompleteService;
+use App\Services\AuditService;
 use App\Models\Signature;
 use Illuminate\Support\Str;
 
@@ -155,12 +156,37 @@ class Composer extends Component
 
             if ($result['success']) {
                 $this->dispatch('toast', 'Message sent', 'success');
+                // Audit log: send action (SEC-05)
+                $action = match($this->mode) {
+                    'reply' => 'reply',
+                    'replyAll' => 'reply_all',
+                    'forward' => 'forward',
+                    default => 'send',
+                };
+                AuditService::send($action, [
+                    'subject' => $this->subject,
+                    'to' => $this->to,
+                    'mode' => $this->mode,
+                ]);
                 // For successful immediate send, show undo toast with the configured delay
                 $this->showUndoToast = true;
                 $this->pendingSendId = null; // No pending send ID for immediate sends
                 $this->undoSendDelay = config('openmail.undo_send_delay', 10) * 1000; // Convert to ms for toast
             } else {
                 $this->dispatch('toast', 'Message queued for sending', 'warning');
+                // Audit log: send queued (SEC-05)
+                $action = match($this->mode) {
+                    'reply' => 'reply',
+                    'replyAll' => 'reply_all',
+                    'forward' => 'forward',
+                    default => 'send',
+                };
+                AuditService::send($action, [
+                    'subject' => $this->subject,
+                    'to' => $this->to,
+                    'mode' => $this->mode,
+                    'queued' => true,
+                ]);
                 // For queued sends, the pending_send_id is in the result
                 $this->showUndoToast = true;
                 $this->pendingSendId = $result['pending_send_id'] ?? null;

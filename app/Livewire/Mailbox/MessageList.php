@@ -67,12 +67,14 @@ class MessageList extends Component
 
     public function getFlatMessages(): LengthAwarePaginator
     {
+        $perPage = (int) auth()->user()->setting('page_size', 25);
+        
         return app(ImapMailboxService::class)->getMessages(
             $this->folderPath,
             $this->sortBy,
             $this->sortDir,
             $this->getPage(),
-            25
+            $perPage
         );
     }
 
@@ -80,7 +82,7 @@ class MessageList extends Component
     {
         $imapService = app(ImapMailboxService::class);
         $page = $this->getPage();
-        $perPage = 25;
+        $perPage = (int) auth()->user()->setting('page_size', 25);
 
         // Get flat messages for current page
         $flatMessages = $imapService->getMessages(

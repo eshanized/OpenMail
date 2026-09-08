@@ -25,8 +25,15 @@ Route::middleware(['auth'])->group(function () {
         ->name('settings');
 
     Route::get('/mailbox', function () {
-        return view('mailbox');
+        $defaultFolder = auth()->user()->setting('default_folder', 'INBOX');
+        return redirect()->route('mailbox.folder', ['folderPath' => $defaultFolder]);
     })->name('mailbox');
+
+    Route::get('/mailbox/{folderPath}', function (string $folderPath) {
+        return view('mailbox', [
+            'folderPath' => $folderPath,
+        ]);
+    })->name('mailbox.folder')->where('folderPath', '.*');
 
     Route::get('/mailbox/{folderPath}/{uid}', function (string $folderPath, int $uid) {
         return view('mailbox', [

@@ -208,8 +208,11 @@ class MessageViewer extends Component
 
     public function reply(): void
     {
+        $replyBehavior = auth()->user()->setting('reply_behavior', 'reply');
+        $mode = $replyBehavior === 'reply_all' ? 'replyAll' : 'reply';
+        
         $this->dispatch('openComposer', [
-            'mode' => 'reply',
+            'mode' => $mode,
             'message' => $this->getMessageDataForComposer(),
         ]);
     }

@@ -38,15 +38,16 @@ created: "2026-09-09"
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 06-01-01 | 01 | 1 | D-11 | T-06-01 / — | message-list renders skeleton guards, no spinner overlay | unit (Livewire) | `php artisan test --filter=MessageList` | ❌ W0 | ⬜ pending |
-| 06-01-02 | 01 | 1 | D-01/D-04 | T-06-01 / — | primary actions carry gradient classes (`from-blue-600 to-purple-600`) | unit (Livewire) | `php artisan test --filter=ComposeButton` | ❌ W0 | ⬜ pending |
-| 06-01-03 | 01 | 1 | D-06/D-07/D-08 | T-06-01 / — | glass classes + badge tints present in mailbox sidebar/search markup | unit (Livewire) | `php artisan test --filter=Mailbox` (extend ThreadUI) | ⚠️ extend existing | ⬜ pending |
-| 06-01-04 | 01 | 1 | D-13 | T-06-01 / — | font CSS emitted by Vite | build-time | `node -e "JSON.parse(require('fs').readFileSync('public/build/manifest.json')).*fontsource*"` | ❌ W0 (script) | ⬜ pending |
-| 06-01-05 | 01 | 1 | D-14/D-15/D-16 | T-06-01 / — | density tokens still applied (1.4 line-height on regular) | unit (DOM attr) | `php artisan test --filter=Appearance` | ❌ W0 | ⬜ pending |
-| 06-02-01 | 02 | 1 | Theme persistence | T-06-02 / — | appearance-tab interaction unchanged by restyle | unit (Livewire) | `php artisan test --filter=Appearance` | ❌ W0 | ⬜ pending |
-| 06-02-02 | 02 | 1 | CSP | T-06-02 / — | layout still emits nonce meta tag (`@cspNonceMetaTag`) | unit | extend existing layout test | ⚠️ extend existing | ⬜ pending |
+| 06-01-01 | 01 | 1 | D-11 | T-06-01 / — | message-list renders skeleton guards, no spinner overlay | unit (Livewire) | `php artisan test --filter=MessageListLoadingTest` | ❌ W0 | ⬜ pending |
+| 06-01-02 | 01 | 1 | D-01/D-04 | T-06-01 / — | primary actions carry gradient classes (`from-blue-600 to-purple-600`) | unit (Livewire) | `php artisan test --filter=UiPolishTest::test_compose_button_has_gradient_classes` | ❌ W0 | ⬜ pending |
+| 06-01-03 | 01 | 1 | D-06/D-07/D-08 | T-06-01 / — | glass classes + badge tints present in mailbox sidebar/search markup | unit (source) | `php artisan test --filter=UiPolishTest::test_glass_surface_classes_present` | ❌ W0 | ⬜ pending |
+| 06-01-04 | 01 | 1 | D-13 | T-06-01 / — | font CSS emitted by Vite | build-time | `node scripts/check-fontsource-build.js` | ❌ W0 (script) | ⬜ pending |
+| 06-01-05 | 01 | 1 | D-14/D-15/D-16 | T-06-01 / — | density tokens still applied (1.4 line-height on regular) | unit (Livewire) | `php artisan test --filter=AppearanceTest` + `rg -c "line-height-base: 1\.4" resources/css/app.css` (expects 2) | ❌ W0 | ⬜ pending |
+| 06-02-01 | 02 | 1 | Theme persistence | T-06-02 / — | appearance-tab interaction unchanged by restyle | unit (Livewire) | `php artisan test --filter=AppearanceTest` | ❌ W0 | ⬜ pending |
+| 06-02-02 | 02 | 1 | CSP | T-06-02 / — | layout still emits nonce meta tag (`@cspNonceMetaTag`) | unit | `php artisan test --filter=UiPolishTest::test_layout_emits_csp_nonce_meta` | ❌ W0 | ⬜ pending |
 | 06-03-01 | 03 | 2 | D-09/D-10/D-12 | T-06-03 / — | animations + overlay hook present in built assets | manual + grep | `rg -l "route-overlay\|animate-fade-in" public/build/assets/*.js` | manual | ⬜ pending |
 | 06-03-02 | 03 | 2 | Contrast, blur, motion | T-06-03 / — | WCAG AA, visual quality | manual (browser + axe/Lighthouse) | — | manual-only | ⬜ pending |
+| 06-05-03 | 05 | 4 | D-01..D-16 | T-06-01..05 / — | phase integration gate — full suite, build, CSP null-diff, QA evidence | full suite | `php artisan test && npm run build && node scripts/check-fontsource-build.js && test -z "$(git diff --stat config/csp.php)"` | — | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 

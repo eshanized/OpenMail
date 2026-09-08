@@ -153,4 +153,4 @@ Plans:
 - [ ] 06-02-PLAN.md — Tracer: font, theme tokens, x-cloak fix, density 1.4, route-overlay fade, gradient Compose (wave 1)
 - [ ] 06-03-PLAN.md — Glass surfaces, soft-tag badges, gradient Send/Archive, hover glow (wave 2)
 - [ ] 06-04-PLAN.md — Skeleton loading + Livewire 4 data-loading migration (wave 3)
-- [ ] 06-05-PLAN.md — Settings polish, Alpine.data script migration, phase integration gate (wave 3)
+- [ ] 06-05-PLAN.md — Settings polish, Alpine.data script migration, phase integration gate (wave 4)

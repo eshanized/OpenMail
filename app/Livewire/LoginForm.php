@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
+use App\Services\AuditService;
 
 class LoginForm extends Component
 {
@@ -46,6 +47,9 @@ class LoginForm extends Component
             // Store encrypted IMAP password in session for future IMAP connections
             $request->session()->put('openmail:imap_password', Crypt::encrypt($this->password));
 
+            // Audit log: login success
+            AuditService::loginSuccess($request);
+
             // Redirect to mailbox
             $this->redirect(route('mailbox'), navigate: true);
             return;
@@ -55,6 +59,15 @@ class LoginForm extends Component
         RateLimiter::hit($throttleKey, $this->calculateDecay());
 
         $attempts = RateLimiter::attempts($throttleKey);
+
+        // Audit log: login failure
+        AuditService::loginFailed($this->email, 'invalid_credentials', request());
+
+        // Audit log: lockout at 10+ attempts
+        if ($attempts >= 10) {
+            AuditService::lockout($this->email, request());
+        }
+
         $this->setErrorMessage($attempts);
     }
 

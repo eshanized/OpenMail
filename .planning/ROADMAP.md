@@ -145,7 +145,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 **Goal:** The app reads as one polished, Gmail-grade interface — gradient primary actions, glass surfaces, soft-tag badges, shimmer skeleton loading, route cross-fade, and the Plus Jakarta Sans typeface, on warm cream (light) / soft-dark (dark) surfaces with WCAG AA contrast in both themes
 **Requirements**: D-01 through D-16 (CONTEXT decisions; no req-ID set for this phase)
 **Depends on:** Phase 5
-**Plans:** 2/5 plans executed created
+**Plans:** 3/5 plans executed created
 
 Plans:
 **Wave 1**
@@ -155,7 +155,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 06-03-PLAN.md — Glass surfaces, soft-tag badges, gradient Send/Archive, hover glow (wave 2)
+- [x] 06-03-PLAN.md — Glass surfaces, soft-tag badges, gradient Send/Archive, hover glow (wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 

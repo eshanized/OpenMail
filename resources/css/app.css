@@ -273,10 +273,17 @@
 @utility glass-input {
     -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
+    background-color: rgb(255 255 255 / 0.6);
+    border: 1px solid rgb(229 231 235 / 0.8);
+    border-radius: 0.5rem;
 }
 @utility glass-card {
     -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
+    background-color: rgb(255 255 255 / 0.6);
+    border: 1px solid rgb(255 255 255 / 0.6);
+    border-radius: 0.75rem;
+    box-shadow: 0 8px 24px -16px rgb(30 27 75 / 0.35);
 }
 @supports not ((backdrop-filter: blur(8px)) or (-webkit-backdrop-filter: blur(8px))) {
     .glass-input, .glass-card {
@@ -298,6 +305,54 @@
     --route-overlay-bg: #1a1a2e;     /* dark overlay */
 }
 
+/* Glass dark-mode fills (layer tokens resolved at use-site) */
+:where(.dark) .glass-input {
+    background-color: rgb(255 255 255 / 0.1);
+    border-color: rgb(255 255 255 / 0.1);
+}
+:where(.dark) .glass-card {
+    background-color: rgb(255 255 255 / 0.1);
+    border-color: rgb(255 255 255 / 0.1);
+    box-shadow: 0 8px 24px -16px rgb(30 27 75 / 0.5);
+}
+
+/* Decorative blob layer for glass visibility over flat surfaces (Pitfall 4) */
+.bg-blobs {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+.bg-blobs::before,
+.bg-blobs::after {
+    content: '';
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(120px);
+    opacity: 0.25;
+}
+.bg-blobs::before {
+    width: 400px;
+    height: 400px;
+    top: -100px;
+    left: -100px;
+    background: var(--color-primary-deep); /* blue-500 from D-04 locked stops — decorative-large only */
+}
+.bg-blobs::after {
+    width: 500px;
+    height: 500px;
+    bottom: -150px;
+    right: -150px;
+    background: var(--color-accent-deep); /* violet-500 from D-04 locked stops — decorative-large only */
+}
+@media (prefers-reduced-motion: reduce) {
+    .bg-blobs::before,
+    .bg-blobs::after {
+        opacity: 0;
+    }
+}
+
 /* ========================================
    x-cloak fix (research Pitfall 5)
    ======================================== */
@@ -314,6 +369,7 @@
         scroll-behavior: auto !important;
     }
     #route-overlay { display: none; }            /* skip cross-fade */
+    .bg-blobs { display: none; }                 /* hide blob layer */
 }
 @media (prefers-reduced-transparency: reduce) {
     .glass-card, .glass-input {
@@ -324,4 +380,5 @@
     :where(.dark) .glass-card, :where(.dark) .glass-input {
         background-color: rgb(26 26 46 / 0.95) !important;
     }
+    .bg-blobs { display: none; }                 /* hide blob layer */
 }

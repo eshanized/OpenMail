@@ -16,7 +16,7 @@
      :class="densityClass">
 
     {{-- Desktop Sidebar --}}
-    <aside class="w-64 flex-shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col hidden lg:flex">
+    <aside class="w-64 flex-shrink-0 glass-card border-r border-white/60 dark:border-white/10 flex flex-col hidden lg:flex">
         <div class="flex-1 overflow-y-auto">
             {{ $sidebar ?? '' }}
         </div>
@@ -24,11 +24,11 @@
 
     {{-- Mobile sidebar toggle --}}
     <button
-        class="lg:hidden fixed top-20 left-4 z-50 bg-white dark:bg-gray-800 p-2 rounded shadow-md"
+        class="lg:hidden fixed top-20 left-4 z-50 glass-card p-2 rounded shadow-md"
         @click="sidebarOpen = !sidebarOpen"
         aria-label="Toggle sidebar"
     >
-        <svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-6 h-6 text-ink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
     </button>
@@ -45,9 +45,9 @@
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
     >
-        <div class="fixed inset-y-0 left-0 w-64 bg-white dark:bg-gray-800 shadow-xl" @click.outside="sidebarOpen = false">
-            <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">OpenMail</h2>
+        <div class="fixed inset-y-0 left-0 w-64 glass-card shadow-xl" @click.outside="sidebarOpen = false">
+            <div class="p-4 border-b border-white/60 dark:border-white/10 flex justify-between items-center">
+                <h2 class="text-lg font-semibold text-ink">OpenMail</h2>
                 <button @click="sidebarOpen = false" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />

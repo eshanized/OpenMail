@@ -172,7 +172,7 @@
         @click.outside="closeWithConfirm()"
     >
         <div
-            class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden"
+            class="glass-card max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden"
             @click.outside.stop
         >
             {{-- Header --}}
@@ -208,7 +208,16 @@
                     <button
                         wire:click="send"
                         wire:loading.attr="disabled"
-                        class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                        class="group inline-flex items-center gap-2 rounded-lg
+                                   bg-linear-to-r from-blue-600 to-purple-600
+                                   px-4 py-2 text-sm font-semibold text-white
+                                   shadow-glow
+                                   transition duration-150 ease-out
+                                   hover:scale-[1.02] hover:shadow-glow-strong
+                                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+                                   focus-visible:ring-blue-600
+                                   motion-reduce:transform-none motion-reduce:transition-none
+                                   disabled:opacity-50"
                     >
                         <span wire:loading.remove>Send Message</span>
                         <span wire:loading class="flex items-center gap-1">
@@ -281,7 +290,7 @@
                         type="text"
                         id="composer-subject"
                         wire:model="subject"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                        class="glass-input w-full px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
                         placeholder="(no subject)"
                     >
                     @error('subject')

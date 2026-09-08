@@ -34,6 +34,9 @@
          style="background-color: var(--route-overlay-bg)"
          aria-hidden="true"></div>
 
+    {{-- Decorative blob layer for glass visibility (D-07, Pitfall 4) — fixed, pointer-events-none, z-0 --}}
+    <div class="bg-blobs" aria-hidden="true"></div>
+
     <nav class="bg-surface-raised dark:bg-surface-raised shadow-sm border-b border-gray-200 dark:border-white/10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">

@@ -4,16 +4,16 @@
          // Initialize from Livewire state
          $wire.on('active-tab-changed', (tab) => { activeTab = tab; });
      "
-     class="h-full flex flex-col">
+     class="h-full flex flex-col glass-card backdrop-blur-sm">
 
     {{-- Desktop Tab Bar (≥768px) --}}
-    <div class="hidden md:flex border-b border-gray-200">
+    <div class="hidden md:flex border-b border-white/60 dark:border-white/10">
         <button
             @click="$wire.setActiveTab('folders')"
             class="flex-1 flex items-center justify-center gap-1.5 px-3 py-3 text-sm font-medium transition-colors
                 {{ $activeTab === 'folders'
-                    ? 'text-blue-700 bg-blue-50 border-b-2 border-blue-600'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50' }}"
+                    ? 'text-primary bg-white/60 dark:bg-white/10 border-b-2 border-primary'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-white/60 dark:hover:bg-white/10' }}"
         >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
@@ -24,8 +24,8 @@
             @click="$wire.setActiveTab('contacts')"
             class="flex-1 flex items-center justify-center gap-1.5 px-3 py-3 text-sm font-medium transition-colors
                 {{ $activeTab === 'contacts'
-                    ? 'text-blue-700 bg-blue-50 border-b-2 border-blue-600'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50' }}"
+                    ? 'text-primary bg-white/60 dark:bg-white/10 border-b-2 border-primary'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-white/60 dark:hover:bg-white/10' }}"
         >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -36,8 +36,8 @@
             @click="$wire.setActiveTab('labels')"
             class="flex-1 flex items-center justify-center gap-1.5 px-3 py-3 text-sm font-medium transition-colors
                 {{ $activeTab === 'labels'
-                    ? 'text-blue-700 bg-blue-50 border-b-2 border-blue-600'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50' }}"
+                    ? 'text-primary bg-white/60 dark:bg-white/10 border-b-2 border-primary'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-white/60 dark:hover:bg-white/10' }}"
         >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
@@ -57,8 +57,8 @@
                         <div
                             class="flex items-center px-3 py-2 rounded-lg cursor-pointer transition-colors
                                 {{ $folder['path'] === $currentFolder
-                                    ? 'bg-blue-50 border-l-2 border-blue-600 text-blue-700'
-                                    : 'text-gray-700 hover:bg-gray-50' }}"
+                                    ? 'bg-white/60 dark:bg-white/10 border-l-2 border-primary text-primary'
+                                    : 'text-ink hover:bg-white/60 dark:hover:bg-white/10' }}"
                             wire:click="selectFolder('{{ $folder['path'] }}')"
                         >
                             {{-- Folder icon based on role --}}
@@ -92,7 +92,7 @@
                             {{-- Count badges --}}
                             <div class="flex items-center space-x-2">
                                 @if($folder['unread_count'] > 0)
-                                    <span class="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">
+                                    <span class="text-xs font-semibold text-primary bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">
                                         {{ $folder['unread_count'] }}
                                     </span>
                                 @endif
@@ -118,7 +118,7 @@
 
                         {{-- Child folders --}}
                         @if($folder['has_children'] && $expandedFolders[$folder['path']] ?? false)
-                            <div class="ml-4 border-l border-gray-200 mt-1 space-y-1">
+                            <div class="ml-4 border-l border-white/60 dark:border-white/10 mt-1 space-y-1">
                                 {{-- Child folders would be loaded here --}}
                             </div>
                         @endif
@@ -128,7 +128,7 @@
 
             {{-- Custom folders separator --}}
             @if(array_filter($folders, fn($f) => !$f['role']))
-                <div class="mt-4 pt-4 border-t border-gray-200 px-2">
+                <div class="mt-4 pt-4 border-t border-white/60 dark:border-white/10 px-2">
                     <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                         Folders
                     </div>
@@ -138,8 +138,8 @@
                                 <div
                                     class="flex items-center px-3 py-2 rounded-lg cursor-pointer transition-colors
                                         {{ $folder['path'] === $currentFolder
-                                            ? 'bg-blue-50 border-l-2 border-blue-600 text-blue-700'
-                                            : 'text-gray-700 hover:bg-gray-50' }}"
+                                            ? 'bg-white/60 dark:bg-white/10 border-l-2 border-primary text-primary'
+                                            : 'text-ink hover:bg-white/60 dark:hover:bg-white/10' }}"
                                     wire:click="selectFolder('{{ $folder['path'] }}')"
                                 >
                                     <svg class="w-5 h-5 mr-3 flex-shrink-0 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
@@ -148,7 +148,7 @@
                                     <span class="flex-1 truncate">{{ $folder['name'] }}</span>
                                     <div class="flex items-center space-x-2">
                                         @if($folder['unread_count'] > 0)
-                                            <span class="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">
+                                            <span class="text-xs font-semibold text-primary bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">
                                                 {{ $folder['unread_count'] }}
                                             </span>
                                         @endif
@@ -164,7 +164,7 @@
             @endif
 
             {{-- Refresh button --}}
-            <div class="mt-4 p-4 border-t border-gray-200">
+            <div class="mt-4 p-4 border-t border-white/60 dark:border-white/10">
                 <button
                     wire:click="refreshFolders"
                     wire:loading.attr="disabled"

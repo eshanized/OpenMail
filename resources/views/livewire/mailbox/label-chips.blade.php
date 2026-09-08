@@ -27,7 +27,7 @@
                 <button
                     @click="open = !open; $event.stopPropagation()"
                     @keydown.escape="open = false"
-                    class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                    class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                 >
                     +{{ $overflowCount }}
                 </button>
@@ -42,7 +42,7 @@
                     x-transition:leave="transition ease-in duration-75"
                     x-transition:leave-start="opacity-100 scale-100"
                     x-transition:leave-end="opacity-0 scale-95"
-                    class="absolute left-0 mt-1 z-50 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[120px]"
+                    class="absolute left-0 mt-1 z-50 glass-card shadow-lg py-1 min-w-[120px]"
                     @click.outside="open = false"
                     @keydown.escape="open = false"
                 >

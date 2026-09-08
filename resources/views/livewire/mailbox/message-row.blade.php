@@ -1,9 +1,12 @@
 <div
     data-uid="{{ $message->uid }}"
-    class="message-row flex items-center hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0
-        {{ !$selected ? 'font-semibold' : '' }}"
+    class="message-row flex items-center cursor-pointer border-b border-white/60 dark:border-white/10 last:border-b-0
+        {{ !$selected ? 'font-semibold' : '' }}
+        hover:bg-white/60 dark:hover:bg-white/10
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
     @click="toggle({{ $message->uid }}, $event)"
     wire:navigate="{{ route('message.show', ['folderPath' => $message->folder_path ?? $folderPath, 'uid' => $message->uid]) }}"
+    tabindex="0"
 >
     {{-- Checkbox --}}
     <input

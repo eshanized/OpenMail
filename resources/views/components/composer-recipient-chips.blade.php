@@ -26,7 +26,7 @@
 
     {{-- Chips Display --}}
     <div
-        class="flex flex-wrap gap-1.5 min-h-[42px] p-2 border border-gray-300 rounded-md bg-white focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent"
+        class="flex flex-wrap gap-1.5 min-h-[42px] p-2 glass-input focus-within:ring-2 focus-within:ring-primary focus-within:border-transparent"
         x-ref="chipsContainer"
         @click="focusInput()"
         role="listbox"

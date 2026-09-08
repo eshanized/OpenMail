@@ -5,7 +5,7 @@
      x-transition:leave="transition ease-in duration-75"
      x-transition:leave-start="opacity-100 transform translate-y-0"
      x-transition:leave-end="opacity-0 transform -translate-y-1"
-     class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-96 overflow-auto"
+     class="absolute z-50 w-full mt-1 glass-card backdrop-blur-sm shadow-xl max-h-96 overflow-auto"
      style="display: none;">
 
     @foreach($results as $index => $result)
@@ -47,14 +47,14 @@
 
 {{-- Empty state: query entered but no results --}}
 <div x-show="open && query.length >= 2 && results.length === 0 && !loading"
-     class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl p-4 text-center text-gray-500 text-sm"
+     class="absolute z-50 w-full mt-1 glass-card shadow-xl p-4 text-center text-gray-500 text-sm"
      style="display: none;">
     No messages found
 </div>
 
 {{-- Loading skeleton --}}
 <div x-show="open && loading"
-     class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden"
+     class="absolute z-50 w-full mt-1 glass-card shadow-xl overflow-hidden"
      style="display: none;">
     @foreach([1, 2, 3] as $i)
         <div class="px-4 py-3 border-t border-gray-100 first:border-t-0">

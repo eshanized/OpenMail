@@ -26,7 +26,7 @@
             }
         });
     "
-    class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex flex-wrap items-center gap-3"
+    class="mb-4 p-3 glass-card flex flex-wrap items-center gap-3"
     x-transition
 >
     <span class="text-sm font-medium text-blue-800">
@@ -38,7 +38,16 @@
         <button
             wire:click="archiveSelected"
             wire:loading.attr="disabled"
-            class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 flex items-center gap-1"
+            class="group inline-flex items-center gap-1 rounded-lg
+                       bg-linear-to-r from-blue-600 to-purple-600
+                       px-3 py-1.5 text-sm font-semibold text-white
+                       shadow-glow
+                       transition duration-150 ease-out
+                       hover:scale-[1.02] hover:shadow-glow-strong
+                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+                       focus-visible:ring-blue-600
+                       motion-reduce:transform-none motion-reduce:transition-none
+                       disabled:opacity-50"
             title="Archive (e)"
         >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -51,7 +60,7 @@
         <button
             wire:click="bulkDelete"
             wire:loading.attr="disabled"
-            class="px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+            class="px-3 py-1.5 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-red-600"
             onclick="return confirm('Move selected messages to Trash?')"
         >
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

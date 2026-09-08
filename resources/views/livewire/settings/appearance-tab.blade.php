@@ -2,8 +2,8 @@
     <div class="space-y-6">
         {{-- Theme --}}
         <section>
-            <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Theme</h3>
-            <fieldset aria-label="Theme selection">
+            <fieldset>
+                <legend class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Theme</legend>
                 <div class="grid grid-cols-3 gap-4">
                     @foreach(['light' => 'Light', 'dark' => 'Dark', 'system' => 'System'] as $value => $label)
                         <label class="relative cursor-pointer">
@@ -12,13 +12,14 @@
                                    value="{{ $value }}"
                                    name="theme"
                                    class="sr-only peer"
-                                   @change="applyTheme('{{ $value }}')">
+                                   @change="applyTheme('{{ $value }}')"
+                                   aria-describedby="theme-{{ $value }}-desc">
                             <div class="p-4 border-2 rounded-lg transition-colors
                                 {{ $theme === $value
                                     ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                                     : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500' }}">
                                 <div class="font-medium text-gray-900 dark:text-white">{{ $label }}</div>
-                                <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                <div id="theme-{{ $value }}-desc" class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                     @if($value === 'system') Matches OS preference @else {{ ucfirst($value) }} mode @endif
                                 </div>
                             </div>
@@ -30,8 +31,8 @@
 
         {{-- Density --}}
         <section>
-            <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Density</h3>
-            <fieldset aria-label="Density selection">
+            <fieldset>
+                <legend class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Density</legend>
                 <div class="grid grid-cols-3 gap-4">
                     @foreach(['compact' => 'Compact', 'regular' => 'Regular', 'comfortable' => 'Comfortable'] as $value => $label)
                         <label class="relative cursor-pointer">
@@ -40,13 +41,14 @@
                                    value="{{ $value }}"
                                    name="density"
                                    class="sr-only peer"
-                                   @change="applyDensity('{{ $value }}')">
+                                   @change="applyDensity('{{ $value }}')"
+                                   aria-describedby="density-{{ $value }}-desc">
                             <div class="p-4 border-2 rounded-lg transition-colors
                                 {{ $density === $value
                                     ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                                     : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500' }}">
                                 <div class="font-medium text-gray-900 dark:text-white">{{ $label }}</div>
-                                <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                <div id="density-{{ $value }}-desc" class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                     @match($value)
                                         @case('compact') Tight spacing @break
                                         @case('regular') Balanced spacing @break
@@ -64,7 +66,8 @@
         <section>
             <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Live Preview</h3>
             <div class="border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-white dark:bg-gray-800 min-h-[200px]"
-                 :class="previewDensityClass">
+                 :class="previewDensityClass"
+                 aria-label="Density preview">
                 <div class="space-y-3">
                     <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded">
                         <div class="font-medium text-gray-900 dark:text-white">Sample message row</div>
@@ -96,7 +99,6 @@
                 });
             },
             applyTheme(value) {
-                // Live preview: apply theme to document immediately
                 const html = document.documentElement;
                 if (value === 'dark' || (value === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                     html.classList.add('dark');
@@ -105,7 +107,6 @@
                 }
             },
             applyDensity(value) {
-                // Live preview: apply density class immediately
                 this.previewDensityClass = `density-${value}`;
             }
         }

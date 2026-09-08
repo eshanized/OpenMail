@@ -48,13 +48,12 @@
                                     ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                                     : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500' }}">
                                 <div class="font-medium text-gray-900 dark:text-white">{{ $label }}</div>
-                                <div id="density-{{ $value }}-desc" class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                    @match($value)
-                                        @case('compact') Tight spacing @break
-                                        @case('regular') Balanced spacing @break
-                                        @case('comfortable') Relaxed spacing @break
-                                    @endmatch
-                                </div>
+<div id="density-{{ $value }}-desc" class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                     @if($value === 'compact') Tight spacing
+                                     @elseif($value === 'regular') Balanced spacing
+                                     @elseif($value === 'comfortable') Relaxed spacing
+                                     @endif
+                                 </div>
                             </div>
                         </label>
                     @endforeach

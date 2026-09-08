@@ -49,6 +49,11 @@ Route::middleware(['auth'])->group(function () {
         ]);
     })->name('labels.show')->where('labelId', '[0-9]+');
 
+    // Signature CRUD routes (SET-02)
+    Route::get('/settings/signatures', function () {
+        return redirect()->route('settings');
+    })->name('settings.signatures');
+
     // API routes with authenticated rate limiting (SEC-04)
     // Compose actions go through Livewire's update endpoint (throttled via Livewire middleware)
     // Search and Settings GET routes have per-route throttle middleware above

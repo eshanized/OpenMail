@@ -611,29 +611,29 @@ Same pattern (with `wire:target` per action) for folder-sidebar folder switches 
 | A6 | Alpine bundled with Livewire 4.4.3 is the only Alpine in the bundle and supports `x-transition`/`x-cloak` identically to standalone Alpine | Patterns / Pitfalls | Low — dist strings confirmed present [VERIFIED in-repo]; usage mirrors existing mailbox.blade.php pattern |
 | A7 | 14px semibold body text is "normal size" per WCAG (large ≥18pt/24px, or ≥14pt/18.6px bold) | Contrast Table | Low — standard WCAG 2.x definition; using 600-level stops keeps AA regardless |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **D-12 "fade cross" interpretation**
+1. **RESOLVED: D-12 "fade cross" interpretation**
    - What we know: Livewire 4's HTML swap is synchronous; `livewire:navigating` cannot delay it, so a two-sided DOM cross-fade is impossible without breaking morphing. The overlay technique (Pattern 3) delivers the locked visual intent (old fades out, new fades in) with deterministic timing.
    - What's unclear: Whether the user wants *literally* the old DOM fading to 0 before the new DOM appears, or accepts the overlay-equivalent. They are visually indistinguishable to a user.
    - Recommendation: Implement Pattern 3. Planner records the choice in PLAN.md as "D-12 implemented via route-overlay (synchronous swap constraint)" so verification has an explicit target. (This is the only locked decision the research modifies in implementation form.)
 
-2. **Gradient stop finalization (D-04 discretion exercised)**
+2. **RESOLVED: Gradient stop finalization (D-04 discretion exercised)**
    - What we know: 500-level stops fail AA (3.68/4.23); 600-level pass (5.17/5.38). Discretion explicitly includes "exact gradient color stops" and "accessibility contrast ratios".
    - What's unclear: None — the discretion resolves it. But since D-04 as written names #3b82f6/#8b5cf6, the plan should state the chosen implementation stops for traceability.
    - Recommendation: `from-blue-600 to-purple-600`; keep blue-500/violet-500 only for large decorative fills with no text (e.g., background blobs).
 
-3. **D-16 line-height 1.4 vs existing `.density-regular` 1.5**
+3. **RESOLVED: D-16 line-height 1.4 vs existing `.density-regular` 1.5**
    - What we know: `.density-regular` sets 1.5 (app.css:199) and `.density-compact` already sets 1.4 (app.css:193). D-16 requires 1.4 as the base feel.
    - What's unclear: Whether "1.4 default" means regular mode becomes 1.4 (compressing thread rows) or stays 1.5 with compact remaining the "dense" option (contradicting D-16).
    - Recommendation: Set `.density-regular` to 1.4 (matching D-16) and let `.density-comfortable` carry the 1.5-1.6 range; verify thread-list density in review. Flag in plan as an explicit change so the earlier 1.5 expectation is knowingly updated.
 
-4. **Variable vs static font package (family name nuance)**
+4. **RESOLVED: Variable vs static font package (family name nuance)**
    - What we know: `@fontsource-variable/plus-jakarta-sans` registers family "Plus Jakarta Sans Variable"; the static package registers exactly "Plus Jakarta Sans". Visually identical; DevTools will show the suffix in the family list.
    - What's unclear: Any consumer that matches the exact family string (none known in repo — no external CSS references fonts.googleapis.com today).
    - Recommendation: Use the variable package (one asset, all weights); if a stakeholder objects to the family-name suffix in DevTools, swap to the static package at build time — zero markup changes.
 
-5. **Initial full-page load fade (non-SPA)**
+5. **RESOLVED: Initial full-page load fade (non-SPA)**
    - What we know: D-09 says "page load" — covers both the first load and SPA swaps. The CSS `animate-fade-in` on `#app-main` runs on full loads automatically.
    - What's unclear: Whether the first-paint fade should also run behind the route overlay on initial load (wrap first load in overlay fade too).
    - Recommendation: Yes — `livewire:navigated` fires on the initial page load as well [CITED: livewire.laravel.com/docs/4.x/navigate], so the same hook covers both; no extra code.

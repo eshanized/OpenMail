@@ -6,25 +6,48 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'OpenMail') }} - {{ $title ?? 'Mailbox' }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    {{-- CSP nonce meta tag for inline scripts (spatie/laravel-csp injects automatically) --}}
+    @cspNonceMetaTag
+
+    {{-- Inline theme initializer to prevent flash of wrong theme on page load --}}
+    <script @cspNonceAttribute nonce="{{ Vite::cspNonce() }}">
+        (function() {
+            var theme = localStorage.getItem('theme') || 'system';
+            var density = localStorage.getItem('density') || 'regular';
+            var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            // Apply theme immediately
+            if (theme === 'dark' || (theme === 'system' && prefersDark)) {
+                document.documentElement.classList.add('dark');
+            }
+
+            // Apply density immediately
+            document.documentElement.classList.add('density-' + density);
+        })();
+    </script>
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col">
-    <nav class="bg-white shadow-sm border-b border-gray-200">
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen flex flex-col">
+    <nav class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <div class="flex items-center">
-                    <h1 class="text-xl font-bold text-gray-900">{{ config('app.name', 'OpenMail') }}</h1>
+                    <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ config('app.name', 'OpenMail') }}</h1>
                 </div>
                 <div class="flex items-center space-x-4">
                     @if (session('success'))
-                        <div class="text-sm text-green-600">{{ session('success') }}</div>
+                        <div class="text-sm text-green-600 dark:text-green-400">{{ session('success') }}</div>
                     @endif
                     @if (session('error'))
-                        <div class="text-sm text-red-600">{{ session('error') }}</div>
+                        <div class="text-sm text-red-600 dark:text-red-400">{{ session('error') }}</div>
                     @endif
-                    <span class="text-sm text-gray-700">{{ auth()->user()->email }}</span>
+                    <a href="{{ route('settings') }}" class="text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
+                        Settings
+                    </a>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ auth()->user()->email }}</span>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="text-sm font-medium text-gray-700 hover:text-gray-900">
+                        <button type="submit" class="text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
                             Logout
                         </button>
                     </form>

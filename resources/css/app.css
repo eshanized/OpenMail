@@ -171,3 +171,74 @@
 .tiptap-editor .ProseMirror .emoji-picker {
     z-index: 100;
 }
+
+/* ========================================
+   Theme & Density System (D-10, D-11)
+   ======================================== */
+
+/* Density CSS custom properties (default: regular) */
+@theme {
+    --spacing-unit: 1rem;
+    --font-size-base: 0.875rem;
+    --line-height-base: 1.5;
+}
+
+/* Dark mode — Tailwind 4 class strategy (D-10) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Density variants — applied via class on <html> or container */
+.density-compact {
+    --spacing-unit: 0.5rem;
+    --font-size-base: 0.8125rem;
+    --line-height-base: 1.4;
+}
+
+.density-regular {
+    --spacing-unit: 1rem;
+    --font-size-base: 0.875rem;
+    --line-height-base: 1.5;
+}
+
+.density-comfortable {
+    --spacing-unit: 1.5rem;
+    --font-size-base: 1rem;
+    --line-height-base: 1.6;
+}
+
+/* Density utility classes */
+@utility density-compact {
+    --spacing-unit: 0.5rem;
+    --font-size-base: 0.8125rem;
+    --line-height-base: 1.4;
+}
+
+@utility density-regular {
+    --spacing-unit: 1rem;
+    --font-size-base: 0.875rem;
+    --line-height-base: 1.5;
+}
+
+@utility density-comfortable {
+    --spacing-unit: 1.5rem;
+    --font-size-base: 1rem;
+    --line-height-base: 1.6;
+}
+
+/* Message row using density variables */
+.message-row {
+    padding: var(--spacing-unit) 1rem;
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+}
+
+/* Sidebar item using density variables */
+.sidebar-item {
+    padding: calc(var(--spacing-unit) * 0.5) 0.75rem;
+    font-size: var(--font-size-base);
+}
+
+/* Focus ring utility for accessibility */
+.focus-ring:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+}

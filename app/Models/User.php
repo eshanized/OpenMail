@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -45,5 +46,29 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Get a user-scoped setting value.
+     */
+    public function setting(string $key, mixed $default = null): mixed
+    {
+        return Setting::getForUser($this->id, $key, $default);
+    }
+
+    /**
+     * Get the user's signatures.
+     */
+    public function signatures(): HasMany
+    {
+        return $this->hasMany(Signature::class);
+    }
+
+    /**
+     * Get the user's audit logs.
+     */
+    public function auditLogs(): HasMany
+    {
+        return $this->hasMany(AuditLog::class);
     }
 }

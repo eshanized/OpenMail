@@ -20,6 +20,8 @@ Route::get('/login', [LoginController::class, 'show'])->name('login');
 Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('/settings', \App\Livewire\Settings\SettingsPage::class)->name('settings');
+
     Route::get('/mailbox', function () {
         return view('mailbox');
     })->name('mailbox');

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -27,7 +27,7 @@ class CspReportController extends Controller
      *
      * @see https://www.w3.org/TR/CSP3/#directive-report-uri
      */
-    public function store(Request $request): JsonResponse
+    public function store(Request $request): Response
     {
         $report = $request->json()->all();
 

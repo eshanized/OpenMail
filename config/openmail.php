@@ -66,4 +66,53 @@ return [
     'drafts_folder' => env('OPENMAIL_DRAFTS_FOLDER', 'Drafts'),
     'max_attachment_size_mb' => 25,
     'max_total_attachment_size_mb' => 50,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Attachment Configuration (SEC-08, SEC-09)
+    |--------------------------------------------------------------------------
+    |
+    | MIME type allowlist and size limits for file attachments.
+    | File::types() inspects file contents, not just extension.
+    |
+    */
+
+    'attachments' => [
+        'allowed_mimes' => [
+            // Images
+            'image/jpeg',
+            'image/png',
+            'image/gif',
+            'image/webp',
+            'image/svg+xml',
+            // Documents
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'text/plain',
+            'text/csv',
+            // Archives
+            'application/zip',
+            'application/x-rar-compressed',
+            'application/x-7z-compressed',
+        ],
+        'max_size' => 25 * 1024 * 1024, // 25MB
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Security Settings
+    |--------------------------------------------------------------------------
+    |
+    | General security configuration for the application.
+    |
+    */
+
+    'security' => [
+        'csp_enabled' => env('CSP_ENABLED', false),
+        'csp_report_only' => env('CSP_REPORT_ONLY', true),
+        'session_timeout' => 120, // minutes
+    ],
 ];

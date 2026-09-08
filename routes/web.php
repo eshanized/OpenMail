@@ -20,7 +20,9 @@ Route::get('/login', [LoginController::class, 'show'])->name('login');
 Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/settings', \App\Livewire\Settings\SettingsPage::class)->name('settings');
+    Route::get('/settings', \App\Livewire\Settings\SettingsPage::class)
+        ->middleware('throttle:api.settings')
+        ->name('settings');
 
     Route::get('/mailbox', function () {
         return view('mailbox');
@@ -33,7 +35,9 @@ Route::middleware(['auth'])->group(function () {
         ]);
     })->name('message.show')->where('folderPath', '.*')->where('uid', '[0-9]+');
 
-    Route::get('/search', [\App\Http\Controllers\SearchController::class, 'index'])->name('search');
+    Route::get('/search', [\App\Http\Controllers\SearchController::class, 'index'])
+        ->middleware('throttle:api.search')
+        ->name('search');
 
     Route::get('/labels/{label}', function (string $labelId) {
         $label = \App\Models\Label::where('id', $labelId)
@@ -44,6 +48,10 @@ Route::middleware(['auth'])->group(function () {
             'labelFilter' => $label,
         ]);
     })->name('labels.show')->where('labelId', '[0-9]+');
+
+    // API routes with authenticated rate limiting (SEC-04)
+    // Compose actions go through Livewire's update endpoint (throttled via Livewire middleware)
+    // Search and Settings GET routes have per-route throttle middleware above
 });
 
 Route::get('/up', function () {

@@ -83,4 +83,57 @@ class MessageSanitizer
 
         return $dom->saveHTML();
     }
+
+    /**
+     * Sanitize signature HTML content (SEC-07).
+     * Reuses the purifier for safe rendering in composer and message view.
+     */
+    public function sanitizeSignatureHtml(string $html): string
+    {
+        return $this->getPurifier()->purify($html);
+    }
+
+    /**
+     * Sanitize URLs in message HTML content (SEC-07).
+     * Blocks dangerous schemes (javascript:, data:, vbscript:, file:)
+     * and private IP addresses to prevent SSRF attacks.
+     */
+    public function sanitizeUrls(string $html): string
+    {
+        $dom = new \DOMDocument();
+        libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        libxml_clear_errors();
+
+        foreach ($dom->getElementsByTagName('a') as $link) {
+            $href = $link->getAttribute('href');
+            if ($href && $this->isDangerousUrl($href)) {
+                $link->setAttribute('href', '#');
+                $link->setAttribute('data-original-href', $href);
+                $link->setAttribute('class', trim(($link->getAttribute('class') ?? '') . ' link-blocked'));
+            }
+        }
+
+        $body = $dom->getElementsByTagName('body')->item(0);
+        return $body ? $dom->saveHTML($body) : $dom->saveHTML();
+    }
+
+    /**
+     * Determine if a URL is dangerous (SSRF or XSS vector).
+     * Used by sanitizeUrls() to neutralize malicious links.
+     */
+    public function isDangerousUrl(string $url): bool
+    {
+        // Block javascript:, data:, vbscript:, file: schemes
+        if (preg_match('/^(javascript|data|vbscript|file):/i', $url)) {
+            return true;
+        }
+
+        // Block localhost and private/reserved IP ranges (SSRF prevention)
+        if (preg_match('/^https?:\/\/(localhost|127\.|10\.|192\.168\.|169\.254\.|\[::1\])/i', $url)) {
+            return true;
+        }
+
+        return false;
+    }
 }

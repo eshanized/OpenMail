@@ -87,5 +87,30 @@ class AppServiceProvider extends ServiceProvider
                 Limit::perMinutes(5, 5)->by($email),
             );
         });
+
+        // API rate limiters per SEC-04
+
+        // Compose endpoint: 30 requests per minute per user/IP
+        RateLimiter::for('api.compose', function ($request) {
+            return Limit::perMinute(30)->by($request->user()?->id ?: $request->ip());
+        });
+
+        // Search endpoint: 60 requests per minute per user/IP
+        RateLimiter::for('api.search', function ($request) {
+            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+        });
+
+        // Settings endpoint: 120 requests per minute per user/IP
+        RateLimiter::for('api.settings', function ($request) {
+            return Limit::perMinute(120)->by($request->user()?->id ?: $request->ip());
+        });
+
+        // Authenticated API: stricter per-user limits (100/min + 1000/hr)
+        RateLimiter::for('api.authenticated', function ($request) {
+            return array(
+                Limit::perMinute(100)->by('minute:' . $request->user()->id),
+                Limit::perHour(1000)->by('hour:' . $request->user()->id),
+            );
+        });
     }
 }

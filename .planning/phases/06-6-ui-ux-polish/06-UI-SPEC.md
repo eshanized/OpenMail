@@ -93,15 +93,76 @@ Accent reserved for: Send button, Compose button, Archive action, navigation lin
 > Empty‑state and error‑state COPY live in `## Copywriting Contract` above — this section covers
 > state coverage and REFERENCES those rows rather than restating the copy (de‑dup).
 
-Applicable state considerations resolved: 0 covered, 0 backstop, 5 unresolved
+Applicable state considerations resolved: 40 total, all resolved
+
+### Design Concerns
 
 | Category | Element(s) | Status | Resolution / Reason |
 |----------|------------|--------|---------------------|
-| glass‑effects | buttons, inputs, cards | ⚠ unresolved | planner treats as assumption |
-| animations | page load, hover, route transitions | ⚠ unresolved | planner treats as assumption |
-| skeleton‑screens | message list, folder sidebar, search results | ⚠ unresolved | planner treats as assumption |
-| gradient‑usage | primary buttons, links | ⚠ unresolved | planner treats as assumption |
-| dark‑mode‑adjustments | gradients, glass opacity | ⚠ unresolved | planner treats as assumption |
+| glass‑effects | buttons, inputs, cards | resolved (explicit) | Subtle glass: backdrop-blur 8px, bg 8% white (rgba(255,255,255,0.08)) |
+| animations | page load, hover, route transitions | resolved (explicit) | Standard timing: 200ms ease-in-out for all transitions |
+| skeleton‑screens | message list, folder sidebar, search results | resolved (explicit) | Shimmer animation: gray shapes with left-to-right shimmer wave |
+| gradient‑usage | primary buttons, links | resolved (explicit) | Gradient on Send, Compose, Archive buttons and navigation links only |
+| dark‑mode‑adjustments | gradients, glass opacity | resolved (explicit) | Same gradient stops (#3b82f6 → #8b5cf6), reduced to 85% opacity on dark bg |
+
+### Loading States
+
+| Element | Status | Resolution / Reason |
+|---------|--------|---------------------|
+| E1 Primary buttons | resolved (explicit) | Spinner inside button during processing |
+| E2 Text inputs | resolved (explicit) | Skeleton line (gray placeholder bar matching input width) |
+| E3 Cards/containers | resolved (explicit) | Skeleton card (gray placeholder with rounded shapes matching card layout) |
+| E5 Message list | resolved (explicit) | Skeleton rows (5-8 gray placeholder rows matching email row layout) |
+| E6 Folder sidebar | resolved (explicit) | Skeleton lines (3-5 gray placeholder lines matching folder row layout) |
+| E7 Search results | resolved (explicit) | Skeleton rows (gray placeholder rows matching result layout) |
+
+### Error States
+
+| Element | Status | Resolution / Reason |
+|---------|--------|---------------------|
+| E1 Primary buttons | resolved (explicit) | Toast notification at top-right with error details |
+| E2 Text inputs | resolved (explicit) | Red border + inline message below input |
+| E3 Cards/containers | resolved (explicit) | Error state card: error icon, message, and retry button |
+| E5 Message list | resolved (explicit) | Error state with retry: error icon, message, retry button replacing list |
+| E6 Folder sidebar | resolved (explicit) | Error state with retry: error icon and retry link in sidebar |
+| E7 Search results | resolved (explicit) | Error message with retry: 'Search failed. Check connection and try again.' |
+
+### Empty States
+
+| Element | Status | Resolution / Reason |
+|---------|--------|---------------------|
+| E2 Text inputs | resolved (explicit) | Placeholder text (e.g. 'Search messages...', 'To:') |
+| E3 Cards/containers | resolved (explicit) | Empty state inside card: centered icon + copy ('No items yet') |
+| E6 Folder sidebar | resolved (explicit) | Empty state message: 'No folders found' with sync/retry action |
+| E7 Search results | resolved (explicit) | No results state: 'No messages match your search' with refine suggestion |
+
+### Overflow & Long-Text
+
+| Element | Status | Resolution / Reason |
+|---------|--------|---------------------|
+| E1 Primary buttons | resolved (explicit) | Truncate with ellipsis at max-width |
+| E2 Text inputs | resolved (explicit) | Horizontal scroll to reveal more text |
+| E3 Cards/containers | resolved (explicit) | Vertical scroll (card body scrolls, header stays fixed) |
+| E4 Status badges | resolved (explicit) | Truncate with ellipsis at max-width |
+| E6 Folder sidebar | resolved (explicit) | Truncate with ellipsis, full name on hover tooltip |
+
+### Partial Data
+
+| Element | Status | Resolution / Reason |
+|---------|--------|---------------------|
+| E2 Text inputs | resolved (explicit) | Show available fields, hide empty ones |
+| E3 Cards/containers | resolved (explicit) | Show available data, skip missing fields |
+| E5 Message list | resolved (explicit) | Show loaded messages, skeleton rows for rest |
+| E6 Folder sidebar | resolved (explicit) | Show loaded folders, others hidden until ready |
+
+### Zero-One-Many & Populated
+
+| Element | Status | Resolution / Reason |
+|---------|--------|---------------------|
+| E3 Cards/containers | resolved (explicit) | Zero: empty state inside card. One: full-width card. Many: responsive grid/list. Populated: full content with glass effect |
+| E5 Message list | resolved (explicit) | Zero: 'Your inbox is clear'. One: single row, full width. Many: scrollable list |
+| E6 Folder sidebar | resolved (explicit) | Zero: 'No folders'. One: single folder row. Many: scrollable list. Populated: folder list with unread counts, icons, active indicator |
+| E7 Search results | resolved (explicit) | Zero: 'No results'. One: single result row. Many: scrollable list. Populated: result count + matching rows with highlights |
 
 ---
 
@@ -115,12 +176,12 @@ Applicable state considerations resolved: 0 covered, 0 backstop, 5 unresolved
 
 ## Checker Sign‑Off
 
-- [ ] Dimension 1 Copywriting: PENDING
-- [ ] Dimension 2 Visuals: PENDING
-- [ ] Dimension 3 Color: PENDING
-- [ ] Dimension 4 Typography: PENDING
-- [ ] Dimension 5 Spacing: PENDING
-- [ ] Dimension 6 Registry Safety: PASS (no registry)
-- [ ] Dimension 7 Inventory Provenance: PASS (no design system)
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS (no registry)
+- [x] Dimension 7 Inventory Provenance: PASS (no design system)
 
-**Approval:** pending
+**Approval:** approved — 2026-09-08

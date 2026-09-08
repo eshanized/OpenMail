@@ -77,10 +77,10 @@ Accent reserved for: Send button, Compose button, Archive action, navigation lin
 
 | Element | Copy |
 |---------|------|
-| Primary CTA | Compose |
-| Empty state heading | No messages |
-| Empty state body | Your inbox is empty. Compose a new message to get started. |
-| Error state | Something went wrong. Please try again. |
+| Primary CTA | Compose Message |
+| Empty state heading | Your inbox is clear |
+| Empty state body | Nothing in this folder yet. Compose a new message to get started. |
+| Error state | Could not load messages. Check your connection and try again. |
 | Destructive confirmation | Delete: Are you sure you want to delete this message? |
 
 ---

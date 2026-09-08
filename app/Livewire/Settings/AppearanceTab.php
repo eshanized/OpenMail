@@ -36,6 +36,10 @@ class AppearanceTab extends Component
         $userId = auth()->id();
         Setting::setForUser($userId, 'theme', $this->theme, 'appearance');
         Setting::setForUser($userId, 'density', $this->density, 'appearance');
+
+        // Dispatch browser events for localStorage sync and cross-component updates
+        $this->dispatch('browser-theme-changed', theme: $this->theme);
+        $this->dispatch('browser-density-changed', density: $this->density);
     }
 
     private function validateTheme(): void

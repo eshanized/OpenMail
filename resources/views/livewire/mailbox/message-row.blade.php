@@ -1,6 +1,6 @@
 <div
     data-uid="{{ $message->uid }}"
-    class="flex items-center px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0
+    class="message-row flex items-center hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0
         {{ !$selected ? 'font-semibold' : '' }}"
     @click="toggle({{ $message->uid }}, $event)"
     wire:navigate="{{ route('message.show', ['folderPath' => $message->folder_path ?? $folderPath, 'uid' => $message->uid]) }}"

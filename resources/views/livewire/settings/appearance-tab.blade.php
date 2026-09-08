@@ -105,9 +105,17 @@
                 } else {
                     html.classList.remove('dark');
                 }
+                // Sync localStorage for persistence across page loads
+                localStorage.setItem('theme', value);
+                // Dispatch browser event for cross-component sync
+                window.dispatchEvent(new CustomEvent('theme-changed', { detail: { theme: value } }));
             },
             applyDensity(value) {
                 this.previewDensityClass = `density-${value}`;
+                // Sync localStorage for persistence across page loads
+                localStorage.setItem('density', value);
+                // Dispatch browser event for cross-component sync
+                window.dispatchEvent(new CustomEvent('density-changed', { detail: { density: value } }));
             }
         }
     }

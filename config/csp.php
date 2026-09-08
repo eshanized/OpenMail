@@ -189,3 +189,44 @@ return [
     'report_only_to' => env('CSP_REPORT_ONLY_TO'),
 
 ];
+
+/*
+|--------------------------------------------------------------------------
+| CSP Enforcement Procedure
+|--------------------------------------------------------------------------
+|
+| Follow this procedure to transition from report-only to enforcement:
+|
+| STEP 1: Deploy with CSP_ENABLED=true, CSP_REPORT_ONLY=true
+|   - CSP headers are sent as Content-Security-Policy-Report-Only
+|   - Violations are reported to /csp-report but NOT blocked by browser
+|   - Monitor storage/logs/security.log for violation reports
+|
+| STEP 2: Monitor for 2-4 weeks
+|   - Review all violation reports in the security log channel
+|   - Categorize: legitimate violations (need policy adjustment) vs noise (browser extensions, etc.)
+|   - Adjust OpenMailPreset if legitimate violations require new directives
+|
+| STEP 3: Switch to enforcement mode
+|   - Set CSP_ENABLED=true, CSP_REPORT_ONLY=false in .env
+|   - Violations are now BLOCKED by the browser
+|   - Continue monitoring for new violations (some may shift from warn to block)
+|
+| STEP 4: Optional strictening
+|   - After 2+ weeks in enforcement with no issues, consider:
+|     - Removing 'unsafe-inline' from script-src (requires refactoring inline scripts to nonces)
+|     - Adding report-only stricter policy via report_only_presets for testing
+|
+| ROLLBACK: If enforcement breaks functionality:
+|   - Set CSP_REPORT_ONLY=true to revert to report-only mode
+|   - Or set CSP_ENABLED=false to disable CSP entirely
+|   - Investigate and fix the violation, then re-enable enforcement
+|
+| FILES INVOLVED:
+|   - config/csp.php — this file (policy configuration)
+|   - app/Support/Csp/OpenMailPreset.php — CSP directives for Livewire/Alpine/Vite
+|   - app/Support/Csp/LaravelViteNonceGenerator.php — Vite nonce integration
+|   - app/Http/Controllers/CspReportController.php — violation report endpoint
+|   - storage/logs/security.log — violation reports (daily rotation, 90-day retention)
+|
+*/

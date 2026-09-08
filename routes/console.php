@@ -10,3 +10,6 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('pending-sends:process')->everyMinute()->withoutOverlapping(5);
+
+// Audit log retention: prune entries older than 90 days daily at 02:00
+Schedule::command('audit:prune')->dailyAt('02:00');

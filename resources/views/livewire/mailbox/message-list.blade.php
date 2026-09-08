@@ -79,9 +79,17 @@
         <div class="flex items-center gap-2">
             <button
                 @click="openComposer"
-                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2"
+                class="group inline-flex items-center gap-2 rounded-lg
+                           bg-linear-to-r from-blue-600 to-purple-600
+                           px-4 py-2 text-sm font-semibold text-white
+                           shadow-glow
+                           transition duration-150 ease-out
+                           hover:scale-[1.02] hover:shadow-glow-strong
+                           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+                           focus-visible:ring-blue-600
+                           motion-reduce:transform-none motion-reduce:transition-none"
             >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828L18 9.828l6.586 6.586a2 2 0 002.828-2.828L10.828 2.172a2 2 0 00-2.828 0L2.172 9.828a2 2 0 000 2.828l6.586 6.586a2 2 0 102.828-2.828z"></path>
                 </svg>
                 Compose

@@ -1,3 +1,4 @@
+import '@fontsource-variable/plus-jakarta-sans';
 import './bootstrap';
 import DOMPurify from 'dompurify';
 
@@ -64,4 +65,19 @@ document.addEventListener('DOMContentLoaded', () => {
         html.classList.remove('density-compact', 'density-regular', 'density-comfortable');
         html.classList.add(`density-${newDensity}`);
     });
+});
+
+// Route overlay fade cross (D-12) + page fade replay (D-09)
+const overlay = () => document.getElementById('route-overlay');
+const main = () => document.getElementById('app-main');
+
+document.addEventListener('livewire:navigating', () => overlay()?.classList.add('opacity-100'));
+document.addEventListener('livewire:navigated', () => {
+    overlay()?.classList.remove('opacity-100');
+    // Replay page fade-in after SPA swaps (morph preserves the main element)
+    const m = main();
+    if (!m) return;
+    m.classList.remove('animate-fade-in');
+    void m.offsetWidth; // force reflow to restart animation
+    m.classList.add('animate-fade-in');
 });

@@ -27,12 +27,18 @@
         })();
     </script>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 min-h-screen flex flex-col">
-    <nav class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+<body class="bg-surface text-ink min-h-screen flex flex-col">
+    {{-- Route overlay fade cross (D-12) — fixed, invisible by default, high z-index --}}
+    <div id="route-overlay"
+         class="pointer-events-none fixed inset-0 z-[9999] opacity-0 transition-opacity duration-150"
+         style="background-color: var(--route-overlay-bg)"
+         aria-hidden="true"></div>
+
+    <nav class="bg-surface-raised dark:bg-surface-raised shadow-sm border-b border-gray-200 dark:border-white/10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <div class="flex items-center">
-                    <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ config('app.name', 'OpenMail') }}</h1>
+                    <h1 class="text-xl font-bold text-ink">{{ config('app.name', 'OpenMail') }}</h1>
                 </div>
                 <div class="flex items-center space-x-4">
                     @if (session('success'))
@@ -44,7 +50,7 @@
                     <a href="{{ route('settings') }}" class="text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
                         Settings
                     </a>
-                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ auth()->user()->email }}</span>
+                    <span class="text-sm text-ink">{{ auth()->user()->email }}</span>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
@@ -56,7 +62,7 @@
         </div>
     </nav>
 
-    <main class="flex-1 max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8 w-full">
+    <main id="app-main" class="flex-1 max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8 w-full animate-fade-in">
         @yield('content')
     </main>
 </body>

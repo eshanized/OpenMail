@@ -1,18 +1,18 @@
 ---
 gsd_state_version: 1.0
-current_phase: 06
+current_phase: 6
 current_phase_name: 6 UI/UX Polish
 status: executing
-stopped_at: Phase 6 UI-SPEC approved
-last_updated: "2026-09-08T20:00:55.970Z"
-last_activity: 2026-09-08
-last_activity_desc: Phase 05 execution started
-state_head: e788ed1059b2ae8af76e6777972a8112fb155036
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-09-08T20:42:55.846Z"
+last_activity: 2026-09-09
+last_activity_desc: Phase 6 execution started
+state_head: 3c2809f499cfd089969ecd0c827a6a9bc224a5ec
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 28
-  completed_plans: 22
+  completed_plans: 23
   percent: 50
 ---
 
@@ -23,16 +23,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-05)
 
 **Core value:** Provide a secure, modern webmail interface that any organization can deploy on their existing mail infrastructure with zero command-line interaction.
-**Current focus:** Phase 05 — Security & Polish
+**Current focus:** Phase 6 — 6 UI/UX Polish
 
 ## Current Position
 
-Phase: 06 (6 UI/UX Polish) — READY TO EXECUTE
-Plan: 1 of 7
+Phase: 6 (6 UI/UX Polish) — EXECUTING
+Plan: 2 of 5
 Status: Ready to execute
-Last activity: 2026-09-08 — Phase 05 execution started
+Last activity: 2026-09-09 — Phase 6 execution started
 
-Progress: █████░░░░░ 50%
+Progress: █████░░░░░ [█████░░░░░] 50%
 
 ## Performance Metrics
 
@@ -57,6 +57,11 @@ Progress: █████░░░░░ 50%
 - Trend: Stable
 
 *Updated after each plan completion*
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 6 P1 | 15 min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -81,6 +86,9 @@ Recent decisions affecting current work:
 - **Phase 4 Plan 1: thread_header_cache table with 24-hour TTL for cross-folder thread roots**
 - **Phase 4 Plan 1: FULLTEXT index on message_metadata for Scout database engine**
 - **Phase 4 Plan 1: Subject normalization strips Re:/Fwd:, 2-day window for fallback grouping**
+- [Phase 6]: Wave 0 test scaffold intentionally RED for implementation-guarding tests (MessageListLoadingTest, UiPolishTest methods 1-4); AppearanceTest and UiPolishTest methods 5-7 are GREEN regression guards — TDD contract: RED tests assert markup that only exists after plans 06-02/06-03/06-04 land; GREEN guards protect existing theme/density persistence and security invariants
+- [Phase 6]: Build gate script exits 1 today (fontsource not installed) — plan 06-02 installs @fontsource-variable/plus-jakarta-sans and flips gate to exit 0 — Objective font-delivery signal; gate validates manifest.json for fontsource + app.css + app.js entries
+- [Phase 6]: Fixed 3 pre-existing test infrastructure issues (Rule 2): @match syntax bug in appearance-tab.blade.php, HTTP test 302 redirect for CSP nonce, Setting value JSON encoding — Auto-fixed missing critical functionality blocking test execution; no production code changes
 
 ### Pending Todos
 
@@ -98,6 +106,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-08T09:07:12.635Z
-Stopped at: Phase 6 UI-SPEC approved
-Resume file: .planning/phases/06-6-ui-ux-polish/06-UI-SPEC.md
+Last session: 2026-09-08T20:42:55.747Z
+Stopped at: Completed 06-01-PLAN.md
+Resume file: None

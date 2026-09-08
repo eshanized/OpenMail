@@ -145,12 +145,12 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 **Goal:** The app reads as one polished, Gmail-grade interface — gradient primary actions, glass surfaces, soft-tag badges, shimmer skeleton loading, route cross-fade, and the Plus Jakarta Sans typeface, on warm cream (light) / soft-dark (dark) surfaces with WCAG AA contrast in both themes
 **Requirements**: D-01 through D-16 (CONTEXT decisions; no req-ID set for this phase)
 **Depends on:** Phase 5
-**Plans:** 5/5 plans created
+**Plans:** 1/5 plans executed created
 
 Plans:
 **Wave 1**
 
-- [ ] 06-01-PLAN.md — Wave 0 scaffolding: RED skeleton/appearance tests, UiPolishTest guard suite, fontsource build gate
+- [x] 06-01-PLAN.md — Wave 0 scaffolding: RED skeleton/appearance tests, UiPolishTest guard suite, fontsource build gate
 - [ ] 06-02-PLAN.md — Tracer: font, theme tokens, x-cloak fix, density 1.4, route-overlay fade, gradient Compose (wave 1)
 
 **Wave 2** *(blocked on Wave 1 completion)*

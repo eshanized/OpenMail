@@ -56,7 +56,7 @@ Exceptions: none
 | Body | 14px | 400 (regular) | 1.4 |
 | Label | 12px | 600 (semibold) | 1.3 |
 | Heading | 20px | 600 (semibold) | 1.2 |
-| Display | 28px | 700 (bold) | 1.1 |
+| Display | 28px | 600 (semibold) | 1.1 |
 
 ---
 

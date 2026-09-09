@@ -225,7 +225,7 @@
             @if($isThreaded)
                 <div class="divide-y divide-border-subtle">
                     @foreach($messages as $thread)
-                        <x-mailbox.thread-row :thread="$thread" :depth="0" :isExpanded="false" />
+                        <x-mailbox.thread-row :thread="$thread" :depth="0" :isExpanded="false" :selectedUids="$selectedUids" />
                     @endforeach
                 </div>
                 <div class="p-3 border-t border-border">
@@ -234,11 +234,10 @@
             @else
                 <div class="divide-y divide-border-subtle">
                     @foreach($messages as $message)
-                        <livewire:mailbox.message-row
-                            :message="$message"
-                            :selected="$selectedUids->contains($message->uid)"
-                            :key="$message->uid"
-                        />
+                        @include('livewire.mailbox.message-row', [
+                            'message' => $message,
+                            'selected' => in_array($message->uid, (array) $selectedUids),
+                        ])
                     @endforeach
                 </div>
                 <div class="p-3 border-t border-border">

@@ -355,4 +355,43 @@ class ThreadUITest extends TestCase
         $view->assertSee('Sender Two');
         $view->assertSee('11:45 AM');
     }
+
+    /** @test */
+    public function test_flat_mode_renders_messages_without_array_contains_error(): void
+    {
+        $messageObj = (object) [
+            'uid' => 101,
+            'message_id' => '<msg-101@example.com>',
+            'subject' => 'Flat Message Test',
+            'date' => now()->toDateTimeString(),
+            'formatted_date' => '12:00 PM',
+            'from_address' => 'sender@example.com',
+            'from_name' => 'Flat Sender',
+            'from_display' => 'Flat Sender',
+            'to_address' => 'user@example.com',
+            'is_seen' => true,
+            'is_flagged' => false,
+            'has_attachments' => false,
+            'snippet' => 'Flat snippet',
+            'folder_path' => 'INBOX',
+            'labels' => collect(),
+        ];
+
+        $mockService = Mockery::mock(\App\Services\ImapMailboxService::class);
+        $mockService->shouldReceive('getCachedFolders')->andReturn([
+            ['path' => 'INBOX', 'name' => 'Inbox', 'role' => 'inbox', 'total' => 1, 'unread_count' => 0]
+        ]);
+        $mockService->shouldReceive('getMessageCount')->andReturn(['total' => 1, 'unread' => 0]);
+        $mockService->shouldReceive('getFolders')->andReturn([]);
+        $mockService->shouldReceive('refreshFolderCache')->andReturn(null);
+        $mockService->shouldReceive('getMessages')
+            ->andReturn(new LengthAwarePaginator([$messageObj], 1, 25));
+        $this->app->instance(\App\Services\ImapMailboxService::class, $mockService);
+
+        Livewire::actingAs($this->user)
+            ->test('mailbox.message-list', ['folderPath' => 'INBOX'])
+            ->set('threadMode', 'flat')
+            ->assertSee('Flat Message Test')
+            ->assertSee('Flat Sender');
+    }
 }

@@ -1,4 +1,4 @@
-@props(['thread', 'depth' => 0, 'isExpanded' => false])
+@props(['thread', 'depth' => 0, 'isExpanded' => false, 'selectedUids' => []])
 
 <div
     x-data="{
@@ -223,7 +223,7 @@
     >
         @if(!empty($thread->children) && count($thread->children) > 0)
             @foreach($thread->children as $child)
-                <x-mailbox.thread-row :thread="$child" :depth="$depth + 1" />
+                <x-mailbox.thread-row :thread="$child" :depth="$depth + 1" :selectedUids="$selectedUids" />
             @endforeach
 
             @if(count($thread->children) > 10)

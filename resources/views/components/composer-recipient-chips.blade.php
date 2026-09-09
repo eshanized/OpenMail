@@ -22,7 +22,7 @@
     class="w-full"
     @keydown.window="handleKeydown($event)"
 >
-    <label for="{{ $fieldName }}-chips" class="block text-sm font-medium text-gray-700 mb-1">{{ $label }}</label>
+    <label for="{{ $fieldName }}-chips" class="block text-sm font-medium text-ink-secondary mb-1">{{ $label }}</label>
 
     {{-- Chips Display --}}
     <div
@@ -33,13 +33,13 @@
         aria-label="{{ $label }} recipients"
     >
         <template x-for="(chip, index) in chips" :key="chip.email + index">
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 border border-blue-200 rounded-full text-sm" role="option" :aria-selected="false">
-                <span class="font-medium text-gray-900" x-text="chip.name || chip.email"></span>
-                <span class="text-gray-500" x-show="chip.name" x-text="'<'+chip.email+'>'"></span>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary-subtle/50 border border-primary/20 rounded-full text-sm" role="option" :aria-selected="false">
+                <span class="font-medium text-ink" x-text="chip.name || chip.email"></span>
+                <span class="text-ink-tertiary" x-show="chip.name" x-text="'<'+chip.email+'>'"></span>
                 <button
                     type="button"
                     @click.prevent="removeChip(index)"
-                    class="text-gray-400 hover:text-red-600 p-0.5 rounded hover:bg-gray-200 transition-colors"
+                    class="text-ink-tertiary hover:text-danger p-0.5 rounded hover:bg-surface-sunken transition-colors"
                     :aria-label="'Remove ' + (chip.name || chip.email)"
                     tabindex="-1"
                 >
@@ -78,7 +78,7 @@
         x-transition:enter-start="opacity-0 transform -translate-y-1"
         x-transition:leave="transition ease-in duration-75"
         x-transition:leave-end="opacity-0"
-        class="absolute z-50 mt-1 w-full max-w-md bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden"
+        class="absolute z-50 mt-1 w-full max-w-md bg-white border border-border rounded-md shadow-lg overflow-hidden"
         :id="'{{ $fieldName }}-suggestions'"
         role="listbox"
         x-ref="dropdown"
@@ -88,31 +88,31 @@
                 type="button"
                 @click="selectSuggestion(suggestion)"
                 @mousedown.prevent="focusInput()"
-                class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 transition-colors flex items-center gap-2"
-                :class="{ 'bg-blue-50': selectedIndex === index }"
+                class="w-full px-3 py-2 text-left text-sm hover:bg-surface-sunken transition-colors flex items-center gap-2"
+                :class="{ 'bg-primary-subtle/50': selectedIndex === index }"
                 :aria-selected="selectedIndex === index"
                 role="option"
                 :id="'{{ $fieldName }}-suggestion-' + index"
             >
-                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-medium text-sm"
+                <div class="w-8 h-8 rounded-full bg-primary-subtle flex items-center justify-center text-primary font-medium text-sm"
                     x-text="suggestion.name ? suggestion.name.charAt(0).toUpperCase() : suggestion.email.charAt(0).toUpperCase()">
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="font-medium text-gray-900 truncate" x-text="suggestion.name || suggestion.email"></p>
-                    <p class="text-xs text-gray-500 truncate" x-show="suggestion.name" x-text="suggestion.email"></p>
+                    <p class="font-medium text-ink truncate" x-text="suggestion.name || suggestion.email"></p>
+                    <p class="text-xs text-ink-tertiary truncate" x-show="suggestion.name" x-text="suggestion.email"></p>
                 </div>
-                <span class="text-xs text-gray-400" x-text="suggestion.frequency"></span>
+                <span class="text-xs text-ink-tertiary" x-text="suggestion.frequency"></span>
             </button>
         </template>
 
-        <div x-show="suggestions.length === 0 && inputValue.length > 0" class="px-3 py-2 text-sm text-gray-500">
+        <div x-show="suggestions.length === 0 && inputValue.length > 0" class="px-3 py-2 text-sm text-ink-tertiary">
             No matching contacts — type to add manually
         </div>
     </div>
 
     {{-- Error Display --}}
     @error($field)
-        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+        <p class="mt-1 text-sm text-danger">{{ $message }}</p>
     @enderror
 
     {{-- Hidden input for Livewire sync --}}

@@ -141,10 +141,8 @@ class ThreadUITest extends TestCase
             ->get('/mailbox/INBOX');
 
         $response->assertStatus(200);
-        // Toggle button with wire:click should be present
         $response->assertSee('toggleThreadMode');
-        $response->assertSee('Threaded view (t)');
-        // Thread mode text should be visible
+        $response->assertSee('Toggle thread view (t)');
         $response->assertSee('Threaded');
     }
 
@@ -208,10 +206,10 @@ class ThreadUITest extends TestCase
         Livewire::actingAs($this->user)
             ->test('mailbox.message-list', ['folderPath' => 'INBOX'])
             ->assertSet('threadMode', 'threaded')
-            ->assertSee('bg-blue-50 text-blue-600')
+            ->assertSee('bg-primary-subtle text-primary')
             ->call('toggleThreadMode')
             ->assertSet('threadMode', 'flat')
-            ->assertSee('text-gray-600 hover:bg-gray-100');
+            ->assertSee('text-ink-secondary');
     }
 
     /** @test */
@@ -220,7 +218,7 @@ class ThreadUITest extends TestCase
         Livewire::actingAs($this->user)
             ->test('mailbox.message-list', ['folderPath' => 'INBOX'])
             ->assertSet('threadMode', 'threaded')
-            ->assertSee('thread-row');
+            ->assertSee('toggleExpand');
     }
 
     /** @test */
@@ -258,10 +256,10 @@ class ThreadUITest extends TestCase
         $response->assertStatus(200);
 
         // Thread toggle button with tooltip showing shortcut
-        $response->assertSee('Threaded view (t)');
+        $response->assertSee('Toggle thread view (t)');
 
         // Search placeholder shows shortcut hint
-        $response->assertSee('Search all mail (shortcut: /)');
+        $response->assertSee('Search all mail... (/)');
     }
 
     /** @test */
@@ -274,7 +272,7 @@ class ThreadUITest extends TestCase
         $response->assertStatus(200);
 
         // Search bar should have the '/' shortcut placeholder
-        $response->assertSee('Search all mail (shortcut: /)');
+        $response->assertSee('Search all mail... (/)');
     }
 
     /** @test */

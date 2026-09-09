@@ -3,11 +3,11 @@
 @section('content')
     <div>
         @if (session('openmail:wizard'))
-            <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
+            <div class="mb-6 p-4 bg-primary-subtle/50 border border-primary/20 rounded-md">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium text-blue-800">Installation in progress</p>
-                        <p class="text-sm text-blue-700">You were on step {{ session('openmail:wizard.currentStep') }}. What would you like to do?</p>
+                        <p class="text-sm font-medium text-primary">Installation in progress</p>
+                        <p class="text-sm text-primary">You were on step {{ session('openmail:wizard.currentStep') }}. What would you like to do?</p>
                     </div>
                     <div class="flex space-x-2">
                         <button wire:click="continueFromSession" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm">

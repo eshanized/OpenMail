@@ -1,6 +1,6 @@
 <div
     x-data="{ showActions: false }"
-    class="flex items-center px-4 py-3 hover:bg-gray-50 cursor-pointer group"
+    class="flex items-center px-4 py-3 hover:bg-surface-sunken cursor-pointer group"
     wire:click="openContactModal"
     @mouseenter="showActions = true"
     @mouseleave="showActions = false"
@@ -12,10 +12,10 @@
 
     {{-- Contact Info --}}
     <div class="ml-3 flex-1 min-w-0">
-        <div class="text-sm font-medium text-gray-900 truncate">{{ $contact->name }}</div>
-        <div class="text-sm text-gray-500 truncate">{{ $contact->email }}</div>
+        <div class="text-sm font-medium text-ink truncate">{{ $contact->name }}</div>
+        <div class="text-sm text-ink-tertiary truncate">{{ $contact->email }}</div>
         @if($contact->phone)
-            <div class="text-xs text-gray-400 truncate flex items-center">
+            <div class="text-xs text-ink-tertiary truncate flex items-center">
                 <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
                 </svg>
@@ -31,12 +31,12 @@
             $overflow = $contact->groups->count() - 2;
         @endphp
         @foreach($groups as $group)
-            <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
+            <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-surface-sunken text-ink font-medium">
                 {{ $group->name }}
             </span>
         @endforeach
         @if($overflow > 0)
-            <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-600">
+            <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-surface-sunken text-ink-secondary">
                 +{{ $overflow }}
             </span>
         @endif
@@ -52,7 +52,7 @@
     >
         <button
             wire:click.stop="openContactModal"
-            class="p-1 text-gray-400 hover:text-gray-600"
+            class="p-1 text-ink-tertiary hover:text-ink-secondary"
             title="Edit"
         >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,7 +62,7 @@
         <button
             wire:click.stop="deleteContact"
             wire:confirm="Are you sure you want to delete this contact?"
-            class="p-1 text-gray-400 hover:text-red-600"
+            class="p-1 text-ink-tertiary hover:text-danger"
             title="Delete"
         >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

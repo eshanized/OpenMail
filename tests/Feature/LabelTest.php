@@ -312,7 +312,7 @@ class LabelTest extends TestCase
 
         // Should NOT show Label 4 and 5 directly (they're in popover)
         // The overflow chip should be present
-        $this->assertStringContainsString('bg-gray-100', $view);
+        $this->assertStringContainsString('bg-surface-sunken', $view);
     }
 
     /** @test */

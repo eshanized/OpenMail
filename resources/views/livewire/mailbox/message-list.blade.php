@@ -33,25 +33,17 @@
     openComposer() {
         @this.dispatch('openComposer', { mode: 'compose' });
     },
-    
-    // Thread mode persistence via localStorage
     initThreadMode() {
         const key = `openmail:threadMode:${@js($folderPath)}`;
         const saved = localStorage.getItem(key);
         const defaultMode = '@js(in_array($folderPath, [\"INBOX\", \"Inbox\"]) ? \"threaded\" : \"flat\")';
         const mode = saved || defaultMode;
-        
-        // Dispatch to Livewire to set initial mode
         @this.set('threadMode', mode);
-        
-        // Listen for thread mode changes from Livewire
         window.addEventListener('save-thread-mode', (e) => {
             if (e.detail.folderPath === '@js($folderPath)') {
                 localStorage.setItem(key, e.detail.mode);
             }
         });
-
-        // Keyboard shortcut: 't' to toggle thread mode (debounced 100ms per T-04-22)
         let lastToggle = 0;
         window.addEventListener('keydown', (e) => {
             if (e.key === 't' && !e.target.closest('input, textarea, select')) {
@@ -62,8 +54,6 @@
                 }
             }
         });
-
-        // Listen for load-thread-mode requests from Livewire (folder change)
         window.addEventListener('load-thread-mode', (e) => {
             if (e.detail.folderPath === '@js($folderPath)') {
                 const folderKey = `openmail:threadMode:${e.detail.folderPath}`;
@@ -73,54 +63,47 @@
             }
         });
     }
-};" x-init="initThreadMode()">
-    {{-- Toolbar with Compose button --}}
-    <div class="mb-4 flex flex-wrap items-center justify-between gap-4">
+}" x-init="initThreadMode()">
+
+    {{-- Toolbar --}}
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-2">
             <button
                 @click="openComposer"
-                class="group inline-flex items-center gap-2 rounded-lg
-                           bg-linear-to-r from-blue-600 to-purple-600
-                           px-4 py-2 text-sm font-semibold text-white
-                           shadow-glow
-                           transition duration-150 ease-out
-                           hover:scale-[1.02] hover:shadow-glow-strong
-                           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
-                           focus-visible:ring-blue-600
-                           motion-reduce:transform-none motion-reduce:transition-none"
+                class="inline-flex items-center gap-2 rounded-lg bg-primary hover:bg-primary-hover
+                       px-4 py-2 text-sm font-semibold text-white
+                       shadow-sm hover:shadow-md
+                       transition-all duration-150
+                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+                       focus-visible:ring-primary
+                       active:scale-[0.98]"
             >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828L18 9.828l6.586 6.586a2 2 0 002.828-2.828L10.828 2.172a2 2 0 00-2.828 0L2.172 9.828a2 2 0 000 2.828l6.586 6.586a2 2 0 102.828-2.828z"></path>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
                 </svg>
                 Compose
             </button>
         </div>
 
         {{-- Search bar --}}
-        <div class="flex-1 max-w-lg mx-4">
+        <div class="flex-1 max-w-md mx-2">
             <livewire:mailbox.search-bar />
         </div>
 
-        {{-- Thread toggle button --}}
+        {{-- Thread toggle --}}
         <div class="flex items-center gap-2">
             <button
                 wire:click="toggleThreadMode"
-                class="px-3 py-1.5 rounded-lg transition-colors flex items-center gap-2
-                    {{ $threadMode === 'threaded' 
-                        ? 'bg-blue-50 text-blue-600 border border-blue-200' 
-                        : 'text-gray-600 hover:bg-gray-100 border border-gray-200' }}"
-                title="Threaded view (t)"
+                class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 flex items-center gap-1.5 border
+                    {{ $threadMode === 'threaded'
+                        ? 'bg-primary-subtle text-primary border-primary/20'
+                        : 'text-ink-secondary border-border hover:bg-hover hover:text-ink' }}"
+                title="Toggle thread view (t)"
             >
-                @if($threadMode === 'threaded')
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                    </svg>
-                @else
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                    </svg>
-                @endif
-                <span class="text-xs font-medium">{{ $threadMode === 'threaded' ? 'Threaded' : 'Flat' }}</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/>
+                </svg>
+                {{ $threadMode === 'threaded' ? 'Threaded' : 'Flat' }}
             </button>
         </div>
 
@@ -132,68 +115,69 @@
     </div>
 
     {{-- Sort controls --}}
-    <div class="mb-4 flex flex-wrap items-center gap-2 text-sm">
-        <span class="text-gray-500">Sort by:</span>
-        <button
-            wire:click="setSort('date', 'desc')"
-            class="px-3 py-1 rounded {{ $sortBy === 'date' && $sortDir === 'desc' ? 'bg-blue-100 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-100' }}"
-        >
-            Date {{ $sortBy === 'date' ? ($sortDir === 'desc' ? '↓' : '↑') : '' }}
-        </button>
-        <button
-            wire:click="setSort('sender', 'asc')"
-            class="px-3 py-1 rounded {{ $sortBy === 'sender' && $sortDir === 'asc' ? 'bg-blue-100 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-100' }}"
-        >
-            Sender {{ $sortBy === 'sender' ? ($sortDir === 'asc' ? '↑' : '↓') : '' }}
-        </button>
-        <button
-            wire:click="setSort('subject', 'asc')"
-            class="px-3 py-1 rounded {{ $sortBy === 'subject' && $sortDir === 'asc' ? 'bg-blue-100 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-100' }}"
-        >
-            Subject {{ $sortBy === 'subject' ? ($sortDir === 'asc' ? '↑' : '↓') : '' }}
-        </button>
-        <button
-            wire:click="setSort('size', 'desc')"
-            class="px-3 py-1 rounded {{ $sortBy === 'size' && $sortDir === 'desc' ? 'bg-blue-100 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-100' }}"
-        >
-            Size {{ $sortBy === 'size' ? ($sortDir === 'desc' ? '↓' : '↑') : '' }}
-        </button>
+    <div class="mb-3 flex flex-wrap items-center gap-1 text-xs">
+        <span class="text-ink-tertiary mr-1">Sort:</span>
+        @foreach([
+            ['key' => 'date', 'dir' => 'desc', 'label' => 'Date'],
+            ['key' => 'sender', 'dir' => 'asc', 'label' => 'Sender'],
+            ['key' => 'subject', 'dir' => 'asc', 'label' => 'Subject'],
+            ['key' => 'size', 'dir' => 'desc', 'label' => 'Size'],
+        ] as $sort)
+            <button
+                wire:click="setSort('{{ $sort['key'] }}', '{{ $sort['dir'] }}')"
+                class="px-2.5 py-1 rounded-md transition-all duration-100
+                    {{ $sortBy === $sort['key']
+                        ? 'bg-primary-subtle text-primary font-medium'
+                        : 'text-ink-tertiary hover:text-ink-secondary hover:bg-hover' }}"
+            >
+                {{ $sort['label'] }}
+                @if($sortBy === $sort['key'])
+                    {{ $sortDir === 'desc' ? ' ↓' : ' ↑' }}
+                @endif
+            </button>
+        @endforeach
     </div>
 
     {{-- Message list --}}
     <div
         wire:loading.remove
         wire:target="onFolderChanged,setSort,toggleThreadMode"
-        class="bg-white rounded-lg border border-gray-200 overflow-hidden"
+        class="bg-surface-raised rounded-lg border border-border overflow-hidden"
     >
         @php
             $isThreaded = $threadMode === 'threaded';
             $isEmpty = $isThreaded ? empty($messages) : $messages->isEmpty();
         @endphp
-        
+
         @if($isEmpty)
-            <div class="p-12 text-center text-gray-500">
-                <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                </svg>
-                <p class="text-lg">{{ $isThreaded ? 'No conversations in this folder' : 'No messages in this folder' }}</p>
+            {{-- Empty state --}}
+            <div class="p-16 text-center">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-surface-sunken flex items-center justify-center">
+                    <svg class="w-8 h-8 text-ink-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/>
+                    </svg>
+                </div>
+                <h3 class="text-sm font-medium text-ink mb-1">
+                    {{ $isThreaded ? 'No conversations here' : 'No messages here' }}
+                </h3>
+                <p class="text-xs text-ink-tertiary max-w-xs mx-auto">
+                    {{ $isThreaded
+                        ? 'Messages in this folder will appear as threaded conversations.'
+                        : 'When new messages arrive, they\'ll show up here.' }}
+                </p>
             </div>
         @else
             @if($isThreaded)
-                {{-- Threaded view --}}
-                <div class="divide-y divide-gray-100">
+                <div class="divide-y divide-border-subtle">
                     @foreach($messages as $thread)
                         <x-mailbox.thread-row :thread="$thread" :depth="0" :isExpanded="false" />
                     @endforeach
                 </div>
-                
-                {{-- Pagination for threaded view --}}
-                <div class="p-4 border-t border-gray-100">
+                <div class="p-3 border-t border-border">
                     {{ $messages instanceof \Illuminate\Pagination\LengthAwarePaginator ? $messages->links() : '' }}
                 </div>
             @else
-                {{-- Flat view --}}
-                <div class="divide-y divide-gray-100">
+                <div class="divide-y divide-border-subtle">
                     @foreach($messages as $message)
                         <livewire:mailbox.message-row
                             :message="$message"
@@ -202,35 +186,33 @@
                         />
                     @endforeach
                 </div>
-
-                {{-- Pagination --}}
-                <div class="p-4 border-t border-gray-100">
+                <div class="p-3 border-t border-border">
                     {{ $messages->links() }}
                 </div>
             @endif
         @endif
     </div>
 
-    {{-- Skeleton loading region (replaces full-viewport splash) --}}
+    {{-- Skeleton loading --}}
     <div
         wire:loading
         wire:target="onFolderChanged,setSort,toggleThreadMode"
-        class="divide-y divide-gray-100 dark:divide-white/5"
+        class="bg-surface-raised rounded-lg border border-border overflow-hidden"
         aria-hidden="true"
         style="display: none;"
     >
-        @foreach([1, 2, 3, 4, 5] as $i)
-            <div class="flex items-start gap-3 px-4 py-3">
-                <div class="h-9 w-9 rounded-full animate-shimmer"
-                     style="background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%); background-size: 200% 100%;"></div>
-                <div class="flex-1 space-y-2">
-                    <div class="h-3.5 w-3/4 rounded animate-shimmer"
-                         style="background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%); background-size: 200% 100%;"></div>
-                    <div class="h-3 w-32 rounded animate-shimmer"
-                         style="background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%); background-size: 200% 100%;"></div>
+        @foreach([1, 2, 3, 4, 5, 6, 7] as $i)
+            <div class="flex items-center gap-3 px-4 py-3 border-b border-border-subtle last:border-b-0">
+                <div class="skeleton h-4 w-4 rounded"></div>
+                <div class="skeleton h-4 w-4 rounded-full"></div>
+                <div class="flex-1 space-y-2 min-w-0">
+                    <div class="flex items-center gap-2">
+                        <div class="skeleton h-3.5 w-24 rounded"></div>
+                        <div class="skeleton h-3 w-32 rounded flex-1"></div>
+                        <div class="skeleton h-3 w-12 rounded"></div>
+                    </div>
+                    <div class="skeleton h-3 w-48 rounded"></div>
                 </div>
-                <div class="h-3 w-12 rounded animate-shimmer"
-                     style="background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%); background-size: 200% 100%;"></div>
             </div>
         @endforeach
     </div>

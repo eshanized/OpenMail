@@ -172,12 +172,12 @@
         @click.outside="closeWithConfirm()"
     >
         <div
-            class="glass-card max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden"
+            class="bg-surface-overlay rounded-xl border border-border shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden"
             @click.outside.stop
         >
             {{-- Header --}}
-            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50 rounded-t-lg">
-                <h2 class="text-xl font-semibold text-gray-900">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-border">
+                <h2 class="text-base font-semibold text-ink">
                     @if($mode === 'compose')
                         New Message
                     @elseif($mode === 'reply')
@@ -194,13 +194,13 @@
                     <button
                         wire:click="saveDraft"
                         data-loading.attr="disabled"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50"
+                        class="px-3 py-1.5 text-xs font-medium text-ink-secondary bg-surface border border-border rounded-lg hover:bg-hover transition-colors disabled:opacity-50"
                     >
                         Save Draft
                     </button>
                     <button
                         wire:click="discardDraft"
-                        class="px-4 py-2 text-sm font-medium text-red-600 bg-white border border-gray-300 rounded-md hover:bg-red-50 transition-colors"
+                        class="px-3 py-1.5 text-xs font-medium text-error bg-error-subtle border border-error/20 rounded-lg hover:bg-error/10 transition-colors"
                         onclick="return confirm('This draft has unsaved changes. Are you sure you want to discard it?')"
                     >
                         Discard
@@ -208,22 +208,20 @@
                     <button
                         wire:click="send"
                         data-loading.attr="disabled"
-                        class="group inline-flex items-center gap-2 rounded-lg
-                                   bg-linear-to-r from-blue-600 to-purple-600
-                                   px-4 py-2 text-sm font-semibold text-white
-                                   shadow-glow
-                                   transition duration-150 ease-out
-                                   hover:scale-[1.02] hover:shadow-glow-strong
-                                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
-                                   focus-visible:ring-blue-600
-                                   motion-reduce:transform-none motion-reduce:transition-none
-                                   disabled:opacity-50"
+                        class="inline-flex items-center gap-2 rounded-lg bg-primary hover:bg-primary-hover
+                               px-4 py-1.5 text-xs font-semibold text-white
+                               shadow-sm hover:shadow-md
+                               transition-all duration-150
+                               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+                               focus-visible:ring-primary
+                               active:scale-[0.98]
+                               disabled:opacity-50"
                     >
-                        <span data-loading.remove>Send Message</span>
+                        <span data-loading.remove>Send</span>
                         <span data-loading class="flex items-center gap-1">
-                            <svg class="spin-animation h-4 w-4" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            <svg class="spin-animation h-3.5 w-3.5" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                             </svg>
                             Sending...
                         </span>
@@ -234,74 +232,61 @@
             {{-- Form --}}
             <form class="flex-1 overflow-y-auto p-6" wire:submit.prevent="send">
                 {{-- Recipient Fields --}}
-                <div class="space-y-4 mb-6">
-                    {{-- To Field (with chips) --}}
+                <div class="space-y-3 mb-5">
+                    {{-- To Field --}}
                     <div>
                         <x-composer-recipient-chips field="to" :value="$to" label="To" :show-suggestions="true" />
                     </div>
 
-                    {{-- CC Field (collapsible with chips) --}}
+                    {{-- CC Field --}}
                     <div x-show="showCc" x-transition>
                         <x-composer-recipient-chips field="cc" :value="$cc" label="Cc" :show-suggestions="true" />
                     </div>
 
-                    {{-- BCC Field (collapsible with chips) --}}
+                    {{-- BCC Field --}}
                     <div x-show="showBcc" x-transition>
                         <x-composer-recipient-chips field="bcc" :value="$bcc" label="Bcc" :show-suggestions="true" />
                     </div>
 
                     {{-- CC/BCC Toggle Buttons --}}
-                    <div class="flex gap-2">
-                        <button
-                            type="button"
-                            @click="showCc = !showCc"
-                            class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
-                        >
-                            <span x-show="!showCc">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                Cc
-                            </span>
-                            <span x-show="showCc">
-                                <svg class="w-4 h-4 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                Cc
-                            </span>
+                    <div class="flex gap-3">
+                        <button type="button" @click="showCc = !showCc"
+                                class="text-xs text-primary hover:text-primary-hover font-medium flex items-center gap-1 transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                            </svg>
+                            <span x-text="showCc ? 'Hide Cc' : 'Add Cc'">Add Cc</span>
                         </button>
-                        <button
-                            type="button"
-                            @click="showBcc = !showBcc"
-                            class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
-                        >
-                            <span x-show="!showBcc">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                Bcc
-                            </span>
-                            <span x-show="showBcc">
-                                <svg class="w-4 h-4 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                Bcc
-                            </span>
+                        <button type="button" @click="showBcc = !showBcc"
+                                class="text-xs text-primary hover:text-primary-hover font-medium flex items-center gap-1 transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                            </svg>
+                            <span x-text="showBcc ? 'Hide Bcc' : 'Add Bcc'">Add Bcc</span>
                         </button>
                     </div>
                 </div>
 
-                {{-- Subject Field --}}
-                <div class="mb-6">
-                    <label for="composer-subject" class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                {{-- Subject --}}
+                <div class="mb-5">
+                    <label for="composer-subject" class="block text-xs font-medium text-ink-secondary mb-1.5">Subject</label>
                     <input
                         type="text"
                         id="composer-subject"
                         wire:model="subject"
-                        class="glass-input w-full px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                        class="w-full px-3 py-2 bg-surface border border-border rounded-lg text-sm text-ink placeholder-ink-tertiary
+                               focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
                         placeholder="(no subject)"
                     >
                     @error('subject')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs text-error">{{ $message }}</p>
                     @enderror
                 </div>
 
-                {{-- Body with Tiptap Editor --}}
-                <div class="mb-6">
-                    <div class="flex items-center justify-between mb-1">
-                        <label for="composer-body" class="block text-sm font-medium text-gray-700">Message</label>
+                {{-- Body --}}
+                <div class="mb-5">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label for="composer-body" class="block text-xs font-medium text-ink-secondary">Message</label>
                         @if($mode === 'compose')
                             <x-signature-dropdown
                                 :signatures="$signatures ?? collect()"
@@ -309,12 +294,9 @@
                             />
                         @endif
                     </div>
-                    <div class="border border-gray-300 rounded-md overflow-hidden">
-                        {{-- Toolbar --}}
+                    <div class="border border-border rounded-lg overflow-hidden">
                         <div x-ref="toolbar" class="tiptap-toolbar-container"></div>
-                        {{-- Editor --}}
                         <div x-ref="editor" class="tiptap-editor"></div>
-                        {{-- Hidden textarea for Livewire sync --}}
                         <textarea
                             id="composer-body"
                             wire:model="bodyHtml"
@@ -323,35 +305,33 @@
                         ></textarea>
                     </div>
                     @error('body')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs text-error">{{ $message }}</p>
                     @enderror
                 </div>
 
-                {{-- Autosave Status Indicator --}}
+                {{-- Autosave Status --}}
                 <div class="mb-4 flex items-center justify-between">
-                    <span class="text-xs text-gray-500" x-data="{ status: @entangle('autosaveStatus') }">
+                    <span class="text-xs text-ink-tertiary" x-data="{ status: @entangle('autosaveStatus') }">
                         <span x-show="status === 'saving'" class="flex items-center gap-1">
-                            <svg class="animate-spin h-3 w-3" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                            <svg class="animate-spin h-3 w-3" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
                             Saving...
                         </span>
-                        <span x-show="status === 'saved'">Saved @if($lastSavedAt) {{ \Carbon\Carbon::parse($lastSavedAt)->diffForHumans() }} @else just now @endif</span>
-                        <span x-show="status === 'error'" class="text-red-600">Save failed</span>
+                        <span x-show="status === 'saved'">Draft saved @if($lastSavedAt) {{ \Carbon\Carbon::parse($lastSavedAt)->diffForHumans() }} @endif</span>
+                        <span x-show="status === 'error'" class="text-error">Save failed</span>
                     </span>
                 </div>
 
                 {{-- Attachments --}}
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Attachments</label>
-
-                    {{-- Drop Zone --}}
+                <div class="mb-5">
+                    <label class="block text-xs font-medium text-ink-secondary mb-2">Attachments</label>
                     <div
-                        class="border-2 border-dashed border-gray-300 hover:border-blue-400 rounded-lg p-8 text-center transition-colors cursor-pointer"
+                        class="border border-dashed border-border hover:border-primary/40 rounded-lg p-6 text-center transition-colors cursor-pointer relative"
                         wire:loading.class="opacity-50"
                         x-data="{ dragOver: false }"
                         @dragover.prevent="dragOver = true"
                         @dragleave.prevent="dragOver = false"
                         @drop.prevent="dragOver = false; handleDrop($event)"
-                        :class="{ 'border-blue-500 bg-blue-50': dragOver }"
+                        :class="{ 'border-primary bg-primary-subtle/30': dragOver }"
                     >
                         <input
                             type="file"
@@ -360,61 +340,48 @@
                             class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                             @change="$wire.updatedAttachments()"
                         >
-                        <div class="flex flex-col items-center gap-2">
-                            <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3 3m0 0l-3-3m3 3V4"></path>
+                        <div class="flex flex-col items-center gap-1.5">
+                            <svg class="w-8 h-8 text-ink-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"/>
                             </svg>
-                            <p class="text-gray-600">Drag files here or click to browse</p>
-                            <p class="text-xs text-gray-400">Max 25MB per file, 50MB total</p>
+                            <p class="text-xs text-ink-secondary">Drag files here or click to browse</p>
+                            <p class="text-[10px] text-ink-tertiary">Max 25MB per file, 50MB total</p>
                         </div>
                         <script>
-                            function handleDrop(event) {
-                                // Files are automatically handled by the wire:model on the hidden input
-                                // This function can be used for additional visual feedback if needed
-                                event.preventDefault();
-                            }
+                            function handleDrop(event) { event.preventDefault(); }
                         </script>
                     </div>
 
-                    {{-- Attachment List --}}
                     @if(count($attachments) > 0)
-                        <div class="mt-4 space-y-2">
+                        <div class="mt-3 space-y-1.5">
                             @foreach($attachments as $index => $attachment)
-                                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                    {{-- File Icon/Preview --}}
+                                <div class="flex items-center gap-2.5 p-2.5 bg-surface-sunken rounded-lg border border-border-subtle">
                                     @php
                                         $mime = $attachment->getMimeType();
                                         $isImage = str_starts_with($mime, 'image/');
                                     @endphp
                                     @if($isImage)
-                                        <img
-                                            src="{{ $attachment->temporaryUrl() }}"
-                                            alt="{{ $attachment->getClientOriginalName() }}"
-                                            class="w-12 h-12 object-cover rounded"
-                                        >
+                                        <img src="{{ $attachment->temporaryUrl() }}" alt="{{ $attachment->getClientOriginalName() }}"
+                                             class="w-10 h-10 object-cover rounded-md">
                                     @else
-                                        <div class="w-12 h-12 bg-blue-100 rounded flex items-center justify-center">
-                                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828L18 9.828l6.586 6.586a2 2 0 002.828-2.828L10.828 2.172a2 2 0 00-2.828 0L2.172 9.828a2 2 0 000 2.828l6.586 6.586a2 2 0 102.828-2.828z"></path>
+                                        <div class="w-10 h-10 bg-primary-subtle rounded-md flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
                                             </svg>
                                         </div>
                                     @endif
-
-                                    {{-- File Info --}}
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-medium text-gray-900 truncate">{{ $attachment->getClientOriginalName() }}</p>
-                                        <p class="text-xs text-gray-500">{{ number_format($attachment->getSize() / 1024, 1) }} KB</p>
+                                        <p class="text-sm font-medium text-ink truncate">{{ $attachment->getClientOriginalName() }}</p>
+                                        <p class="text-[11px] text-ink-tertiary">{{ number_format($attachment->getSize() / 1024, 1) }} KB</p>
                                     </div>
-
-                                    {{-- Remove Button --}}
                                     <button
                                         type="button"
                                         wire:click="removeAttachment({{ $index }})"
-                                        class="text-gray-400 hover:text-red-600 p-1 rounded"
+                                        class="p-1 text-ink-tertiary hover:text-error rounded transition-colors"
                                         aria-label="Remove {{ $attachment->getClientOriginalName() }}"
                                     >
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                                         </svg>
                                     </button>
                                 </div>
@@ -423,11 +390,11 @@
                     @endif
 
                     @error('attachments')
-                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-2 text-xs text-error">{{ $message }}</p>
                     @enderror
                 </div>
 
-                {{-- Reply/Forward Quoted Message Preview --}}
+                {{-- Reply/Forward Quoted Message --}}
                 @if($mode !== 'compose' && $replyToMessage)
                     <x-composer-quote
                         :attribution="'On ' . ($replyToMessage['date_formatted'] ?? $replyToMessage['date'] ?? '') . ', ' . ($replyToMessage['from_name'] ?? '') . ' <' . ($replyToMessage['from_email'] ?? '') . '> wrote:'"

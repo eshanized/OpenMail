@@ -1,144 +1,139 @@
 <div x-data="{ expandedFolders: {}, activeTab: @js($activeTab) }"
      @set-active-tab.window="activeTab = $event.detail.tab"
-     x-init="
-         // Initialize from Livewire state
-         $wire.on('active-tab-changed', (tab) => { activeTab = tab; });
-     "
-     class="h-full flex flex-col glass-card backdrop-blur-sm">
+     x-init="$wire.on('active-tab-changed', (tab) => { activeTab = tab; });"
+     class="h-full flex flex-col">
 
-    {{-- Desktop Tab Bar (≥768px) --}}
-    <div class="hidden md:flex border-b border-white/60 dark:border-white/10">
+    {{-- Desktop Tab Bar --}}
+    <div class="hidden md:flex border-b border-border">
         <button
             @click="$wire.setActiveTab('folders')"
-            class="flex-1 flex items-center justify-center gap-1.5 px-3 py-3 text-sm font-medium transition-colors
+            class="flex-1 flex items-center justify-center gap-1.5 px-3 py-3 text-xs font-medium transition-colors border-b-2
                 {{ $activeTab === 'folders'
-                    ? 'text-primary bg-white/60 dark:bg-white/10 border-b-2 border-primary'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-white/60 dark:hover:bg-white/10' }}"
+                    ? 'text-primary border-primary bg-primary-subtle/50'
+                    : 'text-ink-tertiary border-transparent hover:text-ink-secondary hover:bg-hover' }}"
         >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"/>
             </svg>
             Folders
         </button>
         <button
             @click="$wire.setActiveTab('contacts')"
-            class="flex-1 flex items-center justify-center gap-1.5 px-3 py-3 text-sm font-medium transition-colors
+            class="flex-1 flex items-center justify-center gap-1.5 px-3 py-3 text-xs font-medium transition-colors border-b-2
                 {{ $activeTab === 'contacts'
-                    ? 'text-primary bg-white/60 dark:bg-white/10 border-b-2 border-primary'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-white/60 dark:hover:bg-white/10' }}"
+                    ? 'text-primary border-primary bg-primary-subtle/50'
+                    : 'text-ink-tertiary border-transparent hover:text-ink-secondary hover:bg-hover' }}"
         >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
             </svg>
             Contacts
         </button>
         <button
             @click="$wire.setActiveTab('labels')"
-            class="flex-1 flex items-center justify-center gap-1.5 px-3 py-3 text-sm font-medium transition-colors
+            class="flex-1 flex items-center justify-center gap-1.5 px-3 py-3 text-xs font-medium transition-colors border-b-2
                 {{ $activeTab === 'labels'
-                    ? 'text-primary bg-white/60 dark:bg-white/10 border-b-2 border-primary'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-white/60 dark:hover:bg-white/10' }}"
+                    ? 'text-primary border-primary bg-primary-subtle/50'
+                    : 'text-ink-tertiary border-transparent hover:text-ink-secondary hover:bg-hover' }}"
         >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z"/>
             </svg>
             Labels
         </button>
     </div>
 
     {{-- Tab Panels --}}
-    <div class="flex-1 overflow-y-auto">
+    <div class="flex-1 overflow-y-auto scrollbar-thin">
         {{-- Folders Panel --}}
         <div x-show="activeTab === 'folders'" x-cloak>
             {{-- Skeleton loading during refreshFolders --}}
-            <div
-                wire:loading
-                wire:target="refreshFolders"
-                class="space-y-1 p-2"
-                aria-hidden="true"
-                style="display: none;"
-            >
+            <div wire:loading wire:target="refreshFolders" class="space-y-1 p-3" aria-hidden="true" style="display: none;">
                 @foreach([1, 2, 3] as $i)
-                    <div class="flex items-center px-3 py-2">
-                        <div class="h-4 w-4 rounded animate-shimmer"
-                             style="background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%); background-size: 200% 100%;"></div>
-                        <div class="flex-1 min-w-0 space-y-1 ml-3">
-                            <div class="h-3 rounded animate-shimmer w-3/4"
-                                 style="background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%); background-size: 200% 100%;"></div>
-                            <div class="h-2 rounded animate-shimmer w-1/2"
-                                 style="background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%); background-size: 200% 100%;"></div>
+                    <div class="flex items-center px-3 py-2.5">
+                        <div class="skeleton h-4 w-4 rounded"></div>
+                        <div class="flex-1 min-w-0 ml-3 space-y-1.5">
+                            <div class="skeleton h-3 rounded w-3/4"></div>
                         </div>
-                        <div class="h-2 w-8 rounded animate-shimmer"
-                             style="background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%); background-size: 200% 100%;"></div>
+                        <div class="skeleton h-2.5 w-6 rounded"></div>
                     </div>
                 @endforeach
             </div>
 
             {{-- Standard folders --}}
-            <div
-                wire:loading.remove
-                wire:target="refreshFolders"
-                class="space-y-1 p-2"
-            >
+            <div wire:loading.remove wire:target="refreshFolders" class="space-y-0.5 p-2">
                 @foreach($folders as $folder)
                     @if($folder['role'])
                         <div
-                            class="flex items-center px-3 py-2 rounded-lg cursor-pointer transition-colors
+                            class="group flex items-center px-3 py-2 rounded-lg cursor-pointer transition-all duration-100
                                 {{ $folder['path'] === $currentFolder
-                                    ? 'bg-white/60 dark:bg-white/10 border-l-2 border-primary text-primary'
-                                    : 'text-ink hover:bg-white/60 dark:hover:bg-white/10' }}"
+                                    ? 'bg-primary-subtle text-primary font-medium'
+                                    : 'text-ink-secondary hover:bg-hover hover:text-ink' }}"
                             wire:click="selectFolder('{{ $folder['path'] }}')"
                         >
-                            {{-- Folder icon based on role --}}
+                            {{-- Folder icon --}}
                             <span class="w-5 h-5 mr-3 flex-shrink-0">
                                 @switch($folder['role'])
                                     @case('inbox')
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
+                                        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859m-16.5 0a2.25 2.25 0 00-1.957 1.148l-.07.155a2.25 2.25 0 01-1.957 1.148H2.25M21 13.5V9.75c0-1.108-.892-2-2-2h-3.75m-3 0h-3.75M2.25 9.75V16.5c0 1.108.892 2 2 2h3.75m-3 0h13.5c1.108 0 2-.892 2-2V9.75"/>
+                                        </svg>
                                         @break
                                     @case('sent')
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.949l7.582-1.516a1 1 0 00.618 0l7.582 1.516a1 1 0 001.169-1.949l-7-14zM6.707 10.293a1 1 0 011.414 0L10 11.586l1.879-1.88a1 1 0 111.414 1.414l-2.5 2.5a1 1 0 01-1.414 0l-2.5-2.5a1 1 0 010-1.414z"></path></svg>
+                                        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/>
+                                        </svg>
                                         @break
                                     @case('drafts')
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 3a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V3zm2 1a1 1 0 011-1h10a1 1 0 110 2H7a1 1 0 01-1-1zm0 4a1 1 0 100 2h10a1 1 0 100-2H7z" clip-rule="evenodd"></path></svg>
+                                        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/>
+                                        </svg>
                                         @break
                                     @case('trash')
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                                        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+                                        </svg>
                                         @break
                                     @case('spam')
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+                                        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                                        </svg>
                                         @break
                                     @case('archive')
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path></svg>
+                                        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0l-3-3m3 3l3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/>
+                                        </svg>
                                         @break
                                 @endswitch
                             </span>
 
-                            <span class="flex-1 truncate font-medium">
+                            <span class="flex-1 truncate text-sm">
                                 {{ $folder['name'] }}
                             </span>
 
                             {{-- Count badges --}}
-                            <div class="flex items-center space-x-2">
+                            <div class="flex items-center gap-1.5">
                                 @if($folder['unread_count'] > 0)
-                                    <span class="text-xs font-semibold text-primary bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">
-                                        {{ $folder['unread_count'] }}
+                                    <span class="text-[11px] font-bold text-primary bg-primary-subtle px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+                                        {{ $folder['unread_count'] > 99 ? '99+' : $folder['unread_count'] }}
                                     </span>
                                 @endif
-                                @if($folder['total_count'] > 0)
-                                    <span class="text-xs text-gray-500">
-                                        {{ $folder['total_count'] }}
-                                    </span>
+                                @if($folder['total_count'] > 0 && $folder['unread_count'] === 0)
+                                    <span class="text-[11px] text-ink-tertiary">{{ $folder['total_count'] }}</span>
                                 @endif
                             </div>
 
                             {{-- Expand/collapse for folders with children --}}
                             @if($folder['has_children'])
                                 <button
-                                    class="ml-2 text-gray-400 hover:text-gray-600"
+                                    class="ml-1 text-ink-tertiary hover:text-ink p-0.5 rounded"
                                     @click.stop="expandedFolders['{{ $folder['path'] }}'] = !expandedFolders['{{ $folder['path'] }}']"
                                 >
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    <svg class="w-3.5 h-3.5 transition-transform duration-150"
+                                         :class="{ 'rotate-90': expandedFolders['{{ $folder['path'] }}'] }"
+                                         fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
                                     </svg>
                                 </button>
                             @endif
@@ -146,8 +141,8 @@
 
                         {{-- Child folders --}}
                         @if($folder['has_children'] && $expandedFolders[$folder['path']] ?? false)
-                            <div class="ml-4 border-l border-white/60 dark:border-white/10 mt-1 space-y-1">
-                                {{-- Child folders would be loaded here --}}
+                            <div class="ml-5 border-l border-border-subtle mt-0.5 mb-1 space-y-0.5">
+                                {{-- Child folders placeholder --}}
                             </div>
                         @endif
                     @endif
@@ -156,32 +151,32 @@
 
             {{-- Custom folders separator --}}
             @if(array_filter($folders, fn($f) => !$f['role']))
-                <div class="mt-4 pt-4 border-t border-white/60 dark:border-white/10 px-2">
-                    <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Folders
+                <div class="mt-2 pt-3 border-t border-border-subtle px-2">
+                    <div class="px-3 py-1.5 text-[10px] font-semibold text-ink-tertiary uppercase tracking-wider">
+                        Custom Folders
                     </div>
-                    <div class="space-y-1">
+                    <div class="space-y-0.5">
                         @foreach($folders as $folder)
                             @if(!$folder['role'])
                                 <div
-                                    class="flex items-center px-3 py-2 rounded-lg cursor-pointer transition-colors
+                                    class="group flex items-center px-3 py-2 rounded-lg cursor-pointer transition-all duration-100
                                         {{ $folder['path'] === $currentFolder
-                                            ? 'bg-white/60 dark:bg-white/10 border-l-2 border-primary text-primary'
-                                            : 'text-ink hover:bg-white/60 dark:hover:bg-white/10' }}"
+                                            ? 'bg-primary-subtle text-primary font-medium'
+                                            : 'text-ink-secondary hover:bg-hover hover:text-ink' }}"
                                     wire:click="selectFolder('{{ $folder['path'] }}')"
                                 >
-                                    <svg class="w-5 h-5 mr-3 flex-shrink-0 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+                                    <svg class="w-[18px] h-[18px] mr-3 flex-shrink-0 text-ink-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"/>
                                     </svg>
-                                    <span class="flex-1 truncate">{{ $folder['name'] }}</span>
-                                    <div class="flex items-center space-x-2">
+                                    <span class="flex-1 truncate text-sm">{{ $folder['name'] }}</span>
+                                    <div class="flex items-center gap-1.5">
                                         @if($folder['unread_count'] > 0)
-                                            <span class="text-xs font-semibold text-primary bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">
+                                            <span class="text-[11px] font-bold text-primary bg-primary-subtle px-1.5 py-0.5 rounded-full">
                                                 {{ $folder['unread_count'] }}
                                             </span>
                                         @endif
-                                        @if($folder['total_count'] > 0)
-                                            <span class="text-xs text-gray-500">{{ $folder['total_count'] }}</span>
+                                        @if($folder['total_count'] > 0 && $folder['unread_count'] === 0)
+                                            <span class="text-[11px] text-ink-tertiary">{{ $folder['total_count'] }}</span>
                                         @endif
                                     </div>
                                 </div>
@@ -192,16 +187,16 @@
             @endif
 
             {{-- Refresh button --}}
-            <div class="mt-4 p-4 border-t border-white/60 dark:border-white/10">
+            <div class="mt-auto p-3 border-t border-border-subtle">
                 <button
                     wire:click="refreshFolders"
                     data-loading.attr="disabled"
-                    class="w-full text-sm text-gray-600 hover:text-gray-900 flex items-center justify-center space-x-2"
+                    class="w-full text-xs text-ink-tertiary hover:text-ink flex items-center justify-center gap-1.5 py-2 rounded-lg hover:bg-hover transition-colors"
                 >
-                    <svg class="w-4 h-4" data-loading remove wire:target="refreshFolders" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    <svg class="w-3.5 h-3.5" data-loading remove wire:target="refreshFolders" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182"/>
                     </svg>
-                    <span data-loading remove wire:target="refreshFolders">Refresh</span>
+                    <span data-loading remove wire:target="refreshFolders">Refresh folders</span>
                     <span data-loading wire:target="refreshFolders">Refreshing...</span>
                 </button>
             </div>
@@ -218,45 +213,40 @@
         </div>
     </div>
 
-    {{-- Mobile Bottom Navigation (<768px) --}}
-    <div class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200"
+    {{-- Mobile Bottom Navigation --}}
+    <div class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface-raised border-t border-border"
          style="padding-bottom: env(safe-area-inset-bottom);">
         <div class="flex">
             <button
                 @click="$wire.setActiveTab('folders')"
                 class="flex-1 flex flex-col items-center justify-center py-3 transition-colors
-                    {{ $activeTab === 'folders'
-                        ? 'text-blue-600'
-                        : 'text-gray-500' }}"
+                    {{ $activeTab === 'folders' ? 'text-primary' : 'text-ink-tertiary' }}"
             >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"/>
                 </svg>
-                <span class="text-xs mt-1 font-medium">Folders</span>
+                <span class="text-[10px] mt-1 font-medium">Folders</span>
             </button>
             <button
                 @click="$wire.setActiveTab('contacts')"
                 class="flex-1 flex flex-col items-center justify-center py-3 transition-colors
-                    {{ $activeTab === 'contacts'
-                        ? 'text-blue-600'
-                        : 'text-gray-500' }}"
+                    {{ $activeTab === 'contacts' ? 'text-primary' : 'text-ink-tertiary' }}"
             >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
                 </svg>
-                <span class="text-xs mt-1 font-medium">Contacts</span>
+                <span class="text-[10px] mt-1 font-medium">Contacts</span>
             </button>
             <button
                 @click="$wire.setActiveTab('labels')"
                 class="flex-1 flex flex-col items-center justify-center py-3 transition-colors
-                    {{ $activeTab === 'labels'
-                        ? 'text-blue-600'
-                        : 'text-gray-500' }}"
+                    {{ $activeTab === 'labels' ? 'text-primary' : 'text-ink-tertiary' }}"
             >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z"/>
                 </svg>
-                <span class="text-xs mt-1 font-medium">Labels</span>
+                <span class="text-[10px] mt-1 font-medium">Labels</span>
             </button>
         </div>
     </div>

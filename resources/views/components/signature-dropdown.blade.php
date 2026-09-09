@@ -46,7 +46,7 @@
     <button
         type="button"
         @click="open = !open"
-        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-ink-secondary hover:text-ink border border-border rounded-md hover:bg-surface-sunken transition-colors"
     >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
@@ -67,11 +67,11 @@
         x-transition:leave-start="transform opacity-100 scale-100"
         x-transition:leave-end="transform opacity-0 scale-95"
         @click.away="open = false"
-        class="absolute z-50 mt-1 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg"
+        class="absolute z-50 mt-1 w-64 bg-white border border-border rounded-lg shadow-lg"
     >
         <div class="py-1 max-h-60 overflow-y-auto">
             @if($signatures->isEmpty())
-                <div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
+                <div class="px-4 py-3 text-sm text-ink-tertiary text-center">
                     No signatures created yet.
                 </div>
             @else
@@ -84,26 +84,26 @@
                             content_html: @js($signature->content_html),
                             is_default: @js($signature->is_default)
                         })"
-                        class="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
-                        :class="selectedSignature?.id === {{ $signature->id }} ? 'bg-blue-50 dark:bg-blue-900/30' : ''"
+                        class="w-full px-4 py-2 text-left text-sm hover:bg-surface-sunken flex items-center gap-2 transition-colors"
+                        :class="selectedSignature?.id === {{ $signature->id }} ? 'bg-primary-subtle/50' : ''"
                     >
                         <span class="flex-1 truncate">{{ $signature->name }}</span>
                         @if($signature->is_default)
-                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-primary-subtle text-primary">
                                 Default
                             </span>
                         @endif
                     </button>
                 @endforeach
 
-                <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+                <div class="border-t border-border my-1"></div>
 
                 {{-- No signature option --}}
                 <button
                     type="button"
                     @click="removeSignature()"
-                    class="w-full px-4 py-2 text-left text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                    :class="!selectedSignature ? 'bg-gray-50 dark:bg-gray-700' : ''"
+                    class="w-full px-4 py-2 text-left text-sm text-ink-tertiary hover:bg-surface-sunken transition-colors"
+                    :class="!selectedSignature ? 'bg-surface-sunken' : ''"
                 >
                     No signature
                 </button>
@@ -111,11 +111,11 @@
         </div>
 
         {{-- Manage link --}}
-        <div class="border-t border-gray-200 dark:border-gray-700">
+        <div class="border-t border-border">
             <a
                 href="{{ route('settings') }}"
                 wire:navigate
-                class="block px-4 py-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                class="block px-4 py-2 text-sm text-primary hover:bg-surface-sunken transition-colors"
             >
                 Manage signatures...
             </a>

@@ -65,7 +65,7 @@ class TiptapIntegrationTest extends TestCase
 
         $content = file_get_contents($componentPath);
         $this->assertStringContainsString('quote-block', $content, 'Should have quote-block class');
-        $this->assertStringContainsString('border-l-4 border-blue-200', $content, 'Should have blue left border');
+        $this->assertStringContainsString('border-l-4 border-primary/20', $content, 'Should have blue left border');
         $this->assertStringContainsString('x-show="open"', $content, 'Should use x-show for collapsible content');
         $this->assertStringContainsString('x-transition', $content, 'Should use x-transition for animation');
         $this->assertStringContainsString('aria-expanded', $content, 'Toggle button should have aria-expanded');

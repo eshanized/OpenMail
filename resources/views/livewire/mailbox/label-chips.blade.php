@@ -27,7 +27,7 @@
                 <button
                     @click="open = !open; $event.stopPropagation()"
                     @keydown.escape="open = false"
-                    class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-surface-sunken text-ink-secondary hover:bg-surface-sunken transition-colors"
                 >
                     +{{ $overflowCount }}
                 </button>
@@ -50,7 +50,7 @@
                         <a
                             href="/labels/{{ $label->id }}"
                             wire:navigate
-                            class="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
+                            class="flex items-center gap-2 px-3 py-1.5 text-sm text-ink-secondary hover:bg-surface-sunken"
                             @click="open = false"
                         >
                             <span

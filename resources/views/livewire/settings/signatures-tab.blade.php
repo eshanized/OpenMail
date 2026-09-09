@@ -11,7 +11,7 @@
                            transition duration-150 ease-out
                            hover:scale-[1.02] hover:shadow-glow-strong
                            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
-                           focus-visible:ring-blue-600
+                                       focus-visible:ring-primary
                            motion-reduce:transform-none motion-reduce:transition-none">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -22,11 +22,11 @@
 
         @if($signatures->isEmpty())
             <div class="text-center py-12 glass-card rounded-lg border border-white/60 dark:border-white/10">
-                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="mx-auto h-12 w-12 text-ink-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
                 </svg>
-                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">No signatures yet.</p>
-                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Create your first signature to use in outgoing emails.</p>
+                <p class="mt-2 text-sm text-ink-tertiary">No signatures yet.</p>
+                <p class="mt-1 text-xs text-ink-tertiary">Create your first signature to use in outgoing emails.</p>
                 <button
                     wire:click="openCreateModal"
                     class="mt-4 px-4 py-2 text-sm font-medium text-primary hover:text-primary/80"
@@ -46,7 +46,7 @@
                             </div>
                             <div class="min-w-0">
                                 <p class="text-sm font-medium text-ink truncate">{{ $signature->name }}</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                <p class="text-xs text-ink-tertiary truncate">
                                     @if($signature->is_default)
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary dark:bg-primary/20">
                                             Default
@@ -69,7 +69,7 @@
                             @endunless
                             <button
                                 wire:click="openEditModal({{ $signature->id }})"
-                                class="p-1 text-gray-400 hover:text-primary dark:hover:text-primary/80 transition-colors"
+                                class="p-1 text-ink-tertiary hover:text-primary dark:hover:text-primary/80 transition-colors"
                                 title="Edit signature"
                             >
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,7 +79,7 @@
                             <button
                                 wire:click="deleteSignature({{ $signature->id }})"
                                 wire:confirm="Are you sure you want to delete this signature?"
-                                class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                                class="p-1 text-ink-tertiary hover:text-danger dark:hover:text-danger/80 transition-colors"
                                 title="Delete signature"
                             >
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -126,7 +126,7 @@
                                 maxlength="100"
                             >
                             @error('name')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                <p class="mt-1 text-sm text-danger">{{ $message }}</p>
                             @enderror
                         </div>
 
@@ -150,7 +150,7 @@
                                 type="checkbox"
                                 id="sig-default"
                                 wire:model="isDefault"
-                                class="h-4 w-4 text-primary border-gray-300 dark:border-gray-600 rounded focus:ring-primary"
+                                class="h-4 w-4 text-primary border-border dark:border-border rounded focus:ring-primary"
                             >
                             <label for="sig-default" class="text-sm text-ink">
                                 Set as default signature
@@ -161,7 +161,7 @@
                     <div class="px-6 py-4 border-t border-white/60 dark:border-white/10 flex items-center justify-end gap-3">
                         <button
                             wire:click="closeModal"
-                            class="px-4 py-2 text-sm font-medium text-ink bg-surface-raised dark:bg-surface-raised border border-white/60 dark:border-white/10 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                            class="px-4 py-2 text-sm font-medium text-ink bg-surface-raised dark:bg-surface-raised border border-border dark:border-border rounded-md hover:bg-hover dark:hover:bg-hover transition-colors"
                         >
                             Cancel
                         </button>
@@ -175,7 +175,7 @@
                                        transition duration-150 ease-out
                                        hover:scale-[1.02] hover:shadow-glow-strong
                                        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
-                                       focus-visible:ring-blue-600
+                           focus-visible:ring-primary
                                        motion-reduce:transform-none motion-reduce:transition-none
                                        disabled:opacity-50">
                             <span data-loading.remove wire:target="saveSignature">

@@ -1,29 +1,73 @@
 <div>
+    {{-- Error state --}}
     @if ($error)
-        <div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
-            {{ $error }}
+        <div class="mb-5 p-3 bg-error-subtle border border-error/20 rounded-lg text-sm text-error flex items-start gap-2.5" role="alert">
+            <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
+            </svg>
+            <span>{{ $error }}</span>
         </div>
     @endif
 
-    <form wire:submit.prevent="login" class="space-y-6">
+    <form wire:submit.prevent="login" class="space-y-5">
+        {{-- Email --}}
         <div>
-            <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
-            <input id="email" name="email" type="email" autocomplete="email" wire:model="email" required class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm">
+            <label for="email" class="block text-sm font-medium text-ink mb-1.5">Email address</label>
+            <input
+                id="email"
+                name="email"
+                type="email"
+                autocomplete="email"
+                wire:model="email"
+                required
+                autofocus
+                class="w-full px-3 py-2.5 bg-surface border border-border rounded-lg text-sm text-ink placeholder-ink-tertiary
+                       focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary
+                       transition-colors"
+                placeholder="you@company.com"
+            >
         </div>
 
+        {{-- Password --}}
         <div>
-            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-            <input id="password" name="password" type="password" autocomplete="current-password" wire:model="password" required class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm">
+            <label for="password" class="block text-sm font-medium text-ink mb-1.5">Password</label>
+            <input
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                wire:model="password"
+                required
+                class="w-full px-3 py-2.5 bg-surface border border-border rounded-lg text-sm text-ink placeholder-ink-tertiary
+                       focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary
+                       transition-colors"
+                placeholder="Enter your password"
+            >
         </div>
 
-        <div>
-            <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                Sign in
-            </button>
-        </div>
+        {{-- Submit --}}
+        <button
+            type="submit"
+            class="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-primary hover:bg-primary-hover text-white text-sm font-semibold rounded-lg
+                   focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary
+                   transition-colors"
+            wire:loading.attr="disabled"
+            wire:loading.class="opacity-70"
+        >
+            <span wire:loading.remove wire:target="login">Sign in</span>
+            <span wire:loading wire:target="login" class="flex items-center gap-2">
+                <svg class="spin-animation w-4 h-4" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+                Signing in...
+            </span>
+        </button>
     </form>
 
-    <p class="mt-4 text-center text-sm text-gray-600">
-        <a href="/install" class="font-medium text-blue-600 hover:text-blue-500">Run Setup Wizard</a>
-    </p>
+    <div class="mt-5 text-center">
+        <a href="/install" class="text-xs text-ink-tertiary hover:text-primary transition-colors">
+            Run Setup Wizard
+        </a>
+    </div>
 </div>

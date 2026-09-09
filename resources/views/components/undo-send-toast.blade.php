@@ -1,5 +1,4 @@
-{{-- Undo Send Toast Component --}}
-{{-- Props: $delay (int, milliseconds), $pendingSendId (int) --}}
+@props(['delay' => 10000, 'pendingSendId' => null])
 
 <div
     x-data="undoSendToast()"
@@ -7,16 +6,15 @@
     x-transition:enter="transition ease-out duration-300"
     x-transition:enter-start="opacity-0 transform translate-y-2"
     x-transition:leave="transition ease-in duration-200"
-    class="fixed bottom-4 right-4 z-50 flex items-center gap-3 bg-white border border-gray-200 rounded-lg shadow-lg p-4 min-w-[300px] max-w-md"
+    class="fixed bottom-4 right-4 z-50 flex items-center gap-3 bg-surface-overlay border border-border rounded-xl shadow-lg p-4 min-w-[280px] max-w-md"
     role="alert"
     aria-live="polite"
 >
-
     <div class="flex-1">
-        <p class="font-medium text-gray-900">Message sent</p>
-        <div class="mt-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+        <p class="text-sm font-semibold text-ink">Message sent</p>
+        <div class="mt-2 h-1 bg-surface-sunken rounded-full overflow-hidden">
             <div
-                class="h-full bg-blue-600"
+                class="h-full bg-primary rounded-full"
                 x-ref="progress"
                 style="width: 100%; transition: width 1s linear;"
             ></div>
@@ -25,7 +23,7 @@
 
     <button
         @click="undo()"
-        class="px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+        class="px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary-subtle rounded-lg transition-colors"
         :disabled="!visible"
     >
         Undo
@@ -33,11 +31,11 @@
 
     <button
         @click="dismiss()"
-        class="text-gray-400 hover:text-gray-600"
+        class="p-1 text-ink-tertiary hover:text-ink rounded transition-colors"
         aria-label="Dismiss"
     >
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
         </svg>
     </button>
 </div>
@@ -48,7 +46,7 @@ function undoSendToast() {
         visible: false,
         timer: null,
         progressEl: null,
-        duration: 10000, // ms from config
+        duration: 10000,
 
         init() {
             this.duration = this.$el.dataset.delay || 10000;
@@ -69,7 +67,6 @@ function undoSendToast() {
                 const elapsed = Date.now() - start;
                 const progress = Math.max(0, 1 - elapsed / this.duration);
                 this.progressEl.style.width = (progress * 100) + '%';
-
                 if (progress > 0) {
                     this.timer = requestAnimationFrame(animate);
                 } else {
@@ -82,7 +79,7 @@ function undoSendToast() {
         undo() {
             cancelAnimationFrame(this.timer);
             this.visible = false;
-            this.$wire.undoSend(); // Calls Livewire method
+            this.$wire.undoSend();
         },
 
         dismiss() {

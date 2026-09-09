@@ -36,7 +36,7 @@
                        transition duration-150 ease-out
                        hover:scale-[1.02] hover:shadow-glow-strong
                        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
-                       focus-visible:ring-blue-600
+                       focus-visible:ring-primary
                        motion-reduce:transform-none motion-reduce:transition-none">
                 Save Preferences
             </button>

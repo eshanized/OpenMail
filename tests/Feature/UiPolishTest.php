@@ -82,124 +82,162 @@ class UiPolishTest extends TestCase
     }
 
     #[Test]
-    public function test_compose_button_has_gradient_classes(): void
+    public function test_compose_button_has_brand_color_classes(): void
     {
         $component = Livewire::actingAs($this->user)
             ->test('mailbox.message-list', ['folderPath' => 'INBOX']);
 
         $html = $component->html();
 
-        // RED today — gradient classes land in plan 06-02
-        $this->assertStringContainsString('from-blue-600', $html);
-        $this->assertStringContainsString('to-purple-600', $html);
+        // Compose button uses primary brand color
+        $this->assertStringContainsString('bg-primary', $html);
     }
 
     #[Test]
-    public function test_send_and_archive_buttons_have_gradient_classes(): void
+    public function test_send_button_has_brand_color_classes(): void
     {
-        // Source-level: read composer and message-toolbar blade files
         $composerPath = base_path('resources/views/livewire/mailbox/composer.blade.php');
-        $toolbarPath = base_path('resources/views/livewire/mailbox/message-toolbar.blade.php');
-
         $this->assertFileExists($composerPath);
-        $this->assertFileExists($toolbarPath);
-
         $composerContent = file_get_contents($composerPath);
-        $toolbarContent = file_get_contents($toolbarPath);
 
-        // RED today — gradient classes land in plan 06-03
-        $this->assertStringContainsString('from-blue-600', $composerContent);
-        $this->assertStringContainsString('to-purple-600', $composerContent);
-        $this->assertStringContainsString('from-blue-600', $toolbarContent);
-        $this->assertStringContainsString('to-purple-600', $toolbarContent);
+        // Send button uses primary brand color
+        $this->assertStringContainsString('bg-primary', $composerContent);
     }
 
     #[Test]
     public function test_x_cloak_css_rule_exists(): void
     {
-        // Source-level: read app.css
         $cssPath = base_path('resources/css/app.css');
         $this->assertFileExists($cssPath);
-
         $cssContent = file_get_contents($cssPath);
 
-        // RED today — [x-cloak] rule added in plan 06-02
         $this->assertStringContainsString('[x-cloak]', $cssContent);
         $this->assertStringContainsString('display: none', $cssContent);
     }
 
     #[Test]
-    public function test_glass_surface_classes_present(): void
+    public function test_design_system_tokens_present(): void
     {
-        // Source-level: assert glass classes in blade markup
-        $sidebarPath = base_path('resources/views/livewire/mailbox/folder-sidebar.blade.php');
-        $searchPath = base_path('resources/views/livewire/mailbox/search-results-dropdown.blade.php');
-        $layoutPath = base_path('resources/views/layouts/mailbox.blade.php');
+        $cssPath = base_path('resources/css/app.css');
+        $this->assertFileExists($cssPath);
+        $cssContent = file_get_contents($cssPath);
 
-        $this->assertFileExists($sidebarPath);
-        $this->assertFileExists($searchPath);
-        $this->assertFileExists($layoutPath);
+        // Semantic color tokens
+        $this->assertStringContainsString('--color-primary', $cssContent);
+        $this->assertStringContainsString('--color-surface', $cssContent);
+        $this->assertStringContainsString('--color-ink', $cssContent);
+        $this->assertStringContainsString('--color-border', $cssContent);
 
-        $sidebarContent = file_get_contents($sidebarPath);
-        $searchContent = file_get_contents($searchPath);
-        $layoutContent = file_get_contents($layoutPath);
+        // Shadow tokens
+        $this->assertStringContainsString('--shadow-sm', $cssContent);
+        $this->assertStringContainsString('--shadow-md', $cssContent);
 
-        // RED today — glass classes land in plans 06-02/06-03
-        $this->assertStringContainsString('backdrop-blur-sm', $sidebarContent);
-        $this->assertStringContainsString('backdrop-blur-sm', $searchContent);
-        $this->assertStringContainsString('glass-card', $layoutContent);
+        // Dark mode tokens
+        $this->assertStringContainsString(':where(.dark)', $cssContent);
     }
 
     #[Test]
-    public function test_status_badges_use_soft_tag_style(): void
+    public function test_dark_mode_tokens_defined(): void
     {
-        // Source-level: folder-sidebar unread-count pill keeps tinted-bg + colored-text soft-tag pattern
-        $sidebarPath = base_path('resources/views/livewire/mailbox/folder-sidebar.blade.php');
-        $this->assertFileExists($sidebarPath);
+        $cssPath = base_path('resources/css/app.css');
+        $cssContent = file_get_contents($cssPath);
 
-        $sidebarContent = file_get_contents($sidebarPath);
+        // Dark mode surface and ink colors
+        $this->assertStringContainsString('--color-surface: #111318', $cssContent);
+        $this->assertStringContainsString('--color-surface-raised: #1a1d24', $cssContent);
+        $this->assertStringContainsString('--color-ink: #e8eaef', $cssContent);
+    }
 
-        // GREEN today — pill already matches soft-tag pattern
-        // Assert bg-*-100 tinted pill fill and text-*-600 colored text pair
-        $this->assertStringContainsString('bg-', $sidebarContent);
-        $this->assertStringContainsString('text-', $sidebarContent);
-        // More specific: red-100/red-600 or similar tinted pattern
-        $this->assertTrue(
-            str_contains($sidebarContent, 'red-100') || str_contains($sidebarContent, 'bg-red-100') ||
-            str_contains($sidebarContent, 'bg-blue-100') || str_contains($sidebarContent, 'bg-green-100') ||
-            str_contains($sidebarContent, 'bg-yellow-100') || str_contains($sidebarContent, 'bg-purple-100')
-        );
-        $this->assertTrue(
-            str_contains($sidebarContent, 'text-red-600') || str_contains($sidebarContent, 'text-blue-600') ||
-            str_contains($sidebarContent, 'text-green-600') || str_contains($sidebarContent, 'text-yellow-600') ||
-            str_contains($sidebarContent, 'text-purple-600')
-        );
+    #[Test]
+    public function test_skeleton_loading_class_defined(): void
+    {
+        $cssPath = base_path('resources/css/app.css');
+        $cssContent = file_get_contents($cssPath);
+
+        $this->assertStringContainsString('.skeleton', $cssContent);
+        $this->assertStringContainsString('shimmer', $cssContent);
     }
 
     #[Test]
     public function test_message_viewer_has_no_chrome_classes(): void
     {
-        // Source-level: message-viewer must NOT contain glass- prefix or gradient utility prefix
         $viewerPath = base_path('resources/views/livewire/mailbox/message-viewer.blade.php');
         $this->assertFileExists($viewerPath);
-
         $viewerContent = file_get_contents($viewerPath);
 
-        // GREEN today — cross-phase invariant
+        // No glass morphism in message viewer
         $this->assertStringNotContainsString('glass-', $viewerContent);
+        // No gradient backgrounds
         $this->assertStringNotContainsString('bg-linear', $viewerContent);
     }
 
     #[Test]
     public function test_layout_emits_csp_nonce_meta(): void
     {
-        // Source-level: check app.blade.php for @cspNonceMetaTag directive
         $layoutPath = base_path('resources/views/layouts/app.blade.php');
         $this->assertFileExists($layoutPath);
-
         $layoutContent = file_get_contents($layoutPath);
 
-        // GREEN today — CSP nonce meta tag emitted by spatie/laravel-csp
         $this->assertStringContainsString('@cspNonceMetaTag', $layoutContent);
+    }
+
+    #[Test]
+    public function test_folder_sidebar_uses_semantic_tokens(): void
+    {
+        $sidebarPath = base_path('resources/views/livewire/mailbox/folder-sidebar.blade.php');
+        $this->assertFileExists($sidebarPath);
+        $sidebarContent = file_get_contents($sidebarPath);
+
+        // Uses semantic token classes
+        $this->assertStringContainsString('bg-primary-subtle', $sidebarContent);
+        $this->assertStringContainsString('text-primary', $sidebarContent);
+        $this->assertStringContainsString('bg-surface-raised', $sidebarContent);
+        $this->assertStringContainsString('border-border', $sidebarContent);
+    }
+
+    #[Test]
+    public function test_login_uses_design_system(): void
+    {
+        $loginPath = base_path('resources/views/auth/login.blade.php');
+        $this->assertFileExists($loginPath);
+        $loginContent = file_get_contents($loginPath);
+
+        $this->assertStringContainsString('bg-surface', $loginContent);
+        $this->assertStringContainsString('bg-surface-raised', $loginContent);
+        $this->assertStringContainsString('border-border', $loginContent);
+        $this->assertStringContainsString('Tonmoy Infrastructure', $loginContent);
+    }
+
+    #[Test]
+    public function test_setup_wizard_has_progress_bar(): void
+    {
+        $wizardPath = base_path('resources/views/livewire/setup-wizard.blade.php');
+        $this->assertFileExists($wizardPath);
+        $wizardContent = file_get_contents($wizardPath);
+
+        // Mobile progress bar
+        $this->assertStringContainsString('rounded-full', $wizardContent);
+        // Desktop step bubbles
+        $this->assertStringContainsString('rounded-full', $wizardContent);
+        // Success state
+        $this->assertStringContainsString('bg-success', $wizardContent);
+    }
+
+    #[Test]
+    public function test_reduced_motion_support(): void
+    {
+        $cssPath = base_path('resources/css/app.css');
+        $cssContent = file_get_contents($cssPath);
+
+        $this->assertStringContainsString('prefers-reduced-motion', $cssContent);
+    }
+
+    #[Test]
+    public function test_scrollbar_styling_defined(): void
+    {
+        $cssPath = base_path('resources/css/app.css');
+        $cssContent = file_get_contents($cssPath);
+
+        $this->assertStringContainsString('scrollbar-thin', $cssContent);
     }
 }

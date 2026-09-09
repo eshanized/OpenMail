@@ -29,7 +29,7 @@
     class="mb-4 p-3 glass-card flex flex-wrap items-center gap-3"
     x-transition
 >
-    <span class="text-sm font-medium text-blue-800">
+    <span class="text-sm font-medium text-primary">
         <span x-text="selectedUids.length"></span> selected
     </span>
 
@@ -45,7 +45,7 @@
                        transition duration-150 ease-out
                        hover:scale-[1.02] hover:shadow-glow-strong
                        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
-                       focus-visible:ring-blue-600
+                       focus-visible:ring-primary
                        motion-reduce:transform-none motion-reduce:transition-none
                        disabled:opacity-50"
             title="Archive (e)"
@@ -60,7 +60,7 @@
         <button
             wire:click="bulkDelete"
             data-loading.attr="disabled"
-            class="px-3 py-1.5 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-red-600"
+            class="px-3 py-1.5 text-sm font-semibold text-white bg-danger rounded-lg hover:bg-danger-hover transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-danger"
             onclick="return confirm('Move selected messages to Trash?')"
         >
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -73,7 +73,7 @@
         <button
             wire:click="bulkMove('Spam')"
             data-loading.attr="disabled"
-            class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+            class="px-3 py-1.5 text-sm font-medium text-ink-secondary bg-white border border-border rounded-lg hover:bg-surface-sunken transition-colors disabled:opacity-50"
             title="Mark as Spam"
         >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -87,7 +87,7 @@
                 @click="open = !open"
                 @keydown.escape="open = false"
                 @click.outside="open = false"
-                class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1"
+                class="px-3 py-1.5 text-sm font-medium text-ink-secondary bg-white border border-border rounded-lg hover:bg-surface-sunken transition-colors flex items-center gap-1"
             >
                 Move to...
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,17 +103,17 @@
                 x-transition:leave="transition ease-in duration-75"
                 x-transition:leave-start="transform opacity-100 scale-100"
                 x-transition:leave-end="transform opacity-0 scale-95"
-                class="absolute right-0 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50"
+                class="absolute right-0 mt-1 w-56 bg-white rounded-lg shadow-lg border border-border py-1 z-50"
             >
                 @foreach($folders as $folder)
                     @if($folder['path'] !== $folderPath)
                         <button
                             wire:click="bulkMove('{{ $folder['path'] }}')"
                             data-loading.attr="disabled"
-                            class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 flex items-center"
+                            class="w-full px-4 py-2 text-left text-sm text-ink-secondary hover:bg-surface-sunken disabled:opacity-50 flex items-center"
                         >
                             @if($folder['role'])
-                                <span class="w-5 h-5 mr-2 text-gray-400">
+                                <span class="w-5 h-5 mr-2 text-ink-tertiary">
                                     @if($folder['role'] === 'inbox')
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
                                     @elseif($folder['role'] === 'sent')
@@ -142,7 +142,7 @@
         <button
             wire:click="bulkMarkRead"
             data-loading.attr="disabled"
-            class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+            class="px-3 py-1.5 text-sm font-medium text-ink-secondary bg-white border border-border rounded-lg hover:bg-surface-sunken transition-colors disabled:opacity-50"
             title="Mark as read"
         >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -155,10 +155,10 @@
         <button
             wire:click="bulkMarkUnread"
             data-loading.attr="disabled"
-            class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+            class="px-3 py-1.5 text-sm font-medium text-ink-secondary bg-white border border-border rounded-lg hover:bg-surface-sunken transition-colors disabled:opacity-50"
             title="Mark as unread"
         >
-            <svg class="w-4 h-4 fill-current text-blue-600" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 fill-current text-primary" viewBox="0 0 24 24">
                 <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"></path>
             </svg>
         </button>
@@ -167,7 +167,7 @@
         <button
             wire:click="bulkStar"
             data-loading.attr="disabled"
-            class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+            class="px-3 py-1.5 text-sm font-medium text-ink-secondary bg-white border border-border rounded-lg hover:bg-surface-sunken transition-colors disabled:opacity-50"
             title="Flag"
         >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,7 +179,7 @@
         <button
             wire:click="bulkUnstar"
             data-loading.attr="disabled"
-            class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+            class="px-3 py-1.5 text-sm font-medium text-ink-secondary bg-white border border-border rounded-lg hover:bg-surface-sunken transition-colors disabled:opacity-50"
             title="Unflag"
         >
             <svg class="w-4 h-4 fill-current text-yellow-500" viewBox="0 0 20 20">
@@ -190,7 +190,7 @@
         {{-- Clear selection --}}
         <button
             @click="$dispatch('clear-selection')"
-            class="px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors"
+            class="px-3 py-1.5 text-sm font-medium text-ink-tertiary hover:text-ink-secondary transition-colors"
             title="Clear selection"
         >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -209,12 +209,12 @@
         x-transition:leave="transition ease-in duration-200"
         x-transition:leave-start="opacity-100 translate-y-0"
         x-transition:leave-end="opacity-0 translate-y-2"
-        class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3"
+        class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-ink text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3"
     >
         <span class="text-sm" x-text="archiveMessage || 'Message archived.'"></span>
         <button
             @click="$wire.undoArchive(); archiveToast = false;"
-            class="text-sm font-semibold text-blue-400 hover:text-blue-300 underline"
+            class="text-sm font-semibold text-primary hover:text-primary underline"
         >
             Undo
         </button>

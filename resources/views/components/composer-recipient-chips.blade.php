@@ -19,32 +19,32 @@
     label: '{{ $label }}',
     showSuggestions: {{ $showSuggestions ? 'true' : 'false' }}
 })"
-    class="w-full"
+    class="w-full relative"
     @keydown.window="handleKeydown($event)"
 >
-    <label for="{{ $fieldName }}-chips" class="block text-sm font-medium text-ink-secondary mb-1">{{ $label }}</label>
+    <label for="{{ $fieldName }}-chips-input" class="block text-xs font-semibold uppercase tracking-wider text-ink-secondary mb-1.5">{{ $label }}</label>
 
     {{-- Chips Display --}}
     <div
-        class="flex flex-wrap gap-1.5 min-h-[42px] p-2 glass-input focus-within:ring-2 focus-within:ring-primary focus-within:border-transparent"
+        class="flex flex-wrap items-center gap-1.5 min-h-[42px] px-3 py-1.5 rounded-xl border border-border bg-surface hover:border-border-strong focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/25 transition-all"
         x-ref="chipsContainer"
         @click="focusInput()"
         role="listbox"
         aria-label="{{ $label }} recipients"
     >
         <template x-for="(chip, index) in chips" :key="chip.email + index">
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary-subtle/50 border border-primary/20 rounded-full text-sm" role="option" :aria-selected="false">
+            <span class="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-lg text-xs font-medium shadow-2xs" role="option" :aria-selected="false">
                 <span class="font-medium text-ink" x-text="chip.name || chip.email"></span>
-                <span class="text-ink-tertiary" x-show="chip.name" x-text="'<'+chip.email+'>'"></span>
+                <span class="text-ink-tertiary font-mono text-[11px]" x-show="chip.name" x-text="'<'+chip.email+'>'"></span>
                 <button
                     type="button"
                     @click.prevent="removeChip(index)"
-                    class="text-ink-tertiary hover:text-danger p-0.5 rounded hover:bg-surface-sunken transition-colors"
+                    class="text-ink-tertiary hover:text-error hover:bg-error-subtle p-0.5 rounded transition-colors cursor-pointer"
                     :aria-label="'Remove ' + (chip.name || chip.email)"
                     tabindex="-1"
                 >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </span>
@@ -53,14 +53,14 @@
         {{-- Input Field --}}
         <input
             type="text"
-            :id="'{{ $fieldName }}-chips'-input"
+            :id="'{{ $fieldName }}-chips-input'"
             x-ref="input"
             x-model="inputValue"
             @input="onInput()"
             @keydown="onKeydown($event)"
             @focus="showDropdown = true; fetchSuggestions()"
             @blur.debounce.200="showDropdown = false"
-            class="flex-1 min-w-[120px] px-2 py-1 border-0 focus:outline-none text-sm bg-transparent"
+            class="flex-1 min-w-[140px] px-1 py-1 border-0 focus:outline-none text-sm text-ink bg-transparent placeholder-ink-tertiary"
             :placeholder="chips.length === 0 ? 'name@example.com' : ''"
             autocomplete="email"
             aria-label="{{ $label }} input"
@@ -79,7 +79,7 @@
         x-transition:enter-start="opacity-0 transform -translate-y-1"
         x-transition:leave="transition ease-in duration-75"
         x-transition:leave-end="opacity-0"
-        class="absolute z-50 mt-1 w-full max-w-md bg-white border border-border rounded-md shadow-lg overflow-hidden"
+        class="absolute z-50 mt-1 w-full max-w-md bg-surface-raised border border-border rounded-xl shadow-xl overflow-hidden backdrop-blur-md"
         :id="'{{ $fieldName }}-suggestions'"
         role="listbox"
         x-ref="dropdown"
@@ -89,31 +89,31 @@
                 type="button"
                 @click="selectSuggestion(suggestion)"
                 @mousedown.prevent="focusInput()"
-                class="w-full px-3 py-2 text-left text-sm hover:bg-surface-sunken transition-colors flex items-center gap-2"
-                :class="{ 'bg-primary-subtle/50': selectedIndex === index }"
+                class="w-full px-3 py-2 text-left text-sm hover:bg-hover transition-colors flex items-center gap-2.5 cursor-pointer"
+                :class="{ 'bg-primary-subtle text-primary': selectedIndex === index }"
                 :aria-selected="selectedIndex === index"
                 role="option"
                 :id="'{{ $fieldName }}-suggestion-' + index"
             >
-                <div class="w-8 h-8 rounded-full bg-primary-subtle flex items-center justify-center text-primary font-medium text-sm"
+                <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs ring-1 ring-primary/20 shrink-0"
                     x-text="suggestion.name ? suggestion.name.charAt(0).toUpperCase() : suggestion.email.charAt(0).toUpperCase()">
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="font-medium text-ink truncate" x-text="suggestion.name || suggestion.email"></p>
-                    <p class="text-xs text-ink-tertiary truncate" x-show="suggestion.name" x-text="suggestion.email"></p>
+                    <p class="font-medium text-ink truncate text-xs" x-text="suggestion.name || suggestion.email"></p>
+                    <p class="text-[11px] text-ink-tertiary truncate font-mono" x-show="suggestion.name" x-text="suggestion.email"></p>
                 </div>
-                <span class="text-xs text-ink-tertiary" x-text="suggestion.frequency"></span>
+                <span class="text-[10px] text-ink-tertiary font-mono" x-text="suggestion.frequency"></span>
             </button>
         </template>
 
-        <div x-show="suggestions.length === 0 && inputValue.length > 0" class="px-3 py-2 text-sm text-ink-tertiary">
-            No matching contacts — type to add manually
+        <div x-show="suggestions.length === 0 && inputValue.length > 0" class="px-3 py-2.5 text-xs text-ink-tertiary">
+            No matching contacts — press Enter to add
         </div>
     </div>
 
     {{-- Error Display --}}
     @error($field)
-        <p class="mt-1 text-sm text-danger">{{ $message }}</p>
+        <p class="mt-1 text-xs text-error">{{ $message }}</p>
     @enderror
 
     {{-- Hidden input for Livewire sync --}}

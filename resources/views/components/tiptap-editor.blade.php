@@ -31,8 +31,8 @@
             });
         },
         async initEditor() {
-            const { initTiptapEditor } = await import('../../js/components/TiptapEditor.js');
-            const result = await initTiptapEditor(this.$refs.editor, {
+            const initTiptap = window.initTiptapEditor || (await import('../../js/components/TiptapEditor.js')).initTiptapEditor;
+            const result = await initTiptap(this.$refs.editor, {
                 onUpdate: (html) => {
                     // Sync JSON content to Livewire
                     const json = this.editor.getJSON();

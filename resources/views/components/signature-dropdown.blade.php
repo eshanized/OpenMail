@@ -46,14 +46,14 @@
     <button
         type="button"
         @click="open = !open"
-        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-ink-secondary hover:text-ink border border-border rounded-md hover:bg-surface-sunken transition-colors"
+        class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-ink-secondary hover:text-ink border border-border rounded-xl bg-surface hover:bg-hover transition-all shadow-2xs cursor-pointer"
     >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+        <svg class="w-3.5 h-3.5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/>
         </svg>
-        <span x-text="selectedSignature?.name || 'No signature'"></span>
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        <span class="truncate max-w-[120px]" x-text="selectedSignature?.name || 'No signature'"></span>
+        <svg class="w-3 h-3 text-ink-tertiary transition-transform duration-150" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
         </svg>
     </button>
 
@@ -68,57 +68,62 @@
         x-transition:leave-start="transform opacity-100 scale-100"
         x-transition:leave-end="transform opacity-0 scale-95"
         @click.away="open = false"
-        class="absolute z-50 mt-1 w-64 bg-white border border-border rounded-lg shadow-lg"
+        class="absolute z-50 bottom-full mb-2 left-0 sm:left-auto sm:right-0 sm:bottom-auto sm:top-full sm:mt-1.5 w-64 bg-surface-raised border border-border rounded-xl shadow-xl overflow-hidden backdrop-blur-md"
     >
-        <div class="py-1 max-h-60 overflow-y-auto">
+        <div class="py-1 max-h-60 overflow-y-auto divide-y divide-border-subtle">
             @if($signatures->isEmpty())
-                <div class="px-4 py-3 text-sm text-ink-tertiary text-center">
+                <div class="px-4 py-3 text-xs text-ink-tertiary text-center">
                     No signatures created yet.
                 </div>
             @else
-                @foreach($signatures as $signature)
-                    <button
-                        type="button"
-                        @click="selectSignature({
-                            id: {{ $signature->id }},
-                            name: @js($signature->name),
-                            content_html: @js($signature->content_html),
-                            is_default: @js($signature->is_default)
-                        })"
-                        class="w-full px-4 py-2 text-left text-sm hover:bg-surface-sunken flex items-center gap-2 transition-colors"
-                        :class="selectedSignature?.id === {{ $signature->id }} ? 'bg-primary-subtle/50' : ''"
-                    >
-                        <span class="flex-1 truncate">{{ $signature->name }}</span>
-                        @if($signature->is_default)
-                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-primary-subtle text-primary">
-                                Default
-                            </span>
-                        @endif
-                    </button>
-                @endforeach
-
-                <div class="border-t border-border my-1"></div>
+                <div class="py-1">
+                    @foreach($signatures as $signature)
+                        <button
+                            type="button"
+                            @click="selectSignature({
+                                id: {{ $signature->id }},
+                                name: @js($signature->name),
+                                content_html: @js($signature->content_html),
+                                is_default: @js($signature->is_default)
+                            })"
+                            class="w-full px-3 py-2 text-left text-xs hover:bg-hover flex items-center justify-between gap-2 transition-colors cursor-pointer"
+                            :class="selectedSignature?.id === {{ $signature->id }} ? 'bg-primary-subtle text-primary font-semibold' : 'text-ink'"
+                        >
+                            <span class="truncate flex-1">{{ $signature->name }}</span>
+                            @if($signature->is_default)
+                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-primary-subtle text-primary border border-primary/20 shrink-0">
+                                    Default
+                                </span>
+                            @endif
+                        </button>
+                    @endforeach
+                </div>
 
                 {{-- No signature option --}}
-                <button
-                    type="button"
-                    @click="removeSignature()"
-                    class="w-full px-4 py-2 text-left text-sm text-ink-tertiary hover:bg-surface-sunken transition-colors"
-                    :class="!selectedSignature ? 'bg-surface-sunken' : ''"
-                >
-                    No signature
-                </button>
+                <div class="py-1">
+                    <button
+                        type="button"
+                        @click="removeSignature()"
+                        class="w-full px-3 py-2 text-left text-xs text-ink-tertiary hover:text-ink hover:bg-hover transition-colors cursor-pointer"
+                        :class="!selectedSignature ? 'bg-surface-sunken font-semibold text-ink' : ''"
+                    >
+                        No signature
+                    </button>
+                </div>
             @endif
         </div>
 
         {{-- Manage link --}}
-        <div class="border-t border-border">
+        <div class="border-t border-border bg-surface-sunken/40">
             <a
-                href="{{ route('settings') }}"
+                href="{{ route('settings') }}?tab=signatures"
                 wire:navigate
-                class="block px-4 py-2 text-sm text-primary hover:bg-surface-sunken transition-colors"
+                class="flex items-center justify-between px-3 py-2 text-xs font-semibold text-primary hover:text-primary-hover hover:bg-hover transition-colors"
             >
-                Manage signatures...
+                <span>Manage signatures</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
+                </svg>
             </a>
         </div>
     </div>

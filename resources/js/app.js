@@ -1,8 +1,11 @@
 import '@fontsource-variable/plus-jakarta-sans';
 import './bootstrap';
 import DOMPurify from 'dompurify';
+import { initTiptapEditor, createToolbar } from './components/TiptapEditor.js';
 
 window.DOMPurify = DOMPurify;
+window.initTiptapEditor = initTiptapEditor;
+window.createTiptapToolbar = createToolbar;
 
 // Theme/Density helper functions
 export function applyThemeToDoc(theme) {

@@ -110,7 +110,7 @@ class IntegrationTest extends TestCase
     {
         $response = $this->actingAs($this->user)
             ->withSession(['openmail:imap_password' => Crypt::encrypt('test-password')])
-            ->get('/mailbox');
+            ->get('/mailbox/INBOX');
 
         $response->assertStatus(200);
 
@@ -255,7 +255,7 @@ class IntegrationTest extends TestCase
         // Verify mailbox page loads successfully (toolbar with archive renders via Livewire)
         $response = $this->actingAs($this->user)
             ->withSession(['openmail:imap_password' => Crypt::encrypt('test-password')])
-            ->get('/mailbox');
+            ->get('/mailbox/INBOX');
 
         $response->assertStatus(200);
     }
@@ -266,7 +266,7 @@ class IntegrationTest extends TestCase
         // Verify mailbox page loads with mobile-responsive layout
         $response = $this->actingAs($this->user)
             ->withSession(['openmail:imap_password' => Crypt::encrypt('test-password')])
-            ->get('/mailbox');
+            ->get('/mailbox/INBOX');
 
         $response->assertStatus(200);
     }

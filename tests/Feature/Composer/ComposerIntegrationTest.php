@@ -107,6 +107,9 @@ class ComposerIntegrationTest extends TestCase
 
         $mockService->shouldReceive('getMessages')
             ->andReturn(new LengthAwarePaginator([], 0, 25));
+        
+        // Mock getThreadHeaders for threaded view
+        $mockService->shouldReceive('getThreadHeaders')->andReturn([]);
 
         $this->app->instance(\App\Services\ImapMailboxService::class, $mockService);
 
@@ -131,7 +134,7 @@ class ComposerIntegrationTest extends TestCase
         $this->actingAs($this->user)
             ->withSession(['openmail:imap_password' => Crypt::encrypt('test-password')]);
 
-        $response = $this->get(route('mailbox'));
+        $response = $this->get('/mailbox/INBOX');
         $response->assertStatus(200);
         $response->assertSee('Compose');
     }

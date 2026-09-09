@@ -108,6 +108,11 @@ class MessageViewerTest extends TestCase
         $mockService = Mockery::mock(ImapMailboxService::class);
         $mockService->shouldReceive('getMessageWithBody')->andReturn($mockMessage);
         $mockService->shouldReceive('getCachedFolders')->andReturn($folders ?: $defaultFolders);
+        // The mailbox view renders MessageList which calls getMessages - return empty paginator
+        $mockService->shouldReceive('getMessages')
+            ->andReturn(new \Illuminate\Pagination\LengthAwarePaginator([], 0, 25, 1, ['path' => '']));
+        // MessageList also calls getThreadHeaders for threaded view
+        $mockService->shouldReceive('getThreadHeaders')->andReturn([]);
         
         return $mockService;
     }

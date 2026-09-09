@@ -1,5 +1,6 @@
 <?php
 
+use App\Database\SQLiteConnection;
 use Illuminate\Support\Str;
 use Pdo\Mysql;
 
@@ -41,7 +42,19 @@ return [
             'busy_timeout' => null,
             'journal_mode' => null,
             'synchronous' => null,
-            'transaction_mode' => 'DEFERRED',
+            'transaction_mode' => 'IMMEDIATE',
+        ],
+
+        'sqlite_testing' => [
+            'driver' => 'sqlite',
+            'url' => env('DB_URL'),
+            'database' => ':memory:',
+            'prefix' => '',
+            'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
+            'busy_timeout' => null,
+            'journal_mode' => null,
+            'synchronous' => null,
+            'transaction_mode' => 'IMMEDIATE',
         ],
 
         'mysql' => [

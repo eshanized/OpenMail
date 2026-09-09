@@ -124,7 +124,7 @@ class ThreadUITest extends TestCase
     {
         $response = $this->actingAs($this->user)
             ->withSession(['openmail:imap_password' => Crypt::encrypt('test-password')])
-            ->get('/mailbox');
+            ->get('/mailbox/INBOX');
 
         $response->assertStatus(200);
         // Thread toggle button should be visible
@@ -138,7 +138,7 @@ class ThreadUITest extends TestCase
     {
         $response = $this->actingAs($this->user)
             ->withSession(['openmail:imap_password' => Crypt::encrypt('test-password')])
-            ->get('/mailbox');
+            ->get('/mailbox/INBOX');
 
         $response->assertStatus(200);
         // Toggle button with wire:click should be present
@@ -193,7 +193,7 @@ class ThreadUITest extends TestCase
     {
         $response = $this->actingAs($this->user)
             ->withSession(['openmail:imap_password' => Crypt::encrypt('test-password')])
-            ->get('/mailbox');
+            ->get('/mailbox/INBOX');
 
         $response->assertStatus(200);
         // Thread row should have expand/collapse chevron
@@ -253,7 +253,7 @@ class ThreadUITest extends TestCase
     {
         $response = $this->actingAs($this->user)
             ->withSession(['openmail:imap_password' => Crypt::encrypt('test-password')])
-            ->get('/mailbox');
+            ->get('/mailbox/INBOX');
 
         $response->assertStatus(200);
 
@@ -269,7 +269,7 @@ class ThreadUITest extends TestCase
     {
         $response = $this->actingAs($this->user)
             ->withSession(['openmail:imap_password' => Crypt::encrypt('test-password')])
-            ->get('/mailbox');
+            ->get('/mailbox/INBOX');
 
         $response->assertStatus(200);
 
@@ -282,7 +282,7 @@ class ThreadUITest extends TestCase
     {
         $response = $this->actingAs($this->user)
             ->withSession(['openmail:imap_password' => Crypt::encrypt('test-password')])
-            ->get('/mailbox');
+            ->get('/mailbox/INBOX');
 
         $response->assertStatus(200);
 

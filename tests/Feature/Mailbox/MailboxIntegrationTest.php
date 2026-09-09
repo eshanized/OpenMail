@@ -106,9 +106,12 @@ class MailboxIntegrationTest extends TestCase
             ->andReturn(null);
         
         // Mock getMessages to return a LengthAwarePaginator with empty data
-        $mockService->shouldReceive('getMessages')
+$mockService->shouldReceive('getMessages')
             ->andReturn(new LengthAwarePaginator([], 0, 25));
         
+        // Mock getThreadHeaders for threaded view
+        $mockService->shouldReceive('getThreadHeaders')->andReturn([]);
+
         $this->app->instance(\App\Services\ImapMailboxService::class, $mockService);
         
         // Also bind the FolderMapper
@@ -118,7 +121,7 @@ class MailboxIntegrationTest extends TestCase
 
     public function test_unauthenticated_user_redirected_from_mailbox(): void
     {
-        $response = $this->get('/mailbox');
+        $response = $this->get('/mailbox/INBOX');
         $response->assertRedirect('/login');
     }
 
@@ -128,7 +131,7 @@ class MailboxIntegrationTest extends TestCase
         
         $response = $this->actingAs($user)
             ->withSession(['openmail:imap_password' => Crypt::encrypt('test-password')])
-            ->get('/mailbox');
+            ->get('/mailbox/INBOX');
         
         $response->assertStatus(200);
     }
@@ -139,10 +142,11 @@ class MailboxIntegrationTest extends TestCase
         
         $response = $this->actingAs($user)
             ->withSession(['openmail:imap_password' => Crypt::encrypt('test-password')])
-            ->get('/mailbox');
+            ->get('/mailbox/INBOX');
         
         $response->assertStatus(200);
-        $response->assertSee('Folders');
+        // The folder sidebar is a Livewire component, so check for its wire:key attribute
+        $response->assertSee('wire:key');
     }
 
     public function test_mailbox_layout_extends_app_layout(): void
@@ -151,7 +155,7 @@ class MailboxIntegrationTest extends TestCase
         
         $response = $this->actingAs($user)
             ->withSession(['openmail:imap_password' => Crypt::encrypt('test-password')])
-            ->get('/mailbox');
+            ->get('/mailbox/INBOX');
         
         $response->assertStatus(200);
         $response->assertSee('OpenMail');

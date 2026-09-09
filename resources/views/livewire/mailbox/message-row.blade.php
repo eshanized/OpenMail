@@ -10,7 +10,7 @@
 @endphp
 <div
     data-uid="{{ $message->uid }}"
-    class="message-row message-row-card border-b border-border-subtle last:border-b-0 flex items-center px-3 py-2.5 transition-colors duration-75 group gap-2.5
+    class="message-row message-row-card border-b border-border-subtle last:border-b-0 flex items-center transition-colors duration-75 group
         {{ !$message->is_seen ? 'message-row-unread bg-surface-raised font-medium' : 'text-ink-secondary hover:bg-hover' }}
         {{ !$selected ? '' : '!bg-selected ring-1 ring-primary/20' }}
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
@@ -36,11 +36,11 @@
             title="Toggle star"
         >
             @if($isStarred)
-                <svg class="w-4 h-4 fill-amber-400 text-amber-400 drop-shadow-xs" viewBox="0 0 20 20">
+                <svg class="message-row-icon fill-amber-400 text-amber-400 drop-shadow-xs" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                 </svg>
             @else
-                <svg class="w-4 h-4 fill-none stroke-currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+                <svg class="message-row-icon fill-none stroke-currentColor" viewBox="0 0 24 24" stroke-width="1.75">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/>
                 </svg>
             @endif
@@ -49,11 +49,11 @@
 
     {{-- Sender Avatar & Name --}}
     <div class="flex items-center min-w-0 w-36 sm:w-52 shrink-0">
-        <div class="w-7 h-7 rounded-lg avatar-gradient-{{ $avatarIdx }} flex items-center justify-center text-xs font-bold shadow-2xs shrink-0 mr-2.5">
+        <div class="message-row-avatar rounded-lg avatar-gradient-{{ $avatarIdx }} flex items-center justify-center font-bold shadow-2xs shrink-0 mr-2.5">
             {{ $avatarChar }}
         </div>
         <div class="flex items-center min-w-0 truncate">
-            <span class="truncate text-sm {{ !$message->is_seen ? 'font-bold text-ink' : 'font-medium text-ink-secondary' }}">
+            <span class="truncate message-row-title {{ !$message->is_seen ? 'font-bold text-ink' : 'font-medium text-ink-secondary' }}">
                 {{ $displaySender }}
             </span>
             @if(!$message->is_seen)
@@ -66,11 +66,11 @@
     <a href="{{ route('message.show', ['folderPath' => $message->folder_path ?? $folderPath, 'uid' => $message->uid]) }}" wire:navigate class="flex items-center min-w-0 flex-1 cursor-pointer">
         {{-- Subject + Snippet Preview + Labels --}}
         <div class="flex items-center min-w-0 flex-1 pr-2">
-            <span class="text-sm truncate shrink-0 max-w-[65%] sm:max-w-[55%] {{ !$message->is_seen ? 'font-semibold text-ink' : 'font-normal text-ink/90' }}">
+            <span class="message-row-title truncate shrink-0 max-w-[65%] sm:max-w-[55%] {{ !$message->is_seen ? 'font-semibold text-ink' : 'font-normal text-ink/90' }}">
                 {{ $message->subject ?: '(no subject)' }}
             </span>
             @if(!empty($message->snippet))
-                <span class="text-xs text-ink-tertiary truncate ml-2 font-normal hidden sm:inline">
+                <span class="message-row-desc text-ink-tertiary truncate ml-2 font-normal hidden sm:inline">
                     — {{ Str::limit($message->snippet, 80) }}
                 </span>
             @endif

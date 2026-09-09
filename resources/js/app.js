@@ -4,39 +4,56 @@ import DOMPurify from 'dompurify';
 
 window.DOMPurify = DOMPurify;
 
+// Theme/Density helper functions
+export function applyThemeToDoc(theme) {
+    const html = document.documentElement;
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (theme === 'dark' || (theme === 'system' && prefersDark)) {
+        html.classList.add('dark');
+    } else {
+        html.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+}
+
+export function applyDensityToDoc(density) {
+    const html = document.documentElement;
+    const valid = ['compact', 'regular', 'comfortable'].includes(density) ? density : 'regular';
+    html.classList.remove('density-compact', 'density-regular', 'density-comfortable');
+    html.classList.add(`density-${valid}`);
+    localStorage.setItem('density', valid);
+}
+
+function extractEventValue(e, key) {
+    if (e.detail) {
+        if (typeof e.detail === 'string') return e.detail;
+        if (e.detail[key]) return e.detail[key];
+        if (Array.isArray(e.detail) && e.detail[0] && e.detail[0][key]) return e.detail[0][key];
+    }
+    return null;
+}
+
 // Theme/Density initializer — runs on DOMContentLoaded for unauthenticated pages
 // Authenticated pages use the inline initializer in app.blade.php for zero-flash
 document.addEventListener('DOMContentLoaded', () => {
     const html = document.documentElement;
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-    // Read from localStorage (fallback for unauthenticated pages)
-    let theme = localStorage.getItem('theme') || 'system';
-    let density = localStorage.getItem('density') || 'regular';
+    // Check if inline initializer already set them
+    const hasInlineTheme = html.classList.contains('dark');
+    const hasInlineDensity = html.classList.contains('density-regular')
+        || html.classList.contains('density-compact')
+        || html.classList.contains('density-comfortable');
 
-    // If the inline initializer already applied classes, respect those
-    // (they come from server-rendered DB settings via app.blade.php)
-    if (html.classList.contains('dark') || html.classList.contains('density-regular')
-        || html.classList.contains('density-compact') || html.classList.contains('density-comfortable')) {
-        // Sync localStorage with what the inline initializer applied
-        if (html.classList.contains('dark')) {
-            localStorage.setItem('theme', 'dark');
-        } else if (!html.classList.contains('dark') && prefersDark) {
-            // Could be 'system' — keep as-is
-        }
-        return; // Inline initializer already handled it
+    if (!hasInlineTheme) {
+        const theme = localStorage.getItem('theme') || 'system';
+        applyThemeToDoc(theme);
+    }
+    if (!hasInlineDensity) {
+        const density = localStorage.getItem('density') || 'regular';
+        applyDensityToDoc(density);
     }
 
-    // Apply theme (unauthenticated pages only — authenticated use inline initializer)
-    if (theme === 'dark' || (theme === 'system' && prefersDark)) {
-        html.classList.add('dark');
-    }
-
-    // Apply density
-    html.classList.remove('density-compact', 'density-regular', 'density-comfortable');
-    html.classList.add(`density-${density}`);
-
-    // Listen for system preference changes
+    // Always listen for system preference changes
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
         const currentTheme = localStorage.getItem('theme') || 'system';
         if (currentTheme === 'system') {
@@ -48,23 +65,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Listen for theme/density change events from Settings page
-    window.addEventListener('theme-changed', (e) => {
-        const newTheme = e.detail?.theme || e.detail || 'system';
-        localStorage.setItem('theme', newTheme);
-        if (newTheme === 'dark' || (newTheme === 'system' && prefersDark)) {
-            html.classList.add('dark');
-        } else {
-            html.classList.remove('dark');
-        }
-    });
+    // Always listen for theme/density change events from Settings page or Livewire
+    const handleThemeChange = (e) => {
+        const newTheme = extractEventValue(e, 'theme') || 'system';
+        applyThemeToDoc(newTheme);
+    };
 
-    window.addEventListener('density-changed', (e) => {
-        const newDensity = e.detail?.density || e.detail || 'regular';
-        localStorage.setItem('density', newDensity);
-        html.classList.remove('density-compact', 'density-regular', 'density-comfortable');
-        html.classList.add(`density-${newDensity}`);
-    });
+    const handleDensityChange = (e) => {
+        const newDensity = extractEventValue(e, 'density') || 'regular';
+        applyDensityToDoc(newDensity);
+    };
+
+    window.addEventListener('theme-changed', handleThemeChange);
+    window.addEventListener('browser-theme-changed', handleThemeChange);
+    window.addEventListener('density-changed', handleDensityChange);
+    window.addEventListener('browser-density-changed', handleDensityChange);
 });
 
 // Route overlay fade cross (D-12) + page fade replay (D-09)
@@ -74,6 +89,11 @@ const main = () => document.getElementById('app-main');
 document.addEventListener('livewire:navigating', () => overlay()?.classList.add('opacity-100'));
 document.addEventListener('livewire:navigated', () => {
     overlay()?.classList.remove('opacity-100');
+    // Ensure density and theme persist across Livewire navigation
+    const currentDensity = localStorage.getItem('density');
+    if (currentDensity) {
+        applyDensityToDoc(currentDensity);
+    }
     // Replay page fade-in after SPA swaps (morph preserves the main element)
     const m = main();
     if (!m) return;
@@ -85,31 +105,27 @@ document.addEventListener('livewire:navigated', () => {
 // Alpine component registrations (alpine:init) — registers settings components in the Vite bundle
 document.addEventListener('alpine:init', () => {
     Alpine.data('appearancePreview', (props = {}) => ({
-        previewDensityClass: 'density-regular',
+        currentTheme: props.initialTheme || 'system',
+        currentDensity: props.initialDensity || 'regular',
+        get previewDensityClass() {
+            return `density-${this.currentDensity}`;
+        },
+        get densityLabel() {
+            return `${this.currentDensity} spacing`;
+        },
         init() {
-            this.previewDensityClass = `density-${props.initialDensity || 'regular'}`;
-            this.$watch('previewDensityClass', (val) => {
-                document.documentElement.classList.remove('density-compact', 'density-regular', 'density-comfortable');
-                document.documentElement.classList.add(val);
-            });
+            this.currentDensity = props.initialDensity || localStorage.getItem('density') || 'regular';
+            this.currentTheme = props.initialTheme || localStorage.getItem('theme') || 'system';
+            applyDensityToDoc(this.currentDensity);
         },
         applyTheme(value) {
-            const html = document.documentElement;
-            if (value === 'dark' || (value === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                html.classList.add('dark');
-            } else {
-                html.classList.remove('dark');
-            }
-            // Sync localStorage for persistence across page loads
-            localStorage.setItem('theme', value);
-            // Dispatch browser event for cross-component sync
+            this.currentTheme = value;
+            applyThemeToDoc(value);
             window.dispatchEvent(new CustomEvent('theme-changed', { detail: { theme: value } }));
         },
         applyDensity(value) {
-            this.previewDensityClass = `density-${value}`;
-            // Sync localStorage for persistence across page loads
-            localStorage.setItem('density', value);
-            // Dispatch browser event for cross-component sync
+            this.currentDensity = value;
+            applyDensityToDoc(value);
             window.dispatchEvent(new CustomEvent('density-changed', { detail: { density: value } }));
         }
     }));

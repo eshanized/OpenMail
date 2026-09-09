@@ -135,53 +135,152 @@
 /* ============================================
    Density System
    ============================================ */
-.density-compact {
-    --spacing-unit: 0.5rem;
-    --font-size-base: 0.8125rem;
-    --line-height-base: 1.4;
-}
+:root,
+html.density-regular,
 .density-regular {
     --spacing-unit: 1rem;
     --font-size-base: 0.875rem;
     --line-height-base: 1.5;
+    --density-row-py: 0.625rem;
+    --density-row-px: 0.875rem;
+    --density-row-min-h: 2.875rem;
+    --density-gap: 0.625rem;
+    --density-avatar-size: 1.75rem;
+    --density-avatar-text: 0.75rem;
+    --density-title-size: 0.875rem;
+    --density-desc-size: 0.75rem;
+    --density-icon-size: 1rem;
+    --density-line-height: 1.45;
 }
+
+html.density-compact,
+.density-compact {
+    --spacing-unit: 0.5rem;
+    --font-size-base: 0.8125rem;
+    --line-height-base: 1.4;
+    --density-row-py: 0.25rem;
+    --density-row-px: 0.75rem;
+    --density-row-min-h: 2.25rem;
+    --density-gap: 0.5rem;
+    --density-avatar-size: 1.375rem;
+    --density-avatar-text: 0.6875rem;
+    --density-title-size: 0.8125rem;
+    --density-desc-size: 0.75rem;
+    --density-icon-size: 0.875rem;
+    --density-line-height: 1.3;
+}
+
+html.density-comfortable,
 .density-comfortable {
     --spacing-unit: 1.5rem;
     --font-size-base: 1rem;
     --line-height-base: 1.6;
+    --density-row-py: 1rem;
+    --density-row-px: 1rem;
+    --density-row-min-h: 3.75rem;
+    --density-gap: 0.875rem;
+    --density-avatar-size: 2.25rem;
+    --density-avatar-text: 0.875rem;
+    --density-title-size: 0.9375rem;
+    --density-desc-size: 0.8125rem;
+    --density-icon-size: 1.125rem;
+    --density-line-height: 1.6;
 }
 
 @utility density-compact {
     --spacing-unit: 0.5rem;
     --font-size-base: 0.8125rem;
     --line-height-base: 1.4;
+    --density-row-py: 0.25rem;
+    --density-row-px: 0.75rem;
+    --density-row-min-h: 2.25rem;
+    --density-gap: 0.5rem;
+    --density-avatar-size: 1.375rem;
+    --density-avatar-text: 0.6875rem;
+    --density-title-size: 0.8125rem;
+    --density-desc-size: 0.75rem;
+    --density-icon-size: 0.875rem;
+    --density-line-height: 1.3;
 }
+
 @utility density-regular {
     --spacing-unit: 1rem;
     --font-size-base: 0.875rem;
     --line-height-base: 1.5;
+    --density-row-py: 0.625rem;
+    --density-row-px: 0.875rem;
+    --density-row-min-h: 2.875rem;
+    --density-gap: 0.625rem;
+    --density-avatar-size: 1.75rem;
+    --density-avatar-text: 0.75rem;
+    --density-title-size: 0.875rem;
+    --density-desc-size: 0.75rem;
+    --density-icon-size: 1rem;
+    --density-line-height: 1.45;
 }
+
 @utility density-comfortable {
     --spacing-unit: 1.5rem;
     --font-size-base: 1rem;
     --line-height-base: 1.6;
+    --density-row-py: 1rem;
+    --density-row-px: 1rem;
+    --density-row-min-h: 3.75rem;
+    --density-gap: 0.875rem;
+    --density-avatar-size: 2.25rem;
+    --density-avatar-text: 0.875rem;
+    --density-title-size: 0.9375rem;
+    --density-desc-size: 0.8125rem;
+    --density-icon-size: 1.125rem;
+    --density-line-height: 1.6;
 }
 
 /* ============================================
-   Component Utilities
+   Component Utilities — Density Aware
    ============================================ */
 
 /* Message row — density-aware */
 .message-row {
-    padding: var(--spacing-unit) 1rem;
-    font-size: var(--font-size-base);
-    line-height: var(--line-height-base);
+    padding-top: var(--density-row-py);
+    padding-bottom: var(--density-row-py);
+    padding-left: var(--density-row-px);
+    padding-right: var(--density-row-px);
+    min-height: var(--density-row-min-h);
+    gap: var(--density-gap);
+    font-size: var(--density-title-size);
+    line-height: var(--density-line-height);
+    transition: padding 0.15s ease, min-height 0.15s ease, gap 0.15s ease;
+}
+
+.message-row-avatar {
+    width: var(--density-avatar-size);
+    height: var(--density-avatar-size);
+    font-size: var(--density-avatar-text);
+    transition: width 0.15s ease, height 0.15s ease, font-size 0.15s ease;
+}
+
+.message-row-title {
+    font-size: var(--density-title-size);
+    line-height: var(--density-line-height);
+    transition: font-size 0.15s ease;
+}
+
+.message-row-desc {
+    font-size: var(--density-desc-size);
+    line-height: var(--density-line-height);
+    transition: font-size 0.15s ease;
+}
+
+.message-row-icon {
+    width: var(--density-icon-size);
+    height: var(--density-icon-size);
+    transition: width 0.15s ease, height 0.15s ease;
 }
 
 /* Sidebar item — density-aware */
 .sidebar-item {
-    padding: calc(var(--spacing-unit) * 0.5) 0.75rem;
-    font-size: var(--font-size-base);
+    padding: calc(var(--density-row-py) * 0.75 + 0.25rem) 0.75rem;
+    font-size: var(--density-desc-size);
 }
 
 /* Focus ring — accessibility */

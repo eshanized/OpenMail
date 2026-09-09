@@ -15,6 +15,22 @@
     {{-- Inline theme initializer to prevent flash of wrong theme --}}
     <script @cspNonceAttribute>
         (function() {
+            @auth
+                @php
+                    $savedTheme = auth()->user()->setting('theme', null);
+                    $savedDensity = auth()->user()->setting('density', null);
+                @endphp
+                @if($savedTheme)
+                    if (!localStorage.getItem('theme')) {
+                        localStorage.setItem('theme', @js($savedTheme));
+                    }
+                @endif
+                @if($savedDensity)
+                    if (!localStorage.getItem('density')) {
+                        localStorage.setItem('density', @js($savedDensity));
+                    }
+                @endif
+            @endauth
             var theme = localStorage.getItem('theme') || 'system';
             var density = localStorage.getItem('density') || 'regular';
             var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -23,6 +39,7 @@
                 document.documentElement.classList.add('dark');
             }
 
+            document.documentElement.classList.remove('density-compact', 'density-regular', 'density-comfortable');
             document.documentElement.classList.add('density-' + density);
         })();
     </script>

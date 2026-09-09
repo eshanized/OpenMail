@@ -18,6 +18,7 @@ class MessageList extends Component
     public string $sortDir = 'desc';
     public array $selectedUids = [];
     public string $threadMode = 'threaded'; // 'threaded' | 'flat'
+    public string $quickFilter = 'all'; // 'all' | 'unread' | 'starred'
     protected $paginationTheme = 'tailwind';
 
     protected $listeners = [
@@ -56,25 +57,86 @@ class MessageList extends Component
         $this->onToggleThreadMode($newMode);
     }
 
+    public function setQuickFilter(string $filter): void
+    {
+        $this->quickFilter = in_array($filter, ['all', 'unread', 'starred']) ? $filter : 'all';
+    }
+
     public function getMessages()
     {
-        if ($this->threadMode === 'threaded') {
-            return $this->getThreadedMessages();
+        $messages = $this->threadMode === 'threaded'
+            ? $this->getThreadedMessages()
+            : $this->getFlatMessages();
+
+        if ($this->quickFilter === 'unread') {
+            if (is_array($messages)) {
+                return array_values(array_filter($messages, fn ($t) => ($t->unreadCount ?? ($t->is_seen ? 0 : 1)) > 0));
+            }
+            if ($messages instanceof LengthAwarePaginator) {
+                $filtered = $messages->getCollection()->filter(fn ($m) => !($m->is_seen ?? false));
+                return new LengthAwarePaginator(
+                    $filtered->values(),
+                    $filtered->count(),
+                    $messages->perPage(),
+                    $messages->currentPage(),
+                    ['path' => request()->url(), 'pageName' => 'messages-page']
+                );
+            }
         }
 
-        return $this->getFlatMessages();
+        if ($this->quickFilter === 'starred') {
+            if (is_array($messages)) {
+                return array_values(array_filter($messages, fn ($t) => (bool) ($t->is_flagged ?? false)));
+            }
+            if ($messages instanceof LengthAwarePaginator) {
+                $filtered = $messages->getCollection()->filter(fn ($m) => (bool) ($m->is_flagged ?? false));
+                return new LengthAwarePaginator(
+                    $filtered->values(),
+                    $filtered->count(),
+                    $messages->perPage(),
+                    $messages->currentPage(),
+                    ['path' => request()->url(), 'pageName' => 'messages-page']
+                );
+            }
+        }
+
+        return $messages;
     }
 
     public function getFlatMessages(): LengthAwarePaginator
     {
         $perPage = (int) auth()->user()->setting('page_size', 25);
         
-        return app(ImapMailboxService::class)->getMessages(
+        $paginator = app(ImapMailboxService::class)->getMessages(
             $this->folderPath,
             $this->sortBy,
             $this->sortDir,
             $this->getPage(),
             $perPage
+        );
+
+        if (empty($paginator->items())) {
+            return $paginator;
+        }
+
+        $pageUids = collect($paginator->items())->map(function ($m) {
+            if (is_object($m)) {
+                return method_exists($m, 'getUid') ? $m->getUid() : ($m->uid ?? null);
+            }
+            return null;
+        })->filter()->values()->toArray();
+
+        $enriched = $this->buildHeadersFromFlatMessages($paginator->items(), app(ImapMailboxService::class), $pageUids);
+
+        return new LengthAwarePaginator(
+            $enriched,
+            $paginator->total(),
+            $paginator->perPage(),
+            $paginator->currentPage(),
+            [
+                'path' => request()->url(),
+                'pageName' => 'messages-page',
+            ]
         );
     }
 
@@ -183,7 +245,8 @@ class MessageList extends Component
     public function toggleStar(int $uid): void
     {
         $messages = $this->getMessages();
-        $message = $this->findMessageInThreads($messages, $uid);
+        $items = is_array($messages) ? $messages : $messages->items();
+        $message = $this->findMessageInThreads($items, $uid);
         
         if (!$message) {
             return;
@@ -191,6 +254,46 @@ class MessageList extends Component
         
         $newValue = !$message->is_flagged;
         app(ImapMailboxService::class)->setFlag($this->folderPath, [$uid], '\\Flagged', $newValue);
+    }
+
+    public function quickToggleRead(int $uid): void
+    {
+        $messages = $this->getMessages();
+        $items = is_array($messages) ? $messages : $messages->items();
+        $message = $this->findMessageInThreads($items, $uid);
+        
+        if (!$message) {
+            return;
+        }
+
+        $newValue = !($message->is_seen ?? false);
+        app(ImapMailboxService::class)->setFlag($this->folderPath, [$uid], '\\Seen', $newValue);
+    }
+
+    public function quickArchive(int $uid): void
+    {
+        $imapService = app(ImapMailboxService::class);
+        $archivePath = $imapService->getOrCreateArchiveFolder();
+        if ($archivePath) {
+            $imapService->moveMessages($this->folderPath, [$uid], $archivePath);
+            $this->dispatch('messages-archived', ['message' => 'Conversation archived.']);
+        }
+    }
+
+    public function quickDelete(int $uid): void
+    {
+        $imapService = app(ImapMailboxService::class);
+        $imapService->deleteMessages($this->folderPath, [$uid]);
+        $this->dispatch('messages-archived', ['message' => 'Moved to Trash.']);
+    }
+
+    public function getFolderStats(): array
+    {
+        try {
+            return app(ImapMailboxService::class)->getMessageCount($this->folderPath);
+        } catch (\Throwable) {
+            return ['total' => 0, 'unread' => 0];
+        }
     }
 
     private function extractUidsFromThreads(array $threads): array
@@ -203,15 +306,17 @@ class MessageList extends Component
         return $uids;
     }
 
-    private function findMessageInThreads(array $threads, int $uid): ?object
+    private function findMessageInThreads(iterable $threads, int $uid): ?object
     {
         foreach ($threads as $thread) {
-            if ($thread->uid == $uid) {
+            if (isset($thread->uid) && $thread->uid == $uid) {
                 return $thread;
             }
-            $found = $this->findMessageInThreads($thread->children ?? [], $uid);
-            if ($found) {
-                return $found;
+            if (!empty($thread->children)) {
+                $found = $this->findMessageInThreads($thread->children, $uid);
+                if ($found) {
+                    return $found;
+                }
             }
         }
         return null;
@@ -221,6 +326,20 @@ class MessageList extends Component
     {
         if (empty($messages)) {
             return !empty($pageUids) ? $imapService->getThreadHeaders($this->folderPath, $pageUids) : [];
+        }
+
+        $metadataByUid = collect();
+        if (!empty($pageUids) && Auth::check()) {
+            try {
+                $metadataByUid = \App\Models\MessageMetadata::where('user_id', Auth::id())
+                    ->where('folder_path', $this->folderPath)
+                    ->whereIn('uid', $pageUids)
+                    ->with('labels')
+                    ->get()
+                    ->keyBy('uid');
+            } catch (\Throwable) {
+                // Ignore if query fails
+            }
         }
 
         $results = [];
@@ -234,14 +353,142 @@ class MessageList extends Component
                 continue;
             }
 
+            $meta = $metadataByUid->get($uid);
             $header = method_exists($msg, 'getHeader') ? $msg->getHeader() : null;
-            $from = isset($msg->from) ? (is_iterable($msg->from) ? collect($msg->from)->first() : $msg->from) : null;
-            $to = isset($msg->to) ? (is_iterable($msg->to) ? collect($msg->to)->first() : $msg->to) : null;
 
-            $msgId = (string) ($msg->message_id ?? ($header ? $header->get('message_id') : '') ?? '');
+            // Robust From extraction
+            $fromObj = null;
+            if (method_exists($msg, 'getFrom')) {
+                $fromAttr = $msg->getFrom();
+                if ($fromAttr instanceof \Webklex\PHPIMAP\Attribute) {
+                    $fromObj = $fromAttr->first();
+                }
+            }
+            if (!$fromObj && $header) {
+                $fromAttr = $header->get('from');
+                if ($fromAttr instanceof \Webklex\PHPIMAP\Attribute) {
+                    $fromObj = $fromAttr->first();
+                }
+            }
+            if (!$fromObj && isset($msg->from)) {
+                $fromVal = $msg->from;
+                if ($fromVal instanceof \Webklex\PHPIMAP\Attribute) {
+                    $fromObj = $fromVal->first();
+                } elseif (is_iterable($fromVal)) {
+                    $fromObj = collect($fromVal)->first();
+                } else {
+                    $fromObj = $fromVal;
+                }
+            }
+
+            $fromAddress = '';
+            $fromName = '';
+            if ($fromObj) {
+                if ($fromObj instanceof \Webklex\PHPIMAP\Address) {
+                    $fromAddress = $fromObj->mail ?? '';
+                    $fromName = $fromObj->personal ?? '';
+                } elseif (is_object($fromObj)) {
+                    $fromAddress = $fromObj->mail ?? (isset($fromObj->mailbox, $fromObj->host) && $fromObj->mailbox && $fromObj->host ? $fromObj->mailbox . '@' . $fromObj->host : '');
+                    $fromName = $fromObj->personal ?? '';
+                } elseif (is_string($fromObj)) {
+                    $fromAddress = $fromObj;
+                }
+            }
+
+            if (empty($fromAddress) && !empty($msg->from_address)) {
+                $fromAddress = $msg->from_address;
+            }
+            if (empty($fromName) && !empty($msg->from_name)) {
+                $fromName = $msg->from_name;
+            }
+            if (empty($fromAddress) && $meta && !empty($meta->from_address)) {
+                $fromAddress = $meta->from_address;
+            }
+            if (empty($fromName) && $meta && !empty($meta->from_name)) {
+                $fromName = $meta->from_name;
+            }
+
+            $fromDisplay = !empty($fromName) ? $fromName : (!empty($fromAddress) ? $fromAddress : 'Unknown');
+            if (!empty($msg->from_display)) {
+                $fromDisplay = $msg->from_display;
+            }
+
+            // Extract To
+            $to = isset($msg->to) ? (is_iterable($msg->to) ? collect($msg->to)->first() : $msg->to) : null;
+            $toAddress = is_object($to) ? ($to->mail ?? '') : (string) ($msg->to ?? ($meta?->to_address ?? ''));
+
+            $msgId = (string) ($msg->message_id ?? ($header ? $header->get('message_id') : '') ?? ($meta?->message_id ?? ''));
             if (empty($msgId)) {
                 $msgId = 'uid-' . $uid . '@openmail.local';
             }
+
+            // Extract Date
+            $rawDate = null;
+            if (method_exists($msg, 'getDate')) {
+                $dateAttr = $msg->getDate();
+                if ($dateAttr instanceof \Webklex\PHPIMAP\Attribute) {
+                    $rawDate = $dateAttr->first();
+                }
+            }
+            if (!$rawDate && $header) {
+                $dateAttr = $header->get('date');
+                if ($dateAttr instanceof \Webklex\PHPIMAP\Attribute) {
+                    $rawDate = $dateAttr->first();
+                }
+            }
+            if (!$rawDate && isset($msg->date)) {
+                $propDate = $msg->date;
+                if ($propDate instanceof \Webklex\PHPIMAP\Attribute) {
+                    $rawDate = $propDate->first();
+                } else {
+                    $rawDate = $propDate;
+                }
+            }
+            if (!$rawDate && $meta?->date) {
+                $rawDate = $meta->date;
+            }
+
+            $carbonDate = null;
+            if ($rawDate instanceof \Carbon\CarbonInterface) {
+                $carbonDate = $rawDate;
+            } elseif ($rawDate instanceof \DateTimeInterface) {
+                $carbonDate = \Carbon\Carbon::instance($rawDate);
+            } elseif (is_string($rawDate) && trim($rawDate) !== '') {
+                try {
+                    $carbonDate = \Carbon\Carbon::parse($rawDate);
+                } catch (\Throwable) {
+                    $carbonDate = null;
+                }
+            }
+
+            $formattedDate = '';
+            if ($carbonDate) {
+                $now = now();
+                if ($carbonDate->isToday()) {
+                    $formattedDate = $carbonDate->format('g:i A');
+                } elseif ($carbonDate->isYesterday()) {
+                    $formattedDate = 'Yesterday';
+                } elseif ($carbonDate->year === $now->year) {
+                    $formattedDate = $carbonDate->format('M j');
+                } else {
+                    $formattedDate = $carbonDate->format('M j, Y');
+                }
+            }
+
+            $isSeen = method_exists($msg, 'getFlags') 
+                ? (bool) ($msg->getFlags()?->has('seen') ?? false) 
+                : (bool) ($msg->is_seen ?? ($meta?->is_seen ?? false));
+
+            $isFlagged = method_exists($msg, 'getFlags') 
+                ? (bool) ($msg->getFlags()?->has('flagged') ?? false) 
+                : (bool) ($msg->is_flagged ?? ($meta?->is_flagged ?? false));
+
+            $hasAttachments = method_exists($msg, 'hasAttachments') 
+                ? (bool) $msg->hasAttachments() 
+                : (bool) ($msg->has_attachments ?? ($meta?->has_attachments ?? false));
+
+            $snippet = (string) ($msg->snippet ?? ($meta?->snippet ?? ''));
+            $labels = $meta?->labels ?? ($msg->labels ?? collect());
 
             $results[] = (object) [
                 'uid' => $uid,
@@ -249,16 +496,18 @@ class MessageList extends Component
                 'in_reply_to' => (string) ($msg->in_reply_to ?? ($header ? $header->get('in_reply_to') : '') ?? ''),
                 'references' => (string) ($msg->references ?? ($header ? $header->get('references') : '') ?? ''),
                 'subject' => (string) ($msg->subject ?? ($header ? $header->get('subject') : '') ?? '(no subject)'),
-                'date' => (string) ($msg->date ?? ($header ? $header->get('date') : '') ?? ''),
-                'from_address' => is_object($from) ? ($from->mail ?? '') : (string) ($msg->from ?? ''),
-                'from_name' => is_object($from) ? ($from->personal ?? '') : '',
-                'to_address' => is_object($to) ? ($to->mail ?? '') : (string) ($msg->to ?? ''),
-                'is_seen' => method_exists($msg, 'getFlags') ? (bool) ($msg->getFlags()?->has('seen') ?? false) : (bool) ($msg->is_seen ?? false),
-                'is_flagged' => method_exists($msg, 'getFlags') ? (bool) ($msg->getFlags()?->has('flagged') ?? false) : (bool) ($msg->is_flagged ?? false),
-                'has_attachments' => false,
-                'snippet' => '',
+                'date' => $carbonDate ? $carbonDate->toDateTimeString() : (string) ($rawDate ?? ''),
+                'formatted_date' => $formattedDate,
+                'from_address' => $fromAddress,
+                'from_name' => $fromName,
+                'from_display' => $fromDisplay,
+                'to_address' => $toAddress,
+                'is_seen' => $isSeen,
+                'is_flagged' => $isFlagged,
+                'has_attachments' => $hasAttachments,
+                'snippet' => $snippet,
                 'folder_path' => $this->folderPath,
-                'labels' => collect(),
+                'labels' => $labels,
             ];
         }
 
@@ -272,6 +521,8 @@ class MessageList extends Component
             'selectedUids' => $this->selectedUids,
             'folderPath' => $this->folderPath,
             'threadMode' => $this->threadMode,
+            'folderStats' => $this->getFolderStats(),
+            'quickFilter' => $this->quickFilter,
         ]);
     }
 }

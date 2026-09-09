@@ -73,78 +73,123 @@
     }
 }" x-init="initThreadMode()">
 
-    {{-- Toolbar --}}
-    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div class="flex items-center gap-2">
+    {{-- Mailbox Header & Folder Info --}}
+    <div class="mb-4 flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-border-subtle">
+        <div class="flex items-center gap-3">
+            <h1 class="text-xl font-bold tracking-tight text-ink flex items-center gap-2">
+                <span>{{ ucfirst(strtolower($folderPath)) }}</span>
+            </h1>
+            @php
+                $unreadCount = $folderStats['unread'] ?? 0;
+                $totalCount = $folderStats['total'] ?? 0;
+            @endphp
+            @if($unreadCount > 0)
+                <span class="px-2 py-0.5 text-xs font-semibold text-primary bg-primary-subtle rounded-full border border-primary/20">
+                    {{ $unreadCount }} unread
+                </span>
+            @endif
+            <span class="text-xs text-ink-tertiary">
+                {{ $totalCount }} {{ $threadMode === 'threaded' ? 'conversations' : 'messages' }}
+            </span>
+        </div>
+
+        {{-- Primary Action + Search + Thread Toggle --}}
+        <div class="flex items-center gap-2.5 flex-wrap">
             <button
                 @click="openComposer"
                 class="inline-flex items-center gap-2 rounded-xl bg-primary hover:bg-primary-hover
-                       px-4 py-2 text-sm font-semibold text-white
+                       px-3.5 py-2 text-xs font-semibold text-white
                        shadow-xs hover:shadow-md
                        transition-all duration-150
                        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
                        focus-visible:ring-primary
                        active:scale-[0.98] cursor-pointer"
             >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.25">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.25">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
                 </svg>
                 <span>Compose</span>
             </button>
-        </div>
 
-        {{-- Search bar --}}
-        <div class="flex-1 max-w-md mx-2">
-            <livewire:mailbox.search-bar />
-        </div>
+            {{-- Search bar --}}
+            <div class="w-48 sm:w-64">
+                <livewire:mailbox.search-bar />
+            </div>
 
-        {{-- Thread toggle --}}
-        <div class="flex items-center gap-2">
+            {{-- Thread toggle --}}
             <button
                 wire:click="toggleThreadMode"
-                class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 flex items-center gap-1.5 border cursor-pointer
+                class="px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 flex items-center gap-1.5 border cursor-pointer
                     {{ $threadMode === 'threaded'
                         ? 'bg-primary-subtle text-primary border-primary/20'
                         : 'text-ink-secondary border-border hover:bg-hover hover:text-ink' }}"
                 title="Toggle thread view (t)"
             >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/>
                 </svg>
                 <span>{{ $threadMode === 'threaded' ? 'Threaded' : 'Flat' }}</span>
             </button>
         </div>
-
-        {{-- Bulk action toolbar --}}
-        <livewire:mailbox.message-toolbar
-            :selectedUids="$selectedUids"
-            :folderPath="$folderPath"
-        />
     </div>
 
-    {{-- Sort controls --}}
-    <div class="mb-3 flex flex-wrap items-center gap-1.5 text-xs">
-        <span class="text-ink-tertiary mr-1 font-medium text-[11px] uppercase tracking-wider">Sort:</span>
-        <div class="inline-flex items-center rounded-lg p-0.5 bg-surface-sunken border border-border-subtle">
-            @foreach([
-                ['key' => 'date', 'dir' => 'desc', 'label' => 'Date'],
-                ['key' => 'sender', 'dir' => 'asc', 'label' => 'Sender'],
-                ['key' => 'subject', 'dir' => 'asc', 'label' => 'Subject'],
-                ['key' => 'size', 'dir' => 'desc', 'label' => 'Size'],
-            ] as $sort)
-                <button
-                    wire:click="setSort('{{ $sort['key'] }}', '{{ $sort['dir'] }}')"
-                    class="px-2.5 py-1 rounded-md transition-all duration-100 cursor-pointer text-xs
-                        {{ $sortBy === $sort['key']
-                            ? 'bg-primary-subtle text-primary font-semibold shadow-2xs'
-                            : 'text-ink-tertiary hover:text-ink-secondary hover:bg-hover' }}"
-                >
-                    {{ $sort['label'] }}
-                    @if($sortBy === $sort['key'])
-                        <span class="font-mono">{{ $sortDir === 'desc' ? ' ↓' : ' ↑' }}</span>
-                    @endif
-                </button>
-            @endforeach
+    {{-- Bulk action toolbar --}}
+    <livewire:mailbox.message-toolbar
+        :selectedUids="$selectedUids"
+        :folderPath="$folderPath"
+    />
+
+    {{-- Sub-bar: Quick Filters & Sorting --}}
+    <div class="mb-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+        {{-- Quick Filter Pills --}}
+        <div class="flex items-center gap-1 p-0.5 bg-surface-sunken border border-border-subtle rounded-lg">
+            <button
+                type="button"
+                wire:click="setQuickFilter('all')"
+                class="px-2.5 py-1 rounded-md transition-colors cursor-pointer {{ $quickFilter === 'all' ? 'bg-surface-raised text-ink font-semibold shadow-2xs' : 'text-ink-tertiary hover:text-ink hover:bg-hover' }}"
+            >
+                All
+            </button>
+            <button
+                type="button"
+                wire:click="setQuickFilter('unread')"
+                class="px-2.5 py-1 rounded-md transition-colors cursor-pointer {{ $quickFilter === 'unread' ? 'bg-surface-raised text-primary font-semibold shadow-2xs' : 'text-ink-tertiary hover:text-ink hover:bg-hover' }}"
+            >
+                Unread
+            </button>
+            <button
+                type="button"
+                wire:click="setQuickFilter('starred')"
+                class="px-2.5 py-1 rounded-md transition-colors cursor-pointer {{ $quickFilter === 'starred' ? 'bg-surface-raised text-amber-400 font-semibold shadow-2xs' : 'text-ink-tertiary hover:text-ink hover:bg-hover' }}"
+            >
+                Starred
+            </button>
+        </div>
+
+        {{-- Sort controls --}}
+        <div class="flex items-center gap-1.5">
+            <span class="text-ink-tertiary mr-1 font-medium text-[11px] uppercase tracking-wider">Sort:</span>
+            <div class="inline-flex items-center rounded-lg p-0.5 bg-surface-sunken border border-border-subtle">
+                @foreach([
+                    ['key' => 'date', 'dir' => 'desc', 'label' => 'Date'],
+                    ['key' => 'sender', 'dir' => 'asc', 'label' => 'Sender'],
+                    ['key' => 'subject', 'dir' => 'asc', 'label' => 'Subject'],
+                    ['key' => 'size', 'dir' => 'desc', 'label' => 'Size'],
+                ] as $sort)
+                    <button
+                        wire:click="setSort('{{ $sort['key'] }}', '{{ $sort['dir'] }}')"
+                        class="px-2.5 py-1 rounded-md transition-all duration-100 cursor-pointer text-xs
+                            {{ $sortBy === $sort['key']
+                                ? 'bg-primary-subtle text-primary font-semibold shadow-2xs'
+                                : 'text-ink-tertiary hover:text-ink-secondary hover:bg-hover' }}"
+                    >
+                        {{ $sort['label'] }}
+                        @if($sortBy === $sort['key'])
+                            <span class="font-mono">{{ $sortDir === 'desc' ? ' ↓' : ' ↑' }}</span>
+                        @endif
+                    </button>
+                @endforeach
+            </div>
         </div>
     </div>
 
@@ -227,4 +272,4 @@
         @endforeach
     </div>
 </div>
-</div>
+

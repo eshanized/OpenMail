@@ -709,7 +709,46 @@ class ImapMailboxService
             $results = [];
             foreach ($messages as $msg) {
                 $header = $msg->getHeader();
-                $from = $msg->from ? (is_iterable($msg->from) ? collect($msg->from)->first() : $msg->from) : null;
+
+                $fromObj = null;
+                if (method_exists($msg, 'getFrom')) {
+                    $fromAttr = $msg->getFrom();
+                    if ($fromAttr instanceof \Webklex\PHPIMAP\Attribute) {
+                        $fromObj = $fromAttr->first();
+                    }
+                }
+                if (!$fromObj && $header) {
+                    $fromAttr = $header->get('from');
+                    if ($fromAttr instanceof \Webklex\PHPIMAP\Attribute) {
+                        $fromObj = $fromAttr->first();
+                    }
+                }
+                if (!$fromObj && isset($msg->from)) {
+                    $fromVal = $msg->from;
+                    if ($fromVal instanceof \Webklex\PHPIMAP\Attribute) {
+                        $fromObj = $fromVal->first();
+                    } elseif (is_iterable($fromVal)) {
+                        $fromObj = collect($fromVal)->first();
+                    } else {
+                        $fromObj = $fromVal;
+                    }
+                }
+
+                $fromAddress = '';
+                $fromName = '';
+                if ($fromObj) {
+                    if ($fromObj instanceof \Webklex\PHPIMAP\Address) {
+                        $fromAddress = $fromObj->mail ?? '';
+                        $fromName = $fromObj->personal ?? '';
+                    } elseif (is_object($fromObj)) {
+                        $fromAddress = $fromObj->mail ?? (isset($fromObj->mailbox, $fromObj->host) && $fromObj->mailbox && $fromObj->host ? $fromObj->mailbox . '@' . $fromObj->host : '');
+                        $fromName = $fromObj->personal ?? '';
+                    } elseif (is_string($fromObj)) {
+                        $fromAddress = $fromObj;
+                    }
+                }
+
+                $fromDisplay = !empty($fromName) ? $fromName : (!empty($fromAddress) ? $fromAddress : 'Unknown');
                 $to = $msg->to ? (is_iterable($msg->to) ? collect($msg->to)->first() : $msg->to) : null;
                 
                 $msgId = (string) ($msg->message_id ?? $header?->get('message_id') ?? '');
@@ -717,19 +756,22 @@ class ImapMailboxService
                     $msgId = 'uid-' . $msg->getUid() . '@openmail.local';
                 }
 
+                $rawDate = (string) ($msg->date ?? $header?->get('date') ?? '');
+
                 $results[] = (object) [
                     'uid' => $msg->getUid(),
                     'message_id' => $msgId,
                     'in_reply_to' => (string) ($msg->in_reply_to ?? $header?->get('in_reply_to') ?? ''),
                     'references' => (string) ($msg->references ?? $header?->get('references') ?? ''),
                     'subject' => (string) ($msg->subject ?? $header?->get('subject') ?? '(no subject)'),
-                    'date' => (string) ($msg->date ?? $header?->get('date') ?? ''),
-                    'from_address' => $from?->mail ?? (string) ($msg->from ?? ''),
-                    'from_name' => $from?->personal ?? '',
+                    'date' => $rawDate,
+                    'from_address' => $fromAddress,
+                    'from_name' => $fromName,
+                    'from_display' => $fromDisplay,
                     'to_address' => $to?->mail ?? (string) ($msg->to ?? ''),
                     'is_seen' => (bool) ($msg->getFlags()?->has('seen') ?? false),
                     'is_flagged' => (bool) ($msg->getFlags()?->has('flagged') ?? false),
-                    'has_attachments' => false,
+                    'has_attachments' => method_exists($msg, 'hasAttachments') ? $msg->hasAttachments() : false,
                     'snippet' => '',
                     'folder_path' => $folderPath,
                     'labels' => collect(),

@@ -72,7 +72,11 @@ class ThreadBuilder
         $roots = $this->groupBySubject($roots);
 
         // 7. Sort threads by latest message date descending
-        usort($roots, fn ($a, $b) => $this->getLatestDate($b) <=> $this->getLatestDate($a));
+        usort($roots, function ($a, $b) {
+            $dateA = $this->getLatestDate($a)?->timestamp ?? 0;
+            $dateB = $this->getLatestDate($b)?->timestamp ?? 0;
+            return $dateB <=> $dateA;
+        });
 
         // 8. Attach children recursively and compute metadata
         return $this->attachChildren($roots, $children);
@@ -242,7 +246,20 @@ class ThreadBuilder
      */
     private function getLatestDate(object $thread): ?Carbon
     {
-        $latest = $thread->date instanceof Carbon ? $thread->date : null;
+        $raw = $thread->date ?? null;
+        $latest = null;
+
+        if ($raw instanceof Carbon) {
+            $latest = $raw;
+        } elseif ($raw instanceof \DateTimeInterface) {
+            $latest = Carbon::instance($raw);
+        } elseif (is_string($raw) && trim($raw) !== '') {
+            try {
+                $latest = Carbon::parse($raw);
+            } catch (\Throwable) {
+                $latest = null;
+            }
+        }
 
         foreach (($thread->children ?? []) as $child) {
             $childLatest = $this->getLatestDate($child);
@@ -273,12 +290,27 @@ class ThreadBuilder
      */
     private function getFromDisplay(object $thread): string
     {
-        $latest = $this->getLatestDate($thread);
         // Find the message with the latest date
         $messages = $this->collectThreadMessages($thread);
-        $latestMessage = $messages->sortByDesc('date')->first();
-        
-        return $latestMessage->from_name ?? $latestMessage->from_address ?? 'Unknown';
+        $latestMessage = $messages->sortByDesc(function ($m) {
+            return $this->getLatestDate($m)?->timestamp ?? 0;
+        })->first() ?? $thread;
+
+        $name = trim($latestMessage->from_name ?? '');
+        $display = trim($latestMessage->from_display ?? '');
+        $address = trim($latestMessage->from_address ?? '');
+
+        if (!empty($name)) {
+            return $name;
+        }
+        if (!empty($display)) {
+            return $display;
+        }
+        if (!empty($address)) {
+            return $address;
+        }
+
+        return 'Unknown';
     }
 
     /**

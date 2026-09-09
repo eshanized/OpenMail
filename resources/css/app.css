@@ -909,4 +909,61 @@
     transform: scale(0.9);
 }
 
+/* Quick hover actions on email rows */
+.row-quick-actions {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    transform: translateX(4px);
+}
+
+.group:hover .row-quick-actions {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+}
+
+.group:hover .row-date-display {
+    opacity: 0;
+}
+
+.row-date-display {
+    transition: opacity 0.15s ease;
+}
+
+/* Custom modern mail checkbox */
+.mail-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 1.125rem;
+    height: 1.125rem;
+    border: 1.5px solid var(--color-border-strong);
+    border-radius: 0.375rem;
+    background-color: transparent;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+
+.mail-checkbox:checked {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3E%3C/svg%3E");
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.mail-checkbox:hover:not(:checked) {
+    border-color: var(--color-primary);
+    background-color: var(--color-primary-subtle);
+}
+
+.mail-checkbox:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+
 

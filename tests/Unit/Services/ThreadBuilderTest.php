@@ -153,6 +153,61 @@ class ThreadBuilderTest extends TestCase
         $this->assertTrue(method_exists($this->builder, 'resolveMissingParentsFromCache'));
     }
 
+    /** @test */
+    public function handles_string_dates_and_formats_correctly(): void
+    {
+        $message = (object) [
+            'message_id' => 'msg-string-date',
+            'in_reply_to' => null,
+            'references' => null,
+            'subject' => 'Date Test',
+            'date' => now()->toRfc2822String(),
+            'from_address' => 'sender@example.com',
+            'from_name' => 'Sender',
+            'to_address' => 'user@example.com',
+            'is_seen' => true,
+            'is_flagged' => false,
+            'has_attachments' => false,
+            'uid' => 10,
+            'folder_path' => 'INBOX',
+            'snippet' => '',
+            'labels' => collect(),
+        ];
+
+        $threads = $this->builder->buildThreads(collect([$message]));
+
+        $this->assertCount(1, $threads);
+        $this->assertNotEmpty($threads[0]->formatted_date);
+        $this->assertEquals(now()->format('g:i A'), $threads[0]->formatted_date);
+    }
+
+    /** @test */
+    public function from_display_falls_back_to_address_when_from_name_is_empty_string(): void
+    {
+        $message = (object) [
+            'message_id' => 'msg-empty-name',
+            'in_reply_to' => null,
+            'references' => null,
+            'subject' => 'GitHub Notification',
+            'date' => now(),
+            'from_address' => 'noreply@github.com',
+            'from_name' => '', // Empty string, typical for some system emails
+            'to_address' => 'user@example.com',
+            'is_seen' => true,
+            'is_flagged' => false,
+            'has_attachments' => false,
+            'uid' => 11,
+            'folder_path' => 'INBOX',
+            'snippet' => '',
+            'labels' => collect(),
+        ];
+
+        $threads = $this->builder->buildThreads(collect([$message]));
+
+        $this->assertCount(1, $threads);
+        $this->assertEquals('noreply@github.com', $threads[0]->from_display);
+    }
+
     private function makeMessage(string $messageId, ?string $inReplyTo, ?string $references, string $subject, Carbon $date): object
     {
         return (object) [

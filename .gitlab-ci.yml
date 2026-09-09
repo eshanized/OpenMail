@@ -66,7 +66,7 @@ build:frontend:
     paths:
       - .npm/
   script:
-    - npm ci --prefer-offline
+    - npm ci --prefer-offline --legacy-peer-deps
     - npm run build
     - node scripts/check-fontsource-build.js
   artifacts:

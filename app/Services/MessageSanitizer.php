@@ -121,16 +121,53 @@ class MessageSanitizer
     /**
      * Determine if a URL is dangerous (SSRF or XSS vector).
      * Used by sanitizeUrls() to neutralize malicious links.
+     *
+     * Blocks: javascript/data/vbscript/file schemes, private/reserved IPs,
+     * decimal/octal/hex IP encodings, IPv6 private ranges, and URL-encoded
+     * bypass variants.
      */
     public function isDangerousUrl(string $url): bool
     {
+        $normalized = rawurldecode($url);
+
         // Block javascript:, data:, vbscript:, file: schemes
-        if (preg_match('/^(javascript|data|vbscript|file):/i', $url)) {
+        if (preg_match('/^(javascript|data|vbscript|file):/i', $normalized)) {
             return true;
         }
 
-        // Block localhost and private/reserved IP ranges (SSRF prevention)
-        if (preg_match('/^https?:\/\/(localhost|127\.|10\.|192\.168\.|169\.254\.|\[::1\])/i', $url)) {
+        // Block localhost and private/reserved IPv4 ranges
+        if (preg_match('/^https?:\/\/(localhost|0\.0\.0\.0|127\.\d{1,3}\.\d{1,3}\.\d{1,3})/i', $normalized)) {
+            return true;
+        }
+
+        // RFC 1918 private ranges
+        if (preg_match('/^https?:\/\/(10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3})/i', $normalized)) {
+            return true;
+        }
+
+        // Link-local
+        if (preg_match('/^https?:\/\/169\.254\.\d{1,3}\.\d{1,3}/i', $normalized)) {
+            return true;
+        }
+
+        // IPv6 loopback and private ranges
+        if (preg_match('/^https?:\/\/\[?(::1|::ffff:127\.\d{1,3}\.\d{1,3}\.\d{1,3}|fc00|fd[0-9a-f]{2}|fe80|::)/i', $normalized)) {
+            return true;
+        }
+
+        // Decimal IP (e.g. http://2130706433 = 127.0.0.1)
+        // Block 9+ digit numbers (covers 10.0.0.0/8 through 255.255.255.255)
+        if (preg_match('/^https?:\/\/\d{9,}(\:|\/|$)/i', $normalized)) {
+            return true;
+        }
+
+        // Octal IP (e.g. http://0177.0.0.1)
+        if (preg_match('/^https?:\/\/0\d{2,3}\.\d{1,3}\.\d{1,3}/i', $normalized)) {
+            return true;
+        }
+
+        // Hex IP (e.g. http://0x7f.0x0.0x0.0x1)
+        if (preg_match('/^https?:\/\/0x[0-9a-f]{1,2}\.0x[0-9a-f]{1,2}\.0x[0-9a-f]{1,2}\.0x[0-9a-f]{1,2}/i', $normalized)) {
             return true;
         }
 

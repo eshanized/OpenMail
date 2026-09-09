@@ -63,7 +63,7 @@ class LabelTest extends TestCase
         $msg1 = MessageMetadata::factory()->create(['user_id' => $this->user->id]);
         $msg2 = MessageMetadata::factory()->create(['user_id' => $this->user->id]);
 
-        $this->labelService->applyToMessages($label->id, [$msg1->id, $msg2->id]);
+        $this->labelService->applyToMessages($label->id, [$msg1->id, $msg2->id], $this->user->id);
 
         // Verify label is applied (1 label per message)
         $this->assertCount(1, $msg1->fresh()->labels);
@@ -86,7 +86,7 @@ class LabelTest extends TestCase
         $msg1 = MessageMetadata::factory()->create(['user_id' => $this->user->id]);
         $msg2 = MessageMetadata::factory()->create(['user_id' => $this->user->id]);
 
-        $this->labelService->applyToMessages($label->id, [$msg1->id, $msg2->id]);
+        $this->labelService->applyToMessages($label->id, [$msg1->id, $msg2->id], $this->user->id);
 
         $this->assertCount(1, $msg1->fresh()->labels);
         $this->assertCount(1, $msg2->fresh()->labels);
@@ -101,8 +101,8 @@ class LabelTest extends TestCase
         $msg1 = MessageMetadata::factory()->create(['user_id' => $this->user->id]);
         $msg2 = MessageMetadata::factory()->create(['user_id' => $this->user->id]);
 
-        $this->labelService->applyToMessages($label->id, [$msg1->id, $msg2->id]);
-        $this->labelService->removeFromMessages($label->id, [$msg1->id]);
+        $this->labelService->applyToMessages($label->id, [$msg1->id, $msg2->id], $this->user->id);
+        $this->labelService->removeFromMessages($label->id, [$msg1->id], $this->user->id);
 
         $this->assertCount(0, $msg1->fresh()->labels);
         $this->assertCount(1, $msg2->fresh()->labels);
@@ -121,8 +121,8 @@ class LabelTest extends TestCase
         $msg4 = MessageMetadata::factory()->create(['user_id' => $this->user->id, 'is_seen' => false]);
         $msg5 = MessageMetadata::factory()->create(['user_id' => $this->user->id, 'is_seen' => true]);
 
-        $this->labelService->applyToMessages($label1->id, [$msg1->id, $msg2->id, $msg3->id]);
-        $this->labelService->applyToMessages($label2->id, [$msg4->id, $msg5->id]);
+        $this->labelService->applyToMessages($label1->id, [$msg1->id, $msg2->id, $msg3->id], $this->user->id);
+        $this->labelService->applyToMessages($label2->id, [$msg4->id, $msg5->id], $this->user->id);
 
         $labels = $this->labelService->getForUser($this->user->id);
 
@@ -145,7 +145,7 @@ class LabelTest extends TestCase
         $msg2 = MessageMetadata::factory()->create(['user_id' => $this->user->id]);
         $msg3 = MessageMetadata::factory()->create(['user_id' => $this->user->id]);
 
-        $this->labelService->applyToMessages($label->id, [$msg1->id, $msg2->id]);
+        $this->labelService->applyToMessages($label->id, [$msg1->id, $msg2->id], $this->user->id);
 
         // Test scopeWithLabel
         $withLabel = MessageMetadata::where('user_id', $this->user->id)
@@ -409,7 +409,7 @@ class LabelTest extends TestCase
             'folder_path' => 'INBOX',
         ]);
 
-        $this->labelService->applyToMessages($inboxLabel->id, [$msg1->id, $msg2->id]);
+        $this->labelService->applyToMessages($inboxLabel->id, [$msg1->id, $msg2->id], $this->user->id);
 
         // Verify Inbox label is applied
         $this->assertCount(1, $msg1->fresh()->labels);

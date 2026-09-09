@@ -128,8 +128,8 @@ class MessageToolbar extends Component
 
             // Remove Inbox label and add Archive label
             if (!empty($messageIds)) {
-                $labelService->removeFromMessages($inboxLabel->id, $messageIds);
-                $labelService->applyToMessages($archiveLabel->id, $messageIds);
+                $labelService->removeFromMessages($inboxLabel->id, $messageIds, $userId);
+                $labelService->applyToMessages($archiveLabel->id, $messageIds, $userId);
             }
 
             // Show undo toast for 5 seconds
@@ -181,8 +181,8 @@ class MessageToolbar extends Component
 
             // Restore labels: remove Archive, add Inbox
             if (!empty($messageIds)) {
-                $labelService->removeFromMessages($archiveLabel->id, $messageIds);
-                $labelService->applyToMessages($inboxLabel->id, $messageIds);
+                $labelService->removeFromMessages($archiveLabel->id, $messageIds, $userId);
+                $labelService->applyToMessages($inboxLabel->id, $messageIds, $userId);
             }
 
             $this->showArchiveToast = false;

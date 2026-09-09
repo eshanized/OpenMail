@@ -49,7 +49,7 @@ class SecurityConfigurator
 
         $config = [
             'SESSION_LIFETIME'     => '1440',
-            'SESSION_ENCRYPT'      => 'false',
+            'SESSION_ENCRYPT'      => 'true',
             'SESSION_SECURE_COOKIE' => $isHttps ? 'true' : 'false',
             'BCRYPT_ROUNDS'        => '12',
             'APP_DEBUG'            => 'false',

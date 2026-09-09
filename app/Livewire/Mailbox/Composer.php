@@ -197,7 +197,12 @@ class Composer extends Component
             $this->resetForm();
             $this->isOpen = false;
         } catch (\Exception $e) {
-            $this->dispatch('toast', 'Failed to send: ' . $e->getMessage(), 'error');
+            \Illuminate\Support\Facades\Log::error('Mail send failed', [
+                'user_id' => auth()->id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            $this->dispatch('toast', 'Failed to send message. Please check your connection and try again.', 'error');
         } finally {
             $this->sending = false;
         }
@@ -218,7 +223,12 @@ class Composer extends Component
 
             $this->dispatch('toast', 'Draft saved', 'success');
         } catch (\Exception $e) {
-            $this->dispatch('toast', 'Failed to save draft: ' . $e->getMessage(), 'error');
+            \Illuminate\Support\Facades\Log::error('Draft save failed', [
+                'user_id' => auth()->id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            $this->dispatch('toast', 'Failed to save draft. Please check your connection and try again.', 'error');
         }
     }
 

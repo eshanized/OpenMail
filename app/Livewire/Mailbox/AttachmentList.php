@@ -61,21 +61,9 @@ class AttachmentList extends Component
             'video/webm',
         ];
 
-        // Block executable types
-        $blockedMimeTypes = [
-            'application/x-msdownload',
-            'application/x-msdos-program',
-            'application/x-sh',
-            'application/x-csh',
-            'application/x-perl',
-            'application/x-python',
-            'application/javascript',
-            'text/javascript',
-            'application/x-php',
-        ];
-
-        if (in_array($mimeType, $blockedMimeTypes)) {
-            abort(403, 'Executable file types are not allowed for download');
+        // Enforce MIME type whitelist (SEC-09) - only allowed types may be downloaded
+        if (!in_array($mimeType, $allowedMimeTypes)) {
+            abort(403, 'This file type is not allowed for download');
         }
 
         // Stream directly from IMAP (D-12) - no local file storage

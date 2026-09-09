@@ -16,6 +16,7 @@ use App\Services\SmtpConnectionTester;
 use App\Services\SystemRequirementsChecker;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
@@ -639,10 +640,10 @@ class SetupWizard extends Component
     /** @return array<string, mixed> */
     private function sessionPayload(): array
     {
-        // NOTE: credentials are stored server-side in the PHP session (encrypted
-        // by Laravel when SESSION_ENCRYPT=true). This is acceptable for an
-        // installation wizard. They are cleared after finish().
-        return [
+        // Credentials are encrypted before storage to protect against
+        // SESSION_ENCRYPT=false and database session table compromise.
+        $sensitiveKeys = ['dbPassword', 'imapPassword', 'smtpPassword', 'adminPassword', 'adminPasswordConfirmation'];
+        $payload = [
             'currentStep'               => $this->currentStep,
             'completedSteps'            => $this->completedSteps,
             'appName'                   => $this->appName,
@@ -650,27 +651,27 @@ class SetupWizard extends Component
             'dbPort'                    => $this->dbPort,
             'dbDatabase'                => $this->dbDatabase,
             'dbUsername'                => $this->dbUsername,
-            'dbPassword'                => $this->dbPassword,
+            'dbPassword'                => Crypt::encryptString($this->dbPassword),
             'emailDomain'               => $this->emailDomain,
             'detectedProvider'          => $this->detectedProvider,
             'imapHost'                  => $this->imapHost,
             'imapPort'                  => $this->imapPort,
             'imapEncryption'            => $this->imapEncryption,
             'imapUsername'              => $this->imapUsername,
-            'imapPassword'              => $this->imapPassword,
+            'imapPassword'              => Crypt::encryptString($this->imapPassword),
             'smtpHost'                  => $this->smtpHost,
             'smtpPort'                  => $this->smtpPort,
             'smtpEncryption'            => $this->smtpEncryption,
             'smtpUsername'              => $this->smtpUsername,
-            'smtpPassword'              => $this->smtpPassword,
+            'smtpPassword'              => Crypt::encryptString($this->smtpPassword),
             'appOrg'                    => $this->appOrg,
             'appDomain'                 => $this->appDomain,
             'appUrl'                    => $this->appUrl,
             'appTimezone'               => $this->appTimezone,
             'adminName'                 => $this->adminName,
             'adminEmail'                => $this->adminEmail,
-            'adminPassword'             => $this->adminPassword,
-            'adminPasswordConfirmation' => $this->adminPasswordConfirmation,
+            'adminPassword'             => Crypt::encryptString($this->adminPassword),
+            'adminPasswordConfirmation' => Crypt::encryptString($this->adminPasswordConfirmation),
             'httpsEnabled'              => $this->httpsEnabled,
             'secureCookies'             => $this->secureCookies,
             'verificationResults'       => $this->verificationResults,
@@ -681,6 +682,7 @@ class SetupWizard extends Component
             'imapTestResult'            => $this->imapTestResult,
             'smtpTestResult'            => $this->smtpTestResult,
         ];
+        return $payload;
     }
 
     private function saveToSession(): void
@@ -696,9 +698,21 @@ class SetupWizard extends Component
             return;
         }
 
+        $sensitiveKeys = ['dbPassword', 'imapPassword', 'smtpPassword', 'adminPassword', 'adminPasswordConfirmation'];
+
         foreach ($saved as $key => $value) {
             if (property_exists($this, $key)) {
-                $this->$key = $value;
+                // Decrypt sensitive fields that were encrypted in saveToSession
+                if (in_array($key, $sensitiveKeys) && is_string($value)) {
+                    try {
+                        $this->$key = Crypt::decryptString($value);
+                    } catch (\Throwable) {
+                        // If decryption fails (e.g., key changed), clear the field
+                        $this->$key = '';
+                    }
+                } else {
+                    $this->$key = $value;
+                }
             }
         }
     }

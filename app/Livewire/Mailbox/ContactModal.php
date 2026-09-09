@@ -70,8 +70,13 @@ class ContactModal extends Component
                     'notes' => $this->notes,
                 ]);
             } else {
-                // Create new contact
-                $contact = $service->create(auth()->id(), [
+                // Create new contact — resolve user via auth guard
+                $userId = auth()->id();
+                if (!$userId) {
+                    $this->addError('email', 'You must be logged in to create contacts.');
+                    return;
+                }
+                $contact = $service->create($userId, [
                     'name' => $this->name,
                     'email' => $this->email,
                     'phone' => $this->phone,

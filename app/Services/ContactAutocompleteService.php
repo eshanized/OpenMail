@@ -54,11 +54,13 @@ class ContactAutocompleteService
      */
     public function search(int $userId, string $query, int $limit = 10): Collection
     {
+        $escapedQuery = str_replace(['%', '_'], ['\\%', '\\_'], $query);
+
         return ContactAutocompleteCache::where('user_id', $userId)
             ->where('expires_at', '>', now())
-            ->where(function ($q) use ($query) {
-                $q->where('email', 'LIKE', "%{$query}%")
-                  ->orWhere('name', 'LIKE', "%{$query}%");
+            ->where(function ($q) use ($escapedQuery) {
+                $q->where('email', 'LIKE', "%{$escapedQuery}%")
+                  ->orWhere('name', 'LIKE', "%{$escapedQuery}%");
             })
             ->orderByDesc('frequency')
             ->limit($limit)
@@ -93,11 +95,13 @@ class ContactAutocompleteService
      */
     public function searchUnified(int $userId, string $query, int $limit = 10): Collection
     {
+        $escapedQuery = str_replace(['%', '_'], ['\\%', '\\_'], $query);
+
         // Local contacts: exact match > prefix match on email/name, order by usage_count desc
         $local = Contact::where('user_id', $userId)
-            ->where(function ($q) use ($query) {
-                $q->where('email', 'LIKE', "{$query}%")
-                    ->orWhere('name', 'LIKE', "{$query}%");
+            ->where(function ($q) use ($escapedQuery) {
+                $q->where('email', 'LIKE', "{$escapedQuery}%")
+                    ->orWhere('name', 'LIKE', "{$escapedQuery}%");
             })
             ->orderByDesc('usage_count')
             ->limit($limit)

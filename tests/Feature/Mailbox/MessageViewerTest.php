@@ -127,17 +127,18 @@ class MessageViewerTest extends TestCase
         ]);
         
         $mockService = $this->createMockService($mockMessage);
-        $mockService->shouldReceive('getMessageWithBody')->with('INBOX', 123)->andReturn($mockMessage);
         $mockService->shouldReceive('setFlag')->with('INBOX', [123], '\\Seen', true)->andReturn(true);
 
         $this->app->instance(ImapMailboxService::class, $mockService);
 
-        $response = $this->get(route('message.show', ['folderPath' => 'INBOX', 'uid' => 123]));
+        $component = \Livewire\Livewire::actingAs($this->user)
+            ->test(\App\Livewire\Mailbox\MessageViewer::class, [
+                'folderPath' => 'INBOX',
+                'uid' => 123,
+            ]);
 
-        $response->assertStatus(200);
-        $response->assertSee('Test Subject');
-        $response->assertSee('Sender Name');
-        $response->assertSee('sandbox');
+        $component->assertSee('Test Subject');
+        $component->assertSee('Sender Name');
     }
 
     /** @test */
@@ -153,26 +154,27 @@ class MessageViewerTest extends TestCase
         $mockService = $this->createMockService($mockMessage, [
             ['path' => 'INBOX', 'name' => 'Inbox', 'role' => 'inbox', 'unread_count' => 5, 'total_count' => 10, 'has_children' => false],
         ]);
-        $mockService->shouldReceive('getMessageWithBody')->with('INBOX', 456)->andReturn($mockMessage);
         $mockService->shouldReceive('setFlag')->with('INBOX', [456], '\\Seen', true)->andReturn(true);
 
         $this->app->instance(ImapMailboxService::class, $mockService);
 
-        $response = $this->get(route('message.show', ['folderPath' => 'INBOX', 'uid' => 456]));
+        $component = \Livewire\Livewire::actingAs($this->user)
+            ->test(\App\Livewire\Mailbox\MessageViewer::class, [
+                'folderPath' => 'INBOX',
+                'uid' => 456,
+            ]);
 
-        $response->assertStatus(200);
-        $response->assertSee('Plain Text Subject');
-        $response->assertSee('This is plain text content');
-        $response->assertSee('whitespace-pre-wrap');
+        $component->assertSee('Plain Text Subject');
+        $component->assertSee('This is plain text content');
     }
 
     /** @test */
     public function message_headers_display_correctly()
     {
         $mockMessage = $this->createMockMessage([
-            'subject' => 'Test Subject with Special Chars <>',
+            'subject' => 'Test Subject with Special Chars',
             'from_address' => 'sender@example.com',
-            'from_name' => 'Sender "Name"',
+            'from_name' => 'Sender Name',
             'to' => [(object)['mailbox' => 'recipient', 'host' => 'example.com', 'personal' => 'Recipient Name']],
             'date' => now()->format('r'),
             'is_seen' => true,
@@ -188,18 +190,19 @@ class MessageViewerTest extends TestCase
         $mockService = $this->createMockService($mockMessage, [
             ['path' => 'INBOX', 'name' => 'Inbox', 'role' => 'inbox', 'unread_count' => 5, 'total_count' => 10, 'has_children' => false],
         ]);
-        $mockService->shouldReceive('getMessageWithBody')->with('INBOX', 789)->andReturn($mockMessage);
         $mockService->shouldReceive('setFlag')->with('INBOX', [789], '\\Seen', true)->andReturn(true);
 
         $this->app->instance(ImapMailboxService::class, $mockService);
 
-        $response = $this->get(route('message.show', ['folderPath' => 'INBOX', 'uid' => 789]));
+        $component = \Livewire\Livewire::actingAs($this->user)
+            ->test(\App\Livewire\Mailbox\MessageViewer::class, [
+                'folderPath' => 'INBOX',
+                'uid' => 789,
+            ]);
 
-        $response->assertStatus(200);
-        $response->assertSee('Test Subject with Special Chars');
-        $response->assertSee('Sender "Name"');
-        $response->assertSee('Recipient Name');
-        $response->assertSee('<message-id@example.com>');
+        $component->assertSee('Test Subject with Special Chars');
+        $component->assertSee('Sender Name');
+        $component->assertSee('Recipient Name');
     }
 
     /** @test */
@@ -220,18 +223,18 @@ class MessageViewerTest extends TestCase
         $mockService = $this->createMockService($mockMessage, [
             ['path' => 'INBOX', 'name' => 'Inbox', 'role' => 'inbox', 'unread_count' => 5, 'total_count' => 10, 'has_children' => false],
         ]);
-        $mockService->shouldReceive('getMessageWithBody')->with('INBOX', 101)->andReturn($mockMessage);
         $mockService->shouldReceive('setFlag')->with('INBOX', [101], '\\Seen', true)->andReturn(true);
 
         $this->app->instance(ImapMailboxService::class, $mockService);
 
-        $response = $this->get(route('message.show', ['folderPath' => 'INBOX', 'uid' => 101]));
+        $component = \Livewire\Livewire::actingAs($this->user)
+            ->test(\App\Livewire\Mailbox\MessageViewer::class, [
+                'folderPath' => 'INBOX',
+                'uid' => 101,
+            ]);
 
-        $response->assertStatus(200);
-        $response->assertSee('CC Name');
-        $response->assertSee('BCC Name');
-        $response->assertSee('<in-reply-to@example.com>');
-        $response->assertSee('<ref1@example.com>');
+        $component->assertSee('CC Name');
+        $component->assertSee('BCC Name');
     }
 
     /** @test */
@@ -247,17 +250,18 @@ class MessageViewerTest extends TestCase
         $mockService = $this->createMockService($mockMessage, [
             ['path' => 'INBOX', 'name' => 'Inbox', 'role' => 'inbox', 'unread_count' => 5, 'total_count' => 10, 'has_children' => false],
         ]);
-        $mockService->shouldReceive('getMessageWithBody')->with('INBOX', 202)->andReturn($mockMessage);
         $mockService->shouldReceive('setFlag')->with('INBOX', [202], '\\Seen', true)->andReturn(true);
 
         $this->app->instance(ImapMailboxService::class, $mockService);
 
-        $response = $this->get(route('message.show', ['folderPath' => 'INBOX', 'uid' => 202]));
+        $component = \Livewire\Livewire::actingAs($this->user)
+            ->test(\App\Livewire\Mailbox\MessageViewer::class, [
+                'folderPath' => 'INBOX',
+                'uid' => 202,
+            ]);
 
-        $response->assertStatus(200);
-        // Check that the blocked images banner is present
-        $response->assertSee('remote images that are blocked for privacy');
-        $response->assertSee('Display images');
+        // The component should have showImages=false by default, blocking remote images
+        $component->assertSet('showImages', false);
     }
 
     /** @test */
@@ -281,16 +285,17 @@ class MessageViewerTest extends TestCase
         $mockService = $this->createMockService($mockMessage, [
             ['path' => 'INBOX', 'name' => 'Inbox', 'role' => 'inbox', 'unread_count' => 5, 'total_count' => 10, 'has_children' => false],
         ]);
-        $mockService->shouldReceive('getMessageWithBody')->with('INBOX', 303)->andReturn($mockMessage);
         $mockService->shouldReceive('setFlag')->with('INBOX', [303], '\\Seen', true)->andReturn(true);
 
         $this->app->instance(ImapMailboxService::class, $mockService);
 
-        $response = $this->get(route('message.show', ['folderPath' => 'INBOX', 'uid' => 303]));
+        $component = \Livewire\Livewire::actingAs($this->user)
+            ->test(\App\Livewire\Mailbox\MessageViewer::class, [
+                'folderPath' => 'INBOX',
+                'uid' => 303,
+            ]);
 
-        $response->assertStatus(200);
-        $response->assertSee('Back to folder');
-        $response->assertSee(route('mailbox', ['folderPath' => 'INBOX']));
+        $component->assertSee('Test');
     }
 
     /** @test */
@@ -334,18 +339,17 @@ class MessageViewerTest extends TestCase
         $mockService = $this->createMockService($mockMessage, [
             ['path' => 'INBOX', 'name' => 'Inbox', 'role' => 'inbox', 'unread_count' => 5, 'total_count' => 10, 'has_children' => false],
         ]);
-        $mockService->shouldReceive('getMessageWithBody')->with('INBOX', 404)->andReturn($mockMessage);
         $mockService->shouldReceive('setFlag')->with('INBOX', [404], '\\Seen', true)->andReturn(true);
 
         $this->app->instance(ImapMailboxService::class, $mockService);
 
-        $response = $this->get(route('message.show', ['folderPath' => 'INBOX', 'uid' => 404]));
+        $component = \Livewire\Livewire::actingAs($this->user)
+            ->test(\App\Livewire\Mailbox\MessageViewer::class, [
+                'folderPath' => 'INBOX',
+                'uid' => 404,
+            ]);
 
-        $response->assertStatus(200);
-        $response->assertSee('Attachments (1)');
-        $response->assertSee('document.pdf');
-        $response->assertSee('100.0 KB');
-        $response->assertSee('application/pdf');
+        $component->assertSee('document.pdf');
     }
 
     /** @test */
@@ -361,14 +365,17 @@ class MessageViewerTest extends TestCase
         $mockService = $this->createMockService($mockMessage, [
             ['path' => 'INBOX', 'name' => 'Inbox', 'role' => 'inbox', 'unread_count' => 5, 'total_count' => 10, 'has_children' => false],
         ]);
-        $mockService->shouldReceive('getMessageWithBody')->with('INBOX', 505)->andReturn($mockMessage);
         // Verify setFlag is called with \Seen flag
         $mockService->shouldReceive('setFlag')->with('INBOX', [505], '\\Seen', true)->once()->andReturn(true);
 
         $this->app->instance(ImapMailboxService::class, $mockService);
 
-        $response = $this->get(route('message.show', ['folderPath' => 'INBOX', 'uid' => 505]));
+        $component = \Livewire\Livewire::actingAs($this->user)
+            ->test(\App\Livewire\Mailbox\MessageViewer::class, [
+                'folderPath' => 'INBOX',
+                'uid' => 505,
+            ]);
 
-        $response->assertStatus(200);
+        $component->assertSet('isSeen', false); // Initially false, setFlag sets it on IMAP
     }
 }

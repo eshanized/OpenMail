@@ -102,11 +102,12 @@ class LabelService
      *
      * @param int $labelId
      * @param array<int> $messageIds
+     * @param int $userId The authenticated user ID (required for authorization)
      * @return void
      */
-    public function applyToMessages(int $labelId, array $messageIds): void
+    public function applyToMessages(int $labelId, array $messageIds, int $userId): void
     {
-        $label = Label::findOrFail($labelId);
+        $label = Label::where('id', $labelId)->where('user_id', $userId)->firstOrFail();
 
         // Verify all messages belong to the same user as the label
         $messageIds = MessageMetadata::where('user_id', $label->user_id)
@@ -131,11 +132,12 @@ class LabelService
      *
      * @param int $labelId
      * @param array<int> $messageIds
+     * @param int $userId The authenticated user ID (required for authorization)
      * @return void
      */
-    public function removeFromMessages(int $labelId, array $messageIds): void
+    public function removeFromMessages(int $labelId, array $messageIds, int $userId): void
     {
-        $label = Label::findOrFail($labelId);
+        $label = Label::where('id', $labelId)->where('user_id', $userId)->firstOrFail();
 
         $label->messages()->detach($messageIds);
     }

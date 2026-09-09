@@ -90,9 +90,11 @@ class SearchService
         if (!empty($query)) {
             $words = array_filter(explode(' ', $query));
             foreach ($words as $word) {
-                $q->where(function ($subQuery) use ($searchableColumns, $word) {
+                // Escape LIKE wildcards to prevent broader-than-intended search results
+                $escapedWord = str_replace(['%', '_'], ['\\%', '\\_'], $word);
+                $q->where(function ($subQuery) use ($searchableColumns, $escapedWord) {
                     foreach ($searchableColumns as $col) {
-                        $subQuery->orWhere($col, 'LIKE', '%' . $word . '%');
+                        $subQuery->orWhere($col, 'LIKE', '%' . $escapedWord . '%');
                     }
                 });
             }

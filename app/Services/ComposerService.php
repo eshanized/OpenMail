@@ -183,20 +183,34 @@ class ComposerService
             return false;
         }
 
-        // Update status to cancelled
-        $pendingSend->update(['status' => 'cancelled']);
+        // Mark as cancelling first to prevent concurrent processing
+        $pendingSend->update(['status' => 'cancelling']);
 
-        // If message was appended to Sent folder, delete it
-        if ($pendingSend->sent_folder_uid) {
-            $this->imapService->deleteFromSent($pendingSend->sent_folder_uid);
+        try {
+            // If message was appended to Sent folder, delete it
+            if ($pendingSend->sent_folder_uid) {
+                $this->imapService->deleteFromSent($pendingSend->sent_folder_uid);
+            }
+
+            // Move to Drafts folder (per D-24)
+            if ($pendingSend->mime_message) {
+                $this->imapService->appendToDrafts($pendingSend->mime_message);
+            }
+
+            // Only mark as cancelled after all operations succeed
+            $pendingSend->update(['status' => 'cancelled']);
+            return true;
+        } catch (\Exception $e) {
+            // If append to Drafts fails after deletion from Sent, the message
+            // is lost. Mark as failed so it's not retried, and log the error.
+            $pendingSend->update(['status' => 'failed']);
+            \Illuminate\Support\Facades\Log::error('Undo send failed - message may be lost', [
+                'pending_send_id' => $pendingSendId,
+                'user_id' => $userId,
+                'error' => $e->getMessage(),
+            ]);
+            return false;
         }
-
-        // Move to Drafts folder (per D-24)
-        if ($pendingSend->mime_message) {
-            $this->imapService->appendToDrafts($pendingSend->mime_message);
-        }
-
-        return true;
     }
 
     /**

@@ -22,23 +22,46 @@ class SsrfProtection
 
     /**
      * Private/reserved IP ranges (RFC 1918, loopback, link-local, etc.).
+     * Includes IPv4, IPv6, decimal, octal, and hex-encoded bypass variants.
      */
     private const PRIVATE_IP_PATTERNS = [
-        '/^https?:\/\/(localhost)/i',
-        '/^https?:\/\/127\./i',
-        '/^https?:\/\/10\./i',
-        '/^https?:\/\/192\.168\./i',
-        '/^https?:\/\/169\.254\./i',
-        '/^https?:\/\/\[::1\]/i',
-        '/^https?:\/\/0\.0\.0\.0/i',
+        // IPv4 loopback
+        '/^https?:\/\/(localhost|0\.0\.0\.0|127\.\d{1,3}\.\d{1,3}\.\d{1,3})/i',
+        // IPv4 private RFC 1918 (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16)
+        '/^https?:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}/i',
+        '/^https?:\/\/172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}/i',
+        '/^https?:\/\/192\.168\.\d{1,3}\.\d{1,3}/i',
+        // IPv4 link-local
+        '/^https?:\/\/169\.254\.\d{1,3}\.\d{1,3}/i',
+        // IPv4 "0.x" shorthand (resolves to 0.0.0.0)
+        '/^https?:\/\/0(\.0){0,2}(\.0)?(\:|\/|$)/i',
+        // IPv4 decimal representation (e.g. http://2130706433 = 127.0.0.1)
+        // Block 9+ digit numbers (covers 10.0.0.0/8 through 255.255.255.255)
+        '/^https?:\/\/\d{9,}(\:|\/|$)/i',
+        // IPv4 octal representation (e.g. http://0177.0.0.1 = 127.0.0.1)
+        '/^https?:\/\/0\d{2,3}\.\d{1,3}\.\d{1,3}/i',
+        // IPv4 hex representation (e.g. http://0x7f.0x0.0x0.0x1)
+        '/^https?:\/\/0x[0-9a-f]{1,2}\.0x[0-9a-f]{1,2}\.0x[0-9a-f]{1,2}\.0x[0-9a-f]{1,2}/i',
+        // IPv6 loopback and private ranges
+        '/^https?:\/\/\[?::1\]?\//i',
+        '/^https?:\/\/\[?::ffff:127\.\d{1,3}\.\d{1,3}\.\d{1,3}\]?/i',
+        '/^https?:\/\/\[?(fc00|fd[0-9a-f]{2}|fe80|::)/i',
+        // IPv4-mapped IPv6
+        '/^https?:\/\/\[?::ffff:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\]?/i',
     ];
 
     public function handle(Request $request, Closure $next): Response
     {
-        // Check all input data for dangerous URLs
+        // Check all input data for dangerous URLs (avoid double-scanning with except())
         $this->validateInput($request->query());
         $this->validateInput($request->post());
-        $this->validateInput($request->except(['password', 'password_confirmation']));
+        // Also scan the raw request content for embedded SSRF payloads
+        $content = $request->getContent();
+        if ($content && strlen($content) < 1_000_000) {
+            if ($this->isDangerousUrl($content)) {
+                abort(422, 'Potentially malicious URL detected in input.');
+            }
+        }
 
         return $next($request);
     }

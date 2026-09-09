@@ -72,6 +72,11 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::get('/up', function () {
+    try {
+        \Illuminate\Support\Facades\DB::select('SELECT 1');
+    } catch (\Exception $e) {
+        return response('Database unreachable', 503)->header('Content-Type', 'text/plain');
+    }
     return response('OK', 200)->header('Content-Type', 'text/plain');
 });
 

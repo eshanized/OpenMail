@@ -71,10 +71,12 @@ class ContactService
 
     public function search(int $userId, string $query): Collection
     {
+        $escapedQuery = str_replace(['%', '_'], ['\\%', '\\_'], $query);
+
         return Contact::where('user_id', $userId)
-            ->where(function ($q) use ($query) {
-                $q->where('email', 'LIKE', "{$query}%")
-                    ->orWhere('name', 'LIKE', "%{$query}%");
+            ->where(function ($q) use ($escapedQuery) {
+                $q->where('email', 'LIKE', "{$escapedQuery}%")
+                    ->orWhere('name', 'LIKE', "%{$escapedQuery}%");
             })
             ->orderByDesc('usage_count')
             ->get();

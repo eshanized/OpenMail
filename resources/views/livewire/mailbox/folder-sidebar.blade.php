@@ -1,4 +1,4 @@
-<div x-data="{ expandedFolders: {}, activeTab: @js($activeTab) }"
+<div x-data="{ expandedFolders: {}, activeTab: @js($activeTab ?? 'folders') }"
      @set-active-tab.window="activeTab = $event.detail.tab"
      x-init="$wire.on('active-tab-changed', (tab) => { activeTab = tab; });"
      class="h-full flex flex-col">
@@ -114,13 +114,13 @@
 
                             {{-- Count badges --}}
                             <div class="flex items-center gap-1.5">
-                                @if($folder['unread_count'] > 0)
+                                @if(($folder['unread_count'] ?? 0) > 0)
                                     <span class="text-[11px] font-bold text-primary bg-primary-subtle px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
-                                        {{ $folder['unread_count'] > 99 ? '99+' : $folder['unread_count'] }}
+                                        {{ ($folder['unread_count'] ?? 0) > 99 ? '99+' : $folder['unread_count'] }}
                                     </span>
                                 @endif
-                                @if($folder['total_count'] > 0 && $folder['unread_count'] === 0)
-                                    <span class="text-[11px] text-ink-tertiary">{{ $folder['total_count'] }}</span>
+                                @if(($folder['total_count'] ?? $folder['total'] ?? 0) > 0 && ($folder['unread_count'] ?? 0) === 0)
+                                    <span class="text-[11px] text-ink-tertiary">{{ $folder['total_count'] ?? $folder['total'] }}</span>
                                 @endif
                             </div>
 
@@ -170,13 +170,13 @@
                                     </svg>
                                     <span class="flex-1 truncate text-sm">{{ $folder['name'] }}</span>
                                     <div class="flex items-center gap-1.5">
-                                        @if($folder['unread_count'] > 0)
+                                        @if(($folder['unread_count'] ?? 0) > 0)
                                             <span class="text-[11px] font-bold text-primary bg-primary-subtle px-1.5 py-0.5 rounded-full">
                                                 {{ $folder['unread_count'] }}
                                             </span>
                                         @endif
-                                        @if($folder['total_count'] > 0 && $folder['unread_count'] === 0)
-                                            <span class="text-[11px] text-ink-tertiary">{{ $folder['total_count'] }}</span>
+                                        @if(($folder['total_count'] ?? $folder['total'] ?? 0) > 0 && ($folder['unread_count'] ?? 0) === 0)
+                                            <span class="text-[11px] text-ink-tertiary">{{ $folder['total_count'] ?? $folder['total'] }}</span>
                                         @endif
                                     </div>
                                 </div>

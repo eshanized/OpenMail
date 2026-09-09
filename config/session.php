@@ -18,7 +18,9 @@ return [
     |
     */
 
-    'driver' => env('SESSION_DRIVER', 'database'),
+    'driver' => env('APP_ENV') === 'testing'
+        ? env('SESSION_DRIVER', 'array')
+        : (file_exists(storage_path('installed')) ? env('SESSION_DRIVER', 'database') : 'file'),
 
     /*
     |--------------------------------------------------------------------------

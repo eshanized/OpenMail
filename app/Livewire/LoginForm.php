@@ -34,18 +34,52 @@ class LoginForm extends Component
             ]);
         }
 
-        // Attempt IMAP authentication
-        $remember = false; // We don't use remember token for IMAP auth
-        $credentials = ['email' => $this->email, 'password' => $this->password];
+        // Attempt authentication: IMAP first, then local fallback
+        $authenticatedUser = null;
+        try {
+            $imapTester = app(\App\Services\ImapConnectionTester::class);
+            $host = config('openmail.imap.host');
+            $port = (int) config('openmail.imap.port', 993);
+            $encryption = config('openmail.imap.encryption', 'ssl');
 
-        if (Auth::guard('imap')->attempt($credentials, $remember)) {
+            if ($host) {
+                $result = $imapTester->test($host, $port, $encryption, $this->email, $this->password);
+                if (!empty($result['success'])) {
+                    $authenticatedUser = \App\Models\User::firstOrCreate(
+                        ['email' => $this->email],
+                        ['name' => explode('@', $this->email)[0]]
+                    );
+                    $authenticatedUser->password = $this->password;
+                    $authenticatedUser->save();
+                }
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('IMAP auth check failed: ' . $e->getMessage());
+        }
+
+        // Fallback to local database credentials (e.g. offline testing or local admin account)
+        if (!$authenticatedUser) {
+            if (Auth::guard('web')->attempt(['email' => $this->email, 'password' => $this->password])) {
+                $authenticatedUser = Auth::guard('web')->user();
+            }
+        }
+
+        if ($authenticatedUser) {
+            // Login to web guard (default guard for web routes) and imap guard
+            Auth::guard('web')->login($authenticatedUser);
+            if (config('auth.guards.imap')) {
+                Auth::guard('imap')->login($authenticatedUser);
+            }
+
             // Login successful
             $request = request();
-            $request->session()->regenerate(); // Session rotation (AUTH-04)
+            if ($request->hasSession()) {
+                $request->session()->regenerate(); // Session rotation (AUTH-04)
+            }
             RateLimiter::clear($throttleKey); // Clear throttle on success
 
             // Store encrypted IMAP password in session for future IMAP connections
-            $request->session()->put('openmail:imap_password', Crypt::encrypt($this->password));
+            session()->put('openmail:imap_password', Crypt::encrypt($this->password));
 
             // Audit log: login success
             AuditService::loginSuccess($request);

@@ -4,13 +4,15 @@
 <div class="h-[calc(100vh-3.5rem)] flex overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8 -my-6"
      x-data="{
          sidebarOpen: false,
-     }"
-     :class="densityClass">
+     }">
 
     {{-- Desktop Sidebar --}}
     <aside class="w-[260px] flex-shrink-0 bg-surface-raised border-r border-border flex flex-col hidden lg:flex">
         <div class="flex-1 overflow-y-auto scrollbar-thin">
-            {{ $sidebar ?? '' }}
+            @yield('sidebar')
+            @isset($sidebar)
+                {{ $sidebar }}
+            @endisset
         </div>
     </aside>
 
@@ -28,6 +30,7 @@
     {{-- Mobile sidebar overlay --}}
     <div
         x-show="sidebarOpen"
+        x-cloak
         class="lg:hidden fixed inset-0 z-50 bg-black/40"
         @click="sidebarOpen = false"
         x-transition:enter="transition ease-out duration-200"
@@ -53,7 +56,10 @@
                 </button>
             </div>
             <div class="flex-1 overflow-y-auto scrollbar-thin">
-                {{ $sidebar ?? '' }}
+                @yield('sidebar')
+                @isset($sidebar)
+                    {{ $sidebar }}
+                @endisset
             </div>
         </div>
     </div>
@@ -61,7 +67,8 @@
     {{-- Main content area --}}
     <main class="flex-1 flex flex-col min-w-0 bg-surface">
         <div class="flex-1 overflow-y-auto scrollbar-thin p-4 sm:p-6 pb-20 md:pb-6">
-            @yield('content')
+            @yield('mailbox-content')
+            {{ $slot ?? '' }}
         </div>
     </main>
 

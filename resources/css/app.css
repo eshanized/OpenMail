@@ -420,3 +420,287 @@
         backdrop-filter: none !important;
     }
 }
+
+/* ============================================
+   Setup Wizard UI Enhancements (Premium Dark & Light)
+   ============================================ */
+
+/* Setup background with ambient gradient mesh */
+.setup-bg {
+    min-height: 100vh;
+    background-color: #f8fafc;
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.06) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.06) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(139, 92, 246, 0.04) 0px, transparent 50%);
+    background-attachment: fixed;
+}
+
+:where(.dark) .setup-bg {
+    background-color: #0b0d14;
+    background-image: 
+        radial-gradient(at 15% 10%, rgba(99, 102, 241, 0.14) 0px, transparent 45%),
+        radial-gradient(at 85% 15%, rgba(59, 130, 246, 0.12) 0px, transparent 40%),
+        radial-gradient(at 50% 90%, rgba(139, 92, 246, 0.09) 0px, transparent 50%);
+}
+
+/* Header with subtle backdrop blur */
+.setup-header {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--color-border);
+}
+
+:where(.dark) .setup-header {
+    background: rgba(13, 16, 24, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Glassmorphic card container */
+.setup-card {
+    background: var(--color-surface-raised);
+    border: 1px solid var(--color-border);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+    border-radius: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+:where(.dark) .setup-card {
+    background: rgba(18, 22, 31, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    box-shadow: 
+        0 0 0 1px rgba(255, 255, 255, 0.03),
+        0 24px 48px -12px rgba(0, 0, 0, 0.7),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Top accent gradient bar */
+.setup-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #4f46e5 0%, #3b82f6 50%, #06b6d4 100%);
+    z-index: 10;
+}
+
+/* Setup form inputs */
+.setup-input {
+    width: 100%;
+    border-radius: 0.625rem;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: var(--color-ink);
+    background-color: var(--color-surface-raised);
+    border: 1px solid var(--color-border-strong);
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.setup-input::placeholder {
+    color: var(--color-ink-tertiary);
+}
+
+.setup-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+:where(.dark) .setup-input {
+    background-color: rgba(11, 14, 21, 0.75);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #f1f3f9;
+}
+
+:where(.dark) .setup-input::placeholder {
+    color: #64748b;
+}
+
+:where(.dark) .setup-input:hover:not(:focus):not(:disabled) {
+    border-color: rgba(255, 255, 255, 0.22);
+}
+
+:where(.dark) .setup-input:focus {
+    border-color: #6366f1;
+    background-color: rgba(13, 17, 26, 0.95);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+}
+
+:where(.dark) .setup-input:disabled {
+    opacity: 0.6;
+    background-color: rgba(255, 255, 255, 0.03);
+    cursor: not-allowed;
+}
+
+/* Primary action button with subtle gradient & glow */
+.setup-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.375rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 0.625rem;
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 50%, #2563eb 100%);
+    box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2), 0 4px 12px rgba(79, 70, 229, 0.25);
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+}
+
+.setup-btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(79, 70, 229, 0.25), 0 8px 18px rgba(79, 70, 229, 0.35);
+    filter: brightness(1.06);
+}
+
+.setup-btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+}
+
+.setup-btn-primary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Secondary / ghost action button */
+.setup-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 0.625rem;
+    color: var(--color-ink-secondary);
+    background: var(--color-surface-raised);
+    border: 1px solid var(--color-border);
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.setup-btn-secondary:hover:not(:disabled) {
+    background: var(--color-hover);
+    color: var(--color-ink);
+    border-color: var(--color-border-strong);
+}
+
+:where(.dark) .setup-btn-secondary {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #cbd5e1;
+}
+
+:where(.dark) .setup-btn-secondary:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.08);
+    color: #f8fafc;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Section cards / panels inside steps */
+.setup-panel {
+    background: var(--color-surface-sunken);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    transition: all 0.18s ease;
+}
+
+:where(.dark) .setup-panel {
+    background: rgba(14, 18, 26, 0.6);
+    border-color: rgba(255, 255, 255, 0.07);
+}
+
+/* Status callouts */
+.setup-callout-success {
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    color: #059669;
+    border-radius: 0.75rem;
+}
+:where(.dark) .setup-callout-success {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.25);
+    color: #34d399;
+}
+
+.setup-callout-error {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    color: #dc2626;
+    border-radius: 0.75rem;
+}
+:where(.dark) .setup-callout-error {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.25);
+    color: #f87171;
+}
+
+.setup-callout-warning {
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    color: #d97706;
+    border-radius: 0.75rem;
+}
+:where(.dark) .setup-callout-warning {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.25);
+    color: #fbbf24;
+}
+
+.setup-callout-info {
+    background: rgba(59, 130, 246, 0.08);
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    color: #2563eb;
+    border-radius: 0.75rem;
+}
+:where(.dark) .setup-callout-info {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.25);
+    color: #60a5fa;
+}
+
+/* Subtle code tags */
+.setup-code {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--color-border);
+    color: var(--color-primary);
+}
+:where(.dark) .setup-code {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #a5b4fc;
+}
+
+/* Danger token compatibility */
+.text-danger {
+    color: var(--color-error);
+}
+.bg-danger-subtle {
+    background-color: var(--color-error-subtle);
+}
+.border-danger {
+    border-color: var(--color-error);
+}
+

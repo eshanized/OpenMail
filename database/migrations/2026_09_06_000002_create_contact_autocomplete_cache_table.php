@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('name')->default('');
             $table->integer('frequency')->default(1);
             $table->timestamp('last_used_at')->nullable();
-            $table->timestamp('expires_at');
+            $table->timestamp('expires_at')->nullable();
             $table->timestamps();
 
             // Unique index on user_id + email

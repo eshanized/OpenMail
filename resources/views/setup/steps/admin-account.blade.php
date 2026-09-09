@@ -1,68 +1,75 @@
-<div class="p-8 sm:p-10">
-    <div class="mb-6">
-        <h2 class="text-xl font-semibold text-ink">Administrator Account</h2>
+<div class="p-8 sm:p-12">
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-ink tracking-tight">Administrator Account</h2>
         <p class="mt-1 text-sm text-ink-secondary">
-            Create the first OpenMail administrator account. Use this account to log in to OpenMail.
-            This is an application identity, not a mailbox credential.
+            Create the primary administrator account for OpenMail. This identity manages your application settings and user mailboxes.
         </p>
     </div>
 
-    <div class="space-y-5 max-w-md">
-        {{-- Name --}}
+    <div class="space-y-6 max-w-lg">
+        {{-- Full Name --}}
         <div>
-            <label for="admin_name" class="block text-sm font-medium text-ink-secondary">
-                Full Name <span class="text-danger ml-0.5" aria-hidden="true">*</span>
+            <label for="admin_name" class="block text-sm font-semibold text-ink">
+                Full Name <span class="text-rose-500 ml-0.5">*</span>
             </label>
-            <input type="text"
-                   id="admin_name"
-                   wire:model="adminName"
-                   class="mt-1 block w-full rounded-md border-border shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-2 border"
-                   placeholder="Jane Smith"
-                   autocomplete="name"
-                   required>
+            <div class="mt-1.5">
+                <input type="text"
+                       id="admin_name"
+                       wire:model="adminName"
+                       class="setup-input font-medium"
+                       placeholder="Jane Smith"
+                       autocomplete="name"
+                       required>
+            </div>
             @error('adminName')
-                <p class="mt-1 text-sm text-danger" role="alert">{{ $message }}</p>
+                <p class="mt-1.5 text-xs text-error font-medium" role="alert">{{ $message }}</p>
             @enderror
         </div>
 
-        {{-- Email --}}
+        {{-- Email Address --}}
         <div>
-            <label for="admin_email" class="block text-sm font-medium text-ink-secondary">
-                Email Address <span class="text-danger ml-0.5" aria-hidden="true">*</span>
+            <label for="admin_email" class="block text-sm font-semibold text-ink">
+                Admin Email Address <span class="text-rose-500 ml-0.5">*</span>
             </label>
-            <input type="email"
-                   id="admin_email"
-                   wire:model="adminEmail"
-                   class="mt-1 block w-full rounded-md border-border shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-2 border"
-                   placeholder="admin@example.com"
-                   autocomplete="email"
-                   required>
-            <p class="mt-1 text-xs text-ink-tertiary">You'll use this address to log in.</p>
+            <div class="mt-1.5">
+                <input type="email"
+                       id="admin_email"
+                       wire:model="adminEmail"
+                       class="setup-input font-medium"
+                       placeholder="admin@example.com"
+                       autocomplete="email"
+                       required>
+            </div>
+            <p class="mt-1.5 text-xs text-ink-tertiary">This address will be your login identifier for the webmail console.</p>
             @error('adminEmail')
-                <p class="mt-1 text-sm text-danger" role="alert">{{ $message }}</p>
+                <p class="mt-1.5 text-xs text-error font-medium" role="alert">{{ $message }}</p>
             @enderror
         </div>
 
         {{-- Password --}}
         <div>
-            <label for="admin_password" class="block text-sm font-medium text-ink-secondary">
-                Password <span class="text-danger ml-0.5" aria-hidden="true">*</span>
+            <label for="admin_password" class="block text-sm font-semibold text-ink">
+                Password <span class="text-rose-500 ml-0.5">*</span>
             </label>
-            <input type="password"
-                   id="admin_password"
-                   wire:model="adminPassword"
-                   class="mt-1 block w-full rounded-md border-border shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-2 border"
-                   autocomplete="new-password"
-                   required>
+            <div class="mt-1.5">
+                <input type="password"
+                       id="admin_password"
+                       wire:model="adminPassword"
+                       class="setup-input font-mono"
+                       autocomplete="new-password"
+                       placeholder="••••••••"
+                       required>
+            </div>
             @error('adminPassword')
-                <p class="mt-1 text-sm text-danger" role="alert">{{ $message }}</p>
+                <p class="mt-1.5 text-xs text-error font-medium" role="alert">{{ $message }}</p>
             @enderror
 
-            {{-- Strength meter --}}
-            <div class="mt-2" x-data="{
+            {{-- Strength Meter --}}
+            <div class="mt-3" x-data="{
                     strength: 0,
                     label: '',
                     compute(val) {
+                        if (!val) { this.strength = 0; this.label = ''; return; }
                         let s = 0;
                         if (val.length >= 8) s++;
                         if (/[A-Z]/.test(val) && /[a-z]/.test(val)) s++;
@@ -73,66 +80,93 @@
                     }
                 }"
                 x-init="$watch('$wire.adminPassword', v => compute(v))">
-                <div class="h-1.5 bg-border rounded-full overflow-hidden">
+                <div class="h-1.5 bg-surface-sunken dark:bg-white/10 rounded-full overflow-hidden">
                     <div class="h-full transition-all duration-300 rounded-full"
                          :class="{
                              'w-0': strength === 0,
-                             'w-1/4 bg-danger': strength === 1,
-                             'w-2/4 bg-warning': strength === 2,
-                             'w-3/4 bg-primary': strength === 3,
-                             'w-full bg-success': strength === 4,
+                             'w-1/4 bg-rose-500': strength === 1,
+                             'w-2/4 bg-amber-500': strength === 2,
+                             'w-3/4 bg-blue-500': strength === 3,
+                             'w-full bg-emerald-500': strength === 4,
                          }"
                          role="progressbar"
                          :aria-valuenow="strength * 25"
                          aria-valuemin="0"
-                         aria-valuemax="100"
-                         :aria-label="'Password strength: ' + label">
+                         aria-valuemax="100">
                     </div>
                 </div>
-                <p class="text-xs mt-1 text-ink-tertiary" x-text="label" aria-live="polite"></p>
+                <div class="flex items-center justify-between mt-1 text-[11px]">
+                    <span class="text-ink-tertiary">Password strength:</span>
+                    <span class="font-semibold"
+                          :class="{
+                              'text-rose-500': strength === 1,
+                              'text-amber-500': strength === 2,
+                              'text-blue-500': strength === 3,
+                              'text-emerald-500': strength === 4,
+                          }"
+                          x-text="label" aria-live="polite"></span>
+                </div>
             </div>
         </div>
 
-        {{-- Confirm password --}}
+        {{-- Confirm Password --}}
         <div>
-            <label for="admin_password_confirmation" class="block text-sm font-medium text-ink-secondary">
-                Confirm Password <span class="text-danger ml-0.5" aria-hidden="true">*</span>
+            <label for="admin_password_confirmation" class="block text-sm font-semibold text-ink">
+                Confirm Password <span class="text-rose-500 ml-0.5">*</span>
             </label>
-            <input type="password"
-                   id="admin_password_confirmation"
-                   wire:model="adminPasswordConfirmation"
-                   class="mt-1 block w-full rounded-md border-border shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-2 border"
-                   autocomplete="new-password"
-                   required>
+            <div class="mt-1.5">
+                <input type="password"
+                       id="admin_password_confirmation"
+                       wire:model="adminPasswordConfirmation"
+                       class="setup-input font-mono"
+                       autocomplete="new-password"
+                       placeholder="••••••••"
+                       required>
+            </div>
             @error('adminPasswordConfirmation')
-                <p class="mt-1 text-sm text-danger" role="alert">{{ $message }}</p>
+                <p class="mt-1.5 text-xs text-error font-medium" role="alert">{{ $message }}</p>
             @enderror
         </div>
 
-        {{-- Password requirements --}}
-        <div class="p-3 bg-primary-subtle/50 border border-primary/20 rounded-lg">
-            <p class="text-sm font-medium text-primary">Password requirements:</p>
-            <ul class="mt-1 text-xs text-primary list-disc list-inside space-y-0.5">
-                <li>At least 8 characters</li>
-                <li>At least one uppercase letter (A–Z)</li>
-                <li>At least one lowercase letter (a–z)</li>
-                <li>At least one digit (0–9)</li>
+        {{-- Requirements Callout --}}
+        <div class="setup-panel border-indigo-500/20 bg-indigo-500/[0.02]">
+            <p class="text-xs font-bold text-indigo-600 dark:text-indigo-400">Security requirements:</p>
+            <ul class="mt-2 text-xs text-ink-secondary space-y-1.5">
+                <li class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                    At least 8 characters
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                    At least one uppercase (A&ndash;Z) and one lowercase letter (a&ndash;z)
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                    At least one digit (0&ndash;9)
+                </li>
             </ul>
         </div>
     </div>
 
     {{-- Navigation --}}
-    <div class="mt-8 flex justify-between">
+    <div class="mt-10 pt-6 border-t border-border/70 flex justify-between items-center">
         <button type="button"
                 wire:click="previousStep"
-                class="px-4 py-2 border border-border text-ink-secondary text-sm font-medium rounded-md hover:bg-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
-            ← Back
+                class="setup-btn-secondary">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Back
         </button>
+
         <button type="button"
                 wire:click="nextStep"
                 wire:loading.attr="disabled"
-                class="px-6 py-2.5 bg-primary text-white text-sm font-medium rounded-md hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-60">
-            Continue →
+                class="setup-btn-primary">
+            <span>Continue</span>
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+            </svg>
         </button>
     </div>
 </div>

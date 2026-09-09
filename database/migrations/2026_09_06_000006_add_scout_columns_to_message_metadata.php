@@ -12,7 +12,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Columns already exist in the database (added previously)
+        Schema::table('message_metadata', function (Blueprint $table) {
+            if (!Schema::hasColumn('message_metadata', 'body_text')) {
+                $table->text('body_text')->nullable()->after('snippet');
+            }
+        });
+
         // Only add FULLTEXT index for MySQL/MariaDB (Scout database engine)
         if (DB::getDriverName() === 'mysql') {
             DB::statement("ALTER TABLE message_metadata ADD FULLTEXT INDEX message_metadata_search_idx (subject, from_address, from_name, to_address, snippet, body_text)");

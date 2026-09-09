@@ -61,6 +61,7 @@ class SetupWizard extends Component
     public string  $dbUsername      = 'root';
     public string  $dbPassword      = '';
     public ?array  $dbTestResult    = null;
+    public ?array  $createDbResult  = null;
     public ?array  $migrationResult = null;
     public bool    $migrationsRan   = false;
 
@@ -135,7 +136,7 @@ class SetupWizard extends Component
         6 => [
             'adminName'                 => 'required|string|min:2|max:100',
             'adminEmail'                => 'required|email',
-            'adminPassword'             => 'required|string|min:8|regex:/[A-Z]/|regex:/[a-z]/|regex:/[0-9]/|confirmed',
+            'adminPassword'             => 'required|string|min:8|regex:/[A-Z]/|regex:/[a-z]/|regex:/[0-9]/|same:adminPasswordConfirmation',
             'adminPasswordConfirmation' => 'required|string',
         ],
         7 => [],
@@ -182,7 +183,13 @@ class SetupWizard extends Component
             }
         }
 
-        $this->validate($this->stepRules[$this->currentStep] ?? []);
+        $rules = $this->stepRules[$this->currentStep] ?? [];
+        if (! empty($rules)) {
+            $this->validate($rules, [
+                'adminPassword.same'  => 'The password confirmation does not match.',
+                'adminPassword.regex' => 'The password must contain at least one uppercase letter, one lowercase letter, and one number.',
+            ]);
+        }
 
         if (! in_array($this->currentStep, $this->completedSteps, true)) {
             $this->completedSteps[] = $this->currentStep;
@@ -233,6 +240,32 @@ class SetupWizard extends Component
         // Reset migration state whenever connection config changes
         $this->migrationsRan   = false;
         $this->migrationResult = null;
+
+        $this->saveToSession();
+    }
+
+    public function createDatabase(): void
+    {
+        $this->validate([
+            'dbHost'     => 'required|string',
+            'dbPort'     => 'required|integer|min:1|max:65535',
+            'dbDatabase' => 'required|string|min:1',
+            'dbUsername'  => 'nullable|string',
+            'dbPassword'  => 'nullable|string',
+        ]);
+
+        $this->createDbResult = app(DatabaseInstaller::class)->createDatabase(
+            $this->dbHost,
+            (int) $this->dbPort,
+            $this->dbDatabase,
+            $this->dbUsername,
+            $this->dbPassword,
+        );
+
+        if ($this->createDbResult['success']) {
+            // Automatically re-test connection now that the DB exists
+            $this->testDatabaseConnection();
+        }
 
         $this->saveToSession();
     }
@@ -551,6 +584,7 @@ class SetupWizard extends Component
         $this->currentStep         = 1;
         $this->completedSteps      = [];
         $this->dbTestResult        = null;
+        $this->createDbResult      = null;
         $this->migrationResult     = null;
         $this->migrationsRan       = false;
         $this->imapTestResult      = null;
@@ -677,6 +711,7 @@ class SetupWizard extends Component
             'verificationResults'       => $this->verificationResults,
             'verificationRun'           => $this->verificationRun,
             'dbTestResult'              => $this->dbTestResult,
+            'createDbResult'            => $this->createDbResult,
             'migrationResult'           => $this->migrationResult,
             'migrationsRan'             => $this->migrationsRan,
             'imapTestResult'            => $this->imapTestResult,

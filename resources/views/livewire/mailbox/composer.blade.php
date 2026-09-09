@@ -155,6 +155,7 @@
         },
     }"
     x-show="open"
+    x-cloak
     class="fixed inset-0 z-40"
     @keydown.window="handleKeydown($event)"
     wire:ignore.self

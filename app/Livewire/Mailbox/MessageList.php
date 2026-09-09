@@ -94,7 +94,15 @@ class MessageList extends Component
         );
 
         // Collect UIDs from current page
-        $pageUids = $flatMessages->pluck('uid')->toArray();
+        $pageUids = collect($flatMessages->items())->map(function ($m) {
+            if (is_object($m)) {
+                return method_exists($m, 'getUid') ? $m->getUid() : ($m->uid ?? null);
+            }
+            if (is_array($m)) {
+                return $m['uid'] ?? null;
+            }
+            return null;
+        })->filter()->values()->toArray();
 
         // Fetch headers needed for threading
         $threadHeaders = $imapService->getThreadHeaders($this->folderPath, $pageUids);

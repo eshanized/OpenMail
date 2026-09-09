@@ -1,6 +1,12 @@
+@php
+    $isInbox = in_array(strtolower($folderPath ?? ''), ['inbox']);
+    $defaultThreadMode = $isInbox ? 'threaded' : 'flat';
+@endphp
 <div x-data="{
     selected: new Set(@json($selectedUids)),
     lastChecked: null,
+    currentFolder: {{ Js::from($folderPath) }},
+    defaultThreadMode: {{ Js::from($defaultThreadMode) }},
     toggle(uid, event) {
         if (event.shiftKey && this.lastChecked) {
             const msgs = [...document.querySelectorAll('[data-uid]')];
@@ -34,13 +40,12 @@
         @this.dispatch('openComposer', { mode: 'compose' });
     },
     initThreadMode() {
-        const key = `openmail:threadMode:${@js($folderPath)}`;
+        const key = 'openmail:threadMode:' + this.currentFolder;
         const saved = localStorage.getItem(key);
-        const defaultMode = '@js(in_array($folderPath, [\"INBOX\", \"Inbox\"]) ? \"threaded\" : \"flat\")';
-        const mode = saved || defaultMode;
+        const mode = saved || this.defaultThreadMode;
         @this.set('threadMode', mode);
         window.addEventListener('save-thread-mode', (e) => {
-            if (e.detail.folderPath === '@js($folderPath)') {
+            if (e.detail && e.detail.folderPath === this.currentFolder) {
                 localStorage.setItem(key, e.detail.mode);
             }
         });
@@ -55,11 +60,10 @@
             }
         });
         window.addEventListener('load-thread-mode', (e) => {
-            if (e.detail.folderPath === '@js($folderPath)') {
-                const folderKey = `openmail:threadMode:${e.detail.folderPath}`;
+            if (e.detail && e.detail.folderPath === this.currentFolder) {
+                const folderKey = 'openmail:threadMode:' + e.detail.folderPath;
                 const saved = localStorage.getItem(folderKey);
-                const defaultMode = '@js(in_array($folderPath, [\"INBOX\", \"Inbox\"]) ? \"threaded\" : \"flat\")';
-                @this.call('onThreadModeLoaded', saved || defaultMode);
+                @this.call('onThreadModeLoaded', saved || this.defaultThreadMode);
             }
         });
     }

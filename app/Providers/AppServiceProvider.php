@@ -24,6 +24,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Register Blade directives for CSP nonces
+        \Illuminate\Support\Facades\Blade::directive('cspNonceMetaTag', function () {
+            return "<?php \$nonce = class_exists(\\Illuminate\\Support\\Facades\\Vite::class) ? \\Illuminate\\Support\\Facades\\Vite::cspNonce() : null; if (\$nonce): ?><meta name=\"csp-nonce\" content=\"<?= \$nonce; ?>\"><?php endif; ?>";
+        });
+
+        \Illuminate\Support\Facades\Blade::directive('cspNonceAttribute', function () {
+            return "<?php \$nonce = class_exists(\\Illuminate\\Support\\Facades\\Vite::class) ? \\Illuminate\\Support\\Facades\\Vite::cspNonce() : null; if (\$nonce): ?>nonce=\"<?= \$nonce; ?>\"<?php endif; ?>";
+        });
+
         // Register IMAP auth guard
         Auth::viaRequest('imap', function ($request) {
             $email = $request->input('email');

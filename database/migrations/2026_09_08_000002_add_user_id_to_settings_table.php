@@ -22,7 +22,7 @@ return new class extends Migration
                     Schema::getConnection()->statement("DROP INDEX IF EXISTS \"{$index->name}\"");
                 }
             } else {
-                $table->dropIndex(['key']);
+                $table->dropUnique(['key']);
             }
             $table->foreignId('user_id')->nullable()->after('id')->constrained()->nullOnDelete();
             $table->unique(['user_id', 'key']);

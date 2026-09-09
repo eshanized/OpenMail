@@ -74,6 +74,7 @@
     {{-- Autocomplete Dropdown --}}
     <div
         x-show="showDropdown && suggestions.length > 0"
+        x-cloak
         x-transition:enter="transition ease-out duration-100"
         x-transition:enter-start="opacity-0 transform -translate-y-1"
         x-transition:leave="transition ease-in duration-75"

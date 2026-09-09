@@ -49,6 +49,7 @@ class FolderSidebar extends Component
         return view('livewire.mailbox.folder-sidebar', [
             'folders' => $this->folders,
             'currentFolder' => $this->currentFolder,
+            'activeTab' => $this->activeTab,
         ]);
     }
 }

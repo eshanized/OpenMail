@@ -7,7 +7,7 @@
     <title>{{ config('app.name', 'OpenMail') }} — Sign in</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <script @cspNonceAttribute nonce="{{ Vite::cspNonce() }}">
+    <script @cspNonceAttribute>
         (function() {
             var theme = localStorage.getItem('theme') || 'system';
             var density = localStorage.getItem('density') || 'regular';

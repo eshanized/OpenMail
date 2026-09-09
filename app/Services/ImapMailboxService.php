@@ -18,29 +18,15 @@ class ImapMailboxService
 {
     private function getClient(): Client
     {
-        $config = new \Webklex\PHPIMAP\Config([
-            'default' => 'default',
-            'accounts' => [
-                'default' => [
-                    'host' => config('openmail.imap.host'),
-                    'port' => config('openmail.imap.port'),
-                    'encryption' => config('openmail.imap.encryption'),
-                    'username' => Auth::user()->email,
-                    'password' => Crypt::decrypt(session('openmail:imap_password')),
-                    'protocol' => 'imap',
-                    'timeout' => 10,
-                    'validate_cert' => true,
-                ]
-            ],
-            'masks' => [
-                'message' => \Webklex\PHPIMAP\Support\Masks\MessageMask::class,
-                'attachment' => \Webklex\PHPIMAP\Support\Masks\AttachmentMask::class,
-            ],
-            'events' => [
-                'message' => [],
-                'folder' => [],
-            ]
-        ]);
+        $config = \Webklex\PHPIMAP\Config::make();
+        $config->set('accounts.default.host', config('openmail.imap.host'));
+        $config->set('accounts.default.port', (int) config('openmail.imap.port', 993));
+        $config->set('accounts.default.encryption', config('openmail.imap.encryption', 'ssl'));
+        $config->set('accounts.default.username', Auth::user()->email);
+        $config->set('accounts.default.password', Crypt::decrypt(session('openmail:imap_password')));
+        $config->set('accounts.default.protocol', 'imap');
+        $config->set('accounts.default.timeout', 10);
+        $config->set('accounts.default.validate_cert', true);
 
         $client = new Client($config);
         $client->connect();
@@ -59,14 +45,35 @@ class ImapMailboxService
             foreach ($folders as $folder) {
                 $role = $mapper->mapFolderRole($folder);
                 $name = $mapper->mapFolderName($folder);
-                $info = $folder->examine();
+
+                $totalCount = 0;
+                $unreadCount = 0;
+                $uidvalidity = null;
+
+                try {
+                    $status = $folder->status();
+                    $totalCount = (int) ($status['messages'] ?? 0);
+                    $unreadCount = (int) ($status['unseen'] ?? 0);
+                    $uidvalidity = $status['uidvalidity'] ?? null;
+                } catch (\Throwable) {
+                    try {
+                        $info = $folder->examine();
+                        $totalCount = (int) ($info['exists'] ?? 0);
+                        $uidvalidity = $info['uidvalidity'] ?? null;
+                    } catch (\Throwable) {
+                        // Keep defaults
+                    }
+                }
 
                 $result[] = [
                     'path' => $folder->path,
                     'name' => $name,
                     'role' => $role,
-                    'total' => (int) $info['exists'],
-                    'uidvalidity' => $info['uidvalidity'],
+                    'total' => $totalCount,
+                    'total_count' => $totalCount,
+                    'unread' => $unreadCount,
+                    'unread_count' => $unreadCount,
+                    'uidvalidity' => $uidvalidity,
                     'has_children' => $folder->hasChildren(),
                     'parent_path' => $this->getParentPath($folder->path),
                 ];
@@ -86,6 +93,7 @@ class ImapMailboxService
             $folder = $client->getFolder($folderPath);
 
             $query = $folder->query()
+                ->all()
                 ->setFetchBody(false)
                 ->leaveUnread();
 
@@ -188,7 +196,7 @@ class ImapMailboxService
             $destFolder = $client->getFolder($destinationPath);
 
             $messages = $folder->query()
-                ->uids($uids)
+                ->whereUidIn($uids)
                 ->get();
 
             foreach ($messages as $message) {
@@ -224,7 +232,7 @@ class ImapMailboxService
         try {
             $folder = $client->getFolder($folderPath);
             $messages = $folder->query()
-                ->uids($uids)
+                ->whereUidIn($uids)
                 ->get();
 
             foreach ($messages as $message) {
@@ -604,7 +612,7 @@ class ImapMailboxService
             
             // Fetch only headers we need for threading
             $query = $folder->query()
-                ->uids($uids)
+                ->whereUidIn($uids)
                 ->setFetchBody(false)
                 ->setFetchFlags(false)
                 ->leaveUnread();
@@ -613,20 +621,27 @@ class ImapMailboxService
 
             $results = [];
             foreach ($messages as $msg) {
-                $headers = $msg->getHeaders();
+                $header = $msg->getHeader();
+                $from = $msg->from ? (is_iterable($msg->from) ? collect($msg->from)->first() : $msg->from) : null;
+                $to = $msg->to ? (is_iterable($msg->to) ? collect($msg->to)->first() : $msg->to) : null;
                 
+                $msgId = (string) ($msg->message_id ?? $header?->get('message_id') ?? '');
+                if (empty($msgId)) {
+                    $msgId = 'uid-' . $msg->getUid() . '@openmail.local';
+                }
+
                 $results[] = (object) [
                     'uid' => $msg->getUid(),
-                    'message_id' => $headers->get('Message-ID')?->getValue() ?? '',
-                    'in_reply_to' => $headers->get('In-Reply-To')?->getValue() ?? '',
-                    'references' => $headers->get('References')?->getValue() ?? '',
-                    'subject' => $headers->get('Subject')?->getValue() ?? '',
-                    'date' => $headers->get('Date')?->getValue() ?? '',
-                    'from_address' => '',
-                    'from_name' => '',
-                    'to_address' => '',
-                    'is_seen' => $msg->isSeen(),
-                    'is_flagged' => $msg->isFlagged(),
+                    'message_id' => $msgId,
+                    'in_reply_to' => (string) ($msg->in_reply_to ?? $header?->get('in_reply_to') ?? ''),
+                    'references' => (string) ($msg->references ?? $header?->get('references') ?? ''),
+                    'subject' => (string) ($msg->subject ?? $header?->get('subject') ?? '(no subject)'),
+                    'date' => (string) ($msg->date ?? $header?->get('date') ?? ''),
+                    'from_address' => $from?->mail ?? (string) ($msg->from ?? ''),
+                    'from_name' => $from?->personal ?? '',
+                    'to_address' => $to?->mail ?? (string) ($msg->to ?? ''),
+                    'is_seen' => (bool) ($msg->getFlags()?->has('seen') ?? false),
+                    'is_flagged' => (bool) ($msg->getFlags()?->has('flagged') ?? false),
                     'has_attachments' => false,
                     'snippet' => '',
                     'folder_path' => $folderPath,

@@ -15,7 +15,9 @@ return [
     |
     */
 
-    'default' => env('CACHE_STORE', 'database'),
+    'default' => env('APP_ENV') === 'testing'
+        ? env('CACHE_STORE', 'array')
+        : (file_exists(storage_path('installed')) ? env('CACHE_STORE', 'database') : 'file'),
 
     /*
     |--------------------------------------------------------------------------

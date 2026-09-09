@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->json('message_json');           // Full composer data: to, cc, bcc, subject, body, attachments metadata, in_reply_to, references
             $table->text('mime_message')->nullable(); // Pre-built raw MIME string for retry
-            $table->timestamp('send_at');           // When to actually send
+            $table->timestamp('send_at')->nullable(); // When to actually send
             $table->enum('status', ['pending', 'sent', 'failed', 'cancelled', 'cancelling'])->default('pending');
             $table->string('sent_folder_uid')->nullable(); // UID from IMAP APPEND to Sent
             $table->integer('retry_count')->default(0);

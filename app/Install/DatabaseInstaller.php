@@ -43,9 +43,8 @@ class DatabaseInstaller
                 'strict'      => true,
                 'engine'      => null,
                 'options'     => [
-                    \PDO::ATTR_TIMEOUT      => 5,
-                    \PDO::ATTR_ERRMODE      => \PDO::ERRMODE_EXCEPTION,
-                    \PDO::ATTR_CONNECT_TIMEOUT => 5,
+                    \PDO::ATTR_TIMEOUT => 5,
+                    \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
                 ],
             ]);
 
@@ -53,19 +52,26 @@ class DatabaseInstaller
             $serverVersion = $pdo->getAttribute(\PDO::ATTR_SERVER_VERSION);
 
             return [
-                'success'        => true,
-                'server_version' => $serverVersion,
+                'success'          => true,
+                'server_version'   => $serverVersion,
+                'database_missing' => false,
             ];
         } catch (\PDOException $e) {
+            $code = (int) $e->getCode();
+            $msg  = $e->getMessage();
+            $databaseMissing = ($code === 1049 || str_contains($msg, 'Unknown database'));
+
             return [
-                'success'   => false,
-                'error'     => $this->friendlyPdoError($e),
-                'technical' => [
+                'success'          => false,
+                'database_missing' => $databaseMissing,
+                'error'            => $this->friendlyPdoError($e),
+                'technical'        => [
                     'exception' => get_class($e),
-                    'code'      => (int) $e->getCode(),
-                    'message'   => $e->getMessage(),
+                    'code'      => $code,
+                    'message'   => $msg,
                 ],
             ];
+
         } catch (\Exception $e) {
             return [
                 'success'   => false,
@@ -75,6 +81,77 @@ class DatabaseInstaller
                     'code'      => $e->getCode(),
                     'message'   => $e->getMessage(),
                 ],
+            ];
+        } finally {
+            try {
+                DB::purge($connectionName);
+            } catch (\Exception) {
+            }
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Database creation
+    // ──────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Create the database if it does not exist.
+     *
+     * Connects to the server WITHOUT specifying a database, then runs
+     * CREATE DATABASE IF NOT EXISTS.
+     *
+     * @return array{success: bool, error?: string}
+     */
+    public function createDatabase(
+        string $host,
+        int    $port,
+        string $database,
+        string $username,
+        string $password
+    ): array {
+        $connectionName = 'installer_create_db_' . getmypid();
+
+        try {
+            // Connect without a database — just to the server
+            Config::set("database.connections.{$connectionName}", [
+                'driver'    => 'mysql',
+                'host'      => $host,
+                'port'      => $port,
+                'database'  => '',  // no database selected
+                'username'  => $username,
+                'password'  => $password,
+                'charset'   => 'utf8mb4',
+                'collation' => 'utf8mb4_unicode_ci',
+                'prefix'    => '',
+                'strict'    => true,
+                'options'   => [
+                    \PDO::ATTR_TIMEOUT => 5,
+                    \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+                ],
+            ]);
+
+            $safeName = preg_replace('/[^a-zA-Z0-9_]/', '', $database);
+
+            if (empty($safeName)) {
+                return [
+                    'success' => false,
+                    'error'   => 'Invalid database name. Use only letters, numbers, and underscores.',
+                ];
+            }
+
+            DB::connection($connectionName)
+                ->statement("CREATE DATABASE IF NOT EXISTS `{$safeName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+
+            return ['success' => true];
+        } catch (\PDOException $e) {
+            return [
+                'success' => false,
+                'error'   => $this->friendlyCreateDbError($e),
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'error'   => 'Failed to create database: ' . $e->getMessage(),
             ];
         } finally {
             try {
@@ -156,7 +233,7 @@ class DatabaseInstaller
                 => 'Database connection timed out. Check that the host is reachable and the port is open.',
 
             ($code === 1049 || str_contains($msg, 'Unknown database'))
-                => 'Database "' . htmlspecialchars($msg, ENT_QUOTES) . '" does not exist. Create it in phpMyAdmin/cPanel first.',
+                => 'The specified database does not exist. You can create it using the button below, or create it manually in phpMyAdmin/cPanel.',
 
             ($code === 1045 || str_contains($msg, 'Access denied'))
                 => 'Access denied. Check your database username and password.',
@@ -168,6 +245,22 @@ class DatabaseInstaller
                 => 'MySQL socket not found. Try using "127.0.0.1" as the host instead of "localhost".',
 
             default => 'Database connection failed. ' . $msg,
+        };
+    }
+
+    private function friendlyCreateDbError(\PDOException $e): string
+    {
+        $msg  = $e->getMessage();
+        $code = (int) $e->getCode();
+
+        return match (true) {
+            ($code === 1044 || str_contains($msg, 'Access denied'))
+                => 'Access denied. Your database user does not have permission to create databases. Create the database manually in phpMyAdmin/cPanel.',
+
+            str_contains($msg, 'Connection refused')
+                => 'Cannot connect to the database server. Check that MySQL/MariaDB is running.',
+
+            default => 'Failed to create database: ' . $msg,
         };
     }
 }

@@ -38,7 +38,7 @@
         if (!query || !text) return text || '';
         const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\\\$&');
         const regex = new RegExp('(' + escaped + ')', 'gi');
-        return text.replace(regex, '<mark class=\"bg-warning/20 text-warning px-0.5 rounded\">$1</mark>');
+        return text.replace(regex, '<mark class=\'bg-warning/20 text-warning px-0.5 rounded\'>$1</mark>');
     },
 
     close() {
@@ -77,7 +77,7 @@
                       focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
                placeholder="Search all mail... (/)"
                autocomplete="off">
-        <span x-show="loading" x-transition
+        <span x-show="loading" x-cloak x-transition
               class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-primary border-t-transparent rounded-full spin-animation"></span>
     </div>
 

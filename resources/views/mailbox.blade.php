@@ -4,7 +4,7 @@
     <livewire:mailbox.folder-sidebar />
 @endsection
 
-@section('content')
+@section('mailbox-content')
     <div x-data="{ selected: [] }">
         @if(isset($uid))
             <livewire:mailbox.message-viewer

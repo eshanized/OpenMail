@@ -7,8 +7,8 @@
      }">
 
     {{-- Desktop Sidebar --}}
-    <aside class="w-[260px] flex-shrink-0 bg-surface-raised border-r border-border flex flex-col hidden lg:flex">
-        <div class="flex-1 overflow-y-auto scrollbar-thin">
+    <aside class="w-[260px] flex-shrink-0 bg-surface-raised border-r border-border flex flex-col hidden lg:flex h-full min-h-0">
+        <div class="flex-1 flex flex-col min-h-0 overflow-hidden">
             @yield('sidebar')
             @isset($sidebar)
                 {{ $sidebar }}
@@ -40,14 +40,14 @@
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
     >
-        <div class="fixed inset-y-0 left-0 w-[280px] bg-surface-raised shadow-xl" @click.outside="sidebarOpen = false"
+        <div class="fixed inset-y-0 left-0 w-[280px] bg-surface-raised shadow-xl flex flex-col" @click.outside="sidebarOpen = false"
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="-translate-x-full"
              x-transition:enter-end="translate-x-0"
              x-transition:leave="transition ease-in duration-150"
              x-transition:leave-start="translate-x-0"
              x-transition:leave-end="-translate-x-full">
-            <div class="h-14 px-4 border-b border-border flex justify-between items-center">
+            <div class="h-14 px-4 border-b border-border flex justify-between items-center flex-shrink-0">
                 <span class="text-sm font-semibold text-ink">{{ config('app.name', 'OpenMail') }}</span>
                 <button @click="sidebarOpen = false" class="p-1.5 text-ink-tertiary hover:text-ink rounded-md hover:bg-hover transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
@@ -55,7 +55,7 @@
                     </svg>
                 </button>
             </div>
-            <div class="flex-1 overflow-y-auto scrollbar-thin">
+            <div class="flex-1 flex flex-col min-h-0 overflow-hidden">
                 @yield('sidebar')
                 @isset($sidebar)
                     {{ $sidebar }}

@@ -29,7 +29,36 @@ class FolderSidebar extends Component
 
     public function loadFolders(): void
     {
-        $this->folders = app(ImapMailboxService::class)->getCachedFolders();
+        $raw = app(ImapMailboxService::class)->getCachedFolders();
+        $this->folders = $this->sortFolders($raw);
+    }
+
+    public function sortFolders(array $folders): array
+    {
+        $rolePriority = [
+            'inbox' => 10,
+            'drafts' => 20,
+            'sent' => 30,
+            'archive' => 40,
+            'spam' => 50,
+            'trash' => 60,
+        ];
+
+        usort($folders, function ($a, $b) use ($rolePriority) {
+            $roleA = $a['role'] ?? null;
+            $roleB = $b['role'] ?? null;
+
+            $priorityA = $roleA && isset($rolePriority[$roleA]) ? $rolePriority[$roleA] : 100;
+            $priorityB = $roleB && isset($rolePriority[$roleB]) ? $rolePriority[$roleB] : 100;
+
+            if ($priorityA !== $priorityB) {
+                return $priorityA <=> $priorityB;
+            }
+
+            return strcasecmp($a['name'] ?? '', $b['name'] ?? '');
+        });
+
+        return $folders;
     }
 
     public function selectFolder(string $path): void

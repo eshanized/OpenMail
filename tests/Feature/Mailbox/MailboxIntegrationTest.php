@@ -160,4 +160,40 @@ $mockService->shouldReceive('getMessages')
         $response->assertStatus(200);
         $response->assertSee('OpenMail');
     }
+
+    public function test_folder_sidebar_sorts_folders_logically(): void
+    {
+        $component = new \App\Livewire\Mailbox\FolderSidebar();
+        $unsorted = [
+            ['path' => 'Trash', 'name' => 'Trash', 'role' => 'trash'],
+            ['path' => 'Zeta', 'name' => 'Zeta', 'role' => null],
+            ['path' => 'Spam', 'name' => 'Spam', 'role' => 'spam'],
+            ['path' => 'Alpha', 'name' => 'Alpha', 'role' => null],
+            ['path' => 'Sent', 'name' => 'Sent', 'role' => 'sent'],
+            ['path' => 'Drafts', 'name' => 'Drafts', 'role' => 'drafts'],
+            ['path' => 'INBOX', 'name' => 'Inbox', 'role' => 'inbox'],
+        ];
+
+        $sorted = $component->sortFolders($unsorted);
+        $roles = array_column($sorted, 'role');
+
+        $this->assertEquals('inbox', $roles[0]);
+        $this->assertEquals('drafts', $roles[1]);
+        $this->assertEquals('sent', $roles[2]);
+        $this->assertEquals('spam', $roles[3]);
+        $this->assertEquals('trash', $roles[4]);
+        $this->assertEquals('Alpha', $sorted[5]['name']);
+        $this->assertEquals('Zeta', $sorted[6]['name']);
+    }
+
+    public function test_sidebar_has_compose_and_sync_elements(): void
+    {
+        $user = User::factory()->create();
+        $response = \Livewire\Livewire::actingAs($user)
+            ->test(\App\Livewire\Mailbox\FolderSidebar::class);
+
+        $response->assertSee('New Message');
+        $response->assertSee('Sync Mailbox');
+        $response->assertSee('wire:target="refreshFolders"', false);
+    }
 }

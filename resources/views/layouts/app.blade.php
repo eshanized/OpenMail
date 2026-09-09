@@ -6,6 +6,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'OpenMail') }} - {{ $title ?? 'Mailbox' }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
+    @stack('styles')
 
     {{-- CSP nonce meta tag for inline scripts --}}
     @cspNonceMetaTag
@@ -126,5 +128,8 @@
     <main id="app-main" class="flex-1 max-w-screen-2xl mx-auto py-6 px-4 sm:px-6 lg:px-8 w-full animate-fade-in">
         @yield('content')
     </main>
+
+    @livewireScripts
+    @stack('scripts')
 </body>
 </html>

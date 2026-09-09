@@ -37,7 +37,11 @@
         @this.set('selectedUids', []);
     },
     openComposer() {
-        @this.dispatch('openComposer', { mode: 'compose' });
+        if (typeof Livewire !== 'undefined') {
+            Livewire.dispatch('openComposer', { mode: 'compose' });
+        } else {
+            @this.dispatch('openComposer', { mode: 'compose' });
+        }
     },
     initThreadMode() {
         const key = 'openmail:threadMode:' + this.currentFolder;

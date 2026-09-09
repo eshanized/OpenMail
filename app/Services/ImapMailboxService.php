@@ -16,8 +16,20 @@ use App\Models\MessageMetadata;
 
 class ImapMailboxService
 {
+    protected ?Client $activeClient = null;
+
     private function getClient(): Client
     {
+        if ($this->activeClient !== null) {
+            try {
+                if ($this->activeClient->isConnected()) {
+                    return $this->activeClient;
+                }
+            } catch (\Throwable) {
+                $this->activeClient = null;
+            }
+        }
+
         $config = \Webklex\PHPIMAP\Config::make();
         $config->set('accounts.default.host', config('openmail.imap.host'));
         $config->set('accounts.default.port', (int) config('openmail.imap.port', 993));
@@ -30,7 +42,27 @@ class ImapMailboxService
 
         $client = new Client($config);
         $client->connect();
+        $this->activeClient = $client;
         return $client;
+    }
+
+    public function disconnect(): void
+    {
+        if ($this->activeClient !== null) {
+            try {
+                if ($this->activeClient->isConnected()) {
+                    $this->activeClient->disconnect();
+                }
+            } catch (\Throwable) {
+                // Ignore disconnect errors during termination
+            }
+            $this->activeClient = null;
+        }
+    }
+
+    public function __destruct()
+    {
+        $this->disconnect();
     }
 
     public function getFolders(): array
@@ -80,8 +112,9 @@ class ImapMailboxService
             }
 
             return $result;
-        } finally {
-            $client->disconnect();
+        } catch (\Throwable $e) {
+            $this->disconnect();
+            throw $e;
         }
     }
 
@@ -110,8 +143,9 @@ class ImapMailboxService
                 page: $page,
                 page_name: 'messages-page'
             );
-        } finally {
-            $client->disconnect();
+        } catch (\Throwable $e) {
+            $this->disconnect();
+            throw $e;
         }
     }
 
@@ -123,8 +157,9 @@ class ImapMailboxService
             $folder = $client->getFolder($folderPath);
             $message = $folder->query()->getMessageByUid($uid);
             return $message;
-        } finally {
-            $client->disconnect();
+        } catch (\Throwable $e) {
+            $this->disconnect();
+            throw $e;
         }
     }
 
@@ -138,8 +173,9 @@ class ImapMailboxService
                 ->setFetchBody(true)
                 ->getMessageByUid($uid);
             return $message;
-        } finally {
-            $client->disconnect();
+        } catch (\Throwable $e) {
+            $this->disconnect();
+            throw $e;
         }
     }
 
@@ -159,8 +195,9 @@ class ImapMailboxService
 
             $attachments = $message->getAttachments();
             return $attachments->get($attachmentIndex);
-        } finally {
-            $client->disconnect();
+        } catch (\Throwable $e) {
+            $this->disconnect();
+            throw $e;
         }
     }
 
@@ -182,8 +219,9 @@ class ImapMailboxService
                 'unread' => $unread,
                 'uidvalidity' => $info['uidvalidity'],
             ];
-        } finally {
-            $client->disconnect();
+        } catch (\Throwable $e) {
+            $this->disconnect();
+            throw $e;
         }
     }
 
@@ -204,8 +242,9 @@ class ImapMailboxService
             }
 
             return true;
-        } finally {
-            $client->disconnect();
+        } catch (\Throwable $e) {
+            $this->disconnect();
+            throw $e;
         }
     }
 
@@ -220,8 +259,9 @@ class ImapMailboxService
             }
 
             return $this->moveMessages($folderPath, $uids, $trashPath);
-        } finally {
-            $client->disconnect();
+        } catch (\Throwable $e) {
+            $this->disconnect();
+            throw $e;
         }
     }
 
@@ -244,8 +284,9 @@ class ImapMailboxService
             }
 
             return true;
-        } finally {
-            $client->disconnect();
+        } catch (\Throwable $e) {
+            $this->disconnect();
+            throw $e;
         }
     }
 
@@ -257,8 +298,9 @@ class ImapMailboxService
             $fullPath = $parentPath ? $parentPath . '.' . $name : $name;
             $client->createFolder($fullPath);
             return true;
-        } finally {
-            $client->disconnect();
+        } catch (\Throwable $e) {
+            $this->disconnect();
+            throw $e;
         }
     }
 
@@ -272,8 +314,9 @@ class ImapMailboxService
             $newPath = $parentPath ? $parentPath . '.' . $newName : $newName;
             $folder->rename($newPath);
             return true;
-        } finally {
-            $client->disconnect();
+        } catch (\Throwable $e) {
+            $this->disconnect();
+            throw $e;
         }
     }
 
@@ -285,8 +328,9 @@ class ImapMailboxService
             $folder = $client->getFolder($folderPath);
             $folder->delete();
             return true;
-        } finally {
-            $client->disconnect();
+        } catch (\Throwable $e) {
+            $this->disconnect();
+            throw $e;
         }
     }
 
@@ -386,8 +430,9 @@ class ImapMailboxService
 
             // Parse UID from result (webklex returns array with uid/uidvalidity)
             return $this->parseAppendUid($result);
-        } finally {
-            $client->disconnect();
+        } catch (\Throwable $e) {
+            $this->disconnect();
+            throw $e;
         }
     }
 
@@ -437,8 +482,9 @@ class ImapMailboxService
             }
 
             return $this->appendMessage($draftsFolder, $mimeMessage, ['\\Draft'], now());
-        } finally {
-            $client->disconnect();
+        } catch (\Throwable $e) {
+            $this->disconnect();
+            throw $e;
         }
     }
 
@@ -468,8 +514,9 @@ class ImapMailboxService
             }
 
             return false;
-        } finally {
-            $client->disconnect();
+        } catch (\Throwable $e) {
+            $this->disconnect();
+            throw $e;
         }
     }
 
@@ -499,8 +546,9 @@ class ImapMailboxService
             }
 
             return false;
-        } finally {
-            $client->disconnect();
+        } catch (\Throwable $e) {
+            $this->disconnect();
+            throw $e;
         }
     }
 
@@ -574,8 +622,9 @@ class ImapMailboxService
                 ->toArray();
 
             return $aggregated;
-        } finally {
-            $client->disconnect();
+        } catch (\Throwable $e) {
+            $this->disconnect();
+            throw $e;
         }
     }
 
@@ -650,8 +699,9 @@ class ImapMailboxService
             }
 
             return $results;
-        } finally {
-            $client->disconnect();
+        } catch (\Throwable $e) {
+            $this->disconnect();
+            throw $e;
         }
     }
 
@@ -667,8 +717,9 @@ class ImapMailboxService
         try {
             $mapper = app(FolderMapper::class);
             return $mapper->getArchiveFolderPath($client);
-        } finally {
-            $client->disconnect();
+        } catch (\Throwable $e) {
+            $this->disconnect();
+            throw $e;
         }
     }
 

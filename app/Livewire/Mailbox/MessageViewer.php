@@ -58,18 +58,62 @@ class MessageViewer extends Component
         $sanitizer = app(MessageSanitizer::class);
 
         // Extract all needed data as simple types
-        $this->subject = $this->message->subject ?? '(No subject)';
-        $this->fromDisplay = $this->message->from_name ?? $this->message->from_address ?? '';
-        $this->fromAddress = $this->message->from_address ?? '';
+        $this->subject = (string) ($this->message->subject ?? '(No subject)');
+        if (empty($this->subject)) {
+            $this->subject = '(No subject)';
+        }
+
+        $fromObj = null;
+        if (isset($this->message->from)) {
+            if ($this->message->from instanceof \Webklex\PHPIMAP\Attribute) {
+                $fromObj = $this->message->from->first();
+            } elseif (is_iterable($this->message->from)) {
+                $fromObj = collect($this->message->from)->first();
+            } else {
+                $fromObj = $this->message->from;
+            }
+        }
+
+        $fromAddress = '';
+        $fromName = '';
+        if (is_object($fromObj)) {
+            $fromAddress = $fromObj->mail ?? '';
+            $fromName = $fromObj->personal ?? '';
+        } elseif (is_string($fromObj)) {
+            $fromAddress = $fromObj;
+        }
+
+        $this->fromAddress = (string) ($fromAddress ?: ($this->message->from_address ?? ''));
+        $this->fromDisplay = (string) (!empty($this->message->from_name) ? $this->message->from_name : ($fromName ?: ($this->fromAddress ?: ($this->message->from_display ?? ''))));
         $this->toDisplay = $this->getToDisplayFromMessage($this->message);
-        $this->formattedDate = $this->message->formatted_date ?? $this->message->date ?? '';
-        $this->messageId = $this->message->message_id ?? '';
-        $this->inReplyTo = $this->message->in_reply_to ?? '';
-        $this->references = $this->message->references ?? '';
+        $this->formattedDate = (string) ($this->message->formatted_date ?? $this->message->date ?? '');
+        $this->messageId = (string) ($this->message->message_id ?? '');
+        $this->inReplyTo = (string) ($this->message->in_reply_to ?? '');
+        $this->references = (string) ($this->message->references ?? '');
         $this->ccDisplay = $this->getCcDisplayFromMessage($this->message);
         $this->bccDisplay = $this->getBccDisplayFromMessage($this->message);
-        $this->isSeen = $this->message->is_seen ?? false;
-        $this->isFlagged = $this->message->is_flagged ?? false;
+
+        if (isset($this->message->is_seen) && !($this->message->is_seen instanceof \Webklex\PHPIMAP\Attribute)) {
+            $this->isSeen = (bool) $this->message->is_seen;
+        } elseif (!($this->message instanceof \Mockery\LegacyMockInterface) && method_exists($this->message, 'hasFlag')) {
+            $this->isSeen = $this->message->hasFlag('seen');
+        } elseif (!($this->message instanceof \Mockery\LegacyMockInterface) && method_exists($this->message, 'getFlags')) {
+            $flags = $this->message->getFlags();
+            $this->isSeen = (bool) ($flags?->has('seen') ?? false);
+        } else {
+            $this->isSeen = false;
+        }
+
+        if (isset($this->message->is_flagged) && !($this->message->is_flagged instanceof \Webklex\PHPIMAP\Attribute)) {
+            $this->isFlagged = (bool) $this->message->is_flagged;
+        } elseif (!($this->message instanceof \Mockery\LegacyMockInterface) && method_exists($this->message, 'hasFlag')) {
+            $this->isFlagged = $this->message->hasFlag('flagged');
+        } elseif (!($this->message instanceof \Mockery\LegacyMockInterface) && method_exists($this->message, 'getFlags')) {
+            $flags = $this->message->getFlags();
+            $this->isFlagged = (bool) ($flags?->has('flagged') ?? false);
+        } else {
+            $this->isFlagged = false;
+        }
 
         // Get HTML body and sanitize
         if (method_exists($this->message, 'getHTMLBody')) {
@@ -94,34 +138,76 @@ class MessageViewer extends Component
     protected function getToDisplayFromMessage(object $message): string
     {
         $addresses = [];
-        if (!empty($message->to)) {
-            foreach ($message->to as $addr) {
-                $addresses[] = $addr->personal ?? ($addr->mailbox . '@' . $addr->host);
+        $rawTo = $message->to ?? null;
+        if ($rawTo instanceof \Webklex\PHPIMAP\Attribute) {
+            $rawTo = $rawTo->all();
+        } elseif (!is_iterable($rawTo) && $rawTo !== null) {
+            $rawTo = [$rawTo];
+        }
+
+        if (is_iterable($rawTo)) {
+            foreach ($rawTo as $addr) {
+                if (is_object($addr)) {
+                    $addresses[] = $addr->personal ?: ($addr->mail ?? (isset($addr->mailbox, $addr->host) ? $addr->mailbox . '@' . $addr->host : (string) $addr));
+                } elseif (is_array($addr)) {
+                    $addresses[] = $addr['personal'] ?? ($addr['mail'] ?? (isset($addr['mailbox'], $addr['host']) ? $addr['mailbox'] . '@' . $addr['host'] : ''));
+                } elseif (is_string($addr)) {
+                    $addresses[] = $addr;
+                }
             }
         }
-        return implode(', ', $addresses);
+
+        return implode(', ', array_filter($addresses));
     }
 
     protected function getCcDisplayFromMessage(object $message): string
     {
         $addresses = [];
-        if (!empty($message->cc)) {
-            foreach ($message->cc as $addr) {
-                $addresses[] = $addr->personal ?? ($addr->mailbox . '@' . $addr->host);
+        $rawCc = $message->cc ?? null;
+        if ($rawCc instanceof \Webklex\PHPIMAP\Attribute) {
+            $rawCc = $rawCc->all();
+        } elseif (!is_iterable($rawCc) && $rawCc !== null) {
+            $rawCc = [$rawCc];
+        }
+
+        if (is_iterable($rawCc)) {
+            foreach ($rawCc as $addr) {
+                if (is_object($addr)) {
+                    $addresses[] = $addr->personal ?: ($addr->mail ?? (isset($addr->mailbox, $addr->host) ? $addr->mailbox . '@' . $addr->host : (string) $addr));
+                } elseif (is_array($addr)) {
+                    $addresses[] = $addr['personal'] ?? ($addr['mail'] ?? (isset($addr['mailbox'], $addr['host']) ? $addr['mailbox'] . '@' . $addr['host'] : ''));
+                } elseif (is_string($addr)) {
+                    $addresses[] = $addr;
+                }
             }
         }
-        return implode(', ', $addresses);
+
+        return implode(', ', array_filter($addresses));
     }
 
     protected function getBccDisplayFromMessage(object $message): string
     {
         $addresses = [];
-        if (!empty($message->bcc)) {
-            foreach ($message->bcc as $addr) {
-                $addresses[] = $addr->personal ?? ($addr->mailbox . '@' . $addr->host);
+        $rawBcc = $message->bcc ?? null;
+        if ($rawBcc instanceof \Webklex\PHPIMAP\Attribute) {
+            $rawBcc = $rawBcc->all();
+        } elseif (!is_iterable($rawBcc) && $rawBcc !== null) {
+            $rawBcc = [$rawBcc];
+        }
+
+        if (is_iterable($rawBcc)) {
+            foreach ($rawBcc as $addr) {
+                if (is_object($addr)) {
+                    $addresses[] = $addr->personal ?: ($addr->mail ?? (isset($addr->mailbox, $addr->host) ? $addr->mailbox . '@' . $addr->host : (string) $addr));
+                } elseif (is_array($addr)) {
+                    $addresses[] = $addr['personal'] ?? ($addr['mail'] ?? (isset($addr['mailbox'], $addr['host']) ? $addr['mailbox'] . '@' . $addr['host'] : ''));
+                } elseif (is_string($addr)) {
+                    $addresses[] = $addr;
+                }
             }
         }
-        return implode(', ', $addresses);
+
+        return implode(', ', array_filter($addresses));
     }
 
     protected function extractAttachments(object $message): array

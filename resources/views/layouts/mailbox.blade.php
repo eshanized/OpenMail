@@ -75,8 +75,4 @@
     {{-- Mobile bottom padding for bottom nav --}}
     <div class="md:hidden h-16"></div>
 </div>
-
-@push('scripts')
-    @livewireScripts
-@endpush
 @endsection

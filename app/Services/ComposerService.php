@@ -63,12 +63,10 @@ class ComposerService
 
         // Attach files
         foreach ($data['attachments'] ?? [] as $att) {
-            $email->attach(
-                DataPart::fromPath(
-                    $att['path'],
-                    $att['name'],
-                    $att['mime'] ?? 'application/octet-stream'
-                )->setDisposition('attachment')
+            $email->attachFromPath(
+                $att['path'],
+                $att['name'],
+                $att['mime'] ?? null
             );
         }
 

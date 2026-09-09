@@ -28,16 +28,7 @@
     tabindex="0"
     @keydown="handleKeydown($event)"
 >
-    <div class="flex items-center px-4 py-3 hover:bg-hover cursor-pointer transition-colors duration-75
-        {{ !$thread->is_seen ? '' : '' }}"
-        @click="
-            if (!$event.target.closest('input[type=checkbox]') &&
-                !$event.target.closest('button') &&
-                !$event.target.closest('.label-chip')) {
-                toggleExpand();
-            }
-        "
-    >
+    <div class="flex items-center px-4 py-3 hover:bg-hover transition-colors duration-75">
         {{-- Checkbox --}}
         <input
             type="checkbox"
@@ -65,50 +56,57 @@
             @endif
         </button>
 
-        {{-- Sender + Unread --}}
-        <div class="flex items-center min-w-0 ml-3 flex-1">
-            <span class="truncate block pr-2 text-sm {{ !$thread->is_seen ? 'font-semibold text-ink' : 'text-ink-secondary' }}">
-                {{ $thread->from_display ?? 'Unknown' }}
-            </span>
-            @if(!$thread->is_seen)
-                @php $unreadCount = $thread->unread_count ?? 0; @endphp
-                @if($unreadCount > 1)
-                    <span class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold text-white bg-primary rounded-full flex-shrink-0">
-                        {{ $unreadCount }}
-                    </span>
-                @else
-                    <span class="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0"></span>
+        {{-- Clickable message link to open message --}}
+        <a
+            href="{{ route('message.show', ['folderPath' => $thread->folder_path ?? 'INBOX', 'uid' => $thread->uid]) }}"
+            wire:navigate
+            class="flex items-center min-w-0 flex-1 cursor-pointer"
+        >
+            {{-- Sender + Unread --}}
+            <div class="flex items-center min-w-0 ml-3 flex-1">
+                <span class="truncate block pr-2 text-sm {{ !$thread->is_seen ? 'font-semibold text-ink' : 'text-ink-secondary' }}">
+                    {{ $thread->from_display ?? 'Unknown' }}
+                </span>
+                @if(!$thread->is_seen)
+                    @php $unreadCount = $thread->unread_count ?? 0; @endphp
+                    @if($unreadCount > 1)
+                        <span class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold text-white bg-primary rounded-full flex-shrink-0">
+                            {{ $unreadCount }}
+                        </span>
+                    @else
+                        <span class="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0"></span>
+                    @endif
                 @endif
-            @endif
-        </div>
+            </div>
 
-        {{-- Subject + Labels --}}
-        <div class="flex items-center min-w-0 mr-4 flex-1">
-            <span class="truncate block pr-2 text-sm {{ !$thread->is_seen ? 'font-medium text-ink' : 'text-ink-secondary' }}">
-                {{ Str::limit($thread->subject ?? '', 60) }}
-            </span>
-            @php
-                $labels = $thread->labels ?? collect();
-                $displayLabels = $labels->take(3);
-                $overflowCount = max(0, $labels->count() - 3);
-            @endphp
-            @foreach($displayLabels as $label)
-                <span class="label-chip inline-flex items-center px-1.5 py-0.5 text-[10px] font-semibold rounded text-white flex-shrink-0 ml-1"
-                    style="background-color: {{ $label->color ?? '#6B7280' }}"
-                    title="{{ $label->name }}"
-                >
-                    {{ Str::limit($label->name, 10) }}
+            {{-- Subject + Labels --}}
+            <div class="flex items-center min-w-0 mr-4 flex-1">
+                <span class="truncate block pr-2 text-sm {{ !$thread->is_seen ? 'font-medium text-ink' : 'text-ink-secondary' }}">
+                    {{ Str::limit($thread->subject ?? '', 60) }}
                 </span>
-            @endforeach
-            @if($overflowCount > 0)
-                <span class="label-chip inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded bg-surface-sunken text-ink-tertiary flex-shrink-0 ml-1">
-                    +{{ $overflowCount }}
-                </span>
-            @endif
-        </div>
+                @php
+                    $labels = $thread->labels ?? collect();
+                    $displayLabels = $labels->take(3);
+                    $overflowCount = max(0, $labels->count() - 3);
+                @endphp
+                @foreach($displayLabels as $label)
+                    <span class="label-chip inline-flex items-center px-1.5 py-0.5 text-[10px] font-semibold rounded text-white flex-shrink-0 ml-1"
+                        style="background-color: {{ $label->color ?? '#6B7280' }}"
+                        title="{{ $label->name }}"
+                    >
+                        {{ Str::limit($label->name, 10) }}
+                    </span>
+                @endforeach
+                @if($overflowCount > 0)
+                    <span class="label-chip inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded bg-surface-sunken text-ink-tertiary flex-shrink-0 ml-1">
+                        +{{ $overflowCount }}
+                    </span>
+                @endif
+            </div>
 
-        {{-- Date --}}
-        <span class="text-xs text-ink-tertiary whitespace-nowrap ml-2">{{ $thread->formatted_date ?? '' }}</span>
+            {{-- Date --}}
+            <span class="text-xs text-ink-tertiary whitespace-nowrap ml-2">{{ $thread->formatted_date ?? '' }}</span>
+        </a>
 
         {{-- Attachment --}}
         @if($thread->has_attachments)
@@ -118,7 +116,7 @@
         @endif
 
         {{-- Expand chevron --}}
-        <div class="ml-2 flex-shrink-0">
+        <div class="ml-2 flex-shrink-0 p-1 cursor-pointer hover:bg-surface-sunken rounded" @click.stop="toggleExpand()">
             <svg
                 class="w-4 h-4 text-ink-tertiary transition-transform duration-150"
                 :class="{ 'rotate-90': expanded }"

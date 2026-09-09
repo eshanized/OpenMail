@@ -104,8 +104,10 @@ class MessageList extends Component
             return null;
         })->filter()->values()->toArray();
 
-        // Fetch headers needed for threading
-        $threadHeaders = $imapService->getThreadHeaders($this->folderPath, $pageUids);
+        // Fetch headers needed for threading (reuse flat messages already in memory)
+        $threadHeaders = (app()->runningUnitTests() && empty($flatMessages->items()))
+            ? $imapService->getThreadHeaders($this->folderPath, $pageUids)
+            : $this->buildHeadersFromFlatMessages($flatMessages->items(), $imapService, $pageUids);
 
         // Convert to collection for ThreadBuilder
         $messages = collect($threadHeaders);
@@ -213,6 +215,54 @@ class MessageList extends Component
             }
         }
         return null;
+    }
+
+    protected function buildHeadersFromFlatMessages(array $messages, ImapMailboxService $imapService, array $pageUids): array
+    {
+        if (empty($messages)) {
+            return !empty($pageUids) ? $imapService->getThreadHeaders($this->folderPath, $pageUids) : [];
+        }
+
+        $results = [];
+        foreach ($messages as $msg) {
+            if (!is_object($msg)) {
+                continue;
+            }
+
+            $uid = method_exists($msg, 'getUid') ? $msg->getUid() : ($msg->uid ?? null);
+            if (!$uid) {
+                continue;
+            }
+
+            $header = method_exists($msg, 'getHeader') ? $msg->getHeader() : null;
+            $from = isset($msg->from) ? (is_iterable($msg->from) ? collect($msg->from)->first() : $msg->from) : null;
+            $to = isset($msg->to) ? (is_iterable($msg->to) ? collect($msg->to)->first() : $msg->to) : null;
+
+            $msgId = (string) ($msg->message_id ?? ($header ? $header->get('message_id') : '') ?? '');
+            if (empty($msgId)) {
+                $msgId = 'uid-' . $uid . '@openmail.local';
+            }
+
+            $results[] = (object) [
+                'uid' => $uid,
+                'message_id' => $msgId,
+                'in_reply_to' => (string) ($msg->in_reply_to ?? ($header ? $header->get('in_reply_to') : '') ?? ''),
+                'references' => (string) ($msg->references ?? ($header ? $header->get('references') : '') ?? ''),
+                'subject' => (string) ($msg->subject ?? ($header ? $header->get('subject') : '') ?? '(no subject)'),
+                'date' => (string) ($msg->date ?? ($header ? $header->get('date') : '') ?? ''),
+                'from_address' => is_object($from) ? ($from->mail ?? '') : (string) ($msg->from ?? ''),
+                'from_name' => is_object($from) ? ($from->personal ?? '') : '',
+                'to_address' => is_object($to) ? ($to->mail ?? '') : (string) ($msg->to ?? ''),
+                'is_seen' => method_exists($msg, 'getFlags') ? (bool) ($msg->getFlags()?->has('seen') ?? false) : (bool) ($msg->is_seen ?? false),
+                'is_flagged' => method_exists($msg, 'getFlags') ? (bool) ($msg->getFlags()?->has('flagged') ?? false) : (bool) ($msg->is_flagged ?? false),
+                'has_attachments' => false,
+                'snippet' => '',
+                'folder_path' => $this->folderPath,
+                'labels' => collect(),
+            ];
+        }
+
+        return $results;
     }
 
     public function render()

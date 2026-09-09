@@ -1,12 +1,10 @@
 <div
     data-uid="{{ $message->uid }}"
-    class="message-row flex items-center cursor-pointer transition-colors duration-75
+    class="message-row flex items-center transition-colors duration-75
         {{ !$selected
             ? 'hover:bg-hover'
             : 'bg-selected' }}
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
-    @click="toggle({{ $message->uid }}, $event)"
-    wire:navigate="{{ route('message.show', ['folderPath' => $message->folder_path ?? $folderPath, 'uid' => $message->uid]) }}"
     tabindex="0"
 >
     {{-- Checkbox --}}
@@ -37,7 +35,7 @@
     </button>
 
     {{-- Message content --}}
-    <div class="flex-1 min-w-0 ml-3">
+    <a href="{{ route('message.show', ['folderPath' => $message->folder_path ?? $folderPath, 'uid' => $message->uid]) }}" wire:navigate class="flex-1 min-w-0 ml-3 block">
         {{-- Row 1: From + Date --}}
         <div class="flex items-center justify-between gap-3">
             <div class="flex items-center min-w-0 gap-1.5">
@@ -73,5 +71,5 @@
                 {{ Str::limit($message->snippet, 90) }}
             </div>
         @endif
-    </div>
+    </a>
 </div>

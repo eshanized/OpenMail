@@ -35,11 +35,11 @@
                 <div class="flex items-start gap-3 mb-4">
                     {{-- Avatar --}}
                     <div class="w-10 h-10 rounded-full bg-primary-subtle text-primary flex items-center justify-center text-sm font-semibold flex-shrink-0">
-                        {{ strtoupper(substr($fromDisplay, 0, 1)) }}
+                        {{ strtoupper(substr($fromDisplay ?: ($fromAddress ?: '?'), 0, 1)) }}
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2">
-                            <span class="text-sm font-semibold text-ink">{{ $fromDisplay }}</span>
+                            <span class="text-sm font-semibold text-ink">{{ $fromDisplay ?: $fromAddress }}</span>
                         </div>
                         <div class="flex items-center gap-1 text-xs text-ink-tertiary mt-0.5">
                             <span>to</span>
@@ -68,7 +68,13 @@
                     <div x-show="open" x-transition class="mt-3 space-y-2 text-xs">
                         <div class="grid grid-cols-[80px_1fr] gap-2">
                             <span class="text-ink-tertiary font-medium">From</span>
-                            <span class="text-ink-secondary break-all">{{ $fromDisplay }} &lt;{{ $fromEmail ?? '' }}&gt;</span>
+                            <span class="text-ink-secondary break-all">
+                                @if($fromDisplay && $fromAddress && $fromDisplay !== $fromAddress)
+                                    {{ $fromDisplay }} &lt;{{ $fromAddress }}&gt;
+                                @else
+                                    {{ $fromDisplay ?: $fromAddress }}
+                                @endif
+                            </span>
                         </div>
                         <div class="grid grid-cols-[80px_1fr] gap-2">
                             <span class="text-ink-tertiary font-medium">To</span>

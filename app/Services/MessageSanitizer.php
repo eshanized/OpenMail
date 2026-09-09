@@ -71,17 +71,14 @@ class MessageSanitizer
         foreach ($dom->getElementsByTagName('img') as $img) {
             $src = $img->getAttribute('src');
             if ($src && (str_starts_with($src, 'http://') || str_starts_with($src, 'https://'))) {
-                $img->removeAttribute('src');
                 $img->setAttribute('data-src', $src);
+                $img->setAttribute('src', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
             }
         }
 
         $body = $dom->getElementsByTagName('body')->item(0);
-        if ($body) {
-            return $dom->saveHTML($body);
-        }
-
-        return $dom->saveHTML();
+        $output = $body ? $dom->saveHTML($body) : $dom->saveHTML();
+        return preg_replace('/<\!--\?xml.*?-->\s*/i', '', $output);
     }
 
     /**
@@ -115,7 +112,8 @@ class MessageSanitizer
         }
 
         $body = $dom->getElementsByTagName('body')->item(0);
-        return $body ? $dom->saveHTML($body) : $dom->saveHTML();
+        $output = $body ? $dom->saveHTML($body) : $dom->saveHTML();
+        return preg_replace('/<\!--\?xml.*?-->\s*/i', '', $output);
     }
 
     /**

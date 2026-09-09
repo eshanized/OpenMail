@@ -378,4 +378,80 @@ class MessageViewerTest extends TestCase
 
         $component->assertSet('isSeen', false); // Initially false, setFlag sets it on IMAP
     }
+
+    /** @test */
+    public function real_webklex_message_parses_sender_and_date_correctly()
+    {
+        $raw = "From: Amazon SES <eshan@tonmoyinfrastructure.org>\r\n" .
+               "To: eshan@tonmoyinfrastructure.org\r\n" .
+               "Subject: Verify your company email\r\n" .
+               "Date: Mon, 10 Sep 2026 01:00:00 +0000\r\n" .
+               "Message-ID: <010001a03961f525@email.amazonses.com>\r\n" .
+               "Content-Type: text/html; charset=utf-8\r\n\r\n" .
+               "<p>Log in with your magic link. 🪄</p>";
+
+        $realMessage = \Webklex\PHPIMAP\Message::fromString($raw);
+
+        $mockService = Mockery::mock(ImapMailboxService::class);
+        $mockService->shouldReceive('getMessageWithBody')->with('INBOX', 601)->andReturn($realMessage);
+        $mockService->shouldReceive('getCachedFolders')->andReturn([
+            ['path' => 'INBOX', 'name' => 'Inbox', 'role' => 'inbox', 'unread_count' => 5, 'total_count' => 10, 'has_children' => false],
+        ]);
+        $mockService->shouldReceive('setFlag')->with('INBOX', [601], '\\Seen', true)->andReturn(true);
+
+        $this->app->instance(ImapMailboxService::class, $mockService);
+
+        $component = \Livewire\Livewire::actingAs($this->user)
+            ->test(\App\Livewire\Mailbox\MessageViewer::class, [
+                'folderPath' => 'INBOX',
+                'uid' => 601,
+            ]);
+
+        $component->assertSet('subject', 'Verify your company email');
+        $component->assertSet('fromDisplay', 'Amazon SES');
+        $component->assertSet('fromAddress', 'eshan@tonmoyinfrastructure.org');
+        $component->assertSet('toDisplay', 'eshan@tonmoyinfrastructure.org');
+        $component->assertSee('Amazon SES');
+        $component->assertSee('eshan@tonmoyinfrastructure.org');
+        $component->assertSee('Verify your company email');
+        // Details row should show formatted address without empty brackets
+        $component->assertSee('Amazon SES &lt;eshan@tonmoyinfrastructure.org&gt;', false);
+        $component->assertDontSee('&lt;&gt;', false);
+    }
+
+    /** @test */
+    public function utf8_emojis_and_html_render_cleanly_without_mojibake()
+    {
+        $raw = "From: Support <support@example.com>\r\n" .
+               "To: user@example.com\r\n" .
+               "Subject: Magic Link 🪄\r\n" .
+               "Date: Mon, 10 Sep 2026 01:00:00 +0000\r\n" .
+               "Content-Type: text/html; charset=utf-8\r\n\r\n" .
+               "<p>Log in with your magic link. &nbsp;&nbsp; 🪄 Your magic link</p>";
+
+        $realMessage = \Webklex\PHPIMAP\Message::fromString($raw);
+
+        $mockService = Mockery::mock(ImapMailboxService::class);
+        $mockService->shouldReceive('getMessageWithBody')->with('INBOX', 602)->andReturn($realMessage);
+        $mockService->shouldReceive('getCachedFolders')->andReturn([
+            ['path' => 'INBOX', 'name' => 'Inbox', 'role' => 'inbox', 'unread_count' => 1, 'total_count' => 1, 'has_children' => false],
+        ]);
+        $mockService->shouldReceive('setFlag')->with('INBOX', [602], '\\Seen', true)->andReturn(true);
+
+        $this->app->instance(ImapMailboxService::class, $mockService);
+
+        $component = \Livewire\Livewire::actingAs($this->user)
+            ->test(\App\Livewire\Mailbox\MessageViewer::class, [
+                'folderPath' => 'INBOX',
+                'uid' => 602,
+            ]);
+
+        // Must not contain Latin-1 mojibake bytes like atob creates
+        $html = $component->html();
+        $this->assertStringNotContainsString('Â', $html);
+        $this->assertStringNotContainsString('ï»¿', $html);
+        $this->assertStringNotContainsString('<!--?xml', $html);
+        $this->assertStringContainsString('Magic Link 🪄', $html);
+        $this->assertStringContainsString('🪄 Your magic link', $html);
+    }
 }

@@ -1,0 +1,835 @@
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\SearchHighlightTest::highlight_matches_wrapped_in_mark_tags_after_sanitization(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\SearchHighlightTest::highlight_is_case_insensitive(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\SearchHighlightTest::highlight_escapes_regex_special_characters_in_query(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\SearchHighlightTest::highlight_sanitize_before_mark_wrapping_for_xss_prevention(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\SearchHighlightTest::highlight_preserves_html_safe_snippet_content(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\SearchHighlightTest::highlight_returns_original_when_no_query(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\SearchHighlightTest::highlight_returns_original_when_no_match(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Services\ThreadBuilderTest::buildThreads_returns_root_threads_with_nested_children_from_headers(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Services\ThreadBuilderTest::extractParentId_prefers_in_reply_to_falls_back_to_last_references(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Services\ThreadBuilderTest::extractParentId_falls_back_to_references_when_no_in_reply_to(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Services\ThreadBuilderTest::extractParentId_returns_null_when_no_headers(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Services\ThreadBuilderTest::groupBySubject_strips_re_fwd_normalizes_whitespace_groups_by_subject_and_2day_window(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Services\ThreadBuilderTest::thread_ordering_by_latest_message_date_descending(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Services\ThreadBuilderTest::handles_missing_parent_messages_dummy_containers_pruned(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Services\ThreadBuilderTest::handles_circular_references_gracefully_no_infinite_loop(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Services\ThreadBuilderTest::empty_input_returns_empty_array(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Services\ThreadBuilderTest::resolves_missing_parents_from_thread_header_cache(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactAutocompleteTest::search_unified_merges_local_contacts_and_imap_cache(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactAutocompleteTest::search_unified_local_contacts_exact_match_ranks_higher(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactAutocompleteTest::search_unified_imap_cache_frequency_desc(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactAutocompleteTest::search_unified_deduplicates_by_email_local_wins(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactAutocompleteTest::search_unified_imap_cache_auto_expires(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactAutocompleteTest::search_unified_returns_format_compatible_with_composer_dropdown(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactAutocompleteTest::search_unified_respects_limit(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactAutocompleteTest::search_unified_case_insensitive_deduplication(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactTest::contact_create_validates_email_format_and_sets_avatar_color(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactTest::contact_create_rejects_invalid_email(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactTest::contact_create_rejects_duplicate_email_per_user(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactTest::contact_update_validates_email_unique_excluding_self(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactTest::contact_update_rejects_duplicate_email_from_another_contact(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactTest::contact_delete_removes_contact(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactTest::contact_delete_syncs_groups(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactTest::contact_group_crud_with_user_scoping(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactTest::get_groups_returns_user_groups_with_contact_counts(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactTest::search_contacts_by_email_or_name(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactTest::get_for_user_returns_only_user_contacts(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactTest::increment_usage_increments_count(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactTest::avatar_color_deterministic_from_email_hash(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactTest::avatar_color_set_on_create_not_changed_on_update(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactTest::test_contact_sidebar_loads_contacts(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactTest::test_contact_sidebar_search(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactTest::test_contact_modal_create(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactTest::test_contact_modal_edit(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactTest::test_contact_modal_delete(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactTest::test_contact_modal_validation(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ContactTest::test_contact_row_renders_correctly(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\LabelTest::test_create_validates_name_unique_per_user_case_insensitive_and_color_from_palette(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\LabelTest::test_update_validates_name_unique_excluding_self_and_color_change(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\LabelTest::test_delete_removes_label_from_all_messages_and_deletes_label(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\LabelTest::test_apply_to_messages_attaches_label_to_messages(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\LabelTest::test_remove_from_messages_detaches_label(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\LabelTest::test_get_for_user_returns_labels_with_unread_and_total_counts(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\LabelTest::test_label_filter_scope_where_has_labels(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\LabelTest::test_label_color_palette_returns_10_colors_from_ui_spec(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\LabelTest::test_ensure_archive_label_finds_or_creates_archive_with_gray(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\LabelTest::test_ensure_inbox_label_finds_or_creates_inbox_with_blue(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\LabelTest::test_label_service_scopes_all_operations_to_user(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\LabelTest::test_sidebar_and_filter(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\LabelTest::test_colors(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\LabelTest::test_label_chips_overflow(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\LabelTest::test_label_modal_create_and_edit(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\LabelTest::test_label_sidebar_delete_label(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\LabelTest::test_label_sidebar_empty_state(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\LabelTest::test_archive_action_label_sync(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\LabelTest::test_label_filter_route(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\LabelTest::test_label_filter_route_only_shows_own_labels(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\LabelTest::test_archive_toast_message_format(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\LabelTest::test_folder_mapper_archive_folder(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\LabelTest::test_imap_service_archive_methods(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\LabelTest::test_archive_folder_detection_fallback(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\LabelTest::test_label_filter_route_with_invalid_id(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\LabelTest::test_label_filter_route_unauthenticated(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Mailbox\AttachmentDownloadTest::download_generates_uuid_based_filename(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Mailbox\AttachmentDownloadTest::path_traversal_in_filename_is_prevented(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Mailbox\AttachmentDownloadTest::mime_type_validation_blocks_executables(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Mailbox\AttachmentDownloadTest::content_type_header_is_set_correctly(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Mailbox\AttachmentDownloadTest::content_disposition_is_attachment_not_inline(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Mailbox\BulkActionTest::bulk_mark_read_sets_seen_flag_on_all_selected_uids(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Mailbox\BulkActionTest::bulk_mark_unread_clears_seen_flag_on_all_selected_uids(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Mailbox\BulkActionTest::bulk_star_sets_flagged_flag_on_all_selected_uids(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Mailbox\BulkActionTest::bulk_delete_moves_all_selected_to_trash(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Mailbox\BulkActionTest::bulk_move_moves_all_selected_to_destination_folder(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Mailbox\BulkActionTest::toolbar_shows_when_uids_selected(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Mailbox\BulkActionTest::toolbar_hides_when_no_uids_selected(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Mailbox\BulkActionTest::clear_selection_empties_selection_after_action(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Mailbox\BulkActionTest::empty_selection_refuses_action(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Mailbox\MessageViewerTest::message_viewer_renders_html_email_in_sandboxed_iframe(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Mailbox\MessageViewerTest::plain_text_message_renders_in_pre_tag(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Mailbox\MessageViewerTest::message_headers_display_correctly(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Mailbox\MessageViewerTest::show_details_expands_cc_bcc_message_id(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Mailbox\MessageViewerTest::remote_images_blocked_by_default(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Mailbox\MessageViewerTest::display_images_button_shows_images(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Mailbox\MessageViewerTest::back_button_returns_to_message_list(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Mailbox\MessageViewerTest::attachment_list_renders_with_download_buttons(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Mailbox\MessageViewerTest::message_automatically_marked_as_read_on_open(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchIndexingTest::message_metadata_uses_searchable_trait(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchIndexingTest::toSearchableArray_includes_all_d05_fields(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchIndexingTest::searchableAs_returns_per_user_index_name(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchIndexingTest::shouldBeSearchable_returns_true(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchIndexingTest::search_service_returns_paginated_results(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchIndexingTest::search_service_applies_folder_filter(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchIndexingTest::search_service_applies_date_range_filter(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchIndexingTest::search_service_applies_has_attachment_filter(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchIndexingTest::search_service_applies_is_seen_filter(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchIndexingTest::search_service_applies_is_flagged_filter(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchIndexingTest::search_service_applies_labels_filter(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchIndexingTest::instant_search_returns_limited_results_for_dropdown(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchIndexingTest::search_isolation_by_user_id(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchIndexingTest::body_text_populated_with_plain_text_during_sync(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchIndexingTest::body_text_truncated_to_500_chars(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchIndexingTest::body_text_handles_empty_input(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchIndexingTest::search_results_ordered_by_relevance_and_date(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchIndexingTest::query_with_boolean_operator_does_not_cause_error(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchIndexingTest::sanitize_query_strips_fulltext_boolean_operators(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchIndexingTest::sanitize_query_normalizes_whitespace(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchIndexingTest::sanitize_query_returns_empty_for_only_operators(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchResultsPageTest::search_results_page_renders_with_results(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchResultsPageTest::search_results_page_redirects_on_empty_query(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchResultsPageTest::search_results_page_shows_empty_state(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchResultsPageTest::folder_filter_works(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchResultsPageTest::date_range_filter_works(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchResultsPageTest::attachment_filter_works(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchResultsPageTest::read_unread_filter_works(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchResultsPageTest::flagged_filter_works(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchResultsPageTest::label_filter_works(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchResultsPageTest::active_filter_chips_displayed(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchResultsPageTest::pagination_works(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchResultsPageTest::search_results_page_shows_result_count(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchResultsPageTest::search_results_page_isolation_by_user(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchTest::search_bar_renders_in_mailbox(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchTest::instant_search_returns_results_for_valid_query(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchTest::instant_search_returns_max_8_results(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchTest::instant_search_returns_empty_for_short_query(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchTest::instant_search_isolation_by_user(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchTest::close_dropdown_clears_results(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchTest::keyboard_navigation_highlighted_index_updates(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchTest::test_highlight_after_sanitization_no_xss(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SearchTest::test_highlight_after_sanitization_snippet_no_xss(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ThreadUITest::test_thread_toggle_button_visible_in_toolbar(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ThreadUITest::test_message_list_component_has_thread_mode_default(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ThreadUITest::test_toggle_thread_mode_switches_to_flat(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ThreadUITest::test_toggle_thread_mode_switches_back_to_threaded(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ThreadUITest::test_threaded_mode_returns_array_not_paginator(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ThreadUITest::test_thread_row_renders_with_expand_chevron(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ThreadUITest::test_thread_toggle_button_has_correct_active_state(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ThreadUITest::test_threaded_view_shows_thread_children(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ThreadUITest::test_folder_change_dispatches_load_thread_mode(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ThreadUITest::test_thread_toggle_persistence_per_folder(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ThreadUITest::test_keyboard_shortcuts_rendered_in_view(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ThreadUITest::test_search_focus_shortcut_in_search_bar(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ThreadUITest::test_thread_row_keyboard_navigation(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\VCardTest::import_parses_vcard_30_with_all_fields(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\VCardTest::import_handles_multiple_vcards(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\VCardTest::import_conflict_strategy_skip(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\VCardTest::import_conflict_strategy_update(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\VCardTest::import_conflict_strategy_duplicate(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\VCardTest::import_skips_vcards_without_email(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\VCardTest::import_normalizes_email_to_lowercase(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\VCardTest::export_generates_valid_vcard_30_with_all_fields(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\VCardTest::export_empty_when_no_contacts(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\VCardTest::export_only_includes_user_contacts(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\VCardTest::import_handles_vcard_with_minimal_fields(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\VCardTest::import_syncs_groups_from_categories(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   PASS  Tests\Unit\ExampleTest
+  ✓ that true is true
+
+   PASS  Tests\Unit\SearchHighlightTest
+  ✓ highlight matches wrapped in mark tags after sanitization            0.07s  
+  ✓ highlight is case insensitive
+  ✓ highlight escapes regex special characters in query
+  ✓ highlight sanitize before mark wrapping for xss prevention
+  ✓ highlight preserves html safe snippet content
+  ✓ highlight returns original when no query
+  ✓ highlight returns original when no match
+
+   PASS  Tests\Unit\Services\FolderMapperTest
+  ✓ inbox special use attribute                                          0.01s  
+  ✓ sent special use attribute
+  ✓ drafts special use attribute
+  ✓ trash special use attribute
+  ✓ junk special use attribute
+  ✓ archive special use attribute
+  ✓ name heuristic sent mail
+  ✓ name heuristic deleted items
+  ✓ name heuristic junk
+  ✓ custom folder returns null
+  ✓ inbox path always inbox
+  ✓ map folder name with role
+  ✓ map folder name custom
+
+   PASS  Tests\Unit\Services\MessageSanitizerTest
+  ✓ script tag removed                                                   0.01s  
+  ✓ event handler removed                                                0.01s  
+  ✓ safe link preserved                                                  0.01s  
+  ✓ dangerous link stripped
+  ✓ image src validation
+  ✓ css sanitization                                                     0.01s  
+  ✓ nested html structure preserved
+  ✓ charset handling
+  ✓ sanitize text escapes
+  ✓ block remote images
+  ✓ block remote images preserves local
+
+   PASS  Tests\Unit\Services\ThreadBuilderTest
+  ✓ build threads returns root threads with nested children from header… 0.01s  
+  ✓ extract parent id prefers in reply to falls back to last references
+  ✓ extract parent id falls back to references when no in reply to
+  ✓ extract parent id returns null when no headers
+  ✓ group by subject strips re fwd normalizes whitespace groups by subj… 0.01s  
+  ✓ thread ordering by latest message date descending
+  ✓ handles missing parent messages dummy containers pruned
+  ✓ handles circular references gracefully no infinite loop
+  ✓ empty input returns empty array
+  ✓ resolves missing parents from thread header cache
+
+   WARN  Tests\Feature\Composer\ComposerIntegrationTest
+  ✓ composer modal renders when authenticated                            0.08s  
+  ! compose button is visible in mailbox view → Test code or tested cod… 0.02s  
+  ✓ unauthenticated access redirects to login                            0.01s  
+  ✓ composer livewire component mounts correctly                         0.01s  
+  ✓ open composer for reply populates fields                             0.01s  
+  ✓ open composer for reply all includes cc                              0.01s  
+  ✓ open composer for forward populates correctly                        0.01s  
+  ✓ composer validation requires to subject body                         0.02s  
+  ✓ composer validation passes with valid data                           0.02s  
+  ✓ discard draft clears form                                            0.02s  
+  - attachment validation enforces size limits → Disk quota exceeded in… 0.01s  
+
+   WARN  Tests\Feature\Composer\ComposerServiceTest
+  ✓ build mime message produces valid mime with correct to subject body  0.01s  
+  - build mime message includes attachments with correct mime types → C… 0.01s  
+  ✓ build mime message sets in reply to and references headers for repl… 0.01s  
+  ✓ build mime message generates message id header                       0.01s  
+  ✓ send message calls append to sent before smtp                        0.01s  
+  ✓ send message creates pending send on smtp failure                    0.01s  
+  ✓ save draft calls append to drafts                                    0.01s  
+  ✓ undo send cancels pending send and moves to drafts                   0.01s  
+  ✓ undo send fails for non pending send                                 0.01s  
+
+   PASS  Tests\Feature\Composer\ContactAutocompleteTest
+  ✓ search contacts returns matching recipients from cache               0.01s  
+  ✓ search contacts respects limit parameter                             0.01s  
+  ✓ refresh cache populates from imap sent inbox                         0.01s  
+  ✓ cache expires after 7 days                                           0.01s  
+  ✓ search works with partial email name matches                         0.01s  
+
+   PASS  Tests\Feature\Composer\DraftAutosaveTest
+  ✓ localstorage key format matches pattern                              0.01s  
+  ✓ autosave debounce fires after 1500ms
+  ✓ imap append to drafts folder on sync                                 0.01s  
+  ✓ existing draft uid used for update                                   0.01s  
+  ✓ discard clears localstorage and deletes from imap drafts
+
+   PASS  Tests\Feature\Composer\TiptapIntegrationTest
+  ✓ tiptap editor module exists and exports init                         0.01s  
+  ✓ composer blade contains tiptap editor container
+  ✓ hidden textarea receives content from editor
+  ✓ toolbar buttons render with aria labels
+  ✓ quote component renders attribution and collapsible content
+  ✓ tiptap extensions configured in editor
+  ✓ tiptap css styles added
+  ✓ composer component has syncbodfromeditor method
+  ✓ composer getcomposerdata uses bodyhtml
+
+   PASS  Tests\Feature\Composer\UndoSendTest
+  ✓ pending sends record created on send with correct send at timestamp  0.01s  
+  ✓ undo send cancels pending send and updates status                    0.01s  
+  ✓ undo send moves message to drafts via imap append                    0.01s  
+  ✓ process pending sends processes due records                          0.01s  
+  ✓ process pending sends retries failed sends with backoff              0.01s  
+  ✓ process pending sends marks as failed after 3 retries                0.01s  
+
+   PASS  Tests\Feature\ContactAutocompleteTest
+  ✓ search unified merges local contacts and imap cache                  0.01s  
+  ✓ search unified local contacts exact match ranks higher               0.01s  
+  ✓ search unified imap cache frequency desc                             0.01s  
+  ✓ search unified deduplicates by email local wins                      0.01s  
+  ✓ search unified imap cache auto expires                               0.01s  
+  ✓ search unified returns format compatible with composer dropdown      0.01s  
+  ✓ search unified respects limit                                        0.01s  
+  ✓ search unified case insensitive deduplication                        0.01s  
+"Livewire test contact:" // tests/Feature/ContactTest.php:338
+null // tests/Feature/ContactTest.php:338
+
+   FAIL  Tests\Feature\ContactTest
+  ✓ contact create validates email format and sets avatar color          0.01s  
+  ✓ contact create rejects invalid email
+  ✓ contact create rejects duplicate email per user                      0.01s  
+  ✓ contact update validates email unique excluding self                 0.01s  
+  ✓ contact update rejects duplicate email from another contact          0.01s  
+  ✓ contact delete removes contact                                       0.01s  
+  ✓ contact delete syncs groups                                          0.01s  
+  ✓ contact group crud with user scoping                                 0.01s  
+  ✓ get groups returns user groups with contact counts                   0.01s  
+  ✓ search contacts by email or name                                     0.01s  
+  ✓ get for user returns only user contacts                              0.01s  
+  ✓ increment usage increments count                                     0.01s  
+  ✓ avatar color deterministic from email hash
+  ✓ avatar color set on create not changed on update                     0.01s  
+  ✓ contact sidebar loads contacts                                       0.01s  
+  ✓ contact sidebar search                                               0.01s  
+  ⨯ contact modal create                                                 0.02s  
+  ✓ contact modal edit                                                   0.01s  
+  ✓ contact modal delete                                                 0.01s  
+  ✓ contact modal validation                                             0.01s  
+  ✓ contact row renders correctly                                        0.01s  
+
+   PASS  Tests\Feature\ExampleTest
+  ✓ the application returns a successful response                        0.01s  
+
+   PASS  Tests\Feature\InstallerTest
+  ✓ installer is accessible when not installed                           0.01s  
+  ✓ installer redirects to 404 when installed                            0.01s  
+
+   WARN  Tests\Feature\IntegrationTest
+  ! tabbed sidebar → Test code or tested code did not close its own out… 0.02s  
+  ✓ folder sidebar tab switching                                         0.01s  
+  ✓ tabbed sidebar invalid tab defaults to folders                       0.01s  
+  ✓ tabbed sidebar renders all panels                                    0.01s  
+  ✓ desktop tab bar active state                                         0.01s  
+  ✓ mobile bottom nav hidden on desktop                                  0.01s  
+  ✓ full search flow                                                     0.01s  
+  ✓ search with label filter                                             0.01s  
+  ✓ thread view with labels                                              0.01s  
+  ! archive from thread view → Test code or tested code did not close i… 0.02s  
+  ! mobile responsive → Test code or tested code did not close its own…  0.02s  
+  ✓ all filters combined                                                 0.01s  
+  ✓ label chips in thread row                                            0.01s  
+  ✓ contact groups in sidebar                                            0.01s  
+  ✓ empty states match ui spec                                           0.01s  
+
+   PASS  Tests\Feature\LabelTest
+  ✓ create validates name unique per user case insensitive and color fr… 0.01s  
+  ✓ update validates name unique excluding self and color change         0.01s  
+  ✓ delete removes label from all messages and deletes label             0.01s  
+  ✓ apply to messages attaches label to messages                         0.01s  
+  ✓ remove from messages detaches label                                  0.01s  
+  ✓ get for user returns labels with unread and total counts             0.01s  
+  ✓ label filter scope where has labels                                  0.01s  
+  ✓ label color palette returns 10 colors from ui spec
+  ✓ ensure archive label finds or creates archive with gray              0.01s  
+  ✓ ensure inbox label finds or creates inbox with blue
+  ✓ label service scopes all operations to user                          0.01s  
+  ✓ sidebar and filter                                                   0.02s  
+  ✓ colors                                                               0.01s  
+  ✓ label chips overflow                                                 0.01s  
+  ✓ label modal create and edit                                          0.01s  
+  ✓ label sidebar delete label                                           0.01s  
+  ✓ label sidebar empty state                                            0.01s  
+  ✓ archive action label sync                                            0.01s  
+  ✓ label filter route                                                   0.15s  
+  ✓ label filter route only shows own labels                             0.01s  
+  ✓ archive toast message format
+  ✓ folder mapper archive folder
+  ✓ imap service archive methods
+  ✓ archive folder detection fallback
+  ✓ label filter route with invalid id                                   0.01s  
+  ✓ label filter route unauthenticated                                   0.01s  
+
+   PASS  Tests\Feature\Mailbox\AttachmentDownloadTest
+  ✓ download generates uuid based filename                               0.01s  
+  ✓ path traversal in filename is prevented
+  ✓ mime type validation blocks executables                              0.01s  
+  ✓ content type header is set correctly                                 0.01s  
+  ✓ content disposition is attachment not inline
+
+   PASS  Tests\Feature\Mailbox\BulkActionTest
+  ✓ bulk mark read sets seen flag on all selected uids                   0.01s  
+  ✓ bulk mark unread clears seen flag on all selected uids
+  ✓ bulk star sets flagged flag on all selected uids
+  ✓ bulk delete moves all selected to trash
+  ✓ bulk move moves all selected to destination folder
+  ✓ toolbar shows when uids selected
+  ✓ toolbar hides when no uids selected
+  ✓ clear selection empties selection after action
+  ✓ empty selection refuses action                                       0.01s  
+
+   WARN  Tests\Feature\Mailbox\MailboxIntegrationTest
+  ✓ unauthenticated user redirected from mailbox                         0.01s  
+  ! authenticated user can access mailbox → Test code or tested code di… 0.02s  
+  ! folder sidebar component renders → Test code or tested code did not… 0.01s  
+  ! mailbox layout extends app layout → Test code or tested code did no… 0.02s  
+
+   PASS  Tests\Feature\Mailbox\MessageListLoadingTest
+  ✓ message list has skeleton loading guard                              0.01s  
+  ✓ message list has no full screen spinner overlay                      0.01s  
+
+   FAIL  Tests\Feature\Mailbox\MessageViewerTest
+  ⨯ message viewer renders html email in sandboxed iframe                0.02s  
+  ⨯ plain text message renders in pre tag                                0.02s  
+  ⨯ message headers display correctly                                    0.02s  
+  ⨯ show details expands cc bcc message id                               0.02s  
+  ⨯ remote images blocked by default                                     0.02s  
+  ✓ display images button shows images                                   0.01s  
+  ⨯ back button returns to message list                                  0.02s  
+  ⨯ attachment list renders with download buttons                        0.02s  
+  ⨯ message automatically marked as read on open                         0.02s  
+
+   PASS  Tests\Feature\SearchIndexingTest
+  ✓ message metadata uses searchable trait                               0.01s  
+  ✓ to searchable array includes all d05 fields                          0.01s  
+  ✓ searchable as returns per user index name                            0.01s  
+  ✓ should be searchable returns true                                    0.01s  
+  ✓ search service returns paginated results                             0.01s  
+  ✓ search service applies folder filter                                 0.01s  
+  ✓ search service applies date range filter                             0.01s  
+  ✓ search service applies has attachment filter                         0.01s  
+  ✓ search service applies is seen filter                                0.01s  
+  ✓ search service applies is flagged filter                             0.01s  
+  ✓ search service applies labels filter                                 0.01s  
+  ✓ instant search returns limited results for dropdown                  0.01s  
+  ✓ search isolation by user id                                          0.01s  
+  ✓ body text populated with plain text during sync
+  ✓ body text truncated to 500 chars
+  ✓ body text handles empty input
+  ✓ search results ordered by relevance and date                         0.01s  
+  ✓ query with boolean operator does not cause error                     0.01s  
+  ✓ sanitize query strips fulltext boolean operators
+  ✓ sanitize query normalizes whitespace
+  ✓ sanitize query returns empty for only operators
+
+   PASS  Tests\Feature\SearchResultsPageTest
+  ✓ search results page renders with results                             0.01s  
+  ✓ search results page redirects on empty query                         0.01s  
+  ✓ search results page shows empty state                                0.01s  
+  ✓ folder filter works                                                  0.01s  
+  ✓ date range filter works                                              0.01s  
+  ✓ attachment filter works                                              0.01s  
+  ✓ read unread filter works                                             0.01s  
+  ✓ flagged filter works                                                 0.01s  
+  ✓ label filter works                                                   0.01s  
+  ✓ active filter chips displayed                                        0.01s  
+  ✓ pagination works                                                     0.02s  
+  ✓ search results page shows result count                               0.01s  
+  ✓ search results page isolation by user                                0.01s  
+
+   PASS  Tests\Feature\SearchTest
+  ✓ search bar renders in mailbox                                        0.01s  
+  ✓ instant search returns results for valid query                       0.01s  
+  ✓ instant search returns max 8 results                                 0.02s  
+  ✓ instant search returns empty for short query                         0.01s  
+  ✓ instant search isolation by user                                     0.01s  
+  ✓ close dropdown clears results                                        0.01s  
+  ✓ keyboard navigation highlighted index updates                        0.01s  
+  ✓ highlight after sanitization no xss                                  0.01s  
+  ✓ highlight after sanitization snippet no xss                          0.01s  
+
+   PASS  Tests\Feature\Settings\AppearanceTest
+  ✓ theme radios render and persist                                      0.01s  
+  ✓ density radios render and persist                                    0.01s  
+  ✓ invalid theme snaps back to system                                   0.01s  
+
+   WARN  Tests\Feature\ThreadUITest
+  ! threaded view loads for inbox → Test code or tested code did not cl… 0.02s  
+  ! thread toggle button visible in toolbar → Test code or tested code…  0.02s  
+  ✓ message list component has thread mode default                       0.01s  
+  ✓ toggle thread mode switches to flat                                  0.01s  
+  ✓ toggle thread mode switches back to threaded                         0.01s  
+  ✓ threaded mode returns array not paginator                            0.01s  
+  ! thread row renders with expand chevron → Test code or tested code d… 0.02s  
+  ✓ thread toggle button has correct active state                        0.01s  
+  ✓ threaded view shows thread children                                  0.01s  
+  ✓ folder change dispatches load thread mode                            0.01s  
+  ✓ thread toggle persistence per folder                                 0.02s  
+  ! keyboard shortcuts rendered in view → Test code or tested code did…  0.02s  
+  ! search focus shortcut in search bar → Test code or tested code did…  0.02s  
+  ! thread row keyboard navigation → Test code or tested code did not c… 0.02s  
+
+   PASS  Tests\Feature\UiPolishTest
+  ✓ compose button has gradient classes                                  0.01s  
+  ✓ send and archive buttons have gradient classes                       0.01s  
+  ✓ x cloak css rule exists
+  ✓ glass surface classes present
+  ✓ status badges use soft tag style
+  ✓ message viewer has no chrome classes
+  ✓ layout emits csp nonce meta
+
+   PASS  Tests\Feature\VCardTest
+  ✓ import parses vcard 30 with all fields                               0.01s  
+  ✓ import handles multiple vcards                                       0.01s  
+  ✓ import conflict strategy skip                                        0.01s  
+  ✓ import conflict strategy update                                      0.01s  
+  ✓ import conflict strategy duplicate                                   0.01s  
+  ✓ import skips vcards without email
+  ✓ import normalizes email to lowercase                                 0.01s  
+  ✓ export generates valid vcard 30 with all fields                      0.01s  
+  ✓ export empty when no contacts
+  ✓ export only includes user contacts                                   0.01s  
+  ✓ import handles vcard with minimal fields                             0.01s  
+  ✓ import syncs groups from categories                                  0.01s  
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ContactTest > contact modal create                     
+  Failed asserting that a row in the table [contacts] matches the attributes {
+    "user_id": 1,
+    "name": "New Contact",
+    "email": "new@example.com"
+}.
+
+The table is empty.
+
+  at tests/Feature/ContactTest.php:340
+    336▕         // Debug: check if contact exists in database
+    337▕         $contact = \App\Models\Contact::where('email', 'new@example.com')->first();
+    338▕         dump('Livewire test contact:', $contact);
+    339▕         
+  ➜ 340▕         $this->assertDatabaseHas('contacts', [
+    341▕             'user_id' => $this->user->id,
+    342▕             'name' => 'New Contact',
+    343▕             'email' => 'new@example.com',
+    344▕         ]);
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Mailbox\MessageViewerTest > message viewer renders…    
+  Expected: <div class="h-[calc(100vh-4rem)] flex overflow-hidden"\n
+       x-data="{\n
+           sidebarOpen: false,\n
+  ... (3942 more lines)
+
+  To contain: Sender Name
+
+  at tests/Feature/Mailbox/MessageViewerTest.php:138
+    134▕ 
+    135▕         $response = $this->get(route('message.show', ['folderPath' => 'INBOX', 'uid' => 123]));
+    136▕ 
+    137▕         $response->assertStatus(200);
+  ➜ 138▕         $response->assertSee('Sender Name');
+    139▕         $response->assertSee('sandbox');
+    140▕     }
+    141▕ 
+    142▕     /** @test */
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Mailbox\MessageViewerTest > plain text message rend…   
+  Expected: <div class="h-[calc(100vh-4rem)] flex overflow-hidden"\n
+       x-data="{\n
+           sidebarOpen: false,\n
+  ... (3922 more lines)
+
+  To contain: Plain Text Subject
+
+  at tests/Feature/Mailbox/MessageViewerTest.php:163
+    159▕ 
+    160▕         $response = $this->get(route('message.show', ['folderPath' => 'INBOX', 'uid' => 456]));
+    161▕ 
+    162▕         $response->assertStatus(200);
+  ➜ 163▕         $response->assertSee('Plain Text Subject');
+    164▕         $response->assertSee('This is plain text content');
+    165▕         $response->assertSee('whitespace-pre-wrap');
+    166▕     }
+    167▕
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Mailbox\MessageViewerTest > message headers display…   
+  Expected: <div class="h-[calc(100vh-4rem)] flex overflow-hidden"\n
+       x-data="{\n
+           sidebarOpen: false,\n
+  ... (3922 more lines)
+
+  To contain: Test Subject with Special Chars
+
+  at tests/Feature/Mailbox/MessageViewerTest.php:198
+    194▕ 
+    195▕         $response = $this->get(route('message.show', ['folderPath' => 'INBOX', 'uid' => 789]));
+    196▕ 
+    197▕         $response->assertStatus(200);
+  ➜ 198▕         $response->assertSee('Test Subject with Special Chars');
+    199▕         $response->assertSee('Sender "Name"');
+    200▕         $response->assertSee('Recipient Name');
+    201▕         $response->assertSee('<message-id@example.com>');
+    202▕     }
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Mailbox\MessageViewerTest > show details expands cc…   
+  Expected: <div class="h-[calc(100vh-4rem)] flex overflow-hidden"\n
+       x-data="{\n
+           sidebarOpen: false,\n
+  ... (3922 more lines)
+
+  To contain: CC Name
+
+  at tests/Feature/Mailbox/MessageViewerTest.php:230
+    226▕ 
+    227▕         $response = $this->get(route('message.show', ['folderPath' => 'INBOX', 'uid' => 101]));
+    228▕ 
+    229▕         $response->assertStatus(200);
+  ➜ 230▕         $response->assertSee('CC Name');
+    231▕         $response->assertSee('BCC Name');
+    232▕         $response->assertSee('<in-reply-to@example.com>');
+    233▕         $response->assertSee('<ref1@example.com>');
+    234▕     }
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Mailbox\MessageViewerTest > remote images blocked b…   
+  Expected: <div class="h-[calc(100vh-4rem)] flex overflow-hidden"\n
+       x-data="{\n
+           sidebarOpen: false,\n
+  ... (3922 more lines)
+
+  To contain: remote images that are blocked for privacy
+
+  at tests/Feature/Mailbox/MessageViewerTest.php:258
+    254▕         $response = $this->get(route('message.show', ['folderPath' => 'INBOX', 'uid' => 202]));
+    255▕ 
+    256▕         $response->assertStatus(200);
+    257▕         // Check that the blocked images banner is present
+  ➜ 258▕         $response->assertSee('remote images that are blocked for privacy');
+    259▕         $response->assertSee('Display images');
+    260▕     }
+    261▕ 
+    262▕     /** @test */
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Mailbox\MessageViewerTest > back button returns to…    
+  Expected: <div class="h-[calc(100vh-4rem)] flex overflow-hidden"\n
+       x-data="{\n
+           sidebarOpen: false,\n
+  ... (3922 more lines)
+
+  To contain: Back to folder
+
+  at tests/Feature/Mailbox/MessageViewerTest.php:291
+    287▕ 
+    288▕         $response = $this->get(route('message.show', ['folderPath' => 'INBOX', 'uid' => 303]));
+    289▕ 
+    290▕         $response->assertStatus(200);
+  ➜ 291▕         $response->assertSee('Back to folder');
+    292▕         $response->assertSee(route('mailbox', ['folderPath' => 'INBOX']));
+    293▕     }
+    294▕ 
+    295▕     /** @test */
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Mailbox\MessageViewerTest > attachment list renders…   
+  Expected: <div class="h-[calc(100vh-4rem)] flex overflow-hidden"\n
+       x-data="{\n
+           sidebarOpen: false,\n
+  ... (3922 more lines)
+
+  To contain: Attachments (1)
+
+  at tests/Feature/Mailbox/MessageViewerTest.php:344
+    340▕ 
+    341▕         $response = $this->get(route('message.show', ['folderPath' => 'INBOX', 'uid' => 404]));
+    342▕ 
+    343▕         $response->assertStatus(200);
+  ➜ 344▕         $response->assertSee('Attachments (1)');
+    345▕         $response->assertSee('document.pdf');
+    346▕         $response->assertSee('100.0 KB');
+    347▕         $response->assertSee('application/pdf');
+    348▕     }
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Mailbox\MessageViewerTest >…   InvalidCountException   
+  Method setFlag('INBOX', [0 => 505], '\Seen', true) from Mockery_2_App_Services_ImapMailboxService should be called
+ exactly 1 times but called 0 times.
+
+  at tests/Feature/Mailbox/MessageViewerTest.php:31
+     27▕     }
+     28▕ 
+     29▕     protected function tearDown(): void
+     30▕     {
+  ➜  31▕         Mockery::close();
+     32▕         parent::tearDown();
+     33▕     }
+     34▕ 
+     35▕     protected function createMockMessage(array $overrides = []): object
+
+
+  Tests:    9 failed, 13 risky, 2 skipped, 244 passed (740 assertions)
+  Duration: 2.53s
+

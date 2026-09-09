@@ -1,144 +1,189 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Livewire;
 
+use App\Install\ConfigurationWriter;
+use App\Install\DatabaseInstaller;
+use App\Install\InstallationLock;
+use App\Install\SecurityConfigurator;
 use App\Models\Setting;
 use App\Models\User;
 use App\Services\ImapConnectionTester;
-use App\Services\InstallationVerifier;
 use App\Services\MailConfigDetector;
 use App\Services\SmtpConnectionTester;
 use App\Services\SystemRequirementsChecker;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Validation\Rule;
 use Livewire\Component;
 
+/**
+ * SetupWizard
+ *
+ * An 8-step Livewire wizard guiding the user through a fresh OpenMail
+ * installation. Session-resumable; does not expose secrets via URL or
+ * client-side storage.
+ *
+ * Steps:
+ *   1 — Welcome
+ *   2 — System Requirements
+ *   3 — Database
+ *   4 — Mail (IMAP/SMTP)
+ *   5 — Application Settings
+ *   6 — Administrator Account
+ *   7 — Security
+ *   8 — Verification & Finish
+ */
 class SetupWizard extends Component
 {
-    public int $currentStep = 1;
-    public int $totalSteps = 8;
+    // ── Wizard state ──────────────────────────────────────────────────────────
+    public int   $currentStep    = 1;
+    public int   $totalSteps     = 8;
     public array $completedSteps = [];
 
-    // Step 1: Welcome
-    public string $appName = 'OpenMail';
-    public string $installMode = 'fresh'; // 'fresh' or 'continue'
+    // ── Step 1: Welcome ───────────────────────────────────────────────────────
+    public string $appName     = 'OpenMail';
+    public string $installMode = 'fresh'; // 'fresh' | 'continue'
 
-    // Step 2: System Requirements
-    public array $requirements = [];
+    // ── Step 2: Requirements ──────────────────────────────────────────────────
+    public array $requirements       = [];
+    public bool  $requirementsLoaded = false;
 
-    // Step 3: Database Config
-    public string $dbHost = '127.0.0.1';
-    public string $dbPort = '3306';
-    public string $dbDatabase = '';
-    public string $dbUsername = '';
-    public string $dbPassword = '';
-    public ?array $dbTestResult = null;
+    // ── Step 3: Database ──────────────────────────────────────────────────────
+    public string  $dbHost          = '127.0.0.1';
+    public string  $dbPort          = '3306';
+    public string  $dbDatabase      = '';
+    public string  $dbUsername      = 'root';
+    public string  $dbPassword      = '';
+    public ?array  $dbTestResult    = null;
+    public ?array  $migrationResult = null;
+    public bool    $migrationsRan   = false;
 
-    // Step 4: Mail Config
-    public string $emailDomain = '';
-    public string $detectedProvider = '';
-    public string $imapHost = '';
-    public int $imapPort = 993;
-    public string $imapEncryption = 'ssl';
-    public string $imapUsername = '';
-    public string $imapPassword = '';
-    public string $smtpHost = '';
-    public int $smtpPort = 465;
-    public string $smtpEncryption = 'ssl';
-    public string $smtpUsername = '';
-    public string $smtpPassword = '';
-    public ?array $imapTestResult = null;
-    public ?array $smtpTestResult = null;
+    // ── Step 4: Mail ──────────────────────────────────────────────────────────
+    public string  $emailDomain      = '';
+    public string  $detectedProvider = '';
+    public string  $imapHost         = '';
+    public int     $imapPort         = 993;
+    public string  $imapEncryption   = 'ssl';
+    public string  $imapUsername     = '';
+    public string  $imapPassword     = '';
+    public string  $smtpHost         = '';
+    public int     $smtpPort         = 465;
+    public string  $smtpEncryption   = 'ssl';
+    public string  $smtpUsername     = '';
+    public string  $smtpPassword     = '';
+    public ?array  $imapTestResult   = null;
+    public ?array  $smtpTestResult   = null;
 
-    // Step 5: App Settings
-    public string $appOrg = '';
-    public string $appDomain = '';
+    // ── Step 5: Application settings ─────────────────────────────────────────
+    public string $appOrg      = '';
+    public string $appDomain   = '';
+    public string $appUrl      = '';
     public string $appTimezone = 'UTC';
 
-    // Step 6: Admin Account
-    public string $adminEmail = '';
-    public string $adminPassword = '';
+    // ── Step 6: Administrator ─────────────────────────────────────────────────
+    public string $adminName                = '';
+    public string $adminEmail               = '';
+    public string $adminPassword            = '';
     public string $adminPasswordConfirmation = '';
 
-    // Step 7: Security
+    // ── Step 7: Security ─────────────────────────────────────────────────────
     public bool $httpsEnabled = false;
     public bool $secureCookies = false;
 
-    // Step 8: Verify
-    public array $verificationResults = [];
-    public bool $verificationRun = false;
+    // ── Step 8: Verification ─────────────────────────────────────────────────
+    public array $verificationResults  = [];
+    public bool  $verificationRun      = false;
+    public bool  $installationComplete = false;
 
+    // ── Validation rules per step ─────────────────────────────────────────────
+    /** @var array<int, array<string, string>> */
     protected array $stepRules = [
         1 => [
             'appName' => 'required|string|min:2|max:100',
         ],
         2 => [],
         3 => [
-            'dbHost' => 'required|string',
-            'dbPort' => 'required|integer|min:1|max:65535',
+            'dbHost'     => 'required|string',
+            'dbPort'     => 'required|integer|min:1|max:65535',
             'dbDatabase' => 'required|string|min:1',
             'dbUsername' => 'nullable|string',
             'dbPassword' => 'nullable|string',
         ],
         4 => [
-            'emailDomain' => 'required|email',
-            'imapHost' => 'required|string',
-            'imapPort' => 'required|integer|min:1|max:65535',
+            'imapHost'       => 'required|string',
+            'imapPort'       => 'required|integer|min:1|max:65535',
             'imapEncryption' => 'required|in:ssl,tls,none',
-            'imapUsername' => 'required|string',
-            'imapPassword' => 'required|string',
-            'smtpHost' => 'required|string',
-            'smtpPort' => 'required|integer|min:1|max:65535',
+            'imapUsername'   => 'required|string',
+            'imapPassword'   => 'required|string',
+            'smtpHost'       => 'required|string',
+            'smtpPort'       => 'required|integer|min:1|max:65535',
             'smtpEncryption' => 'required|in:ssl,tls,none',
-            'smtpUsername' => 'required|string',
-            'smtpPassword' => 'required|string',
+            'smtpUsername'   => 'required|string',
+            'smtpPassword'   => 'required|string',
         ],
         5 => [
-            'appOrg' => 'required|string|min:2|max:100',
-            'appDomain' => 'required|string|min:3|max:255',
+            'appOrg'      => 'required|string|min:2|max:100',
+            'appDomain'   => 'required|string|min:3|max:255',
             'appTimezone' => 'required|timezone',
         ],
         6 => [
-            'adminEmail' => 'required|email',
-            'adminPassword' => 'required|string|min:8|regex:/[A-Z]/|regex:/[a-z]/|regex:/[0-9]/|confirmed',
+            'adminName'                 => 'required|string|min:2|max:100',
+            'adminEmail'                => 'required|email',
+            'adminPassword'             => 'required|string|min:8|regex:/[A-Z]/|regex:/[a-z]/|regex:/[0-9]/|confirmed',
             'adminPasswordConfirmation' => 'required|string',
         ],
         7 => [],
         8 => [],
     ];
 
+    // ──────────────────────────────────────────────────────────────────────────
+    // Lifecycle
+    // ──────────────────────────────────────────────────────────────────────────
+
     public function mount(): void
     {
         $this->restoreFromSession();
-        $this->requirements = app(SystemRequirementsChecker::class)->check();
+        $this->requirements       = app(SystemRequirementsChecker::class)->check();
+        $this->requirementsLoaded = true;
         $this->detectInstallMode();
-    }
 
-    private function detectInstallMode(): void
-    {
-        $envPath = base_path('.env');
-        $installed = file_exists(storage_path('installed'));
+        // Pre-populate from request context
+        if (! $this->httpsEnabled) {
+            $this->httpsEnabled  = request()->isSecure();
+            $this->secureCookies = request()->isSecure();
+        }
 
-        if ($installed) {
-            $this->installMode = 'continue';
-        } elseif (File::exists($envPath)) {
-            $content = File::get($envPath);
-            if (str_contains($content, 'DB_DATABASE=') && !str_contains($content, 'DB_DATABASE=$')) {
-                $this->installMode = 'continue';
-            }
+        if (empty($this->appUrl)) {
+            $this->appUrl = rtrim(request()->getSchemeAndHttpHost(), '/');
         }
     }
 
+    // ──────────────────────────────────────────────────────────────────────────
+    // Navigation
+    // ──────────────────────────────────────────────────────────────────────────
+
     public function nextStep(): void
     {
+        // Step 3 guard: DB must be tested and migrations run
+        if ($this->currentStep === 3) {
+            if (! $this->dbTestResult || ! $this->dbTestResult['success']) {
+                $this->addError('dbConnection', 'Test the database connection successfully before proceeding.');
+                return;
+            }
+            if (! $this->migrationsRan) {
+                $this->addError('dbMigrations', 'Run database migrations successfully before proceeding.');
+                return;
+            }
+        }
+
         $this->validate($this->stepRules[$this->currentStep] ?? []);
 
-        if (!in_array($this->currentStep, $this->completedSteps)) {
+        if (! in_array($this->currentStep, $this->completedSteps, true)) {
             $this->completedSteps[] = $this->currentStep;
         }
 
@@ -154,210 +199,6 @@ class SetupWizard extends Component
         }
     }
 
-    public function testDatabaseConnection(): void
-    {
-        $this->validate([
-            'dbHost' => 'required|string',
-            'dbPort' => 'required|integer|min:1|max:65535',
-            'dbDatabase' => 'required|string|min:1',
-            'dbUsername' => 'nullable|string',
-            'dbPassword' => 'nullable|string',
-        ]);
-
-        try {
-            // Temporarily set database config
-            Config::set('database.connections.testing', [
-                'driver' => 'mysql',
-                'host' => $this->dbHost,
-                'port' => $this->dbPort,
-                'database' => $this->dbDatabase,
-                'username' => $this->dbUsername,
-                'password' => $this->dbPassword,
-                'charset' => 'utf8mb4',
-                'collation' => 'utf8mb4_unicode_ci',
-                'prefix' => '',
-                'strict' => true,
-                'engine' => null,
-            ]);
-
-            // Test connection
-            DB::purge('testing');
-            $pdo = DB::connection('testing')->getPdo();
-
-            $this->dbTestResult = ['success' => true, 'error' => null];
-
-            // Write to .env
-            $this->writeDbConfigToEnv();
-
-            // Run migrations
-            Artisan::call('migrate', ['--force' => true, '--path' => 'database/migrations']);
-
-            session()->flash('success', 'Database connected and migrations ran successfully!');
-        } catch (\Exception $e) {
-            $this->dbTestResult = [
-                'success' => false,
-                'error' => 'Database connection failed. Please check your credentials.',
-                'technical' => [
-                    'exception' => get_class($e),
-                    'message' => $e->getMessage(),
-                ],
-            ];
-        }
-
-        $this->saveToSession();
-    }
-
-    public function updatedEmailDomain(): void
-    {
-        if ($this->emailDomain) {
-            $detector = app(MailConfigDetector::class);
-            $detected = $detector->detect($this->emailDomain);
-
-            if ($detected) {
-                $this->detectedProvider = $detected['name'];
-                $this->imapHost = $detected['imap_host'];
-                $this->imapPort = $detected['imap_port'];
-                $this->imapEncryption = $detected['imap_encryption'];
-                $this->smtpHost = $detected['smtp_host'];
-                $this->smtpPort = $detected['smtp_port'];
-                $this->smtpEncryption = $detected['smtp_encryption'];
-
-                // Pre-fill username/password if email domain matches
-                if (str_contains($this->emailDomain, '@')) {
-                    $this->imapUsername = $this->emailDomain;
-                    $this->smtpUsername = $this->emailDomain;
-                }
-            }
-        }
-    }
-
-    public function testImapConnection(): void
-    {
-        $this->validate([
-            'imapHost' => 'required|string',
-            'imapPort' => 'required|integer|min:1|max:65535',
-            'imapEncryption' => 'required|in:ssl,tls,none',
-            'imapUsername' => 'required|string',
-            'imapPassword' => 'required|string',
-        ]);
-
-        $tester = app(ImapConnectionTester::class);
-        $this->imapTestResult = $tester->test(
-            $this->imapHost,
-            $this->imapPort,
-            $this->imapEncryption,
-            $this->imapUsername,
-            $this->imapPassword
-        );
-
-        $this->saveToSession();
-    }
-
-    public function testSmtpConnection(): void
-    {
-        $this->validate([
-            'smtpHost' => 'required|string',
-            'smtpPort' => 'required|integer|min:1|max:65535',
-            'smtpEncryption' => 'required|in:ssl,tls,none',
-            'smtpUsername' => 'required|string',
-            'smtpPassword' => 'required|string',
-        ]);
-
-        $tester = app(SmtpConnectionTester::class);
-        $this->smtpTestResult = $tester->test(
-            $this->smtpHost,
-            $this->smtpPort,
-            $this->smtpEncryption,
-            $this->smtpUsername,
-            $this->smtpPassword
-        );
-
-        $this->saveToSession();
-    }
-
-    public function runVerification(): void
-    {
-        $config = [
-            'imapHost' => $this->imapHost,
-            'imapPort' => $this->imapPort,
-            'imapEncryption' => $this->imapEncryption,
-            'imapUsername' => $this->imapUsername,
-            'imapPassword' => $this->imapPassword,
-            'smtpHost' => $this->smtpHost,
-            'smtpPort' => $this->smtpPort,
-            'smtpEncryption' => $this->smtpEncryption,
-            'smtpUsername' => $this->smtpUsername,
-            'smtpPassword' => $this->smtpPassword,
-        ];
-
-        $verifier = app(InstallationVerifier::class);
-        $this->verificationResults = $verifier->verify($config);
-        $this->verificationRun = true;
-        $this->saveToSession();
-    }
-
-    public function finish(): void
-    {
-        $this->runVerification();
-
-        // Check if all verifications passed
-        $allPassed = collect($this->verificationResults)->every(fn($check) => $check['passed']);
-
-        if (!$allPassed) {
-            session()->flash('error', 'Some verification checks failed. Please fix the issues before finishing.');
-            return;
-        }
-
-        // Create admin user
-        User::create([
-            'name' => explode('@', $this->adminEmail)[0],
-            'email' => $this->adminEmail,
-            'password' => Hash::make($this->adminPassword),
-        ]);
-
-        // Save app settings
-        Setting::set('app_name', $this->appName);
-        Setting::set('app_org', $this->appOrg);
-        Setting::set('app_domain', $this->appDomain);
-        Setting::set('app_timezone', $this->appTimezone);
-
-        // Write security config to .env
-        $this->writeSecurityConfigToEnv();
-
-        // Write mail config to .env
-        $this->writeMailConfigToEnv();
-
-        // Create lock file with flock for atomicity
-        $lockFile = storage_path('installed');
-        $fp = fopen($lockFile, 'c+');
-        if (flock($fp, LOCK_EX)) {
-            ftruncate($fp, 0);
-            fwrite($fp, now()->toIso8601String());
-            flock($fp, LOCK_UN);
-        }
-        fclose($fp);
-
-        // Clear wizard session
-        Session::forget('openmail:wizard');
-
-        // Redirect to login
-        return redirect()->route('login');
-    }
-
-    public function continueFromSession(): void
-    {
-        // Session already restored in mount(), just continue
-        $this->saveToSession();
-    }
-
-    public function resetWizard(): void
-    {
-        Session::forget($this->sessionKey());
-        $this->currentStep = 1;
-        $this->completedSteps = [];
-        $this->saveToSession();
-    }
-
     public function goToStep(int $step): void
     {
         if ($step >= 1 && $step <= $this->totalSteps) {
@@ -366,87 +207,428 @@ class SetupWizard extends Component
         }
     }
 
+    // ──────────────────────────────────────────────────────────────────────────
+    // Step 3: Database
+    // ──────────────────────────────────────────────────────────────────────────
+
+    public function testDatabaseConnection(): void
+    {
+        $this->validate([
+            'dbHost'     => 'required|string',
+            'dbPort'     => 'required|integer|min:1|max:65535',
+            'dbDatabase' => 'required|string|min:1',
+            'dbUsername' => 'nullable|string',
+            'dbPassword' => 'nullable|string',
+        ]);
+
+        $this->dbTestResult   = app(DatabaseInstaller::class)->testConnection(
+            $this->dbHost,
+            (int) $this->dbPort,
+            $this->dbDatabase,
+            $this->dbUsername,
+            $this->dbPassword,
+        );
+
+        // Reset migration state whenever connection config changes
+        $this->migrationsRan   = false;
+        $this->migrationResult = null;
+
+        $this->saveToSession();
+    }
+
+    public function runMigrations(): void
+    {
+        if (! $this->dbTestResult || ! $this->dbTestResult['success']) {
+            $this->addError('dbConnection', 'Test the database connection successfully first.');
+            return;
+        }
+
+        // Write DB config to .env so the default connection picks it up
+        $this->writeDbConfigToEnv();
+        Artisan::call('config:clear');
+
+        $this->migrationResult = app(DatabaseInstaller::class)->runMigrations();
+        $this->migrationsRan   = $this->migrationResult['success'];
+
+        $this->saveToSession();
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Step 4: Mail
+    // ──────────────────────────────────────────────────────────────────────────
+
+    public function updatedEmailDomain(): void
+    {
+        if (! empty($this->emailDomain) && str_contains($this->emailDomain, '@')) {
+            $detected = app(MailConfigDetector::class)->detect($this->emailDomain);
+
+            if ($detected) {
+                $this->detectedProvider = $detected['name'];
+                $this->imapHost         = $detected['imap_host'];
+                $this->imapPort         = $detected['imap_port'];
+                $this->imapEncryption   = $detected['imap_encryption'];
+                $this->smtpHost         = $detected['smtp_host'];
+                $this->smtpPort         = $detected['smtp_port'];
+                $this->smtpEncryption   = $detected['smtp_encryption'];
+                $this->imapUsername     = $this->emailDomain;
+                $this->smtpUsername     = $this->emailDomain;
+            }
+        }
+    }
+
+    public function testImapConnection(): void
+    {
+        $this->validate([
+            'imapHost'       => 'required|string',
+            'imapPort'       => 'required|integer|min:1|max:65535',
+            'imapEncryption' => 'required|in:ssl,tls,none',
+            'imapUsername'   => 'required|string',
+            'imapPassword'   => 'required|string',
+        ]);
+
+        $this->imapTestResult = app(ImapConnectionTester::class)->test(
+            $this->imapHost,
+            (int) $this->imapPort,
+            $this->imapEncryption,
+            $this->imapUsername,
+            $this->imapPassword,
+        );
+
+        $this->saveToSession();
+    }
+
+    public function testSmtpConnection(): void
+    {
+        $this->validate([
+            'smtpHost'       => 'required|string',
+            'smtpPort'       => 'required|integer|min:1|max:65535',
+            'smtpEncryption' => 'required|in:ssl,tls,none',
+            'smtpUsername'   => 'required|string',
+            'smtpPassword'   => 'required|string',
+        ]);
+
+        $this->smtpTestResult = app(SmtpConnectionTester::class)->test(
+            $this->smtpHost,
+            (int) $this->smtpPort,
+            $this->smtpEncryption,
+            $this->smtpUsername,
+            $this->smtpPassword,
+        );
+
+        $this->saveToSession();
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Step 8: Verification
+    // ──────────────────────────────────────────────────────────────────────────
+
+    public function runVerification(): void
+    {
+        $checks = [];
+
+        // 1. APP_KEY
+        $appKey = config('app.key');
+        $hasKey = ! empty($appKey) && strlen($appKey) > 10;
+        $checks[] = [
+            'name'    => 'app_key',
+            'label'   => 'Application key configured',
+            'passed'  => $hasKey,
+            'error'   => $hasKey ? null : 'APP_KEY is not set. It will be generated automatically.',
+            'fixable' => false,
+            'fixStep' => null,
+        ];
+
+        // 2. Database connection
+        $dbPassed = false;
+        $dbError  = null;
+        try {
+            DB::connection()->getPdo();
+            $dbPassed = true;
+        } catch (\Exception $e) {
+            $dbError = 'Database connection failed: ' . $e->getMessage();
+        }
+        $checks[] = [
+            'name'    => 'db_connection',
+            'label'   => 'Database connected',
+            'passed'  => $dbPassed,
+            'error'   => $dbError,
+            'fixable' => true,
+            'fixStep' => 3,
+        ];
+
+        // 3. Migrations
+        $checks[] = [
+            'name'    => 'migrations',
+            'label'   => 'Database tables created',
+            'passed'  => $this->migrationsRan,
+            'error'   => $this->migrationsRan ? null : 'Migrations have not been run. Return to the Database step.',
+            'fixable' => true,
+            'fixStep' => 3,
+        ];
+
+        // 4. IMAP
+        if (! empty($this->imapUsername) && ! empty($this->imapPassword)) {
+            $imapResult = app(ImapConnectionTester::class)->test(
+                $this->imapHost,
+                (int) $this->imapPort,
+                $this->imapEncryption,
+                $this->imapUsername,
+                $this->imapPassword,
+            );
+            $checks[] = [
+                'name'      => 'imap_connection',
+                'label'     => 'IMAP (incoming mail) connected',
+                'passed'    => $imapResult['success'],
+                'error'     => $imapResult['success'] ? null : $imapResult['error'],
+                'technical' => $imapResult['technical'] ?? null,
+                'fixable'   => true,
+                'fixStep'   => 4,
+            ];
+        } else {
+            $checks[] = [
+                'name'    => 'imap_connection',
+                'label'   => 'IMAP (incoming mail) connected',
+                'passed'  => false,
+                'error'   => 'IMAP credentials not configured.',
+                'fixable' => true,
+                'fixStep' => 4,
+            ];
+        }
+
+        // 5. SMTP
+        if (! empty($this->smtpUsername) && ! empty($this->smtpPassword)) {
+            $smtpResult = app(SmtpConnectionTester::class)->test(
+                $this->smtpHost,
+                (int) $this->smtpPort,
+                $this->smtpEncryption,
+                $this->smtpUsername,
+                $this->smtpPassword,
+            );
+            $checks[] = [
+                'name'      => 'smtp_connection',
+                'label'     => 'SMTP (outgoing mail) connected',
+                'passed'    => $smtpResult['success'],
+                'error'     => $smtpResult['success'] ? null : $smtpResult['error'],
+                'technical' => $smtpResult['technical'] ?? null,
+                'fixable'   => true,
+                'fixStep'   => 4,
+            ];
+        } else {
+            $checks[] = [
+                'name'    => 'smtp_connection',
+                'label'   => 'SMTP (outgoing mail) connected',
+                'passed'  => false,
+                'error'   => 'SMTP credentials not configured.',
+                'fixable' => true,
+                'fixStep' => 4,
+            ];
+        }
+
+        // 6. Filesystem
+        $storagePath    = storage_path();
+        $bootstrapPath  = base_path('bootstrap/cache');
+        $storageOk      = is_writable($storagePath);
+        $bootstrapOk    = is_writable($bootstrapPath);
+        $fsOk           = $storageOk && $bootstrapOk;
+        $checks[] = [
+            'name'    => 'filesystem',
+            'label'   => 'Filesystem writable',
+            'passed'  => $fsOk,
+            'error'   => $fsOk ? null : sprintf(
+                'Directories not writable: %s',
+                implode(', ', array_filter([
+                    $storageOk   ? null : 'storage/',
+                    $bootstrapOk ? null : 'bootstrap/cache/',
+                ])),
+            ),
+            'fixable' => false,
+            'fixStep' => null,
+        ];
+
+        // 7. Admin account ready
+        $adminReady = ! empty($this->adminEmail) && ! empty($this->adminPassword);
+        $checks[] = [
+            'name'    => 'admin_account',
+            'label'   => 'Administrator account ready',
+            'passed'  => $adminReady,
+            'error'   => $adminReady ? null : 'Administrator credentials not provided.',
+            'fixable' => true,
+            'fixStep' => 6,
+        ];
+
+        $this->verificationResults = $checks;
+        $this->verificationRun     = true;
+        $this->saveToSession();
+    }
+
     public function getAllVerificationPassedProperty(): bool
     {
-        return collect($this->verificationResults)->every(fn($check) => $check['passed']);
+        return ! empty($this->verificationResults)
+            && collect($this->verificationResults)->every(fn ($c) => $c['passed']);
     }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Finish
+    // ──────────────────────────────────────────────────────────────────────────
+
+    /** @return mixed Livewire redirect or null */
+    public function finish(): mixed
+    {
+        if (! $this->verificationRun) {
+            $this->runVerification();
+        }
+
+        if (! $this->getAllVerificationPassedProperty()) {
+            session()->flash('error', 'Some verification checks failed. Fix the issues above before finishing.');
+            return null;
+        }
+
+        $lock = app(InstallationLock::class);
+        $lock->markInstalling();
+
+        try {
+            // Persist configuration
+            $this->writeAppConfigToEnv();
+            $this->writeMailConfigToEnv();
+            $this->writeSecurityConfigToEnv();
+
+            // Ensure APP_KEY is set (won't overwrite existing)
+            app(SecurityConfigurator::class)->ensureAppKey();
+
+            Artisan::call('config:clear');
+
+            // Create administrator (idempotent)
+            if (! User::where('email', $this->adminEmail)->exists()) {
+                User::create([
+                    'name'     => $this->adminName ?: explode('@', $this->adminEmail)[0],
+                    'email'    => $this->adminEmail,
+                    'password' => Hash::make($this->adminPassword),
+                ]);
+            }
+
+            // Persist application settings
+            Setting::set('app_name',        $this->appName);
+            Setting::set('app_org',         $this->appOrg);
+            Setting::set('app_domain',      $this->appDomain);
+            Setting::set('app_timezone',    $this->appTimezone);
+            Setting::set('installed_at',    now()->toIso8601String());
+            Setting::set('installed_version', '1.0.0');
+
+            // Lock the installation
+            $lock->markInstalled([
+                'version'     => '1.0.0',
+                'org'         => $this->appOrg,
+                'admin_email' => $this->adminEmail,
+            ]);
+
+            $this->installationComplete = true;
+
+            // Clean up wizard session
+            Session::forget($this->sessionKey());
+
+            return $this->redirectRoute('login');
+        } catch (\Throwable $e) {
+            $lock->markFailed($e->getMessage());
+            session()->flash('error', 'Installation failed: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Session management
+    // ──────────────────────────────────────────────────────────────────────────
+
+    public function continueFromSession(): void
+    {
+        // Session already restored in mount() — just persist current state
+        $this->saveToSession();
+    }
+
+    public function resetWizard(): void
+    {
+        Session::forget($this->sessionKey());
+        $this->currentStep         = 1;
+        $this->completedSteps      = [];
+        $this->dbTestResult        = null;
+        $this->migrationResult     = null;
+        $this->migrationsRan       = false;
+        $this->imapTestResult      = null;
+        $this->smtpTestResult      = null;
+        $this->verificationResults = [];
+        $this->verificationRun     = false;
+        $this->saveToSession();
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // .env writers (delegate to ConfigurationWriter)
+    // ──────────────────────────────────────────────────────────────────────────
 
     private function writeDbConfigToEnv(): void
     {
-        $envPath = base_path('.env');
-        $content = File::exists($envPath) ? File::get($envPath) : '';
-
-        $keys = [
+        app(ConfigurationWriter::class)->write([
             'DB_CONNECTION' => 'mysql',
-            'DB_HOST' => $this->dbHost,
-            'DB_PORT' => $this->dbPort,
-            'DB_DATABASE' => $this->dbDatabase,
-            'DB_USERNAME' => $this->dbUsername,
-            'DB_PASSWORD' => $this->dbPassword,
-        ];
-
-        $this->updateEnvFile($envPath, $content, $keys);
-        Artisan::call('config:clear');
+            'DB_HOST'       => $this->dbHost,
+            'DB_PORT'       => $this->dbPort,
+            'DB_DATABASE'   => $this->dbDatabase,
+            'DB_USERNAME'   => $this->dbUsername,
+            'DB_PASSWORD'   => $this->dbPassword,
+        ]);
     }
 
     private function writeMailConfigToEnv(): void
     {
-        $envPath = base_path('.env');
-        $content = File::exists($envPath) ? File::get($envPath) : '';
-
-        $keys = [
-            'OPENMAIL_IMAP_HOST' => $this->imapHost,
-            'OPENMAIL_IMAP_PORT' => $this->imapPort,
+        app(ConfigurationWriter::class)->write([
+            'OPENMAIL_IMAP_HOST'       => $this->imapHost,
+            'OPENMAIL_IMAP_PORT'       => (string) $this->imapPort,
             'OPENMAIL_IMAP_ENCRYPTION' => $this->imapEncryption,
-            'OPENMAIL_IMAP_USERNAME' => $this->imapUsername,
-            'OPENMAIL_IMAP_PASSWORD' => $this->imapPassword,
-            'OPENMAIL_SMTP_HOST' => $this->smtpHost,
-            'OPENMAIL_SMTP_PORT' => $this->smtpPort,
+            'OPENMAIL_IMAP_USERNAME'   => $this->imapUsername,
+            'OPENMAIL_IMAP_PASSWORD'   => $this->imapPassword,
+            'OPENMAIL_SMTP_HOST'       => $this->smtpHost,
+            'OPENMAIL_SMTP_PORT'       => (string) $this->smtpPort,
             'OPENMAIL_SMTP_ENCRYPTION' => $this->smtpEncryption,
-            'OPENMAIL_SMTP_USERNAME' => $this->smtpUsername,
-            'OPENMAIL_SMTP_PASSWORD' => $this->smtpPassword,
-        ];
+            'OPENMAIL_SMTP_USERNAME'   => $this->smtpUsername,
+            'OPENMAIL_SMTP_PASSWORD'   => $this->smtpPassword,
+        ]);
+    }
 
-        $this->updateEnvFile($envPath, $content, $keys);
-        Artisan::call('config:clear');
+    private function writeAppConfigToEnv(): void
+    {
+        app(ConfigurationWriter::class)->write([
+            'APP_NAME'     => $this->appName,
+            'APP_ENV'      => 'production',
+            'APP_URL'      => $this->appUrl ?: ('http://' . ($this->appDomain ?: 'localhost')),
+            'APP_TIMEZONE' => $this->appTimezone,
+        ]);
     }
 
     private function writeSecurityConfigToEnv(): void
     {
-        $envPath = base_path('.env');
-        $content = File::exists($envPath) ? File::get($envPath) : '';
-
-        $keys = [
-            'SESSION_LIFETIME' => '1440',
+        app(ConfigurationWriter::class)->write([
+            'SESSION_LIFETIME'      => '1440',
+            'SESSION_DRIVER'        => 'database',
+            'CACHE_STORE'           => 'database',
             'SESSION_SECURE_COOKIE' => $this->secureCookies ? 'true' : 'false',
-        ];
-
-        $this->updateEnvFile($envPath, $content, $keys);
-        Artisan::call('config:clear');
+        ]);
     }
 
-    private function updateEnvFile(string $path, string $content, array $keys): void
+    // ──────────────────────────────────────────────────────────────────────────
+    // Private helpers
+    // ──────────────────────────────────────────────────────────────────────────
+
+    private function detectInstallMode(): void
     {
-        $lines = $content ? explode("\n", $content) : [];
-        $found = [];
-
-        foreach ($lines as $i => $line) {
-            foreach ($keys as $key => $value) {
-                if (str_starts_with(trim($line), $key . '=')) {
-                    $lines[$i] = $key . '=' . $value;
-                    $found[$key] = true;
-                    break;
-                }
-            }
+        if (app(InstallationLock::class)->isInstalled()) {
+            $this->installMode = 'installed';
+            return;
         }
 
-        foreach ($keys as $key => $value) {
-            if (!isset($found[$key])) {
-                $lines[] = $key . '=' . $value;
+        $envPath = base_path('.env');
+        if (file_exists($envPath)) {
+            $content = file_get_contents($envPath) ?: '';
+            if (str_contains($content, 'DB_DATABASE=') && ! preg_match('/^DB_DATABASE=\s*$/m', $content)) {
+                $this->installMode = 'continue';
             }
         }
-
-        File::put($path, implode("\n", $lines) . "\n");
     }
 
     private function sessionKey(): string
@@ -454,51 +636,63 @@ class SetupWizard extends Component
         return 'openmail:setup:wizard';
     }
 
+    /** @return array<string, mixed> */
+    private function sessionPayload(): array
+    {
+        // NOTE: credentials are stored server-side in the PHP session (encrypted
+        // by Laravel when SESSION_ENCRYPT=true). This is acceptable for an
+        // installation wizard. They are cleared after finish().
+        return [
+            'currentStep'               => $this->currentStep,
+            'completedSteps'            => $this->completedSteps,
+            'appName'                   => $this->appName,
+            'dbHost'                    => $this->dbHost,
+            'dbPort'                    => $this->dbPort,
+            'dbDatabase'                => $this->dbDatabase,
+            'dbUsername'                => $this->dbUsername,
+            'dbPassword'                => $this->dbPassword,
+            'emailDomain'               => $this->emailDomain,
+            'detectedProvider'          => $this->detectedProvider,
+            'imapHost'                  => $this->imapHost,
+            'imapPort'                  => $this->imapPort,
+            'imapEncryption'            => $this->imapEncryption,
+            'imapUsername'              => $this->imapUsername,
+            'imapPassword'              => $this->imapPassword,
+            'smtpHost'                  => $this->smtpHost,
+            'smtpPort'                  => $this->smtpPort,
+            'smtpEncryption'            => $this->smtpEncryption,
+            'smtpUsername'              => $this->smtpUsername,
+            'smtpPassword'              => $this->smtpPassword,
+            'appOrg'                    => $this->appOrg,
+            'appDomain'                 => $this->appDomain,
+            'appUrl'                    => $this->appUrl,
+            'appTimezone'               => $this->appTimezone,
+            'adminName'                 => $this->adminName,
+            'adminEmail'                => $this->adminEmail,
+            'adminPassword'             => $this->adminPassword,
+            'adminPasswordConfirmation' => $this->adminPasswordConfirmation,
+            'httpsEnabled'              => $this->httpsEnabled,
+            'secureCookies'             => $this->secureCookies,
+            'verificationResults'       => $this->verificationResults,
+            'verificationRun'           => $this->verificationRun,
+            'dbTestResult'              => $this->dbTestResult,
+            'migrationResult'           => $this->migrationResult,
+            'migrationsRan'             => $this->migrationsRan,
+            'imapTestResult'            => $this->imapTestResult,
+            'smtpTestResult'            => $this->smtpTestResult,
+        ];
+    }
+
     private function saveToSession(): void
     {
-        $data = [
-            'currentStep' => $this->currentStep,
-            'completedSteps' => $this->completedSteps,
-            'appName' => $this->appName,
-            'dbHost' => $this->dbHost,
-            'dbPort' => $this->dbPort,
-            'dbDatabase' => $this->dbDatabase,
-            'dbUsername' => $this->dbUsername,
-            'dbPassword' => $this->dbPassword,
-            'emailDomain' => $this->emailDomain,
-            'detectedProvider' => $this->detectedProvider,
-            'imapHost' => $this->imapHost,
-            'imapPort' => $this->imapPort,
-            'imapEncryption' => $this->imapEncryption,
-            'imapUsername' => $this->imapUsername,
-            'imapPassword' => $this->imapPassword,
-            'smtpHost' => $this->smtpHost,
-            'smtpPort' => $this->smtpPort,
-            'smtpEncryption' => $this->smtpEncryption,
-            'smtpUsername' => $this->smtpUsername,
-            'smtpPassword' => $this->smtpPassword,
-            'appOrg' => $this->appOrg,
-            'appDomain' => $this->appDomain,
-            'appTimezone' => $this->appTimezone,
-            'adminEmail' => $this->adminEmail,
-            'adminPassword' => $this->adminPassword,
-            'adminPasswordConfirmation' => $this->adminPasswordConfirmation,
-            'httpsEnabled' => $this->httpsEnabled,
-            'secureCookies' => $this->secureCookies,
-            'verificationResults' => $this->verificationResults,
-            'verificationRun' => $this->verificationRun,
-            'dbTestResult' => $this->dbTestResult,
-            'imapTestResult' => $this->imapTestResult,
-            'smtpTestResult' => $this->smtpTestResult,
-        ];
-
-        Session::put($this->sessionKey(), $data);
+        Session::put($this->sessionKey(), $this->sessionPayload());
     }
 
     private function restoreFromSession(): void
     {
         $saved = Session::get($this->sessionKey());
-        if (!$saved) {
+
+        if (! is_array($saved)) {
             return;
         }
 
@@ -509,8 +703,12 @@ class SetupWizard extends Component
         }
     }
 
-    public function render()
+    // ──────────────────────────────────────────────────────────────────────────
+    // Render
+    // ──────────────────────────────────────────────────────────────────────────
+
+    public function render(): View
     {
-        return view('setup.wizard');
+        return view('livewire.setup-wizard');
     }
 }

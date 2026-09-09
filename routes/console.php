@@ -4,10 +4,15 @@ use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 use App\Console\Commands\ProcessPendingSends;
+use App\Console\Commands\InstallCommand;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
+
+Artisan::command('openmail:install', function () {
+    $this->call(InstallCommand::class);
+})->purpose('Install OpenMail via CLI');
 
 Schedule::command('pending-sends:process')->everyMinute()->withoutOverlapping(5);
 

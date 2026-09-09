@@ -1,23 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use App\Services\SystemRequirementsChecker;
+use App\Install\InstallationLock;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
 
 class SetupController extends Controller
 {
-    public function show(Request $request)
+    public function show(Request $request): View|\Illuminate\Http\RedirectResponse
     {
-        $installed = file_exists(storage_path('installed'));
+        $lock = app(InstallationLock::class);
 
-        if ($installed) {
+        if ($lock->isInstalled()) {
             abort(404);
         }
 
-        $requirements = app(SystemRequirementsChecker::class)->check();
-
-        return view('setup.wizard', compact('requirements'));
+        // Render the page that embeds <livewire:setup-wizard />
+        return view('setup.page');
     }
 }

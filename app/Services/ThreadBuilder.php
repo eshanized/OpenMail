@@ -235,7 +235,9 @@ class ThreadBuilder
             $root->from_display = $this->getFromDisplay($root);
             $root->formatted_date = $this->formatDate($root->latestDate);
             $root->has_attachments = $this->hasAttachmentsInThread($root);
-            $root->labels = $root->labels ?? collect();
+            $root->labels = ($root->labels ?? null) instanceof \Illuminate\Support\Collection
+                ? $root->labels
+                : collect();
         }
 
         return $roots;

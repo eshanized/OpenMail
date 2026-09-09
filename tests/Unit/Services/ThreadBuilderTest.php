@@ -208,6 +208,33 @@ class ThreadBuilderTest extends TestCase
         $this->assertEquals('noreply@github.com', $threads[0]->from_display);
     }
 
+    /** @test */
+    public function buildThreads_ensures_labels_is_collection_even_when_attribute_or_null_passed(): void
+    {
+        $message = (object) [
+            'message_id' => 'msg-attr',
+            'in_reply_to' => null,
+            'references' => null,
+            'subject' => 'Attribute test',
+            'date' => now(),
+            'from_address' => 'sender@example.com',
+            'from_name' => 'Sender',
+            'to_address' => 'user@example.com',
+            'is_seen' => true,
+            'is_flagged' => false,
+            'has_attachments' => false,
+            'uid' => 12,
+            'folder_path' => 'INBOX',
+            'snippet' => '',
+            'labels' => new \Webklex\PHPIMAP\Attribute('labels'),
+        ];
+
+        $threads = $this->builder->buildThreads(collect([$message]));
+
+        $this->assertCount(1, $threads);
+        $this->assertInstanceOf(Collection::class, $threads[0]->labels);
+    }
+
     private function makeMessage(string $messageId, ?string $inReplyTo, ?string $references, string $subject, Carbon $date): object
     {
         return (object) [

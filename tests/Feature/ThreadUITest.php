@@ -289,4 +289,70 @@ class ThreadUITest extends TestCase
         $response->assertSee('ArrowRight');
         $response->assertSee('ArrowLeft');
     }
+
+    /** @test */
+    public function test_thread_row_renders_safely_when_labels_is_webklex_attribute(): void
+    {
+        $thread = (object) [
+            'uid' => 9999,
+            'message_id' => '<attr-test@example.com>',
+            'in_reply_to' => '',
+            'references' => '',
+            'subject' => 'Attribute Safe Subject',
+            'date' => now()->toDateTimeString(),
+            'formatted_date' => '10:30 AM',
+            'from_address' => 'sender@example.com',
+            'from_name' => 'Sender Name',
+            'from_display' => 'Sender Name',
+            'to_address' => 'user@example.com',
+            'is_seen' => true,
+            'is_flagged' => false,
+            'has_attachments' => false,
+            'snippet' => 'Test preview text',
+            'folder_path' => 'INBOX',
+            'labels' => new \Webklex\PHPIMAP\Attribute('labels'),
+            'children' => [],
+            'unreadCount' => 0,
+        ];
+
+        $view = $this->blade(
+            '<x-mailbox.thread-row :thread="$thread" :selected="false" />',
+            ['thread' => $thread]
+        );
+
+        $view->assertSee('Attribute Safe Subject');
+        $view->assertSee('Sender Name');
+        $view->assertSee('10:30 AM');
+    }
+
+    /** @test */
+    public function test_message_row_renders_safely_when_labels_is_webklex_attribute(): void
+    {
+        $message = (object) [
+            'uid' => 9998,
+            'message_id' => '<attr-test-2@example.com>',
+            'subject' => 'Attribute Flat Subject',
+            'date' => now()->toDateTimeString(),
+            'formatted_date' => '11:45 AM',
+            'from_address' => 'sender2@example.com',
+            'from_name' => 'Sender Two',
+            'from_display' => 'Sender Two',
+            'to_address' => 'user@example.com',
+            'is_seen' => false,
+            'is_flagged' => true,
+            'has_attachments' => true,
+            'snippet' => 'Flat preview text',
+            'folder_path' => 'INBOX',
+            'labels' => new \Webklex\PHPIMAP\Attribute('labels'),
+        ];
+
+        $view = $this->blade(
+            '@include("livewire.mailbox.message-row", ["message" => $message, "selected" => false])',
+            ['message' => $message]
+        );
+
+        $view->assertSee('Attribute Flat Subject');
+        $view->assertSee('Sender Two');
+        $view->assertSee('11:45 AM');
+    }
 }

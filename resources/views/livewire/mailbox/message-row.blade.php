@@ -77,7 +77,8 @@
 
             {{-- Labels --}}
             @php
-                $labels = $message->labels ?? collect();
+                $rawLabels = $message->labels ?? null;
+                $labels = ($rawLabels instanceof \Illuminate\Support\Collection) ? $rawLabels : collect();
                 $displayLabels = $labels->take(2);
                 $overflowCount = max(0, $labels->count() - 2);
             @endphp

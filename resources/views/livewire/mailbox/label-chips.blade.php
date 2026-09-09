@@ -1,6 +1,7 @@
 @props(['labels' => collect(), 'maxDisplay' => 3])
 
 @php
+    $labels = ($labels instanceof \Illuminate\Support\Collection) ? $labels : collect();
     $visibleLabels = $labels->take($maxDisplay);
     $overflowCount = $labels->count() - $maxDisplay;
 @endphp

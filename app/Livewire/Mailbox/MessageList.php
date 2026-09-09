@@ -487,15 +487,34 @@ class MessageList extends Component
                 ? (bool) $msg->hasAttachments() 
                 : (bool) ($msg->has_attachments ?? ($meta?->has_attachments ?? false));
 
-            $snippet = (string) ($msg->snippet ?? ($meta?->snippet ?? ''));
-            $labels = $meta?->labels ?? ($msg->labels ?? collect());
+            $snippet = '';
+            if ($meta && !empty($meta->snippet)) {
+                $snippet = (string) $meta->snippet;
+            } elseif (is_object($msg) && !($msg instanceof \Webklex\PHPIMAP\Message) && !empty($msg->snippet)) {
+                $snippet = (string) $msg->snippet;
+            }
+
+            $labels = collect();
+            if ($meta && isset($meta->labels) && $meta->labels instanceof \Illuminate\Support\Collection) {
+                $labels = $meta->labels;
+            } elseif (isset($msg->labels) && $msg->labels instanceof \Illuminate\Support\Collection) {
+                $labels = $msg->labels;
+            }
+
+            $inReplyTo = (string) ($header ? $header->get('in_reply_to') : (!($msg instanceof \Webklex\PHPIMAP\Message) ? ($msg->in_reply_to ?? '') : ''));
+            $references = (string) ($header ? $header->get('references') : (!($msg instanceof \Webklex\PHPIMAP\Message) ? ($msg->references ?? '') : ''));
+            $rawSubject = (string) ($header ? $header->get('subject') : (!($msg instanceof \Webklex\PHPIMAP\Message) ? ($msg->subject ?? '') : ''));
+            $subject = trim($rawSubject);
+            if ($subject === '') {
+                $subject = '(no subject)';
+            }
 
             $results[] = (object) [
                 'uid' => $uid,
                 'message_id' => $msgId,
-                'in_reply_to' => (string) ($msg->in_reply_to ?? ($header ? $header->get('in_reply_to') : '') ?? ''),
-                'references' => (string) ($msg->references ?? ($header ? $header->get('references') : '') ?? ''),
-                'subject' => (string) ($msg->subject ?? ($header ? $header->get('subject') : '') ?? '(no subject)'),
+                'in_reply_to' => $inReplyTo,
+                'references' => $references,
+                'subject' => $subject,
                 'date' => $carbonDate ? $carbonDate->toDateTimeString() : (string) ($rawDate ?? ''),
                 'formatted_date' => $formattedDate,
                 'from_address' => $fromAddress,

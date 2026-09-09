@@ -13,7 +13,7 @@
                     wire:click="runVerification"
                     wire:loading.attr="disabled"
                     wire:target="runVerification"
-                    class="px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-60">
+                    class="px-5 py-2.5 bg-primary text-white text-sm font-medium rounded-md hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-60">
                 <span wire:loading.remove wire:target="runVerification">Run Verification Checks</span>
                 <span wire:loading wire:target="runVerification">Running checks…</span>
             </button>
@@ -97,7 +97,7 @@
                         wire:click="finish"
                         wire:loading.attr="disabled"
                         wire:target="finish"
-                        class="w-full sm:w-auto px-8 py-3 bg-green-600 text-white text-sm font-semibold rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-60">
+                        class="w-full sm:w-auto px-8 py-3 bg-success text-white text-sm font-semibold rounded-md hover:bg-success-hover focus:outline-none focus:ring-2 focus:ring-success focus:ring-offset-2 disabled:opacity-60">
                     <span wire:loading.remove wire:target="finish">Complete Installation →</span>
                     <span wire:loading wire:target="finish">Installing…</span>
                 </button>
@@ -109,7 +109,7 @@
     <div class="mt-8 flex justify-between">
         <button type="button"
                 wire:click="previousStep"
-                class="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2">
+                class="px-4 py-2 border border-border text-ink-secondary text-sm font-medium rounded-md hover:bg-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
             ← Back
         </button>
     </div>

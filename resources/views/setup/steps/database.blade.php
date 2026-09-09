@@ -93,7 +93,7 @@
                     wire:click="testDatabaseConnection"
                     wire:loading.attr="disabled"
                     wire:target="testDatabaseConnection"
-                    class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-60">
+                    class="px-4 py-2 border border-border text-sm font-medium rounded-md text-ink-secondary bg-white hover:bg-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-60">
                 <span wire:loading.remove wire:target="testDatabaseConnection">Test Connection</span>
                 <span wire:loading wire:target="testDatabaseConnection">Testing…</span>
             </button>
@@ -144,7 +144,7 @@
                         wire:loading.attr="disabled"
                         wire:target="runMigrations"
                         {{ $migrationsRan ? 'disabled' : '' }}
-                        class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-60">
+                        class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-60">
                     <span wire:loading.remove wire:target="runMigrations">
                         {{ $migrationsRan ? '✓ Migrations Complete' : 'Run Migrations' }}
                     </span>
@@ -170,12 +170,12 @@
     <div class="mt-8 flex justify-between">
         <button type="button"
                 wire:click="previousStep"
-                class="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2">
+                class="px-4 py-2 border border-border text-ink-secondary text-sm font-medium rounded-md hover:bg-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
             ← Back
         </button>
         <button type="button"
                 wire:click="nextStep"
-                class="px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                class="px-6 py-2.5 bg-primary text-white text-sm font-medium rounded-md hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
             Continue →
         </button>
     </div>

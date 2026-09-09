@@ -81,10 +81,10 @@
     </div>
 
     <div class="mt-4 flex justify-between">
-        <button type="button" wire:click="previousStep" class="inline-flex justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+        <button type="button" wire:click="previousStep" class="inline-flex justify-center px-4 py-2 border border-border shadow-sm text-sm font-medium rounded-md text-ink-secondary bg-white hover:bg-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
             Previous
         </button>
-        <button type="button" wire:click="nextStep" class="inline-flex justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+        <button type="button" wire:click="nextStep" class="inline-flex justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
             Next
         </button>
     </div>

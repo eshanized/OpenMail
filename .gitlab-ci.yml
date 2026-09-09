@@ -149,33 +149,33 @@ package:release:
     - composer install --no-dev --optimize-autoloader --prefer-dist --no-progress
     - RELEASE_VERSION="${CI_COMMIT_TAG:-$CI_COMMIT_REF_SLUG}"
     - ZIP_NAME="openmail-${RELEASE_VERSION}.zip"
-    - echo "Generating production release archive: ${ZIP_NAME}..."
-    - >
-      zip -q -r "${ZIP_NAME}"
-      app
-      bootstrap
-      config
-      database
-      public
-      resources
-      routes
-      storage
-      vendor
-      artisan
-      composer.json
-      composer.lock
-      package.json
-      .env.example
-      README.md
-      -x "storage/logs/*"
-      -x "storage/framework/cache/*"
-      -x "storage/framework/sessions/*"
-      -x "storage/framework/views/*"
-      -x "tests/*"
-      -x "node_modules/*"
-      -x ".git/*"
-      -x ".planning/*"
-      -x ".gsd/*"
+    - 'echo "Generating production release archive: ${ZIP_NAME}..."'
+    - |
+      zip -q -r "${ZIP_NAME}" \
+        app \
+        bootstrap \
+        config \
+        database \
+        public \
+        resources \
+        routes \
+        storage \
+        vendor \
+        artisan \
+        composer.json \
+        composer.lock \
+        package.json \
+        .env.example \
+        README.md \
+        -x "storage/logs/*" \
+        -x "storage/framework/cache/*" \
+        -x "storage/framework/sessions/*" \
+        -x "storage/framework/views/*" \
+        -x "tests/*" \
+        -x "node_modules/*" \
+        -x ".git/*" \
+        -x ".planning/*" \
+        -x ".gsd/*"
     - ls -lh "${ZIP_NAME}"
   artifacts:
     name: "openmail-release-$CI_COMMIT_REF_SLUG"

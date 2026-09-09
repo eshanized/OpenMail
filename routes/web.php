@@ -29,18 +29,18 @@ Route::middleware(['auth'])->group(function () {
         return redirect()->route('mailbox.folder', ['folderPath' => $defaultFolder]);
     })->name('mailbox');
 
-    Route::get('/mailbox/{folderPath}', function (string $folderPath) {
-        return view('mailbox', [
-            'folderPath' => $folderPath,
-        ]);
-    })->name('mailbox.folder')->where('folderPath', '.*');
-
     Route::get('/mailbox/{folderPath}/{uid}', function (string $folderPath, int $uid) {
         return view('mailbox', [
             'folderPath' => $folderPath,
             'uid' => $uid,
         ]);
     })->name('message.show')->where('folderPath', '.*')->where('uid', '[0-9]+');
+
+    Route::get('/mailbox/{folderPath}', function (string $folderPath) {
+        return view('mailbox', [
+            'folderPath' => $folderPath,
+        ]);
+    })->name('mailbox.folder')->where('folderPath', '.*');
 
     Route::get('/search', [\App\Http\Controllers\SearchController::class, 'index'])
         ->middleware('throttle:api.search')

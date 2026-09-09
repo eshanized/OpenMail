@@ -124,6 +124,12 @@ class ImapMailboxService
 
         try {
             $folder = $client->getFolder($folderPath);
+            if (!$folder) {
+                return new LengthAwarePaginator([], 0, $perPage, $page, [
+                    'path' => request()->url(),
+                    'pageName' => 'messages-page',
+                ]);
+            }
 
             $query = $folder->query()
                 ->all()
@@ -155,6 +161,9 @@ class ImapMailboxService
 
         try {
             $folder = $client->getFolder($folderPath);
+            if (!$folder) {
+                return null;
+            }
             $message = $folder->query()->getMessageByUid($uid);
             return $message;
         } catch (\Throwable $e) {
@@ -169,6 +178,9 @@ class ImapMailboxService
 
         try {
             $folder = $client->getFolder($folderPath);
+            if (!$folder) {
+                return null;
+            }
             $message = $folder->query()
                 ->setFetchBody(true)
                 ->getMessageByUid($uid);
@@ -658,6 +670,9 @@ class ImapMailboxService
 
         try {
             $folder = $client->getFolder($folderPath);
+            if (!$folder) {
+                return [];
+            }
             
             // Fetch only headers we need for threading
             $query = $folder->query()

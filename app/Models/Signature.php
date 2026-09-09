@@ -28,11 +28,15 @@ class Signature extends Model
             // Sanitize HTML before save using tiptap-php to render JSON → HTML
             if ($signature->content_json && !$signature->content_html) {
                 try {
-                    $editor = new \Tiptap\Editor();
-                    $html = $editor->setContent($signature->content_json)->getHTML();
-                    $sanitizer = app(\App\Services\MessageSanitizer::class);
-                    $signature->content_html = $sanitizer->sanitizeHtml($html);
-                } catch (\Exception $e) {
+                    if (class_exists(\Tiptap\Editor::class)) {
+                        $editor = new \Tiptap\Editor();
+                        $html = $editor->setContent($signature->content_json)->getHTML();
+                        $sanitizer = app(\App\Services\MessageSanitizer::class);
+                        $signature->content_html = $sanitizer->sanitizeHtml($html);
+                    } else {
+                        $signature->content_html = e(json_encode($signature->content_json));
+                    }
+                } catch (\Throwable $e) {
                     // Fallback: if tiptap-php is not available, store JSON-encoded content
                     $signature->content_html = e(json_encode($signature->content_json));
                 }

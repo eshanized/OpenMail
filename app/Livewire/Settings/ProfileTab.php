@@ -7,11 +7,16 @@ use Livewire\Attributes\Validate;
 
 class ProfileTab extends Component
 {
-    #[Validate('required|string|max:255')]
     public string $name = '';
-
-    #[Validate('required|email|max:255|unique:users,email,' . '::auth()->id()')]
     public string $email = '';
+
+    public function rules(): array
+    {
+        return [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . auth()->id(),
+        ];
+    }
 
     public function mount(): void
     {
@@ -28,7 +33,7 @@ class ProfileTab extends Component
             'email' => $this->email,
         ]);
 
-        $this->dispatch('toast', message: 'Profile updated', type: 'success');
+        $this->dispatch('toast', message: 'Profile updated successfully.', type: 'success');
     }
 
     public function render()

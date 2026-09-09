@@ -62,8 +62,9 @@ class SignatureService
      */
     public function setDefault(Signature $signature): void
     {
-        $signature->user->signatures()->update(['is_default' => false]);
-        $signature->update(['is_default' => true]);
+        $signature->user->signatures()->where('id', '!=', $signature->id)->update(['is_default' => false]);
+        $signature->is_default = true;
+        $signature->save();
     }
 
     /**

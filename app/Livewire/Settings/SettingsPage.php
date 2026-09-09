@@ -6,7 +6,7 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 
-#[Layout('layouts.mailbox')]
+#[Layout('layouts.app')]
 class SettingsPage extends Component
 {
     #[Url(as: 'tab')]

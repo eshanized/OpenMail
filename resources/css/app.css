@@ -521,6 +521,95 @@ html.density-comfortable,
 }
 
 /* ============================================
+   Settings Design System (Cards, Inputs & Badges)
+   ============================================ */
+.settings-card,
+.glass-card {
+    background-color: var(--color-surface-raised);
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    box-shadow: var(--shadow-xs);
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+:where(.dark) .settings-card,
+:where(.dark) .glass-card {
+    background-color: rgba(22, 26, 35, 0.72);
+    border-color: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
+}
+
+.settings-input,
+.glass-input {
+    width: 100%;
+    border-radius: 0.625rem;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: var(--color-ink);
+    background-color: var(--color-surface-sunken);
+    border: 1px solid var(--color-border);
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.settings-input::placeholder,
+.glass-input::placeholder {
+    color: var(--color-ink-tertiary);
+}
+
+.settings-input:focus,
+.glass-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    background-color: var(--color-surface-raised);
+}
+
+:where(.dark) .settings-input,
+:where(.dark) .glass-input {
+    background-color: rgba(13, 16, 23, 0.85);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #f1f3f9;
+}
+
+:where(.dark) .settings-input:hover:not(:focus):not(:disabled),
+:where(.dark) .glass-input:hover:not(:focus):not(:disabled) {
+    border-color: rgba(255, 255, 255, 0.22);
+}
+
+:where(.dark) .settings-input:focus,
+:where(.dark) .glass-input:focus {
+    border-color: #3b82f6;
+    background-color: rgba(17, 21, 30, 0.98);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.28);
+}
+
+.settings-input:disabled,
+.glass-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: var(--color-surface-sunken);
+}
+
+/* Custom Select Dropdown Styling */
+select.settings-input,
+select.glass-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%238b90a0' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 1.25em 1.25em;
+    padding-right: 2.5rem;
+}
+
+:where(.dark) select.settings-input,
+:where(.dark) select.glass-input {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+}
+
+/* ============================================
    Setup Wizard UI Enhancements (Premium Dark & Light)
    ============================================ */
 

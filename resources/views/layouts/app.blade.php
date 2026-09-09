@@ -222,6 +222,7 @@
 
     <main id="app-main" class="flex-1 max-w-screen-2xl mx-auto py-6 px-4 sm:px-6 lg:px-8 w-full animate-fade-in">
         @yield('content')
+        {{ $slot ?? '' }}
     </main>
 
     @livewireScripts

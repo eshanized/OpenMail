@@ -64,7 +64,7 @@ class SignaturesTab extends Component
     {
         $this->validate([
             'name' => 'required|string|max:100',
-            'content_json' => 'required|array',
+            'contentJson' => 'required|array',
         ]);
 
         $service = app(SignatureService::class);
@@ -98,6 +98,7 @@ class SignaturesTab extends Component
         $this->closeModal();
         $this->loadSignatures();
         $this->dispatch('signature-updated');
+        $this->dispatch('toast', message: 'Signature saved successfully.', type: 'success');
     }
 
     public function deleteSignature(int $signatureId): void
@@ -109,6 +110,7 @@ class SignaturesTab extends Component
         app(SignatureService::class)->delete($signature);
         $this->loadSignatures();
         $this->dispatch('signature-updated');
+        $this->dispatch('toast', message: 'Signature deleted successfully.', type: 'success');
     }
 
     public function setDefaultSignature(int $signatureId): void
@@ -120,6 +122,7 @@ class SignaturesTab extends Component
         app(SignatureService::class)->setDefault($signature);
         $this->loadSignatures();
         $this->dispatch('signature-updated');
+        $this->dispatch('toast', message: 'Default signature updated.', type: 'success');
     }
 
     public function updateContentJson(array $contentJson): void

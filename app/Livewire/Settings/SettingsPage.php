@@ -4,10 +4,12 @@ namespace App\Livewire\Settings;
 
 use Livewire\Component;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Url;
 
 #[Layout('layouts.mailbox')]
 class SettingsPage extends Component
 {
+    #[Url(as: 'tab')]
     public string $activeTab = 'profile';
 
     public array $tabs = [
@@ -17,6 +19,14 @@ class SettingsPage extends Component
         'security' => 'Security',
         'signatures' => 'Signatures',
     ];
+
+    public function mount(): void
+    {
+        $tab = request()->query('tab');
+        if ($tab && array_key_exists($tab, $this->tabs)) {
+            $this->activeTab = $tab;
+        }
+    }
 
     public function setTab(string $tab): void
     {

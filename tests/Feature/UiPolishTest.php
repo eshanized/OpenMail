@@ -240,4 +240,19 @@ class UiPolishTest extends TestCase
 
         $this->assertStringContainsString('scrollbar-thin', $cssContent);
     }
+
+    #[Test]
+    public function test_user_profile_dropdown_renders_with_enhanced_ui(): void
+    {
+        $response = $this->actingAs($this->user)
+            ->withSession(['openmail:imap_password' => \Illuminate\Support\Facades\Crypt::encrypt('test-password')])
+            ->get('/mailbox/INBOX');
+
+        $response->assertStatus(200);
+        $response->assertSee('user-menu-button');
+        $response->assertSee('Settings & Preferences', false);
+        $response->assertSee('Theme & Display', false);
+        $response->assertSee('Sign out');
+        $response->assertSee($this->user->email);
+    }
 }

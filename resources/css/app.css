@@ -704,3 +704,209 @@
     border-color: var(--color-error);
 }
 
+/* ============================================
+   Modern Email Visualization & Reader System
+   ============================================ */
+
+/* Curated dynamic avatar gradients for sender initials */
+.avatar-gradient-0 {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: #ffffff;
+}
+.avatar-gradient-1 {
+    background: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+    color: #ffffff;
+}
+.avatar-gradient-2 {
+    background: linear-gradient(135deg, #d97706 0%, #ea580c 100%);
+    color: #ffffff;
+}
+.avatar-gradient-3 {
+    background: linear-gradient(135deg, #e11d48 0%, #db2777 100%);
+    color: #ffffff;
+}
+.avatar-gradient-4 {
+    background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+    color: #ffffff;
+}
+.avatar-gradient-5 {
+    background: linear-gradient(135deg, #9333ea 0%, #c026d3 100%);
+    color: #ffffff;
+}
+
+/* Email reading container & canvas card */
+.email-canvas-card {
+    background-color: var(--color-surface-raised);
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+    position: relative;
+    transition: all 0.2s ease-in-out;
+}
+
+:where(.dark) .email-canvas-card {
+    background-color: var(--color-surface-raised);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
+}
+
+/* Reader toolbar controls */
+.email-control-bar {
+    background-color: var(--color-surface-sunken);
+    border-bottom: 1px solid var(--color-border-subtle);
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+:where(.dark) .email-control-bar {
+    background-color: rgba(255, 255, 255, 0.02);
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+.email-control-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-ink-secondary);
+    background-color: transparent;
+    border: 1px solid transparent;
+    transition: all 0.15s ease;
+    cursor: pointer;
+}
+
+.email-control-btn:hover {
+    color: var(--color-ink);
+    background-color: var(--color-hover);
+    border-color: var(--color-border-subtle);
+}
+
+.email-control-btn.active {
+    color: var(--color-primary);
+    background-color: var(--color-primary-subtle);
+    border-color: rgba(37, 99, 235, 0.2);
+}
+
+/* Email reading surface */
+.email-reading-surface {
+    position: relative;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    transition: max-width 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease;
+}
+
+.email-reading-surface.mode-focused {
+    max-width: 48rem; /* 768px optimal reading width */
+}
+
+.email-reading-surface.mode-full {
+    max-width: 100%;
+}
+
+/* Remote images privacy shield banner */
+.email-privacy-shield {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(217, 119, 6, 0.03) 100%);
+    border: 1px solid rgba(245, 158, 11, 0.22);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    margin: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    position: relative;
+    overflow: hidden;
+}
+
+:where(.dark) .email-privacy-shield {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(217, 119, 6, 0.05) 100%);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+/* Modern attachment card grid */
+.attachment-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 0.75rem;
+}
+
+.attachment-card {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0.875rem;
+    background-color: var(--color-surface-sunken);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.attachment-card:hover {
+    background-color: var(--color-surface-raised);
+    border-color: var(--color-border-strong);
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.06);
+    transform: translateY(-1px);
+}
+
+:where(.dark) .attachment-card {
+    background-color: rgba(255, 255, 255, 0.02);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+:where(.dark) .attachment-card:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.16);
+    box-shadow: 0 6px 20px -2px rgba(0, 0, 0, 0.4);
+}
+
+.attachment-icon-pill {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.625rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Modern unread message row indicator */
+.message-row-card {
+    position: relative;
+    transition: background-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.message-row-unread {
+    position: relative;
+}
+
+.message-row-unread::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 4px;
+    bottom: 4px;
+    width: 3.5px;
+    background: linear-gradient(180deg, #3b82f6 0%, #6366f1 100%);
+    border-radius: 0 3px 3px 0;
+}
+
+/* Star glowing state */
+.star-btn {
+    transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.15s ease;
+}
+.star-btn:hover {
+    transform: scale(1.15);
+}
+.star-btn:active {
+    transform: scale(0.9);
+}
+
+

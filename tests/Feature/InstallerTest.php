@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Install\InstallationLock;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
@@ -14,7 +13,7 @@ class InstallerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Ensure not installed for tests
         $lockFile = storage_path('installed');
         if (File::exists($lockFile)) {
@@ -34,7 +33,7 @@ class InstallerTest extends TestCase
     public function test_installer_is_accessible_when_not_installed(): void
     {
         $response = $this->get('/install');
-        
+
         $response->assertStatus(200);
         $response->assertViewIs('setup.page');
     }
@@ -43,9 +42,9 @@ class InstallerTest extends TestCase
     {
         $lock = app(InstallationLock::class);
         $lock->markInstalled();
-        
+
         $response = $this->get('/install');
-        
+
         $response->assertStatus(404);
     }
 }

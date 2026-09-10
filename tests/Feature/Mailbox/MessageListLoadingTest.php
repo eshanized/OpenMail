@@ -2,15 +2,16 @@
 
 namespace Tests\Feature\Mailbox;
 
-use Tests\TestCase;
 use App\Models\User;
+use App\Services\FolderMapper;
+use App\Services\ImapMailboxService;
+use App\Services\MessageSanitizer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Crypt;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Livewire;
 use Mockery;
-use Illuminate\Pagination\LengthAwarePaginator;
-
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class MessageListLoadingTest extends TestCase
 {
@@ -33,7 +34,7 @@ class MessageListLoadingTest extends TestCase
 
     private function mockImapService(): void
     {
-        $mockService = Mockery::mock(\App\Services\ImapMailboxService::class);
+        $mockService = Mockery::mock(ImapMailboxService::class);
 
         $mockService->shouldReceive('getCachedFolders')
             ->andReturn([
@@ -77,9 +78,9 @@ class MessageListLoadingTest extends TestCase
         $mockService->shouldReceive('getThreadHeaders')
             ->andReturn([]);
 
-        $this->app->instance(\App\Services\ImapMailboxService::class, $mockService);
-        $this->app->instance(\App\Services\FolderMapper::class, new \App\Services\FolderMapper());
-        $this->app->instance(\App\Services\MessageSanitizer::class, new \App\Services\MessageSanitizer());
+        $this->app->instance(ImapMailboxService::class, $mockService);
+        $this->app->instance(FolderMapper::class, new FolderMapper);
+        $this->app->instance(MessageSanitizer::class, new MessageSanitizer);
     }
 
     #[Test]

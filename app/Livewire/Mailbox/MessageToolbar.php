@@ -2,17 +2,23 @@
 
 namespace App\Livewire\Mailbox;
 
-use Livewire\Component;
+use App\Models\MessageMetadata;
 use App\Services\ImapMailboxService;
 use App\Services\LabelService;
+use Livewire\Component;
 
 class MessageToolbar extends Component
 {
     public array $selectedUids = [];
+
     public string $folderPath = 'INBOX';
+
     public array $folders = [];
+
     public bool $showArchiveToast = false;
+
     public string $archiveToastMessage = '';
+
     public array $archiveRevertData = [];
 
     protected $listeners = [
@@ -120,14 +126,14 @@ class MessageToolbar extends Component
             }
 
             // Find message metadata IDs for label operations
-            $messageIds = \App\Models\MessageMetadata::where('user_id', $userId)
+            $messageIds = MessageMetadata::where('user_id', $userId)
                 ->where('folder_path', $this->folderPath)
                 ->whereIn('uid', $this->selectedUids)
                 ->pluck('id')
                 ->toArray();
 
             // Remove Inbox label and add Archive label
-            if (!empty($messageIds)) {
+            if (! empty($messageIds)) {
                 $labelService->removeFromMessages($inboxLabel->id, $messageIds, $userId);
                 $labelService->applyToMessages($archiveLabel->id, $messageIds, $userId);
             }
@@ -136,12 +142,12 @@ class MessageToolbar extends Component
             $this->showArchiveToast = true;
             $this->archiveToastMessage = count($this->selectedUids) === 1
                 ? 'Message archived.'
-                : count($this->selectedUids) . ' messages archived.';
+                : count($this->selectedUids).' messages archived.';
 
             $this->dispatch('selection-cleared');
             $this->dispatch('messages-archived');
         } catch (\Exception $e) {
-            $this->dispatch('toast', 'Archive failed: ' . $e->getMessage(), 'error');
+            $this->dispatch('toast', 'Archive failed: '.$e->getMessage(), 'error');
         }
     }
 
@@ -174,13 +180,13 @@ class MessageToolbar extends Component
             }
 
             // Find message metadata IDs
-            $messageIds = \App\Models\MessageMetadata::where('user_id', $userId)
+            $messageIds = MessageMetadata::where('user_id', $userId)
                 ->whereIn('uid', $uids)
                 ->pluck('id')
                 ->toArray();
 
             // Restore labels: remove Archive, add Inbox
-            if (!empty($messageIds)) {
+            if (! empty($messageIds)) {
                 $labelService->removeFromMessages($archiveLabel->id, $messageIds, $userId);
                 $labelService->applyToMessages($inboxLabel->id, $messageIds, $userId);
             }
@@ -190,7 +196,7 @@ class MessageToolbar extends Component
             $this->dispatch('toast', 'Archive undone', 'success');
             $this->dispatch('messages-restored');
         } catch (\Exception $e) {
-            $this->dispatch('toast', 'Undo failed: ' . $e->getMessage(), 'error');
+            $this->dispatch('toast', 'Undo failed: '.$e->getMessage(), 'error');
         }
     }
 

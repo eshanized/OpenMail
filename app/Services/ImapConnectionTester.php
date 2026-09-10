@@ -3,7 +3,10 @@
 namespace App\Services;
 
 use Webklex\PHPIMAP\Client;
+use Webklex\PHPIMAP\Config;
 use Webklex\PHPIMAP\Exceptions\ConnectionFailedException;
+use Webklex\PHPIMAP\Support\Masks\AttachmentMask;
+use Webklex\PHPIMAP\Support\Masks\MessageMask;
 
 class ImapConnectionTester
 {
@@ -15,7 +18,7 @@ class ImapConnectionTester
         string $password
     ): array {
         try {
-            $config = new \Webklex\PHPIMAP\Config([
+            $config = new Config([
                 'default' => 'default',
                 'accounts' => [
                     'default' => [
@@ -27,23 +30,23 @@ class ImapConnectionTester
                         'protocol' => 'imap',
                         'timeout' => 10,
                         'validate_cert' => true,
-                    ]
+                    ],
                 ],
                 'masks' => [
-                    'message' => \Webklex\PHPIMAP\Support\Masks\MessageMask::class,
-                    'attachment' => \Webklex\PHPIMAP\Support\Masks\AttachmentMask::class,
+                    'message' => MessageMask::class,
+                    'attachment' => AttachmentMask::class,
                 ],
                 'events' => [
                     'message' => [],
                     'folder' => [],
-                ]
+                ],
             ]);
 
             $client = new Client($config);
             $client->connect();
 
             $folders = $client->getFolders();
-            $folderNames = $folders->map(fn($f) => $f->path)->toArray();
+            $folderNames = $folders->map(fn ($f) => $f->path)->toArray();
 
             $client->disconnect();
 

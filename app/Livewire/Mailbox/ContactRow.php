@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Mailbox;
 
-use Livewire\Component;
 use App\Models\Contact;
+use Livewire\Component;
 
 class ContactRow extends Component
 {

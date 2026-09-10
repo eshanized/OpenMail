@@ -2,42 +2,65 @@
 
 namespace App\Livewire\Mailbox;
 
-use Livewire\Component;
-use Livewire\WithFileUploads;
+use App\Models\Signature;
+use App\Services\AuditService;
 use App\Services\ComposerService;
+use App\Services\ContactAutocompleteService;
 use App\Services\MessageSanitizer;
 use App\Services\SignatureService;
-use App\Services\ContactAutocompleteService;
-use App\Services\AuditService;
-use App\Models\Signature;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class Composer extends Component
 {
     use WithFileUploads;
 
     public bool $isOpen = false;
+
     public string $mode = 'compose'; // compose, reply, replyAll, forward
+
     public string $to = '';
+
     public string $cc = '';
+
     public string $bcc = '';
+
     public string $subject = '';
+
     public string $body = '';
+
     public string $bodyHtml = '';
+
     public string $bodyText = '';
+
     public array $attachments = [];
+
     public ?array $replyToMessage = null;
+
     public string $compositionId;
+
     public ?string $draftUid = null;
+
     public bool $sending = false;
+
     public bool $showCc = false;
+
     public bool $showBcc = false;
+
     public $signatures;
+
     public ?array $defaultSignature = null;
+
     public string $autosaveStatus = 'idle'; // idle, saving, saved, error
+
     public ?string $lastSavedAt = null;
+
     public bool $showUndoToast = false;
+
     public ?int $pendingSendId = null;
+
     public int $undoSendDelay = 10;
 
     protected $listeners = [
@@ -60,7 +83,9 @@ class Composer extends Component
     public function loadSignatures(): void
     {
         $user = auth()->user();
-        if (!$user) return;
+        if (! $user) {
+            return;
+        }
 
         $service = app(SignatureService::class);
         $this->signatures = $service->getAll($user);
@@ -84,8 +109,8 @@ class Composer extends Component
         }
 
         // Auto-insert default signature on new compose (not reply/forward)
-        if ($this->mode === 'compose' && $this->defaultSignature && !empty($this->defaultSignature['content_html'])) {
-            $this->bodyHtml = '<br><br>' . $this->defaultSignature['content_html'];
+        if ($this->mode === 'compose' && $this->defaultSignature && ! empty($this->defaultSignature['content_html'])) {
+            $this->bodyHtml = '<br><br>'.$this->defaultSignature['content_html'];
             $this->body = strip_tags($this->bodyHtml);
         }
 
@@ -97,22 +122,22 @@ class Composer extends Component
     {
         if ($this->mode === 'forward') {
             $this->to = '';
-            $this->subject = 'Fwd: ' . ltrim($message['subject'] ?? '', 'Re: Fwd: ');
+            $this->subject = 'Fwd: '.ltrim($message['subject'] ?? '', 'Re: Fwd: ');
         } else {
             $this->to = $message['from_email'] ?? '';
-            $this->subject = 'Re: ' . ltrim($message['subject'] ?? '', 'Re: Fwd: ');
+            $this->subject = 'Re: '.ltrim($message['subject'] ?? '', 'Re: Fwd: ');
 
             if ($this->mode === 'replyAll') {
                 $ccAddresses = [];
-                if (!empty($message['to_address'])) {
+                if (! empty($message['to_address'])) {
                     $ccAddresses[] = $message['to_address'];
                 }
-                if (!empty($message['cc_address'])) {
+                if (! empty($message['cc_address'])) {
                     $ccAddresses[] = $message['cc_address'];
                 }
                 // Exclude own email from CC
                 $ownEmail = auth()->user()->email ?? '';
-                $this->cc = implode(', ', array_filter($ccAddresses, fn($e) => strtolower($e) !== strtolower($ownEmail)));
+                $this->cc = implode(', ', array_filter($ccAddresses, fn ($e) => strtolower($e) !== strtolower($ownEmail)));
             }
         }
 
@@ -128,18 +153,19 @@ class Composer extends Component
         $attribution = "On {$date}, {$fromName} <{$fromEmail}> wrote:\n\n";
 
         $quotedHtml = '';
-        if (!empty($message['html_body'])) {
+        if (! empty($message['html_body'])) {
             $quotedHtml = $sanitizer->sanitizeHtml($message['html_body']);
-        } elseif (!empty($message['text_body'])) {
+        } elseif (! empty($message['text_body'])) {
             $quotedHtml = nl2br(e($message['text_body']));
         }
 
         if ($this->mode === 'forward') {
             $forwardHeader = "-------- Forwarded message --------\n";
-            return $forwardHeader . $attribution . "<blockquote>{$quotedHtml}</blockquote><br>";
+
+            return $forwardHeader.$attribution."<blockquote>{$quotedHtml}</blockquote><br>";
         }
 
-        return $attribution . "<blockquote>{$quotedHtml}</blockquote><br>";
+        return $attribution."<blockquote>{$quotedHtml}</blockquote><br>";
     }
 
     public function send(): void
@@ -157,7 +183,7 @@ class Composer extends Component
             if ($result['success']) {
                 $this->dispatch('toast', 'Message sent', 'success');
                 // Audit log: send action (SEC-05)
-                $action = match($this->mode) {
+                $action = match ($this->mode) {
                     'reply' => 'reply',
                     'replyAll' => 'reply_all',
                     'forward' => 'forward',
@@ -175,7 +201,7 @@ class Composer extends Component
             } else {
                 $this->dispatch('toast', 'Message queued for sending', 'warning');
                 // Audit log: send queued (SEC-05)
-                $action = match($this->mode) {
+                $action = match ($this->mode) {
                     'reply' => 'reply',
                     'replyAll' => 'reply_all',
                     'forward' => 'forward',
@@ -197,7 +223,7 @@ class Composer extends Component
             $this->resetForm();
             $this->isOpen = false;
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Mail send failed', [
+            Log::error('Mail send failed', [
                 'user_id' => auth()->id(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -223,7 +249,7 @@ class Composer extends Component
 
             $this->dispatch('toast', 'Draft saved', 'success');
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Draft save failed', [
+            Log::error('Draft save failed', [
                 'user_id' => auth()->id(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -274,15 +300,15 @@ class Composer extends Component
 
     protected function buildReferences(?array $message): ?string
     {
-        if (!$message) {
+        if (! $message) {
             return null;
         }
 
         $refs = [];
-        if (!empty($message['references'])) {
+        if (! empty($message['references'])) {
             $refs = array_merge($refs, explode(' ', $message['references']));
         }
-        if (!empty($message['message_id'])) {
+        if (! empty($message['message_id'])) {
             $refs[] = $message['message_id'];
         }
 
@@ -308,9 +334,10 @@ class Composer extends Component
 
         foreach ($this->attachments as $attachment) {
             $mime = $attachment->getMimeType();
-            if (!in_array($mime, $allowedMimes)) {
+            if (! in_array($mime, $allowedMimes)) {
                 $this->addError('attachments', "File type not allowed: {$attachment->getClientOriginalName()} ({$mime})");
                 $this->attachments = [];
+
                 return;
             }
         }
@@ -319,7 +346,7 @@ class Composer extends Component
         $maxTotalSize = config('openmail.max_total_attachment_size_mb', 50) * 1024 * 1024;
 
         if ($totalSize > $maxTotalSize) {
-            $this->addError('attachments', "Total attachments cannot exceed " . config('openmail.max_total_attachment_size_mb', 50) . "MB");
+            $this->addError('attachments', 'Total attachments cannot exceed '.config('openmail.max_total_attachment_size_mb', 50).'MB');
             $this->attachments = [];
         }
     }
@@ -349,7 +376,7 @@ class Composer extends Component
     {
         // Dispatch browser event to save to LocalStorage
         $this->dispatch('save-to-localstorage', [
-            'key' => 'openmail:draft:' . $this->compositionId,
+            'key' => 'openmail:draft:'.$this->compositionId,
             'data' => [
                 'compositionId' => $this->compositionId,
                 'to' => $this->to,
@@ -367,7 +394,7 @@ class Composer extends Component
     public function loadDraftFromLocalStorage(string $compositionId): void
     {
         $this->dispatch('load-from-localstorage', [
-            'key' => 'openmail:draft:' . $compositionId,
+            'key' => 'openmail:draft:'.$compositionId,
         ]);
     }
 
@@ -446,7 +473,7 @@ class Composer extends Component
             ->first();
 
         if ($signature && $signature->content_html) {
-            $this->bodyHtml = $this->bodyHtml . '<br><br>' . $signature->content_html;
+            $this->bodyHtml = $this->bodyHtml.'<br><br>'.$signature->content_html;
             $this->body = strip_tags($this->bodyHtml);
         }
     }

@@ -2,12 +2,16 @@
 
 namespace App\Providers;
 
+use App\Models\User;
+use App\Services\ImapMailboxService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Webklex\PHPIMAP\Client;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -16,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->scoped(\App\Services\ImapMailboxService::class);
+        $this->app->scoped(ImapMailboxService::class);
     }
 
     /**
@@ -25,12 +29,12 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Register Blade directives for CSP nonces
-        \Illuminate\Support\Facades\Blade::directive('cspNonceMetaTag', function () {
-            return "<?php \$nonce = class_exists(\\Illuminate\\Support\\Facades\\Vite::class) ? \\Illuminate\\Support\\Facades\\Vite::cspNonce() : null; if (\$nonce): ?><meta name=\"csp-nonce\" content=\"<?= \$nonce; ?>\"><?php endif; ?>";
+        Blade::directive('cspNonceMetaTag', function () {
+            return '<?php $nonce = class_exists(\\Illuminate\\Support\\Facades\\Vite::class) ? \\Illuminate\\Support\\Facades\\Vite::cspNonce() : null; if ($nonce): ?><meta name="csp-nonce" content="<?= $nonce; ?>"><?php endif; ?>';
         });
 
-        \Illuminate\Support\Facades\Blade::directive('cspNonceAttribute', function () {
-            return "<?php \$nonce = class_exists(\\Illuminate\\Support\\Facades\\Vite::class) ? \\Illuminate\\Support\\Facades\\Vite::cspNonce() : null; if (\$nonce): ?>nonce=\"<?= \$nonce; ?>\"<?php endif; ?>";
+        Blade::directive('cspNonceAttribute', function () {
+            return '<?php $nonce = class_exists(\\Illuminate\\Support\\Facades\\Vite::class) ? \\Illuminate\\Support\\Facades\\Vite::cspNonce() : null; if ($nonce): ?>nonce="<?= $nonce; ?>"<?php endif; ?>';
         });
 
         // Register IMAP auth guard
@@ -38,19 +42,19 @@ class AppServiceProvider extends ServiceProvider
             $email = $request->input('email');
             $password = $request->input('password');
 
-            if (!$email || !$password) {
+            if (! $email || ! $password) {
                 return null;
             }
 
             // Find or create user by email
-            $user = \App\Models\User::firstOrCreate(
+            $user = User::firstOrCreate(
                 ['email' => $email],
                 ['name' => explode('@', $email)[0]]
             );
 
             // Verify credentials against IMAP
             try {
-                $config = array(
+                $config = [
                     'host' => config('openmail.imap.host'),
                     'port' => config('openmail.imap.port'),
                     'encryption' => config('openmail.imap.encryption'),
@@ -59,27 +63,27 @@ class AppServiceProvider extends ServiceProvider
                     'protocol' => 'imap',
                     'timeout' => 10,
                     'validate_cert' => true,
-                );
+                ];
 
-                $client = new \Webklex\PHPIMAP\Client($config);
+                $client = new Client($config);
                 $client->connect();
 
                 // Connection successful - log security event (without password)
-                Log::channel('security')->info('IMAP authentication successful', array(
+                Log::channel('security')->info('IMAP authentication successful', [
                     'email' => $email,
                     'ip' => $request->ip(),
-                ));
+                ]);
 
                 $client->disconnect();
 
                 return $user;
             } catch (\Exception $e) {
                 // Log failed attempt (without password)
-                Log::channel('security')->warning('IMAP authentication failed', array(
+                Log::channel('security')->warning('IMAP authentication failed', [
                     'email' => $email,
                     'ip' => $request->ip(),
                     'error' => $e->getMessage(),
-                ));
+                ]);
 
                 return null;
             }
@@ -89,12 +93,12 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('login', function ($request) {
             $email = Str::lower($request->input('email', ''));
 
-            return array(
+            return [
                 // Per-IP: 10 attempts per minute
                 Limit::perMinute(10)->by($request->ip()),
                 // Per-email: 5 attempts per 5 minutes
                 Limit::perMinutes(5, 5)->by($email),
-            );
+            ];
         });
 
         // API rate limiters per SEC-04
@@ -116,10 +120,10 @@ class AppServiceProvider extends ServiceProvider
 
         // Authenticated API: stricter per-user limits (100/min + 1000/hr)
         RateLimiter::for('api.authenticated', function ($request) {
-            return array(
-                Limit::perMinute(100)->by('minute:' . $request->user()->id),
-                Limit::perHour(1000)->by('hour:' . $request->user()->id),
-            );
+            return [
+                Limit::perMinute(100)->by('minute:'.$request->user()->id),
+                Limit::perHour(1000)->by('hour:'.$request->user()->id),
+            ];
         });
     }
 }

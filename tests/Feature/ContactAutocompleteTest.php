@@ -2,19 +2,22 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Models\Contact;
 use App\Models\ContactAutocompleteCache;
 use App\Models\User;
 use App\Services\ContactAutocompleteService;
 use App\Services\ContactService;
+use App\Services\FolderMapper;
+use App\Services\ImapMailboxService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class ContactAutocompleteTest extends TestCase
 {
     use RefreshDatabase;
 
     private User $user;
+
     private ContactAutocompleteService $service;
 
     protected function setUp(): void
@@ -22,8 +25,8 @@ class ContactAutocompleteTest extends TestCase
         parent::setUp();
         $this->user = User::factory()->create();
         $this->service = new ContactAutocompleteService(
-            app(\App\Services\ImapMailboxService::class),
-            app(\App\Services\FolderMapper::class)
+            app(ImapMailboxService::class),
+            app(FolderMapper::class)
         );
     }
 
@@ -31,7 +34,7 @@ class ContactAutocompleteTest extends TestCase
     public function search_unified_merges_local_contacts_and_imap_cache(): void
     {
         // Create local contact
-        $contactService = new ContactService();
+        $contactService = new ContactService;
         $contactService->create($this->user->id, [
             'name' => 'Local Contact',
             'email' => 'local@example.com',
@@ -58,7 +61,7 @@ class ContactAutocompleteTest extends TestCase
     /** @test */
     public function search_unified_local_contacts_exact_match_ranks_higher(): void
     {
-        $contactService = new ContactService();
+        $contactService = new ContactService;
         $contactService->create($this->user->id, [
             'name' => 'John Doe',
             'email' => 'john@example.com',
@@ -113,7 +116,7 @@ class ContactAutocompleteTest extends TestCase
     /** @test */
     public function search_unified_deduplicates_by_email_local_wins(): void
     {
-        $contactService = new ContactService();
+        $contactService = new ContactService;
         $contactService->create($this->user->id, [
             'name' => 'Local Version',
             'email' => 'same@example.com',
@@ -166,7 +169,7 @@ class ContactAutocompleteTest extends TestCase
     /** @test */
     public function search_unified_returns_format_compatible_with_composer_dropdown(): void
     {
-        $contactService = new ContactService();
+        $contactService = new ContactService;
         $contact = $contactService->create($this->user->id, [
             'name' => 'Test Contact',
             'email' => 'test@example.com',
@@ -177,14 +180,14 @@ class ContactAutocompleteTest extends TestCase
 
         $this->assertCount(1, $results);
         $result = $results->first();
-        
+
         $this->assertArrayHasKey('name', $result);
         $this->assertArrayHasKey('email', $result);
         $this->assertArrayHasKey('phone', $result);
         $this->assertArrayHasKey('avatar', $result);
         $this->assertArrayHasKey('frequency', $result);
         $this->assertArrayHasKey('source', $result);
-        
+
         $this->assertEquals('Test Contact', $result['name']);
         $this->assertEquals('test@example.com', $result['email']);
         $this->assertEquals('+1234567890', $result['phone']);
@@ -196,7 +199,7 @@ class ContactAutocompleteTest extends TestCase
     /** @test */
     public function search_unified_respects_limit(): void
     {
-        $contactService = new ContactService();
+        $contactService = new ContactService;
         for ($i = 1; $i <= 15; $i++) {
             $contactService->create($this->user->id, [
                 'name' => "Contact $i",
@@ -212,7 +215,7 @@ class ContactAutocompleteTest extends TestCase
     /** @test */
     public function search_unified_case_insensitive_deduplication(): void
     {
-        $contactService = new ContactService();
+        $contactService = new ContactService;
         $contactService->create($this->user->id, [
             'name' => 'Local',
             'email' => 'TEST@EXAMPLE.COM',

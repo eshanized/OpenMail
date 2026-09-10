@@ -2,13 +2,13 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Models\Contact;
 use App\Models\ContactGroup;
 use App\Models\User;
-use App\Services\VCardService;
 use App\Services\ContactService;
+use App\Services\VCardService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class VCardTest extends TestCase
 {
@@ -25,7 +25,7 @@ class VCardTest extends TestCase
     /** @test */
     public function import_parses_vcard_30_with_all_fields(): void
     {
-        $vcard = <<<VCARD
+        $vcard = <<<'VCARD'
         BEGIN:VCARD
         VERSION:3.0
         FN:Jane Smith
@@ -36,7 +36,7 @@ class VCardTest extends TestCase
         END:VCARD
         VCARD;
 
-        $service = new VCardService();
+        $service = new VCardService;
         $results = $service->import($vcard, $this->user->id);
 
         $this->assertEquals(1, $results['imported']);
@@ -58,7 +58,7 @@ class VCardTest extends TestCase
     /** @test */
     public function import_handles_multiple_vcards(): void
     {
-        $vcard = <<<VCARD
+        $vcard = <<<'VCARD'
         BEGIN:VCARD
         VERSION:3.0
         FN:First Person
@@ -71,7 +71,7 @@ class VCardTest extends TestCase
         END:VCARD
         VCARD;
 
-        $service = new VCardService();
+        $service = new VCardService;
         $results = $service->import($vcard, $this->user->id);
 
         $this->assertEquals(2, $results['imported']);
@@ -82,13 +82,13 @@ class VCardTest extends TestCase
     public function import_conflict_strategy_skip(): void
     {
         // Create existing contact
-        $contactService = new ContactService();
+        $contactService = new ContactService;
         $contactService->create($this->user->id, [
             'name' => 'Existing',
             'email' => 'existing@example.com',
         ]);
 
-        $vcard = <<<VCARD
+        $vcard = <<<'VCARD'
         BEGIN:VCARD
         VERSION:3.0
         FN:Existing Updated
@@ -96,7 +96,7 @@ class VCardTest extends TestCase
         END:VCARD
         VCARD;
 
-        $service = new VCardService();
+        $service = new VCardService;
         $results = $service->import($vcard, $this->user->id, 'skip');
 
         $this->assertEquals(1, $results['skipped']);
@@ -110,13 +110,13 @@ class VCardTest extends TestCase
     /** @test */
     public function import_conflict_strategy_update(): void
     {
-        $contactService = new ContactService();
+        $contactService = new ContactService;
         $contactService->create($this->user->id, [
             'name' => 'Old Name',
             'email' => 'update@example.com',
         ]);
 
-        $vcard = <<<VCARD
+        $vcard = <<<'VCARD'
         BEGIN:VCARD
         VERSION:3.0
         FN:New Name
@@ -125,7 +125,7 @@ class VCardTest extends TestCase
         END:VCARD
         VCARD;
 
-        $service = new VCardService();
+        $service = new VCardService;
         $results = $service->import($vcard, $this->user->id, 'update');
 
         $this->assertEquals(1, $results['updated']);
@@ -139,13 +139,13 @@ class VCardTest extends TestCase
     /** @test */
     public function import_conflict_strategy_duplicate(): void
     {
-        $contactService = new ContactService();
+        $contactService = new ContactService;
         $contactService->create($this->user->id, [
             'name' => 'First',
             'email' => 'dup@example.com',
         ]);
 
-        $vcard = <<<VCARD
+        $vcard = <<<'VCARD'
         BEGIN:VCARD
         VERSION:3.0
         FN:Second
@@ -153,39 +153,39 @@ class VCardTest extends TestCase
         END:VCARD
         VCARD;
 
-        $service = new VCardService();
+        $service = new VCardService;
         $results = $service->import($vcard, $this->user->id, 'duplicate');
 
         $this->assertEquals(1, $results['imported']);
-        
+
         // Original contact should still exist
         $this->assertDatabaseHas('contacts', [
             'user_id' => $this->user->id,
             'email' => 'dup@example.com',
             'name' => 'First',
         ]);
-        
+
         // New contact should be created with modified email
         $this->assertDatabaseHas('contacts', [
             'user_id' => $this->user->id,
             'email' => 'dup+1@example.com',
             'name' => 'Second',
         ]);
-        
+
         $this->assertCount(2, Contact::where('user_id', $this->user->id)->get());
     }
 
     /** @test */
     public function import_skips_vcards_without_email(): void
     {
-        $vcard = <<<VCARD
+        $vcard = <<<'VCARD'
         BEGIN:VCARD
         VERSION:3.0
         FN:No Email Person
         END:VCARD
         VCARD;
 
-        $service = new VCardService();
+        $service = new VCardService;
         $results = $service->import($vcard, $this->user->id);
 
         $this->assertCount(1, $results['errors']);
@@ -195,7 +195,7 @@ class VCardTest extends TestCase
     /** @test */
     public function import_normalizes_email_to_lowercase(): void
     {
-        $vcard = <<<VCARD
+        $vcard = <<<'VCARD'
         BEGIN:VCARD
         VERSION:3.0
         FN:Case Test
@@ -203,7 +203,7 @@ class VCardTest extends TestCase
         END:VCARD
         VCARD;
 
-        $service = new VCardService();
+        $service = new VCardService;
         $results = $service->import($vcard, $this->user->id);
 
         $this->assertEquals(1, $results['imported']);
@@ -216,7 +216,7 @@ class VCardTest extends TestCase
     /** @test */
     public function export_generates_valid_vcard_30_with_all_fields(): void
     {
-        $contactService = new ContactService();
+        $contactService = new ContactService;
         $contact = $contactService->create($this->user->id, [
             'name' => 'Export Test',
             'email' => 'export@example.com',
@@ -227,7 +227,7 @@ class VCardTest extends TestCase
         $group = ContactGroup::create(['user_id' => $this->user->id, 'name' => 'Family']);
         $contact->groups()->attach($group->id);
 
-        $service = new VCardService();
+        $service = new VCardService;
         $output = $service->export($this->user->id);
 
         $this->assertNotEmpty($output);
@@ -244,7 +244,7 @@ class VCardTest extends TestCase
     /** @test */
     public function export_empty_when_no_contacts(): void
     {
-        $service = new VCardService();
+        $service = new VCardService;
         $output = $service->export($this->user->id);
 
         $this->assertEmpty($output);
@@ -253,13 +253,13 @@ class VCardTest extends TestCase
     /** @test */
     public function export_only_includes_user_contacts(): void
     {
-        $contactService = new ContactService();
+        $contactService = new ContactService;
         $otherUser = User::factory()->create();
 
         $contactService->create($this->user->id, ['name' => 'Mine', 'email' => 'mine@test.com']);
         $contactService->create($otherUser->id, ['name' => 'Theirs', 'email' => 'theirs@test.com']);
 
-        $service = new VCardService();
+        $service = new VCardService;
         $output = $service->export($this->user->id);
 
         $this->assertStringContainsString('FN:Mine', $output);
@@ -269,14 +269,14 @@ class VCardTest extends TestCase
     /** @test */
     public function import_handles_vcard_with_minimal_fields(): void
     {
-        $vcard = <<<VCARD
+        $vcard = <<<'VCARD'
         BEGIN:VCARD
         VERSION:3.0
         EMAIL:minimal@test.com
         END:VCARD
         VCARD;
 
-        $service = new VCardService();
+        $service = new VCardService;
         $results = $service->import($vcard, $this->user->id);
 
         $this->assertEquals(1, $results['imported']);
@@ -290,7 +290,7 @@ class VCardTest extends TestCase
     /** @test */
     public function import_syncs_groups_from_categories(): void
     {
-        $vcard = <<<VCARD
+        $vcard = <<<'VCARD'
         BEGIN:VCARD
         VERSION:3.0
         FN:Grouped
@@ -299,7 +299,7 @@ class VCardTest extends TestCase
         END:VCARD
         VCARD;
 
-        $service = new VCardService();
+        $service = new VCardService;
         $results = $service->import($vcard, $this->user->id);
 
         $this->assertEquals(1, $results['imported']);

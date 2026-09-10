@@ -2,12 +2,16 @@
 
 namespace Tests\Feature\Mailbox;
 
-use Tests\TestCase;
+use App\Livewire\Mailbox\MessageViewer;
 use App\Models\User;
 use App\Services\ImapMailboxService;
-use App\Services\MessageSanitizer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Livewire\Livewire;
 use Mockery;
+use Mockery\MockInterface;
+use Tests\TestCase;
+use Webklex\PHPIMAP\Message;
 use Webklex\PHPIMAP\Support\AttachmentCollection;
 
 class MessageViewerTest extends TestCase
@@ -48,27 +52,42 @@ class MessageViewerTest extends TestCase
             'cc' => [],
             'bcc' => [],
         ];
-        
+
         $data = array_merge($defaults, $overrides);
-        
+
         // Create a simple object with all needed properties and methods
-        $message = new class($data) {
+        $message = new class($data)
+        {
             public $subject;
+
             public $from_address;
+
             public $from_name;
+
             public $to;
+
             public $date;
+
             public $is_seen;
+
             public $is_flagged;
+
             public $message_id;
+
             public $in_reply_to;
+
             public $references;
+
             public $cc;
+
             public $bcc;
+
             private $htmlBody;
+
             private $textBody;
+
             private $attachments;
-            
+
             public function __construct(array $data)
             {
                 foreach ($data as $key => $value) {
@@ -78,42 +97,42 @@ class MessageViewerTest extends TestCase
                 $this->textBody = $data['text_body'] ?? '';
                 $this->attachments = $data['attachments'] ?? [];
             }
-            
+
             public function getHTMLBody(): string
             {
                 return $this->htmlBody;
             }
-            
+
             public function getTextBody(): string
             {
                 return $this->textBody;
             }
-            
+
             public function getAttachments()
             {
                 return $this->attachments;
             }
         };
-        
+
         return $message;
     }
 
-    protected function createMockService(object $mockMessage, array $folders = []): \Mockery\MockInterface
+    protected function createMockService(object $mockMessage, array $folders = []): MockInterface
     {
         $defaultFolders = [
             ['path' => 'INBOX', 'name' => 'Inbox', 'role' => 'inbox', 'unread_count' => 5, 'total_count' => 10, 'has_children' => false],
             ['path' => 'Sent', 'name' => 'Sent', 'role' => 'sent', 'unread_count' => 0, 'total_count' => 20, 'has_children' => false],
         ];
-        
+
         $mockService = Mockery::mock(ImapMailboxService::class);
         $mockService->shouldReceive('getMessageWithBody')->andReturn($mockMessage);
         $mockService->shouldReceive('getCachedFolders')->andReturn($folders ?: $defaultFolders);
         // The mailbox view renders MessageList which calls getMessages - return empty paginator
         $mockService->shouldReceive('getMessages')
-            ->andReturn(new \Illuminate\Pagination\LengthAwarePaginator([], 0, 25, 1, ['path' => '']));
+            ->andReturn(new LengthAwarePaginator([], 0, 25, 1, ['path' => '']));
         // MessageList also calls getThreadHeaders for threaded view
         $mockService->shouldReceive('getThreadHeaders')->andReturn([]);
-        
+
         return $mockService;
     }
 
@@ -125,14 +144,14 @@ class MessageViewerTest extends TestCase
             'from_name' => 'Sender Name',
             'html_body' => '<html><body><p>Test HTML content</p></body></html>',
         ]);
-        
+
         $mockService = $this->createMockService($mockMessage);
         $mockService->shouldReceive('setFlag')->with('INBOX', [123], '\\Seen', true)->andReturn(true);
 
         $this->app->instance(ImapMailboxService::class, $mockService);
 
-        $component = \Livewire\Livewire::actingAs($this->user)
-            ->test(\App\Livewire\Mailbox\MessageViewer::class, [
+        $component = Livewire::actingAs($this->user)
+            ->test(MessageViewer::class, [
                 'folderPath' => 'INBOX',
                 'uid' => 123,
             ]);
@@ -150,7 +169,7 @@ class MessageViewerTest extends TestCase
             'html_body' => '',
             'text_body' => 'This is plain text content',
         ]);
-        
+
         $mockService = $this->createMockService($mockMessage, [
             ['path' => 'INBOX', 'name' => 'Inbox', 'role' => 'inbox', 'unread_count' => 5, 'total_count' => 10, 'has_children' => false],
         ]);
@@ -158,8 +177,8 @@ class MessageViewerTest extends TestCase
 
         $this->app->instance(ImapMailboxService::class, $mockService);
 
-        $component = \Livewire\Livewire::actingAs($this->user)
-            ->test(\App\Livewire\Mailbox\MessageViewer::class, [
+        $component = Livewire::actingAs($this->user)
+            ->test(MessageViewer::class, [
                 'folderPath' => 'INBOX',
                 'uid' => 456,
             ]);
@@ -175,18 +194,18 @@ class MessageViewerTest extends TestCase
             'subject' => 'Test Subject with Special Chars',
             'from_address' => 'sender@example.com',
             'from_name' => 'Sender Name',
-            'to' => [(object)['mailbox' => 'recipient', 'host' => 'example.com', 'personal' => 'Recipient Name']],
+            'to' => [(object) ['mailbox' => 'recipient', 'host' => 'example.com', 'personal' => 'Recipient Name']],
             'date' => now()->format('r'),
             'is_seen' => true,
             'is_flagged' => true,
             'message_id' => '<message-id@example.com>',
             'in_reply_to' => '<in-reply-to@example.com>',
             'references' => '<ref1@example.com> <ref2@example.com>',
-            'cc' => [(object)['mailbox' => 'cc', 'host' => 'example.com', 'personal' => 'CC Name']],
+            'cc' => [(object) ['mailbox' => 'cc', 'host' => 'example.com', 'personal' => 'CC Name']],
             'bcc' => [],
             'html_body' => '<p>HTML body</p>',
         ]);
-        
+
         $mockService = $this->createMockService($mockMessage, [
             ['path' => 'INBOX', 'name' => 'Inbox', 'role' => 'inbox', 'unread_count' => 5, 'total_count' => 10, 'has_children' => false],
         ]);
@@ -194,8 +213,8 @@ class MessageViewerTest extends TestCase
 
         $this->app->instance(ImapMailboxService::class, $mockService);
 
-        $component = \Livewire\Livewire::actingAs($this->user)
-            ->test(\App\Livewire\Mailbox\MessageViewer::class, [
+        $component = Livewire::actingAs($this->user)
+            ->test(MessageViewer::class, [
                 'folderPath' => 'INBOX',
                 'uid' => 789,
             ]);
@@ -215,11 +234,11 @@ class MessageViewerTest extends TestCase
             'message_id' => '<message-id@example.com>',
             'in_reply_to' => '<in-reply-to@example.com>',
             'references' => '<ref1@example.com> <ref2@example.com>',
-            'cc' => [(object)['mailbox' => 'cc', 'host' => 'example.com', 'personal' => 'CC Name']],
-            'bcc' => [(object)['mailbox' => 'bcc', 'host' => 'example.com', 'personal' => 'BCC Name']],
+            'cc' => [(object) ['mailbox' => 'cc', 'host' => 'example.com', 'personal' => 'CC Name']],
+            'bcc' => [(object) ['mailbox' => 'bcc', 'host' => 'example.com', 'personal' => 'BCC Name']],
             'html_body' => '<p>HTML body</p>',
         ]);
-        
+
         $mockService = $this->createMockService($mockMessage, [
             ['path' => 'INBOX', 'name' => 'Inbox', 'role' => 'inbox', 'unread_count' => 5, 'total_count' => 10, 'has_children' => false],
         ]);
@@ -227,8 +246,8 @@ class MessageViewerTest extends TestCase
 
         $this->app->instance(ImapMailboxService::class, $mockService);
 
-        $component = \Livewire\Livewire::actingAs($this->user)
-            ->test(\App\Livewire\Mailbox\MessageViewer::class, [
+        $component = Livewire::actingAs($this->user)
+            ->test(MessageViewer::class, [
                 'folderPath' => 'INBOX',
                 'uid' => 101,
             ]);
@@ -246,7 +265,7 @@ class MessageViewerTest extends TestCase
             'from_name' => 'Sender',
             'html_body' => '<html><body><img src="http://tracker.com/pixel.gif" alt="tracking"></body></html>',
         ]);
-        
+
         $mockService = $this->createMockService($mockMessage, [
             ['path' => 'INBOX', 'name' => 'Inbox', 'role' => 'inbox', 'unread_count' => 5, 'total_count' => 10, 'has_children' => false],
         ]);
@@ -254,8 +273,8 @@ class MessageViewerTest extends TestCase
 
         $this->app->instance(ImapMailboxService::class, $mockService);
 
-        $component = \Livewire\Livewire::actingAs($this->user)
-            ->test(\App\Livewire\Mailbox\MessageViewer::class, [
+        $component = Livewire::actingAs($this->user)
+            ->test(MessageViewer::class, [
                 'folderPath' => 'INBOX',
                 'uid' => 202,
             ]);
@@ -281,7 +300,7 @@ class MessageViewerTest extends TestCase
             'from_name' => 'Sender',
             'html_body' => '<p>Body</p>',
         ]);
-        
+
         $mockService = $this->createMockService($mockMessage, [
             ['path' => 'INBOX', 'name' => 'Inbox', 'role' => 'inbox', 'unread_count' => 5, 'total_count' => 10, 'has_children' => false],
         ]);
@@ -289,8 +308,8 @@ class MessageViewerTest extends TestCase
 
         $this->app->instance(ImapMailboxService::class, $mockService);
 
-        $component = \Livewire\Livewire::actingAs($this->user)
-            ->test(\App\Livewire\Mailbox\MessageViewer::class, [
+        $component = Livewire::actingAs($this->user)
+            ->test(MessageViewer::class, [
                 'folderPath' => 'INBOX',
                 'uid' => 303,
             ]);
@@ -302,9 +321,12 @@ class MessageViewerTest extends TestCase
     public function attachment_list_renders_with_download_buttons()
     {
         // Use a simple object instead of Mockery mock for attachment
-        $mockAttachment = new class {
+        $mockAttachment = new class
+        {
             public string $name = 'document.pdf';
+
             public int $size = 102400;
+
             public string $contentType = 'application/pdf';
         };
 
@@ -335,7 +357,7 @@ class MessageViewerTest extends TestCase
         $mockMessage->shouldReceive('getTextBody')->andReturn('');
         $mockMessage->shouldReceive('getAttachments')->andReturn($mockAttachments);
         $mockMessage->shouldReceive('get')->andReturn(null);
-        
+
         $mockService = $this->createMockService($mockMessage, [
             ['path' => 'INBOX', 'name' => 'Inbox', 'role' => 'inbox', 'unread_count' => 5, 'total_count' => 10, 'has_children' => false],
         ]);
@@ -343,8 +365,8 @@ class MessageViewerTest extends TestCase
 
         $this->app->instance(ImapMailboxService::class, $mockService);
 
-        $component = \Livewire\Livewire::actingAs($this->user)
-            ->test(\App\Livewire\Mailbox\MessageViewer::class, [
+        $component = Livewire::actingAs($this->user)
+            ->test(MessageViewer::class, [
                 'folderPath' => 'INBOX',
                 'uid' => 404,
             ]);
@@ -361,7 +383,7 @@ class MessageViewerTest extends TestCase
             'from_name' => 'Sender',
             'html_body' => '<p>Body</p>',
         ]);
-        
+
         $mockService = $this->createMockService($mockMessage, [
             ['path' => 'INBOX', 'name' => 'Inbox', 'role' => 'inbox', 'unread_count' => 5, 'total_count' => 10, 'has_children' => false],
         ]);
@@ -370,8 +392,8 @@ class MessageViewerTest extends TestCase
 
         $this->app->instance(ImapMailboxService::class, $mockService);
 
-        $component = \Livewire\Livewire::actingAs($this->user)
-            ->test(\App\Livewire\Mailbox\MessageViewer::class, [
+        $component = Livewire::actingAs($this->user)
+            ->test(MessageViewer::class, [
                 'folderPath' => 'INBOX',
                 'uid' => 505,
             ]);
@@ -382,15 +404,15 @@ class MessageViewerTest extends TestCase
     /** @test */
     public function real_webklex_message_parses_sender_and_date_correctly()
     {
-        $raw = "From: Amazon SES <eshan@tonmoyinfrastructure.org>\r\n" .
-               "To: eshan@tonmoyinfrastructure.org\r\n" .
-               "Subject: Verify your company email\r\n" .
-               "Date: Mon, 10 Sep 2026 01:00:00 +0000\r\n" .
-               "Message-ID: <010001a03961f525@email.amazonses.com>\r\n" .
-               "Content-Type: text/html; charset=utf-8\r\n\r\n" .
-               "<p>Log in with your magic link. 🪄</p>";
+        $raw = "From: Amazon SES <eshan@tonmoyinfrastructure.org>\r\n".
+               "To: eshan@tonmoyinfrastructure.org\r\n".
+               "Subject: Verify your company email\r\n".
+               "Date: Mon, 10 Sep 2026 01:00:00 +0000\r\n".
+               "Message-ID: <010001a03961f525@email.amazonses.com>\r\n".
+               "Content-Type: text/html; charset=utf-8\r\n\r\n".
+               '<p>Log in with your magic link. 🪄</p>';
 
-        $realMessage = \Webklex\PHPIMAP\Message::fromString($raw);
+        $realMessage = Message::fromString($raw);
 
         $mockService = Mockery::mock(ImapMailboxService::class);
         $mockService->shouldReceive('getMessageWithBody')->with('INBOX', 601)->andReturn($realMessage);
@@ -401,8 +423,8 @@ class MessageViewerTest extends TestCase
 
         $this->app->instance(ImapMailboxService::class, $mockService);
 
-        $component = \Livewire\Livewire::actingAs($this->user)
-            ->test(\App\Livewire\Mailbox\MessageViewer::class, [
+        $component = Livewire::actingAs($this->user)
+            ->test(MessageViewer::class, [
                 'folderPath' => 'INBOX',
                 'uid' => 601,
             ]);
@@ -422,14 +444,14 @@ class MessageViewerTest extends TestCase
     /** @test */
     public function utf8_emojis_and_html_render_cleanly_without_mojibake()
     {
-        $raw = "From: Support <support@example.com>\r\n" .
-               "To: user@example.com\r\n" .
-               "Subject: Magic Link 🪄\r\n" .
-               "Date: Mon, 10 Sep 2026 01:00:00 +0000\r\n" .
-               "Content-Type: text/html; charset=utf-8\r\n\r\n" .
-               "<p>Log in with your magic link. &nbsp;&nbsp; 🪄 Your magic link</p>";
+        $raw = "From: Support <support@example.com>\r\n".
+               "To: user@example.com\r\n".
+               "Subject: Magic Link 🪄\r\n".
+               "Date: Mon, 10 Sep 2026 01:00:00 +0000\r\n".
+               "Content-Type: text/html; charset=utf-8\r\n\r\n".
+               '<p>Log in with your magic link. &nbsp;&nbsp; 🪄 Your magic link</p>';
 
-        $realMessage = \Webklex\PHPIMAP\Message::fromString($raw);
+        $realMessage = Message::fromString($raw);
 
         $mockService = Mockery::mock(ImapMailboxService::class);
         $mockService->shouldReceive('getMessageWithBody')->with('INBOX', 602)->andReturn($realMessage);
@@ -440,8 +462,8 @@ class MessageViewerTest extends TestCase
 
         $this->app->instance(ImapMailboxService::class, $mockService);
 
-        $component = \Livewire\Livewire::actingAs($this->user)
-            ->test(\App\Livewire\Mailbox\MessageViewer::class, [
+        $component = Livewire::actingAs($this->user)
+            ->test(MessageViewer::class, [
                 'folderPath' => 'INBOX',
                 'uid' => 602,
             ]);

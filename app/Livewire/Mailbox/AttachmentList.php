@@ -2,15 +2,16 @@
 
 namespace App\Livewire\Mailbox;
 
-use Livewire\Component;
-use App\Services\ImapMailboxService;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Str;
+use Livewire\Component;
 
 class AttachmentList extends Component
 {
     public $attachments;
+
     public string $folderPath = '';
+
     public int $uid = 0;
 
     protected $listeners = ['download' => 'download'];
@@ -26,13 +27,13 @@ class AttachmentList extends Component
     {
         $attachment = $this->attachments->get($index);
 
-        if (!$attachment) {
+        if (! $attachment) {
             abort(404, 'Attachment not found');
         }
 
         // Security: Generate UUID-based filename to prevent path traversal (SEC-08)
         $originalName = $attachment->name ?? 'attachment';
-        $safeName = Str::uuid() . '_' . basename($originalName);
+        $safeName = Str::uuid().'_'.basename($originalName);
 
         // Security: Validate MIME type against whitelist (SEC-09)
         $mimeType = $attachment->contentType ?? 'application/octet-stream';
@@ -62,7 +63,7 @@ class AttachmentList extends Component
         ];
 
         // Enforce MIME type whitelist (SEC-09) - only allowed types may be downloaded
-        if (!in_array($mimeType, $allowedMimeTypes)) {
+        if (! in_array($mimeType, $allowedMimeTypes)) {
             abort(403, 'This file type is not allowed for download');
         }
 

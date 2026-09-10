@@ -2,14 +2,15 @@
 
 namespace App\Livewire\Mailbox;
 
-use Livewire\Component;
 use App\Services\ImapMailboxService;
-use App\Services\FolderMapper;
+use Livewire\Component;
 
 class FolderSidebar extends Component
 {
     public array $folders = [];
+
     public string $currentFolder = 'INBOX';
+
     public string $activeTab = 'folders'; // 'folders' | 'contacts' | 'labels'
 
     protected $listeners = [

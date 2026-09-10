@@ -2,8 +2,9 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Collection;
+use App\Models\ThreadHeaderCache;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 class ThreadBuilder
 {
@@ -12,7 +13,7 @@ class ThreadBuilder
     /**
      * Build conversation threads from a collection of messages using JWZ algorithm.
      *
-     * @param Collection<int, object> $messages Messages with message_id, in_reply_to, references, subject, date, etc.
+     * @param  Collection<int, object>  $messages  Messages with message_id, in_reply_to, references, subject, date, etc.
      * @return array<int, object> Root threads with nested children
      */
     public function buildThreads(Collection $messages): array
@@ -23,7 +24,7 @@ class ThreadBuilder
 
         // 1. Index messages by Message-ID (cleaned)
         $byMessageId = $messages
-            ->filter(fn ($m) => !empty($m->message_id))
+            ->filter(fn ($m) => ! empty($m->message_id))
             ->keyBy(fn ($m) => $this->cleanMessageId($m->message_id));
 
         // 2. Build parent-child relationships (first pass - allow all)
@@ -42,7 +43,7 @@ class ThreadBuilder
         // 3. Detect and break cycles (JWZ step: prune empty containers / handle cycles)
         // Find all nodes that are part of cycles
         $inCycle = $this->findCycles($byMessageId, $parentOf);
-        
+
         // Break cycles by removing the parent link for nodes in cycles
         foreach (array_keys($inCycle) as $messageId) {
             $parentId = $parentOf[$messageId];
@@ -61,7 +62,7 @@ class ThreadBuilder
         // 4. Identify roots (messages without parents)
         $roots = [];
         foreach ($byMessageId as $messageId => $message) {
-            if (!isset($parentOf[$messageId])) {
+            if (! isset($parentOf[$messageId])) {
                 $roots[] = $message;
             }
         }
@@ -75,6 +76,7 @@ class ThreadBuilder
         usort($roots, function ($a, $b) {
             $dateA = $this->getLatestDate($a)?->timestamp ?? 0;
             $dateB = $this->getLatestDate($b)?->timestamp ?? 0;
+
             return $dateB <=> $dateA;
         });
 
@@ -92,7 +94,7 @@ class ThreadBuilder
         $inCycle = [];
 
         foreach ($byMessageId as $messageId => $message) {
-            if (!isset($color[$messageId])) {
+            if (! isset($color[$messageId])) {
                 $this->dfsDetectCycle($messageId, $parentOf, $color, $inCycle);
             }
         }
@@ -106,8 +108,8 @@ class ThreadBuilder
 
         if (isset($parentOf[$nodeId])) {
             $parentId = $parentOf[$nodeId];
-            
-            if (!isset($color[$parentId])) {
+
+            if (! isset($color[$parentId])) {
                 $this->dfsDetectCycle($parentId, $parentOf, $color, $inCycle);
             } elseif ($color[$parentId] === 1) {
                 // Found a back edge - cycle detected
@@ -130,13 +132,13 @@ class ThreadBuilder
      */
     public function extractParentId(object $message): ?string
     {
-        if (!empty($message->in_reply_to)) {
+        if (! empty($message->in_reply_to)) {
             return $this->cleanMessageId($message->in_reply_to);
         }
 
-        if (!empty($message->references)) {
+        if (! empty($message->references)) {
             $refs = array_filter(array_map('trim', explode(' ', $message->references)));
-            if (!empty($refs)) {
+            if (! empty($refs)) {
                 return $this->cleanMessageId(end($refs));
             }
         }
@@ -171,6 +173,7 @@ class ThreadBuilder
             $subject = preg_replace('/^(Re|Fwd):\s*/i', '', $subject);
             $subject = trim(preg_replace('/\s+/', ' ', $subject));
             $m->normalized_subject = strtolower($subject);
+
             return $m;
         });
 
@@ -189,13 +192,13 @@ class ThreadBuilder
                 if (empty($currentCluster)) {
                     $currentCluster[] = $message;
                 } else {
-                    $firstDate = $currentCluster[0]->date instanceof Carbon 
-                        ? $currentCluster[0]->date 
+                    $firstDate = $currentCluster[0]->date instanceof Carbon
+                        ? $currentCluster[0]->date
                         : Carbon::parse($currentCluster[0]->date);
-                    $messageDate = $message->date instanceof Carbon 
-                        ? $message->date 
+                    $messageDate = $message->date instanceof Carbon
+                        ? $message->date
                         : Carbon::parse($message->date);
-                    
+
                     // Check if within 2 days (48 hours) of first message in cluster
                     if ($firstDate->diffInHours($messageDate, true) <= 48) {
                         $currentCluster[] = $message;
@@ -206,7 +209,7 @@ class ThreadBuilder
                 }
             }
 
-            if (!empty($currentCluster)) {
+            if (! empty($currentCluster)) {
                 $clusters[] = $currentCluster;
             }
 
@@ -228,14 +231,14 @@ class ThreadBuilder
         foreach ($roots as &$root) {
             $root->children = $children[$root->message_id] ?? [];
             $root->children = $this->attachChildren($root->children, $children);
-            
+
             // Compute derived properties for UI
             $root->latestDate = $this->getLatestDate($root);
             $root->unreadCount = $this->countUnread($root);
             $root->from_display = $this->getFromDisplay($root);
             $root->formatted_date = $this->formatDate($root->latestDate);
             $root->has_attachments = $this->hasAttachmentsInThread($root);
-            $root->labels = ($root->labels ?? null) instanceof \Illuminate\Support\Collection
+            $root->labels = ($root->labels ?? null) instanceof Collection
                 ? $root->labels
                 : collect();
         }
@@ -265,7 +268,7 @@ class ThreadBuilder
 
         foreach (($thread->children ?? []) as $child) {
             $childLatest = $this->getLatestDate($child);
-            if ($childLatest && (!$latest || $childLatest->gt($latest))) {
+            if ($childLatest && (! $latest || $childLatest->gt($latest))) {
                 $latest = $childLatest;
             }
         }
@@ -302,13 +305,13 @@ class ThreadBuilder
         $display = trim($latestMessage->from_display ?? '');
         $address = trim($latestMessage->from_address ?? '');
 
-        if (!empty($name)) {
+        if (! empty($name)) {
             return $name;
         }
-        if (!empty($display)) {
+        if (! empty($display)) {
             return $display;
         }
-        if (!empty($address)) {
+        if (! empty($address)) {
             return $address;
         }
 
@@ -320,7 +323,7 @@ class ThreadBuilder
      */
     private function formatDate(?Carbon $date): string
     {
-        if (!$date) {
+        if (! $date) {
             return '';
         }
 
@@ -341,7 +344,7 @@ class ThreadBuilder
      */
     private function hasAttachmentsInThread(object $thread): bool
     {
-        if (!empty($thread->has_attachments)) {
+        if (! empty($thread->has_attachments)) {
             return true;
         }
 
@@ -370,9 +373,9 @@ class ThreadBuilder
 
     /**
      * Resolve missing parent Message-IDs from thread_header_cache.
-     * 
-     * @param array<string> $missingMessageIds Message-IDs not found in current message set
-     * @param int $userId Current user ID
+     *
+     * @param  array<string>  $missingMessageIds  Message-IDs not found in current message set
+     * @param  int  $userId  Current user ID
      * @return Collection<int, object> Cached header data for found Message-IDs
      */
     public function resolveMissingParentsFromCache(array $missingMessageIds, int $userId): Collection
@@ -382,7 +385,7 @@ class ThreadBuilder
         }
 
         // Query thread_header_cache for non-expired entries
-        $cached = \App\Models\ThreadHeaderCache::where('user_id', $userId)
+        $cached = ThreadHeaderCache::where('user_id', $userId)
             ->whereIn('message_id', $missingMessageIds)
             ->where('expires_at', '>', now())
             ->get();

@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Settings;
 
-use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
+use Livewire\Component;
 
 #[Layout('layouts.app')]
 class SettingsPage extends Component

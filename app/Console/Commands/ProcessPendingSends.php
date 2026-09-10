@@ -2,15 +2,15 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\PendingSend;
-use App\Services\ComposerService;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 use Symfony\Component\Mime\Email;
 
 class ProcessPendingSends extends Command
 {
     protected $signature = 'pending-sends:process';
+
     protected $description = 'Process pending email sends that are due';
 
     public function handle(): int
@@ -22,6 +22,7 @@ class ProcessPendingSends extends Command
 
         if ($pending->isEmpty()) {
             $this->info('No pending sends to process.');
+
             return 0;
         }
 
@@ -41,7 +42,7 @@ class ProcessPendingSends extends Command
 
                     // Replace Symfony's generated MIME with our pre-built one
                     $message->using(function (Email $symfonyMessage) use ($send) {
-                        $mimeMessage = new Email();
+                        $mimeMessage = new Email;
                         $mimeMessage = $mimeMessage->fromString($send->mime_message);
                         foreach ($mimeMessage->getHeaders()->all() as $header) {
                             $symfonyMessage->getHeaders()->add($header);

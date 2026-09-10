@@ -3,18 +3,18 @@
 namespace App\Livewire\Settings;
 
 use Livewire\Component;
-use Livewire\Attributes\Validate;
 
 class ProfileTab extends Component
 {
     public string $name = '';
+
     public string $email = '';
 
     public function rules(): array
     {
         return [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,' . auth()->id(),
+            'email' => 'required|email|max:255|unique:users,email,'.auth()->id(),
         ];
     }
 

@@ -20,7 +20,7 @@ class MessageSanitizer
         $config->set('HTML.AllowedElements', [
             'p', 'br', 'a', 'img', 'table', 'tr', 'td', 'th', 'div', 'span',
             'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote',
-            'pre', 'code', 'strong', 'em', 'u', 's', 'sub', 'sup'
+            'pre', 'code', 'strong', 'em', 'u', 's', 'sub', 'sup',
         ]);
         $config->set('HTML.AllowedAttributes', [
             'a.href', 'a.target', 'a.rel', 'a.title',
@@ -32,7 +32,7 @@ class MessageSanitizer
             'h1.style', 'h2.style', 'h3.style', 'h4.style', 'h5.style', 'h6.style',
             'ul.style', 'ol.style', 'li.style',
             'blockquote.style', 'pre.style', 'code.style',
-            'strong.style', 'em.style', 'u.style', 's.style', 'sub.style', 'sup.style'
+            'strong.style', 'em.style', 'u.style', 's.style', 'sub.style', 'sup.style',
         ]);
         $config->set('CSS.AllowedProperties', [
             'color', 'background-color', 'font-size', 'font-family', 'font-weight',
@@ -40,7 +40,7 @@ class MessageSanitizer
             'margin-right', 'margin-bottom', 'margin-left', 'padding', 'padding-top',
             'padding-right', 'padding-bottom', 'padding-left', 'border', 'border-top',
             'border-right', 'border-bottom', 'border-left', 'width', 'height',
-            'float', 'clear'
+            'float', 'clear',
         ]);
         $config->set('URI.AllowedSchemes', ['http', 'https', 'mailto']);
         $config->set('AutoFormat.AutoParagraph', true);
@@ -48,6 +48,7 @@ class MessageSanitizer
         $config->set('Core.Encoding', 'UTF-8');
 
         $this->purifier = new HTMLPurifier($config);
+
         return $this->purifier;
     }
 
@@ -63,9 +64,9 @@ class MessageSanitizer
 
     public function blockRemoteImages(string $html): string
     {
-        $dom = new \DOMDocument();
+        $dom = new \DOMDocument;
         libxml_use_internal_errors(true);
-        $dom->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        $dom->loadHTML('<?xml encoding="UTF-8">'.$html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         libxml_clear_errors();
 
         foreach ($dom->getElementsByTagName('img') as $img) {
@@ -78,6 +79,7 @@ class MessageSanitizer
 
         $body = $dom->getElementsByTagName('body')->item(0);
         $output = $body ? $dom->saveHTML($body) : $dom->saveHTML();
+
         return preg_replace('/<\!--\?xml.*?-->\s*/i', '', $output);
     }
 
@@ -97,9 +99,9 @@ class MessageSanitizer
      */
     public function sanitizeUrls(string $html): string
     {
-        $dom = new \DOMDocument();
+        $dom = new \DOMDocument;
         libxml_use_internal_errors(true);
-        $dom->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        $dom->loadHTML('<?xml encoding="UTF-8">'.$html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         libxml_clear_errors();
 
         foreach ($dom->getElementsByTagName('a') as $link) {
@@ -107,12 +109,13 @@ class MessageSanitizer
             if ($href && $this->isDangerousUrl($href)) {
                 $link->setAttribute('href', '#');
                 $link->setAttribute('data-original-href', $href);
-                $link->setAttribute('class', trim(($link->getAttribute('class') ?? '') . ' link-blocked'));
+                $link->setAttribute('class', trim(($link->getAttribute('class') ?? '').' link-blocked'));
             }
         }
 
         $body = $dom->getElementsByTagName('body')->item(0);
         $output = $body ? $dom->saveHTML($body) : $dom->saveHTML();
+
         return preg_replace('/<\!--\?xml.*?-->\s*/i', '', $output);
     }
 

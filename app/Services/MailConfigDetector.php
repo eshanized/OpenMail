@@ -73,6 +73,7 @@ class MailConfigDetector
     public function detect(string $email): ?array
     {
         $domain = strtolower(substr(strrchr($email, '@'), 1));
+
         return $this->providers[$domain] ?? $this->genericFallback($domain);
     }
 

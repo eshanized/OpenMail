@@ -2,23 +2,36 @@
 
 namespace App\Livewire\Mailbox;
 
-use Livewire\Component;
-use Livewire\WithPagination;
+use App\Models\MessageMetadata;
 use App\Services\ImapMailboxService;
 use App\Services\ThreadBuilder;
+use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Component;
+use Livewire\WithPagination;
+use Webklex\PHPIMAP\Address;
+use Webklex\PHPIMAP\Attribute;
+use Webklex\PHPIMAP\Message;
 
 class MessageList extends Component
 {
     use WithPagination;
 
     public string $folderPath = 'INBOX';
+
     public string $sortBy = 'date';
+
     public string $sortDir = 'desc';
+
     public array $selectedUids = [];
+
     public string $threadMode = 'threaded'; // 'threaded' | 'flat'
+
     public string $quickFilter = 'all'; // 'all' | 'unread' | 'starred'
+
     protected $paginationTheme = 'tailwind';
 
     protected $listeners = [
@@ -73,7 +86,8 @@ class MessageList extends Component
                 return array_values(array_filter($messages, fn ($t) => ($t->unreadCount ?? ($t->is_seen ? 0 : 1)) > 0));
             }
             if ($messages instanceof LengthAwarePaginator) {
-                $filtered = $messages->getCollection()->filter(fn ($m) => !($m->is_seen ?? false));
+                $filtered = $messages->getCollection()->filter(fn ($m) => ! ($m->is_seen ?? false));
+
                 return new LengthAwarePaginator(
                     $filtered->values(),
                     $filtered->count(),
@@ -90,6 +104,7 @@ class MessageList extends Component
             }
             if ($messages instanceof LengthAwarePaginator) {
                 $filtered = $messages->getCollection()->filter(fn ($m) => (bool) ($m->is_flagged ?? false));
+
                 return new LengthAwarePaginator(
                     $filtered->values(),
                     $filtered->count(),
@@ -106,7 +121,7 @@ class MessageList extends Component
     public function getFlatMessages(): LengthAwarePaginator
     {
         $perPage = (int) auth()->user()->setting('page_size', 25);
-        
+
         $paginator = app(ImapMailboxService::class)->getMessages(
             $this->folderPath,
             $this->sortBy,
@@ -123,6 +138,7 @@ class MessageList extends Component
             if (is_object($m)) {
                 return method_exists($m, 'getUid') ? $m->getUid() : ($m->uid ?? null);
             }
+
             return null;
         })->filter()->values()->toArray();
 
@@ -163,6 +179,7 @@ class MessageList extends Component
             if (is_array($m)) {
                 return $m['uid'] ?? null;
             }
+
             return null;
         })->filter()->values()->toArray();
 
@@ -176,24 +193,24 @@ class MessageList extends Component
 
         // Resolve missing parents from thread_header_cache
         $threadBuilder = app(ThreadBuilder::class);
-        
+
         // Find all Message-IDs referenced in In-Reply-To/References that aren't in current set
         $allMessageIds = $messages->pluck('message_id')->filter()->toArray();
         $referencedIds = [];
-        
+
         foreach ($messages as $msg) {
-            if (!empty($msg->in_reply_to)) {
+            if (! empty($msg->in_reply_to)) {
                 $referencedIds[] = trim($msg->in_reply_to, '<> ');
             }
-            if (!empty($msg->references)) {
+            if (! empty($msg->references)) {
                 $refs = array_filter(array_map('trim', explode(' ', $msg->references)));
                 $referencedIds = array_merge($referencedIds, $refs);
             }
         }
-        
+
         $missingIds = array_values(array_unique(array_diff($referencedIds, $allMessageIds)));
-        
-        if (!empty($missingIds)) {
+
+        if (! empty($missingIds)) {
             $cachedParents = $threadBuilder->resolveMissingParentsFromCache($missingIds, Auth::id());
             $messages = $messages->merge($cachedParents);
         }
@@ -247,12 +264,12 @@ class MessageList extends Component
         $messages = $this->getMessages();
         $items = is_array($messages) ? $messages : $messages->items();
         $message = $this->findMessageInThreads($items, $uid);
-        
-        if (!$message) {
+
+        if (! $message) {
             return;
         }
-        
-        $newValue = !$message->is_flagged;
+
+        $newValue = ! $message->is_flagged;
         app(ImapMailboxService::class)->setFlag($this->folderPath, [$uid], '\\Flagged', $newValue);
     }
 
@@ -261,12 +278,12 @@ class MessageList extends Component
         $messages = $this->getMessages();
         $items = is_array($messages) ? $messages : $messages->items();
         $message = $this->findMessageInThreads($items, $uid);
-        
-        if (!$message) {
+
+        if (! $message) {
             return;
         }
 
-        $newValue = !($message->is_seen ?? false);
+        $newValue = ! ($message->is_seen ?? false);
         app(ImapMailboxService::class)->setFlag($this->folderPath, [$uid], '\\Seen', $newValue);
     }
 
@@ -303,6 +320,7 @@ class MessageList extends Component
             $uids[] = $thread->uid;
             $uids = array_merge($uids, $this->extractUidsFromThreads($thread->children ?? []));
         }
+
         return $uids;
     }
 
@@ -312,26 +330,27 @@ class MessageList extends Component
             if (isset($thread->uid) && $thread->uid == $uid) {
                 return $thread;
             }
-            if (!empty($thread->children)) {
+            if (! empty($thread->children)) {
                 $found = $this->findMessageInThreads($thread->children, $uid);
                 if ($found) {
                     return $found;
                 }
             }
         }
+
         return null;
     }
 
     protected function buildHeadersFromFlatMessages(array $messages, ImapMailboxService $imapService, array $pageUids): array
     {
         if (empty($messages)) {
-            return !empty($pageUids) ? $imapService->getThreadHeaders($this->folderPath, $pageUids) : [];
+            return ! empty($pageUids) ? $imapService->getThreadHeaders($this->folderPath, $pageUids) : [];
         }
 
         $metadataByUid = collect();
-        if (!empty($pageUids) && Auth::check()) {
+        if (! empty($pageUids) && Auth::check()) {
             try {
-                $metadataByUid = \App\Models\MessageMetadata::where('user_id', Auth::id())
+                $metadataByUid = MessageMetadata::where('user_id', Auth::id())
                     ->where('folder_path', $this->folderPath)
                     ->whereIn('uid', $pageUids)
                     ->with('labels')
@@ -344,12 +363,12 @@ class MessageList extends Component
 
         $results = [];
         foreach ($messages as $msg) {
-            if (!is_object($msg)) {
+            if (! is_object($msg)) {
                 continue;
             }
 
             $uid = method_exists($msg, 'getUid') ? $msg->getUid() : ($msg->uid ?? null);
-            if (!$uid) {
+            if (! $uid) {
                 continue;
             }
 
@@ -360,19 +379,19 @@ class MessageList extends Component
             $fromObj = null;
             if (method_exists($msg, 'getFrom')) {
                 $fromAttr = $msg->getFrom();
-                if ($fromAttr instanceof \Webklex\PHPIMAP\Attribute) {
+                if ($fromAttr instanceof Attribute) {
                     $fromObj = $fromAttr->first();
                 }
             }
-            if (!$fromObj && $header) {
+            if (! $fromObj && $header) {
                 $fromAttr = $header->get('from');
-                if ($fromAttr instanceof \Webklex\PHPIMAP\Attribute) {
+                if ($fromAttr instanceof Attribute) {
                     $fromObj = $fromAttr->first();
                 }
             }
-            if (!$fromObj && isset($msg->from)) {
+            if (! $fromObj && isset($msg->from)) {
                 $fromVal = $msg->from;
-                if ($fromVal instanceof \Webklex\PHPIMAP\Attribute) {
+                if ($fromVal instanceof Attribute) {
                     $fromObj = $fromVal->first();
                 } elseif (is_iterable($fromVal)) {
                     $fromObj = collect($fromVal)->first();
@@ -384,32 +403,32 @@ class MessageList extends Component
             $fromAddress = '';
             $fromName = '';
             if ($fromObj) {
-                if ($fromObj instanceof \Webklex\PHPIMAP\Address) {
+                if ($fromObj instanceof Address) {
                     $fromAddress = $fromObj->mail ?? '';
                     $fromName = $fromObj->personal ?? '';
                 } elseif (is_object($fromObj)) {
-                    $fromAddress = $fromObj->mail ?? (isset($fromObj->mailbox, $fromObj->host) && $fromObj->mailbox && $fromObj->host ? $fromObj->mailbox . '@' . $fromObj->host : '');
+                    $fromAddress = $fromObj->mail ?? (isset($fromObj->mailbox, $fromObj->host) && $fromObj->mailbox && $fromObj->host ? $fromObj->mailbox.'@'.$fromObj->host : '');
                     $fromName = $fromObj->personal ?? '';
                 } elseif (is_string($fromObj)) {
                     $fromAddress = $fromObj;
                 }
             }
 
-            if (empty($fromAddress) && !empty($msg->from_address)) {
+            if (empty($fromAddress) && ! empty($msg->from_address)) {
                 $fromAddress = $msg->from_address;
             }
-            if (empty($fromName) && !empty($msg->from_name)) {
+            if (empty($fromName) && ! empty($msg->from_name)) {
                 $fromName = $msg->from_name;
             }
-            if (empty($fromAddress) && $meta && !empty($meta->from_address)) {
+            if (empty($fromAddress) && $meta && ! empty($meta->from_address)) {
                 $fromAddress = $meta->from_address;
             }
-            if (empty($fromName) && $meta && !empty($meta->from_name)) {
+            if (empty($fromName) && $meta && ! empty($meta->from_name)) {
                 $fromName = $meta->from_name;
             }
 
-            $fromDisplay = !empty($fromName) ? $fromName : (!empty($fromAddress) ? $fromAddress : 'Unknown');
-            if (!empty($msg->from_display)) {
+            $fromDisplay = ! empty($fromName) ? $fromName : (! empty($fromAddress) ? $fromAddress : 'Unknown');
+            if (! empty($msg->from_display)) {
                 $fromDisplay = $msg->from_display;
             }
 
@@ -419,43 +438,43 @@ class MessageList extends Component
 
             $msgId = (string) ($msg->message_id ?? ($header ? $header->get('message_id') : '') ?? ($meta?->message_id ?? ''));
             if (empty($msgId)) {
-                $msgId = 'uid-' . $uid . '@openmail.local';
+                $msgId = 'uid-'.$uid.'@openmail.local';
             }
 
             // Extract Date
             $rawDate = null;
             if (method_exists($msg, 'getDate')) {
                 $dateAttr = $msg->getDate();
-                if ($dateAttr instanceof \Webklex\PHPIMAP\Attribute) {
+                if ($dateAttr instanceof Attribute) {
                     $rawDate = $dateAttr->first();
                 }
             }
-            if (!$rawDate && $header) {
+            if (! $rawDate && $header) {
                 $dateAttr = $header->get('date');
-                if ($dateAttr instanceof \Webklex\PHPIMAP\Attribute) {
+                if ($dateAttr instanceof Attribute) {
                     $rawDate = $dateAttr->first();
                 }
             }
-            if (!$rawDate && isset($msg->date)) {
+            if (! $rawDate && isset($msg->date)) {
                 $propDate = $msg->date;
-                if ($propDate instanceof \Webklex\PHPIMAP\Attribute) {
+                if ($propDate instanceof Attribute) {
                     $rawDate = $propDate->first();
                 } else {
                     $rawDate = $propDate;
                 }
             }
-            if (!$rawDate && $meta?->date) {
+            if (! $rawDate && $meta?->date) {
                 $rawDate = $meta->date;
             }
 
             $carbonDate = null;
-            if ($rawDate instanceof \Carbon\CarbonInterface) {
+            if ($rawDate instanceof CarbonInterface) {
                 $carbonDate = $rawDate;
             } elseif ($rawDate instanceof \DateTimeInterface) {
-                $carbonDate = \Carbon\Carbon::instance($rawDate);
+                $carbonDate = Carbon::instance($rawDate);
             } elseif (is_string($rawDate) && trim($rawDate) !== '') {
                 try {
-                    $carbonDate = \Carbon\Carbon::parse($rawDate);
+                    $carbonDate = Carbon::parse($rawDate);
                 } catch (\Throwable) {
                     $carbonDate = null;
                 }
@@ -475,35 +494,35 @@ class MessageList extends Component
                 }
             }
 
-            $isSeen = method_exists($msg, 'getFlags') 
-                ? (bool) ($msg->getFlags()?->has('seen') ?? false) 
+            $isSeen = method_exists($msg, 'getFlags')
+                ? (bool) ($msg->getFlags()?->has('seen') ?? false)
                 : (bool) ($msg->is_seen ?? ($meta?->is_seen ?? false));
 
-            $isFlagged = method_exists($msg, 'getFlags') 
-                ? (bool) ($msg->getFlags()?->has('flagged') ?? false) 
+            $isFlagged = method_exists($msg, 'getFlags')
+                ? (bool) ($msg->getFlags()?->has('flagged') ?? false)
                 : (bool) ($msg->is_flagged ?? ($meta?->is_flagged ?? false));
 
-            $hasAttachments = method_exists($msg, 'hasAttachments') 
-                ? (bool) $msg->hasAttachments() 
+            $hasAttachments = method_exists($msg, 'hasAttachments')
+                ? (bool) $msg->hasAttachments()
                 : (bool) ($msg->has_attachments ?? ($meta?->has_attachments ?? false));
 
             $snippet = '';
-            if ($meta && !empty($meta->snippet)) {
+            if ($meta && ! empty($meta->snippet)) {
                 $snippet = (string) $meta->snippet;
-            } elseif (is_object($msg) && !($msg instanceof \Webklex\PHPIMAP\Message) && !empty($msg->snippet)) {
+            } elseif (is_object($msg) && ! ($msg instanceof Message) && ! empty($msg->snippet)) {
                 $snippet = (string) $msg->snippet;
             }
 
             $labels = collect();
-            if ($meta && isset($meta->labels) && $meta->labels instanceof \Illuminate\Support\Collection) {
+            if ($meta && isset($meta->labels) && $meta->labels instanceof Collection) {
                 $labels = $meta->labels;
-            } elseif (isset($msg->labels) && $msg->labels instanceof \Illuminate\Support\Collection) {
+            } elseif (isset($msg->labels) && $msg->labels instanceof Collection) {
                 $labels = $msg->labels;
             }
 
-            $inReplyTo = (string) ($header ? $header->get('in_reply_to') : (!($msg instanceof \Webklex\PHPIMAP\Message) ? ($msg->in_reply_to ?? '') : ''));
-            $references = (string) ($header ? $header->get('references') : (!($msg instanceof \Webklex\PHPIMAP\Message) ? ($msg->references ?? '') : ''));
-            $rawSubject = (string) ($header ? $header->get('subject') : (!($msg instanceof \Webklex\PHPIMAP\Message) ? ($msg->subject ?? '') : ''));
+            $inReplyTo = (string) ($header ? $header->get('in_reply_to') : (! ($msg instanceof Message) ? ($msg->in_reply_to ?? '') : ''));
+            $references = (string) ($header ? $header->get('references') : (! ($msg instanceof Message) ? ($msg->references ?? '') : ''));
+            $rawSubject = (string) ($header ? $header->get('subject') : (! ($msg instanceof Message) ? ($msg->subject ?? '') : ''));
             $subject = trim($rawSubject);
             if ($subject === '') {
                 $subject = '(no subject)';

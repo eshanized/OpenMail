@@ -1,6 +1,5 @@
 <?php
 
-use App\Database\SQLiteConnection;
 use Illuminate\Support\Str;
 use Pdo\Mysql;
 

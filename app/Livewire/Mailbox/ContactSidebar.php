@@ -2,19 +2,25 @@
 
 namespace App\Livewire\Mailbox;
 
-use Livewire\Component;
-use App\Services\ContactService;
 use App\Models\Contact;
+use App\Services\ContactService;
 use Illuminate\Support\Collection;
+use Livewire\Component;
 
 class ContactSidebar extends Component
 {
     public string $search = '';
+
     public Collection $contacts;
+
     public ?Contact $selectedContact = null;
+
     public bool $showModal = false;
+
     public bool $showImportModal = false;
+
     public bool $activeTab = false;
+
     public bool $isLoading = true;
 
     protected $listeners = [
@@ -49,6 +55,7 @@ class ContactSidebar extends Component
     {
         if (empty($this->search)) {
             $this->refreshContacts();
+
             return;
         }
 

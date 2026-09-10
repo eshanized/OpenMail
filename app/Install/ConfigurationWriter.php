@@ -26,7 +26,7 @@ class ConfigurationWriter
      * - Values are quoted when they contain spaces, quotes, # or are empty.
      * - Writes atomically with LOCK_EX.
      *
-     * @param array<string, string|int|bool> $values
+     * @param  array<string, string|int|bool>  $values
      */
     public function write(array $values): bool
     {
@@ -37,8 +37,8 @@ class ConfigurationWriter
         }
 
         $content = file_exists($this->envPath) ? (file_get_contents($this->envPath) ?: '') : '';
-        $lines   = $content !== '' ? explode("\n", rtrim($content, "\n")) : [];
-        $found   = [];
+        $lines = $content !== '' ? explode("\n", rtrim($content, "\n")) : [];
+        $found = [];
 
         foreach ($lines as &$line) {
             // Skip blank lines and comments
@@ -52,8 +52,8 @@ class ConfigurationWriter
                     continue;
                 }
                 // Match KEY= at start of (possibly leading-space-free) key
-                if (preg_match('/^' . preg_quote($key, '/') . '\s*=/', $trimmed)) {
-                    $line       = $key . '=' . $this->quote($value);
+                if (preg_match('/^'.preg_quote($key, '/').'\s*=/', $trimmed)) {
+                    $line = $key.'='.$this->quote($value);
                     $found[$key] = true;
                     break;
                 }
@@ -64,12 +64,12 @@ class ConfigurationWriter
         // Append keys that didn't exist yet
         foreach ($normalized as $key => $value) {
             if (! isset($found[$key])) {
-                $lines[] = $key . '=' . $this->quote($value);
+                $lines[] = $key.'='.$this->quote($value);
             }
         }
 
-        $newContent = implode("\n", $lines) . "\n";
-        $result     = file_put_contents($this->envPath, $newContent, LOCK_EX);
+        $newContent = implode("\n", $lines)."\n";
+        $result = file_put_contents($this->envPath, $newContent, LOCK_EX);
 
         return $result !== false;
     }
@@ -84,7 +84,7 @@ class ConfigurationWriter
         }
 
         $content = file_get_contents($this->envPath) ?: '';
-        if (preg_match('/^' . preg_quote($key, '/') . '\s*=(.*)$/m', $content, $m)) {
+        if (preg_match('/^'.preg_quote($key, '/').'\s*=(.*)$/m', $content, $m)) {
             return $this->unquote(trim($m[1]));
         }
 
@@ -122,7 +122,8 @@ class ConfigurationWriter
         if ($value === '' || preg_match('/[\s"#]/', $value) || str_starts_with($value, "'")) {
             // Escape backslashes, then double-quote the value
             $escaped = str_replace(['\\', '"'], ['\\\\', '\\"'], $value);
-            return '"' . $escaped . '"';
+
+            return '"'.$escaped.'"';
         }
 
         return $value;

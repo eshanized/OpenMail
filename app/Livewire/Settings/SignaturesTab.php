@@ -2,21 +2,26 @@
 
 namespace App\Livewire\Settings;
 
-use Livewire\Component;
 use App\Models\Signature;
 use App\Services\SignatureService;
-use App\Http\Requests\SignatureRequest;
+use Illuminate\Database\Eloquent\Collection;
+use Livewire\Component;
 
 class SignaturesTab extends Component
 {
-    /** @var \Illuminate\Database\Eloquent\Collection */
+    /** @var Collection */
     public $signatures;
 
     public bool $showModal = false;
+
     public ?int $editingSignatureId = null;
+
     public string $modalTitle = 'New Signature';
+
     public string $name = '';
+
     public array $contentJson = [];
+
     public bool $isDefault = false;
 
     public function mount(): void

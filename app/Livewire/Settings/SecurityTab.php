@@ -2,13 +2,15 @@
 
 namespace App\Livewire\Settings;
 
-use Livewire\Component;
 use Illuminate\Support\Facades\DB;
+use Livewire\Component;
 
 class SecurityTab extends Component
 {
     public array $sessions = [];
+
     public ?string $currentSessionId = null;
+
     public bool $showRevokeConfirm = false;
 
     public function mount(): void
@@ -20,12 +22,12 @@ class SecurityTab extends Component
     public function loadSessions(): void
     {
         $userId = auth()->id();
-        
+
         $this->sessions = DB::table('sessions')
             ->where('user_id', $userId)
             ->orderBy('last_activity', 'desc')
             ->get()
-            ->map(fn($session) => [
+            ->map(fn ($session) => [
                 'id' => $session->id,
                 'ip_address' => $session->ip_address ?? 'Unknown',
                 'user_agent' => $this->parseUserAgent($session->user_agent ?? ''),
@@ -82,11 +84,11 @@ class SecurityTab extends Component
             $os = 'Unknown OS';
         }
 
-        if (str_contains($userAgent, 'Chrome') && !str_contains($userAgent, 'Edg')) {
+        if (str_contains($userAgent, 'Chrome') && ! str_contains($userAgent, 'Edg')) {
             $browser = 'Chrome';
         } elseif (str_contains($userAgent, 'Firefox')) {
             $browser = 'Firefox';
-        } elseif (str_contains($userAgent, 'Safari') && !str_contains($userAgent, 'Chrome')) {
+        } elseif (str_contains($userAgent, 'Safari') && ! str_contains($userAgent, 'Chrome')) {
             $browser = 'Safari';
         } elseif (str_contains($userAgent, 'Edg')) {
             $browser = 'Edge';

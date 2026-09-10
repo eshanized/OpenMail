@@ -2,12 +2,17 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
+use App\Exceptions\DuplicateContactException;
+use App\Livewire\Mailbox\ContactModal;
+use App\Livewire\Mailbox\ContactRow;
+use App\Livewire\Mailbox\ContactSidebar;
 use App\Models\Contact;
 use App\Models\ContactGroup;
 use App\Models\User;
 use App\Services\ContactService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
+use Tests\TestCase;
 
 class ContactTest extends TestCase
 {
@@ -24,7 +29,7 @@ class ContactTest extends TestCase
     /** @test */
     public function contact_create_validates_email_format_and_sets_avatar_color(): void
     {
-        $service = new ContactService();
+        $service = new ContactService;
         $contact = $service->create($this->user->id, [
             'name' => 'John Doe',
             'email' => 'john@example.com',
@@ -44,7 +49,7 @@ class ContactTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        $service = new ContactService();
+        $service = new ContactService;
         $service->create($this->user->id, [
             'name' => 'Bad Email',
             'email' => 'not-an-email',
@@ -54,13 +59,13 @@ class ContactTest extends TestCase
     /** @test */
     public function contact_create_rejects_duplicate_email_per_user(): void
     {
-        $service = new ContactService();
+        $service = new ContactService;
         $service->create($this->user->id, [
             'name' => 'First',
             'email' => 'dup@example.com',
         ]);
 
-        $this->expectException(\App\Exceptions\DuplicateContactException::class);
+        $this->expectException(DuplicateContactException::class);
         $service->create($this->user->id, [
             'name' => 'Second',
             'email' => 'dup@example.com',
@@ -70,7 +75,7 @@ class ContactTest extends TestCase
     /** @test */
     public function contact_update_validates_email_unique_excluding_self(): void
     {
-        $service = new ContactService();
+        $service = new ContactService;
         $contact = $service->create($this->user->id, [
             'name' => 'John',
             'email' => 'john@example.com',
@@ -86,7 +91,7 @@ class ContactTest extends TestCase
     /** @test */
     public function contact_update_rejects_duplicate_email_from_another_contact(): void
     {
-        $service = new ContactService();
+        $service = new ContactService;
         $contact1 = $service->create($this->user->id, [
             'name' => 'First',
             'email' => 'first@example.com',
@@ -96,7 +101,7 @@ class ContactTest extends TestCase
             'email' => 'second@example.com',
         ]);
 
-        $this->expectException(\App\Exceptions\DuplicateContactException::class);
+        $this->expectException(DuplicateContactException::class);
         $service->update($contact1, [
             'email' => 'second@example.com',
         ]);
@@ -105,7 +110,7 @@ class ContactTest extends TestCase
     /** @test */
     public function contact_delete_removes_contact(): void
     {
-        $service = new ContactService();
+        $service = new ContactService;
         $contact = $service->create($this->user->id, [
             'name' => 'To Delete',
             'email' => 'delete@example.com',
@@ -121,7 +126,7 @@ class ContactTest extends TestCase
     /** @test */
     public function contact_delete_syncs_groups(): void
     {
-        $service = new ContactService();
+        $service = new ContactService;
         $contact = $service->create($this->user->id, [
             'name' => 'Grouped',
             'email' => 'grouped@example.com',
@@ -148,7 +153,7 @@ class ContactTest extends TestCase
     /** @test */
     public function contact_group_crud_with_user_scoping(): void
     {
-        $service = new ContactService();
+        $service = new ContactService;
 
         // Create group
         $group = $service->createGroup($this->user->id, [
@@ -182,7 +187,7 @@ class ContactTest extends TestCase
     /** @test */
     public function get_groups_returns_user_groups_with_contact_counts(): void
     {
-        $service = new ContactService();
+        $service = new ContactService;
 
         $group1 = ContactGroup::create(['user_id' => $this->user->id, 'name' => 'Friends']);
         $group2 = ContactGroup::create(['user_id' => $this->user->id, 'name' => 'Work']);
@@ -208,7 +213,7 @@ class ContactTest extends TestCase
     /** @test */
     public function search_contacts_by_email_or_name(): void
     {
-        $service = new ContactService();
+        $service = new ContactService;
         $service->create($this->user->id, ['name' => 'Alice Smith', 'email' => 'alice@example.com']);
         $service->create($this->user->id, ['name' => 'Bob Jones', 'email' => 'bob@example.com']);
 
@@ -224,7 +229,7 @@ class ContactTest extends TestCase
     /** @test */
     public function get_for_user_returns_only_user_contacts(): void
     {
-        $service = new ContactService();
+        $service = new ContactService;
         $otherUser = User::factory()->create();
 
         $service->create($this->user->id, ['name' => 'Mine', 'email' => 'mine@test.com']);
@@ -238,7 +243,7 @@ class ContactTest extends TestCase
     /** @test */
     public function increment_usage_increments_count(): void
     {
-        $service = new ContactService();
+        $service = new ContactService;
         $contact = $service->create($this->user->id, ['name' => 'Used', 'email' => 'used@test.com']);
 
         $this->assertEquals(0, $contact->usage_count);
@@ -264,9 +269,9 @@ class ContactTest extends TestCase
 
         // Different email should potentially produce different color
         $color3 = Contact::colorFromEmail('different@example.com');
-        
+
         // Verify colors are from palette
-        $palette = ['bg-blue-500','bg-green-600','bg-red-600','bg-yellow-600','bg-purple-600','bg-pink-600','bg-orange-600','bg-teal-600','bg-indigo-600','bg-gray-500'];
+        $palette = ['bg-blue-500', 'bg-green-600', 'bg-red-600', 'bg-yellow-600', 'bg-purple-600', 'bg-pink-600', 'bg-orange-600', 'bg-teal-600', 'bg-indigo-600', 'bg-gray-500'];
         $this->assertContains($color1, $palette);
         $this->assertContains($color3, $palette);
     }
@@ -274,7 +279,7 @@ class ContactTest extends TestCase
     /** @test */
     public function avatar_color_set_on_create_not_changed_on_update(): void
     {
-        $service = new ContactService();
+        $service = new ContactService;
         $contact = $service->create($this->user->id, ['name' => 'Test', 'email' => 'test@test.com']);
         $originalColor = $contact->avatar_color;
 
@@ -284,42 +289,42 @@ class ContactTest extends TestCase
         $this->assertEquals($originalColor, $contact->avatar_color);
     }
 
-/** @test */
+    /** @test */
     public function test_contact_sidebar_loads_contacts(): void
     {
-        $service = new ContactService();
+        $service = new ContactService;
         $service->create($this->user->id, ['name' => 'Alice', 'email' => 'alice@example.com']);
         $service->create($this->user->id, ['name' => 'Bob', 'email' => 'bob@example.com']);
 
-        $component = \Livewire\Livewire::actingAs($this->user)
-            ->test(\App\Livewire\Mailbox\ContactSidebar::class)
+        $component = Livewire::actingAs($this->user)
+            ->test(ContactSidebar::class)
             ->assertSet('activeTab', false)
             ->set('contacts', $service->getForUser($this->user->id));
 
-        $component->assertSet('contacts', fn($contacts) => $contacts->count() === 2);
+        $component->assertSet('contacts', fn ($contacts) => $contacts->count() === 2);
     }
 
     /** @test */
     public function test_contact_sidebar_search(): void
     {
-        $service = new ContactService();
+        $service = new ContactService;
         $service->create($this->user->id, ['name' => 'Alice Smith', 'email' => 'alice@example.com']);
         $service->create($this->user->id, ['name' => 'Bob Jones', 'email' => 'bob@example.com']);
 
-        $component = \Livewire\Livewire::actingAs($this->user)
-            ->test(\App\Livewire\Mailbox\ContactSidebar::class)
+        $component = Livewire::actingAs($this->user)
+            ->test(ContactSidebar::class)
             ->set('activeTab', true)
             ->set('contacts', $service->getForUser($this->user->id))
             ->set('search', 'alice');
 
-        $component->assertSet('contacts', fn($contacts) => $contacts->count() === 1);
+        $component->assertSet('contacts', fn ($contacts) => $contacts->count() === 1);
     }
 
     /** @test */
     public function test_contact_modal_create(): void
     {
-        $component = \Livewire\Livewire::actingAs($this->user)
-            ->test(\App\Livewire\Mailbox\ContactModal::class)
+        $component = Livewire::actingAs($this->user)
+            ->test(ContactModal::class)
             ->set('name', 'New Contact')
             ->set('email', 'new@example.com')
             ->call('save');
@@ -334,15 +339,15 @@ class ContactTest extends TestCase
     /** @test */
     public function test_contact_modal_edit(): void
     {
-        $service = new ContactService();
+        $service = new ContactService;
         $contact = $service->create($this->user->id, [
             'name' => 'Original Name',
             'email' => 'original@example.com',
         ]);
 
         $this->actingAs($this->user);
-        
-        $component = \Livewire\Livewire::test(\App\Livewire\Mailbox\ContactModal::class, ['contact' => $contact])
+
+        $component = Livewire::test(ContactModal::class, ['contact' => $contact])
             ->set('name', 'Updated Name')
             ->call('save');
 
@@ -355,15 +360,15 @@ class ContactTest extends TestCase
     /** @test */
     public function test_contact_modal_delete(): void
     {
-        $service = new ContactService();
+        $service = new ContactService;
         $contact = $service->create($this->user->id, [
             'name' => 'To Delete',
             'email' => 'delete@example.com',
         ]);
 
         $this->actingAs($this->user);
-        
-        $component = \Livewire\Livewire::test(\App\Livewire\Mailbox\ContactModal::class, ['contact' => $contact])
+
+        $component = Livewire::test(ContactModal::class, ['contact' => $contact])
             ->call('delete');
 
         $this->assertDatabaseMissing('contacts', [
@@ -375,8 +380,8 @@ class ContactTest extends TestCase
     public function test_contact_modal_validation(): void
     {
         $this->actingAs($this->user);
-        
-        $component = \Livewire\Livewire::test(\App\Livewire\Mailbox\ContactModal::class)
+
+        $component = Livewire::test(ContactModal::class)
             ->set('name', '')
             ->set('email', 'not-an-email')
             ->call('save');
@@ -387,7 +392,7 @@ class ContactTest extends TestCase
     /** @test */
     public function test_contact_row_renders_correctly(): void
     {
-        $service = new ContactService();
+        $service = new ContactService;
         $contact = $service->create($this->user->id, [
             'name' => 'Test Contact',
             'email' => 'test@example.com',
@@ -395,8 +400,8 @@ class ContactTest extends TestCase
         ]);
 
         $this->actingAs($this->user);
-        
-        $component = \Livewire\Livewire::test(\App\Livewire\Mailbox\ContactRow::class, ['contact' => $contact]);
+
+        $component = Livewire::test(ContactRow::class, ['contact' => $contact]);
 
         $component->assertSee('Test Contact');
         $component->assertSee('test@example.com');

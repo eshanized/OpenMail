@@ -2,12 +2,11 @@
 
 namespace App\Services;
 
-use Sabre\VObject\Reader;
-use Sabre\VObject\Writer;
-use Sabre\VObject\Component\VCard;
 use App\Models\Contact;
 use App\Models\ContactGroup;
-use Illuminate\Support\Collection;
+use Sabre\VObject\Component\VCard;
+use Sabre\VObject\Reader;
+use Sabre\VObject\Writer;
 
 class VCardService
 {
@@ -17,13 +16,14 @@ class VCardService
 
         // Split content by BEGIN:VCARD to handle multiple vCards
         $vcardBlocks = preg_split('/(?=BEGIN:VCARD)/i', $content);
-        $vcardBlocks = array_filter($vcardBlocks, fn($block) => trim($block) !== '');
+        $vcardBlocks = array_filter($vcardBlocks, fn ($block) => trim($block) !== '');
 
         foreach ($vcardBlocks as $block) {
             try {
                 $vcard = Reader::read($block);
             } catch (\Throwable $e) {
-                $results['errors'][] = 'Invalid vCard format: ' . $e->getMessage();
+                $results['errors'][] = 'Invalid vCard format: '.$e->getMessage();
+
                 continue;
             }
 
@@ -40,8 +40,9 @@ class VCardService
 
             foreach ($cards as $card) {
                 $email = (string) ($card->EMAIL ?? '');
-                if (!$email) {
+                if (! $email) {
                     $results['errors'][] = 'Missing email in vCard';
+
                     continue;
                 }
 
@@ -51,6 +52,7 @@ class VCardService
 
                 if ($existing && $conflictStrategy === 'skip') {
                     $results['skipped']++;
+
                     continue;
                 }
 
@@ -72,7 +74,7 @@ class VCardService
                     $baseEmail = $email;
                     $emailParts = explode('@', $email);
                     while (Contact::where('user_id', $userId)->where('email', $email)->exists()) {
-                        $email = $emailParts[0] . '+' . $counter . '@' . $emailParts[1];
+                        $email = $emailParts[0].'+'.$counter.'@'.$emailParts[1];
                         $counter++;
                     }
                     $data['email'] = $email;
@@ -98,10 +100,10 @@ class VCardService
             return '';
         }
 
-        $vcard = new \Sabre\VObject\Component\VCard();
+        $vcard = new VCard;
 
         foreach ($contacts as $contact) {
-            $card = new VCard();
+            $card = new VCard;
             $card->VERSION = '3.0';
             $card->add('FN', $contact->name);
             $card->add('EMAIL', $contact->email);
@@ -124,7 +126,7 @@ class VCardService
     private function syncGroups(Contact $contact, VCard $card): void
     {
         $categories = (string) ($card->CATEGORIES ?? '');
-        if (!$categories) {
+        if (! $categories) {
             return;
         }
 

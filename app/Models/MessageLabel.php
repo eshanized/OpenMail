@@ -9,6 +9,7 @@ class MessageLabel extends Pivot
     protected $table = 'message_labels';
 
     public $incrementing = false;
+
     public $timestamps = false;
 
     protected $fillable = [

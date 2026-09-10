@@ -2,10 +2,8 @@
 
 namespace Tests\Feature\Composer;
 
-use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Livewire\Mailbox\Composer;
-use Livewire\Livewire;
+use Tests\TestCase;
 
 class TiptapIntegrationTest extends TestCase
 {

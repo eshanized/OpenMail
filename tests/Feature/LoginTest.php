@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\LoginForm;
 use App\Models\User;
 use App\Services\ImapConnectionTester;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -26,7 +27,7 @@ class LoginTest extends TestCase
             ]);
         $this->app->instance(ImapConnectionTester::class, $mockTester);
 
-        Livewire::test(\App\Livewire\LoginForm::class)
+        Livewire::test(LoginForm::class)
             ->set('email', 'test@tonmoyinfrastructure.org')
             ->set('password', 'SecretPassword123')
             ->call('login')
@@ -54,7 +55,7 @@ class LoginTest extends TestCase
             ]);
         $this->app->instance(ImapConnectionTester::class, $mockTester);
 
-        Livewire::test(\App\Livewire\LoginForm::class)
+        Livewire::test(LoginForm::class)
             ->set('email', 'local@example.com')
             ->set('password', 'LocalPassword123')
             ->call('login')
@@ -76,7 +77,7 @@ class LoginTest extends TestCase
             ]);
         $this->app->instance(ImapConnectionTester::class, $mockTester);
 
-        Livewire::test(\App\Livewire\LoginForm::class)
+        Livewire::test(LoginForm::class)
             ->set('email', 'nonexistent@example.com')
             ->set('password', 'WrongPassword')
             ->call('login')

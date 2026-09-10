@@ -2,19 +2,23 @@
 
 namespace App\Livewire;
 
+use App\Models\User;
+use App\Services\AuditService;
+use App\Services\ImapConnectionTester;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
-use App\Services\AuditService;
 
 class LoginForm extends Component
 {
     public string $email = '';
+
     public string $password = '';
+
     public string $error = '';
 
     public function login(): void
@@ -25,7 +29,7 @@ class LoginForm extends Component
         ]);
 
         // Check throttle using dual-key (IP + email)
-        $throttleKey = 'login_attempts:' . Str::lower($this->email);
+        $throttleKey = 'login_attempts:'.Str::lower($this->email);
 
         if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
             $seconds = RateLimiter::availableIn($throttleKey);
@@ -37,15 +41,15 @@ class LoginForm extends Component
         // Attempt authentication: IMAP first, then local fallback
         $authenticatedUser = null;
         try {
-            $imapTester = app(\App\Services\ImapConnectionTester::class);
+            $imapTester = app(ImapConnectionTester::class);
             $host = config('openmail.imap.host');
             $port = (int) config('openmail.imap.port', 993);
             $encryption = config('openmail.imap.encryption', 'ssl');
 
             if ($host) {
                 $result = $imapTester->test($host, $port, $encryption, $this->email, $this->password);
-                if (!empty($result['success'])) {
-                    $authenticatedUser = \App\Models\User::firstOrCreate(
+                if (! empty($result['success'])) {
+                    $authenticatedUser = User::firstOrCreate(
                         ['email' => $this->email],
                         ['name' => explode('@', $this->email)[0]]
                     );
@@ -54,11 +58,11 @@ class LoginForm extends Component
                 }
             }
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::warning('IMAP auth check failed: ' . $e->getMessage());
+            Log::warning('IMAP auth check failed: '.$e->getMessage());
         }
 
         // Fallback to local database credentials (e.g. offline testing or local admin account)
-        if (!$authenticatedUser) {
+        if (! $authenticatedUser) {
             if (Auth::guard('web')->attempt(['email' => $this->email, 'password' => $this->password])) {
                 $authenticatedUser = Auth::guard('web')->user();
             }
@@ -86,6 +90,7 @@ class LoginForm extends Component
 
             // Redirect to mailbox
             $this->redirect(route('mailbox'), navigate: true);
+
             return;
         }
 

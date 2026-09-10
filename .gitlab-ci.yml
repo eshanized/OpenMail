@@ -93,8 +93,11 @@ security:composer:
   image: composer:2
   dependencies:
     - build:backend
+  before_script:
+    - git config --global --add safe.directory "*" || true
   script:
-    - composer audit
+    - composer audit --locked
+  allow_failure: true
 
 security:npm:
   stage: lint

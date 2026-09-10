@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\SettingFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Support\Facades\Cache;
 
 class Setting extends Model
 {
-    /** @use HasFactory<\Database\Factories\SettingFactory> */
+    /** @use HasFactory<SettingFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -35,6 +36,7 @@ class Setting extends Model
     {
         return Cache::remember("setting:{$key}", 3600, function () use ($key, $default) {
             $setting = static::whereNull('user_id')->where('key', $key)->first();
+
             return $setting ? $setting->value : $default;
         });
     }
@@ -58,6 +60,7 @@ class Setting extends Model
     {
         return Cache::remember("setting:user:{$userId}:{$key}", 3600, function () use ($userId, $key, $default) {
             $setting = static::where('user_id', $userId)->where('key', $key)->first();
+
             return $setting ? $setting->value : $default;
         });
     }

@@ -2,12 +2,17 @@
 
 namespace Tests\Feature\Mailbox;
 
-use Tests\TestCase;
+use App\Livewire\Mailbox\FolderSidebar;
 use App\Models\User;
-use Illuminate\Support\Facades\Crypt;
+use App\Services\FolderMapper;
+use App\Services\ImapMailboxService;
+use App\Services\MessageSanitizer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Mockery;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Crypt;
+use Livewire\Livewire;
+use Mockery;
+use Tests\TestCase;
 
 class MailboxIntegrationTest extends TestCase
 {
@@ -16,7 +21,7 @@ class MailboxIntegrationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Mock the IMAP service to avoid real connections in tests
         $this->mockImapService();
     }
@@ -29,8 +34,8 @@ class MailboxIntegrationTest extends TestCase
 
     private function mockImapService(): void
     {
-        $mockService = Mockery::mock(\App\Services\ImapMailboxService::class);
-        
+        $mockService = Mockery::mock(ImapMailboxService::class);
+
         $mockService->shouldReceive('getCachedFolders')
             ->andReturn([
                 [
@@ -64,10 +69,10 @@ class MailboxIntegrationTest extends TestCase
                     'parent_path' => '',
                 ],
             ]);
-        
+
         $mockService->shouldReceive('getMessageCount')
             ->andReturn(['total_count' => 5, 'unread_count' => 2, 'uidvalidity' => 12345]);
-        
+
         $mockService->shouldReceive('getFolders')
             ->andReturn([
                 [
@@ -101,22 +106,22 @@ class MailboxIntegrationTest extends TestCase
                     'parent_path' => '',
                 ],
             ]);
-        
+
         $mockService->shouldReceive('refreshFolderCache')
             ->andReturn(null);
-        
+
         // Mock getMessages to return a LengthAwarePaginator with empty data
-$mockService->shouldReceive('getMessages')
+        $mockService->shouldReceive('getMessages')
             ->andReturn(new LengthAwarePaginator([], 0, 25));
-        
+
         // Mock getThreadHeaders for threaded view
         $mockService->shouldReceive('getThreadHeaders')->andReturn([]);
 
-        $this->app->instance(\App\Services\ImapMailboxService::class, $mockService);
-        
+        $this->app->instance(ImapMailboxService::class, $mockService);
+
         // Also bind the FolderMapper
-        $this->app->instance(\App\Services\FolderMapper::class, new \App\Services\FolderMapper());
-        $this->app->instance(\App\Services\MessageSanitizer::class, new \App\Services\MessageSanitizer());
+        $this->app->instance(FolderMapper::class, new FolderMapper);
+        $this->app->instance(MessageSanitizer::class, new MessageSanitizer);
     }
 
     public function test_unauthenticated_user_redirected_from_mailbox(): void
@@ -128,22 +133,22 @@ $mockService->shouldReceive('getMessages')
     public function test_authenticated_user_can_access_mailbox(): void
     {
         $user = User::factory()->create();
-        
+
         $response = $this->actingAs($user)
             ->withSession(['openmail:imap_password' => Crypt::encrypt('test-password')])
             ->get('/mailbox/INBOX');
-        
+
         $response->assertStatus(200);
     }
 
     public function test_folder_sidebar_component_renders(): void
     {
         $user = User::factory()->create();
-        
+
         $response = $this->actingAs($user)
             ->withSession(['openmail:imap_password' => Crypt::encrypt('test-password')])
             ->get('/mailbox/INBOX');
-        
+
         $response->assertStatus(200);
         // The folder sidebar is a Livewire component, so check for its wire:key attribute
         $response->assertSee('wire:key');
@@ -152,18 +157,18 @@ $mockService->shouldReceive('getMessages')
     public function test_mailbox_layout_extends_app_layout(): void
     {
         $user = User::factory()->create();
-        
+
         $response = $this->actingAs($user)
             ->withSession(['openmail:imap_password' => Crypt::encrypt('test-password')])
             ->get('/mailbox/INBOX');
-        
+
         $response->assertStatus(200);
         $response->assertSee('OpenMail');
     }
 
     public function test_folder_sidebar_sorts_folders_logically(): void
     {
-        $component = new \App\Livewire\Mailbox\FolderSidebar();
+        $component = new FolderSidebar;
         $unsorted = [
             ['path' => 'Trash', 'name' => 'Trash', 'role' => 'trash'],
             ['path' => 'Zeta', 'name' => 'Zeta', 'role' => null],
@@ -189,8 +194,8 @@ $mockService->shouldReceive('getMessages')
     public function test_sidebar_has_compose_and_sync_elements(): void
     {
         $user = User::factory()->create();
-        $response = \Livewire\Livewire::actingAs($user)
-            ->test(\App\Livewire\Mailbox\FolderSidebar::class);
+        $response = Livewire::actingAs($user)
+            ->test(FolderSidebar::class);
 
         $response->assertSee('New Message');
         $response->assertSee('Sync Mailbox');

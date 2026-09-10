@@ -3,13 +3,13 @@
 $dir = '/home/snigdha/Desktop/OpenMail';
 
 // Directories to create
-@mkdir($dir . '/app/Install', 0777, true);
-@mkdir($dir . '/app/Console/Commands', 0777, true);
-@mkdir($dir . '/resources/views/livewire', 0777, true);
-@mkdir($dir . '/resources/views/setup/steps', 0777, true);
+@mkdir($dir.'/app/Install', 0777, true);
+@mkdir($dir.'/app/Console/Commands', 0777, true);
+@mkdir($dir.'/resources/views/livewire', 0777, true);
+@mkdir($dir.'/resources/views/setup/steps', 0777, true);
 
 // 1. InstallationState.php
-file_put_contents($dir . '/app/Install/InstallationState.php', '<?php
+file_put_contents($dir.'/app/Install/InstallationState.php', '<?php
 
 declare(strict_types=1);
 
@@ -35,7 +35,7 @@ enum InstallationState: string
 ');
 
 // 2. InstallationLock.php
-file_put_contents($dir . '/app/Install/InstallationLock.php', '<?php
+file_put_contents($dir.'/app/Install/InstallationLock.php', '<?php
 
 declare(strict_types=1);
 
@@ -142,7 +142,7 @@ class InstallationLock
 ');
 
 // 3. ConfigurationWriter.php
-file_put_contents($dir . '/app/Install/ConfigurationWriter.php', '<?php
+file_put_contents($dir.'/app/Install/ConfigurationWriter.php', '<?php
 
 declare(strict_types=1);
 
@@ -238,7 +238,7 @@ class ConfigurationWriter
 ');
 
 // 4. DatabaseInstaller.php
-file_put_contents($dir . '/app/Install/DatabaseInstaller.php', '<?php
+file_put_contents($dir.'/app/Install/DatabaseInstaller.php', '<?php
 
 declare(strict_types=1);
 
@@ -396,7 +396,7 @@ class DatabaseInstaller
 ');
 
 // 5. SecurityConfigurator.php
-file_put_contents($dir . '/app/Install/SecurityConfigurator.php', '<?php
+file_put_contents($dir.'/app/Install/SecurityConfigurator.php', '<?php
 
 declare(strict_types=1);
 
@@ -453,7 +453,7 @@ class SecurityConfigurator
 ');
 
 // 6. InstallationBootstrap.php
-file_put_contents($dir . '/app/Install/InstallationBootstrap.php', '<?php
+file_put_contents($dir.'/app/Install/InstallationBootstrap.php', '<?php
 
 declare(strict_types=1);
 

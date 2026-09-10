@@ -2,15 +2,18 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Models\User;
+use App\Services\FolderMapper;
+use App\Services\ImapMailboxService;
+use App\Services\MessageSanitizer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Crypt;
 use Livewire\Livewire;
 use Mockery;
-use Illuminate\Pagination\LengthAwarePaginator;
-
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
+use Webklex\PHPIMAP\Attribute;
 
 class ThreadUITest extends TestCase
 {
@@ -33,7 +36,7 @@ class ThreadUITest extends TestCase
 
     private function mockImapService(): void
     {
-        $mockService = Mockery::mock(\App\Services\ImapMailboxService::class);
+        $mockService = Mockery::mock(ImapMailboxService::class);
 
         $mockService->shouldReceive('getCachedFolders')
             ->andReturn([
@@ -114,9 +117,9 @@ class ThreadUITest extends TestCase
                 ],
             ]);
 
-        $this->app->instance(\App\Services\ImapMailboxService::class, $mockService);
-        $this->app->instance(\App\Services\FolderMapper::class, new \App\Services\FolderMapper());
-        $this->app->instance(\App\Services\MessageSanitizer::class, new \App\Services\MessageSanitizer());
+        $this->app->instance(ImapMailboxService::class, $mockService);
+        $this->app->instance(FolderMapper::class, new FolderMapper);
+        $this->app->instance(MessageSanitizer::class, new MessageSanitizer);
     }
 
     #[Test]
@@ -310,7 +313,7 @@ class ThreadUITest extends TestCase
             'has_attachments' => false,
             'snippet' => 'Test preview text',
             'folder_path' => 'INBOX',
-            'labels' => new \Webklex\PHPIMAP\Attribute('labels'),
+            'labels' => new Attribute('labels'),
             'children' => [],
             'unreadCount' => 0,
         ];
@@ -343,7 +346,7 @@ class ThreadUITest extends TestCase
             'has_attachments' => true,
             'snippet' => 'Flat preview text',
             'folder_path' => 'INBOX',
-            'labels' => new \Webklex\PHPIMAP\Attribute('labels'),
+            'labels' => new Attribute('labels'),
         ];
 
         $view = $this->blade(
@@ -377,16 +380,16 @@ class ThreadUITest extends TestCase
             'labels' => collect(),
         ];
 
-        $mockService = Mockery::mock(\App\Services\ImapMailboxService::class);
+        $mockService = Mockery::mock(ImapMailboxService::class);
         $mockService->shouldReceive('getCachedFolders')->andReturn([
-            ['path' => 'INBOX', 'name' => 'Inbox', 'role' => 'inbox', 'total' => 1, 'unread_count' => 0]
+            ['path' => 'INBOX', 'name' => 'Inbox', 'role' => 'inbox', 'total' => 1, 'unread_count' => 0],
         ]);
         $mockService->shouldReceive('getMessageCount')->andReturn(['total' => 1, 'unread' => 0]);
         $mockService->shouldReceive('getFolders')->andReturn([]);
         $mockService->shouldReceive('refreshFolderCache')->andReturn(null);
         $mockService->shouldReceive('getMessages')
             ->andReturn(new LengthAwarePaginator([$messageObj], 1, 25));
-        $this->app->instance(\App\Services\ImapMailboxService::class, $mockService);
+        $this->app->instance(ImapMailboxService::class, $mockService);
 
         Livewire::actingAs($this->user)
             ->test('mailbox.message-list', ['folderPath' => 'INBOX'])

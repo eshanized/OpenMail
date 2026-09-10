@@ -3,8 +3,8 @@
 namespace App\Providers;
 
 use App\Database\SQLiteConnection;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\ServiceProvider;
 
 class DatabaseServiceProvider extends ServiceProvider
 {

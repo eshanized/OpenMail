@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MessageMetadata;
+use App\Services\LabelService;
 use App\Services\SearchService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -29,7 +31,10 @@ class SearchController extends Controller
 
         // Remove empty filters
         $filters = array_filter($filters, function ($v) {
-            if (is_array($v)) return !empty($v);
+            if (is_array($v)) {
+                return ! empty($v);
+            }
+
             return $v !== null && $v !== '' && $v !== false;
         });
 
@@ -43,9 +48,9 @@ class SearchController extends Controller
 
         // Get user's folders for filter sidebar
         $folders = cache()->remember(
-            'user_folders_' . auth()->id(),
+            'user_folders_'.auth()->id(),
             3600,
-            fn() => \App\Models\MessageMetadata::where('user_id', auth()->id())
+            fn () => MessageMetadata::where('user_id', auth()->id())
                 ->distinct()
                 ->pluck('folder_path')
                 ->sort()
@@ -53,7 +58,7 @@ class SearchController extends Controller
         );
 
         // Get user's labels for filter sidebar
-        $labels = app(\App\Services\LabelService::class)->getForUser(auth()->id());
+        $labels = app(LabelService::class)->getForUser(auth()->id());
 
         return view('livewire.mailbox.search-results-page', [
             'query' => $query,

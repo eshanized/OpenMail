@@ -2,13 +2,15 @@
 
 namespace Tests\Feature\Composer;
 
-use Tests\TestCase;
+use App\Models\PendingSend;
+use App\Models\User;
 use App\Services\ComposerService;
 use App\Services\ImapMailboxService;
 use App\Services\MessageSanitizer;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Models\User;
+use Illuminate\Support\Facades\Mail;
+use Symfony\Component\Mime\Email;
+use Tests\TestCase;
 
 class ComposerServiceTest extends TestCase
 {
@@ -39,7 +41,7 @@ class ComposerServiceTest extends TestCase
 
         $mimeMessage = $service->buildMimeMessage($data, $this->user->id);
 
-        $this->assertInstanceOf(\Symfony\Component\Mime\Email::class, $mimeMessage);
+        $this->assertInstanceOf(Email::class, $mimeMessage);
         $this->assertEquals($this->user->email, (string) $mimeMessage->getFrom()[0]->getAddress());
         $this->assertEquals('recipient@example.com', (string) $mimeMessage->getTo()[0]->getAddress());
         $this->assertEquals('Test Subject', $mimeMessage->getSubject());
@@ -55,11 +57,12 @@ class ComposerServiceTest extends TestCase
 
         // Create a temporary file for testing
         $tempDir = sys_get_temp_dir();
-        $tempFile = $tempDir . '/test_attachment_' . uniqid() . '.txt';
+        $tempFile = $tempDir.'/test_attachment_'.uniqid().'.txt';
         $result = @file_put_contents($tempFile, 'Test attachment content');
-        
+
         if ($result === false) {
             $this->markTestSkipped('Cannot create temporary file for attachment test');
+
             return;
         }
 
@@ -81,7 +84,7 @@ class ComposerServiceTest extends TestCase
 
         $mimeMessage = $service->buildMimeMessage($data, $this->user->id);
 
-        $this->assertInstanceOf(\Symfony\Component\Mime\Email::class, $mimeMessage);
+        $this->assertInstanceOf(Email::class, $mimeMessage);
         $body = $mimeMessage->getBody();
         $this->assertNotNull($body);
 
@@ -152,6 +155,7 @@ class ComposerServiceTest extends TestCase
         $imapService->method('appendToSent')
             ->willReturnCallback(function () use (&$appendToSentCalled) {
                 $appendToSentCalled = true;
+
                 return '12345';
             });
 
@@ -208,7 +212,7 @@ class ComposerServiceTest extends TestCase
         $this->assertTrue($result['queued']);
 
         // Verify PendingSend was created
-        $pendingSend = \App\Models\PendingSend::where('user_id', $this->user->id)->first();
+        $pendingSend = PendingSend::where('user_id', $this->user->id)->first();
         $this->assertNotNull($pendingSend);
         $this->assertEquals('pending', $pendingSend->status);
         $this->assertEquals('12345', $pendingSend->sent_folder_uid);
@@ -224,6 +228,7 @@ class ComposerServiceTest extends TestCase
         $imapService->method('appendToDrafts')
             ->willReturnCallback(function () use (&$appendToDraftsCalled) {
                 $appendToDraftsCalled = true;
+
                 return 'draft-uid-123';
             });
 
@@ -256,19 +261,21 @@ class ComposerServiceTest extends TestCase
         $imapService->method('deleteFromSent')
             ->willReturnCallback(function () use (&$deleteFromSentCalled) {
                 $deleteFromSentCalled = true;
+
                 return true;
             });
 
         $imapService->method('appendToDrafts')
             ->willReturnCallback(function () use (&$appendToDraftsCalled) {
                 $appendToDraftsCalled = true;
+
                 return 'new-draft-uid';
             });
 
         $service = new ComposerService($imapService, $sanitizer);
 
         // Create a pending send
-        $pendingSend = \App\Models\PendingSend::create([
+        $pendingSend = PendingSend::create([
             'user_id' => $this->user->id,
             'message_json' => ['to' => 'test@example.com', 'subject' => 'Test', 'body' => '<p>Test</p>'],
             'mime_message' => 'raw-mime-message',
@@ -295,7 +302,7 @@ class ComposerServiceTest extends TestCase
 
         $service = new ComposerService($imapService, $sanitizer);
 
-        $pendingSend = \App\Models\PendingSend::create([
+        $pendingSend = PendingSend::create([
             'user_id' => $this->user->id,
             'message_json' => ['to' => 'test@example.com', 'subject' => 'Test', 'body' => '<p>Test</p>'],
             'mime_message' => 'raw-mime-message',

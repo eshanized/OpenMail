@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * SSRF Protection Middleware (SEC-07)
@@ -69,7 +70,7 @@ class SsrfProtection
     /**
      * Validate an array of input data for dangerous URLs.
      *
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException
+     * @throws HttpException
      */
     private function validateInput(array $data): void
     {
@@ -85,7 +86,7 @@ class SsrfProtection
     /**
      * Check if a string contains a dangerous URL and throw 422 if so.
      *
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException
+     * @throws HttpException
      */
     private function validateUrl(string $value): void
     {
@@ -100,7 +101,7 @@ class SsrfProtection
     public function isDangerousUrl(string $url): bool
     {
         // Block dangerous URL schemes
-        if (preg_match('/^(' . implode('|', self::DANGEROUS_SCHEMES) . '):/i', $url)) {
+        if (preg_match('/^('.implode('|', self::DANGEROUS_SCHEMES).'):/i', $url)) {
             return true;
         }
 

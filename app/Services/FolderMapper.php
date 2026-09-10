@@ -57,14 +57,12 @@ class FolderMapper
         if ($role) {
             return ucfirst($role);
         }
+
         return $folder->name;
     }
 
     /**
      * Get the Sent folder path using SPECIAL-USE or heuristic.
-     *
-     * @param Client $client
-     * @return string|null
      */
     public function getSentFolderPath(Client $client): ?string
     {
@@ -91,9 +89,6 @@ class FolderMapper
 
     /**
      * Get the Drafts folder path using SPECIAL-USE or heuristic.
-     *
-     * @param Client $client
-     * @return string|null
      */
     public function getDraftsFolderPath(Client $client): ?string
     {
@@ -121,9 +116,6 @@ class FolderMapper
     /**
      * Get the Archive folder path using SPECIAL-USE or heuristic.
      * Falls back to creating "Archive" folder if not found.
-     *
-     * @param Client $client
-     * @return string|null
      */
     public function getArchiveFolderPath(Client $client): ?string
     {
@@ -148,6 +140,7 @@ class FolderMapper
         // Try to create the Archive folder
         try {
             $client->createFolder('Archive');
+
             return 'Archive';
         } catch (\Exception) {
             // Folder may already exist or creation failed

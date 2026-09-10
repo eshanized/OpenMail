@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Label;
 use App\Models\MessageMetadata;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -30,10 +29,8 @@ class LabelService
     /**
      * Create a new label for the user.
      *
-     * @param int $userId
-     * @param string $name
-     * @param string $color Hex color from palette
-     * @return Label
+     * @param  string  $color  Hex color from palette
+     *
      * @throws ValidationException
      */
     public function create(int $userId, string $name, string $color): Label
@@ -52,11 +49,6 @@ class LabelService
     /**
      * Update an existing label.
      *
-     * @param int $labelId
-     * @param int $userId
-     * @param string|null $name
-     * @param string|null $color
-     * @return Label
      * @throws ValidationException
      */
     public function update(int $labelId, int $userId, ?string $name = null, ?string $color = null): Label
@@ -75,16 +67,13 @@ class LabelService
                 $label->color = $color;
             }
             $label->save();
+
             return $label->fresh();
         });
     }
 
     /**
      * Delete a label and remove it from all messages.
-     *
-     * @param int $labelId
-     * @param int $userId
-     * @return void
      */
     public function delete(int $labelId, int $userId): void
     {
@@ -100,10 +89,8 @@ class LabelService
     /**
      * Apply label to messages.
      *
-     * @param int $labelId
-     * @param array<int> $messageIds
-     * @param int $userId The authenticated user ID (required for authorization)
-     * @return void
+     * @param  array<int>  $messageIds
+     * @param  int  $userId  The authenticated user ID (required for authorization)
      */
     public function applyToMessages(int $labelId, array $messageIds, int $userId): void
     {
@@ -130,10 +117,8 @@ class LabelService
     /**
      * Remove label from messages.
      *
-     * @param int $labelId
-     * @param array<int> $messageIds
-     * @param int $userId The authenticated user ID (required for authorization)
-     * @return void
+     * @param  array<int>  $messageIds
+     * @param  int  $userId  The authenticated user ID (required for authorization)
      */
     public function removeFromMessages(int $labelId, array $messageIds, int $userId): void
     {
@@ -145,7 +130,6 @@ class LabelService
     /**
      * Get all labels for a user with unread and total message counts.
      *
-     * @param int $userId
      * @return Collection<int, Label>
      */
     public function getForUser(int $userId): Collection
@@ -173,9 +157,6 @@ class LabelService
 
     /**
      * Find or create the "Archive" label for a user.
-     *
-     * @param int $userId
-     * @return Label
      */
     public function ensureArchiveLabel(int $userId): Label
     {
@@ -187,9 +168,6 @@ class LabelService
 
     /**
      * Find or create the "Inbox" label for a user.
-     *
-     * @param int $userId
-     * @return Label
      */
     public function ensureInboxLabel(int $userId): Label
     {
@@ -202,9 +180,6 @@ class LabelService
     /**
      * Validate label creation.
      *
-     * @param string $name
-     * @param string $color
-     * @param int $userId
      * @throws ValidationException
      */
     private function validateCreate(string $name, string $color, int $userId): void
@@ -226,11 +201,11 @@ class LabelService
             }
         }
 
-        if (!in_array($color, self::PALETTE, true)) {
+        if (! in_array($color, self::PALETTE, true)) {
             $errors['color'] = 'Invalid color. Must be one of the 10 palette colors.';
         }
 
-        if (!empty($errors)) {
+        if (! empty($errors)) {
             throw ValidationException::withMessages($errors);
         }
     }
@@ -238,9 +213,6 @@ class LabelService
     /**
      * Validate label update.
      *
-     * @param Label $label
-     * @param string|null $name
-     * @param string|null $color
      * @throws ValidationException
      */
     private function validateUpdate(Label $label, ?string $name, ?string $color): void
@@ -265,11 +237,11 @@ class LabelService
             }
         }
 
-        if ($color !== null && !in_array($color, self::PALETTE, true)) {
+        if ($color !== null && ! in_array($color, self::PALETTE, true)) {
             $errors['color'] = 'Invalid color. Must be one of the 10 palette colors.';
         }
 
-        if (!empty($errors)) {
+        if (! empty($errors)) {
             throw ValidationException::withMessages($errors);
         }
     }

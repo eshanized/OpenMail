@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\MessageMetadata;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -11,11 +12,10 @@ class SearchService
     /**
      * Search messages for a user with filters.
      *
-     * @param int $userId The authenticated user ID
-     * @param string $query Search query
-     * @param array $filters Optional filters (folder, date_from, date_to, has_attachment, is_seen, is_flagged, labels)
-     * @param int $perPage Results per page (max 50, D-09/T-04-10)
-     * @return LengthAwarePaginator
+     * @param  int  $userId  The authenticated user ID
+     * @param  string  $query  Search query
+     * @param  array  $filters  Optional filters (folder, date_from, date_to, has_attachment, is_seen, is_flagged, labels)
+     * @param  int  $perPage  Results per page (max 50, D-09/T-04-10)
      */
     public function search(int $userId, string $query, array $filters = [], int $perPage = 25): LengthAwarePaginator
     {
@@ -40,10 +40,9 @@ class SearchService
     /**
      * Instant search returning limited results for dropdown (D-08).
      *
-     * @param int $userId The authenticated user ID
-     * @param string $query Search query
-     * @param int $limit Maximum results (default 8)
-     * @return Collection
+     * @param  int  $userId  The authenticated user ID
+     * @param  string  $query  Search query
+     * @param  int  $limit  Maximum results (default 8)
      */
     public function instantSearch(int $userId, string $query, int $limit = 8): Collection
     {
@@ -82,19 +81,19 @@ class SearchService
         array $filters = [],
         int $limit = 25,
         ?array $columns = null
-    ): \Illuminate\Database\Eloquent\Collection|LengthAwarePaginator {
+    ): Collection|LengthAwarePaginator {
         $searchableColumns = ['subject', 'from_address', 'from_name', 'to_address', 'snippet', 'body_text'];
 
         $q = MessageMetadata::query()->where('user_id', $userId);
 
-        if (!empty($query)) {
+        if (! empty($query)) {
             $words = array_filter(explode(' ', $query));
             foreach ($words as $word) {
                 // Escape LIKE wildcards to prevent broader-than-intended search results
                 $escapedWord = str_replace(['%', '_'], ['\\%', '\\_'], $word);
                 $q->where(function ($subQuery) use ($searchableColumns, $escapedWord) {
                     foreach ($searchableColumns as $col) {
-                        $subQuery->orWhere($col, 'LIKE', '%' . $escapedWord . '%');
+                        $subQuery->orWhere($col, 'LIKE', '%'.$escapedWord.'%');
                     }
                 });
             }
@@ -115,8 +114,8 @@ class SearchService
      * Highlight search matches in a snippet string.
      * Wraps matches in <mark> tags with yellow background styling.
      *
-     * @param string $snippet The text to highlight
-     * @param string $query The search query
+     * @param  string  $snippet  The text to highlight
+     * @param  string  $query  The search query
      * @return string The highlighted text
      */
     public function highlightMatches(string $snippet, string $query): string
@@ -136,8 +135,8 @@ class SearchService
         }
 
         // Build pattern for all query words
-        $patterns = array_map(fn($word) => preg_quote($word, '/'), $words);
-        $pattern = '/(' . implode('|', $patterns) . ')/iu';
+        $patterns = array_map(fn ($word) => preg_quote($word, '/'), $words);
+        $pattern = '/('.implode('|', $patterns).')/iu';
 
         // Wrap matches in <mark> tags — applied AFTER any HTML sanitization
         return preg_replace($pattern, '<mark class="bg-yellow-100 text-yellow-900 px-0.5 rounded">$1</mark>', $snippet);
@@ -147,7 +146,7 @@ class SearchService
      * Sanitize search query to prevent MySQL FULLTEXT boolean mode injection (T-04-06).
      * Escapes: + - > < * " ( ) ~
      *
-     * @param string $query Raw user query
+     * @param  string  $query  Raw user query
      * @return string Sanitized query safe for MATCH...AGAINST
      */
     public function sanitizeQuery(string $query): string
@@ -165,21 +164,20 @@ class SearchService
     /**
      * Apply filter constraints to a query builder.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param array $filters
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param  Builder  $query
+     * @return Builder
      */
     private function applyFilters($query, array $filters): void
     {
-        if (!empty($filters['folder'])) {
+        if (! empty($filters['folder'])) {
             $query->where('folder_path', $filters['folder']);
         }
 
-        if (!empty($filters['date_from'])) {
+        if (! empty($filters['date_from'])) {
             $query->where('date', '>=', $filters['date_from']);
         }
 
-        if (!empty($filters['date_to'])) {
+        if (! empty($filters['date_to'])) {
             $query->where('date', '<=', $filters['date_to']);
         }
 
@@ -195,7 +193,7 @@ class SearchService
             $query->where('is_flagged', $filters['is_flagged']);
         }
 
-        if (!empty($filters['labels']) && is_array($filters['labels'])) {
+        if (! empty($filters['labels']) && is_array($filters['labels'])) {
             $query->whereHas('labels', function ($q) use ($filters) {
                 $q->whereIn('labels.id', $filters['labels']);
             });

@@ -2,23 +2,32 @@
 
 namespace App\Livewire\Mailbox;
 
-use Livewire\Component;
+use App\Exceptions\DuplicateContactException;
 use App\Models\Contact;
 use App\Models\ContactGroup;
 use App\Services\ContactService;
-use App\Exceptions\DuplicateContactException;
+use Livewire\Component;
 
 class ContactModal extends Component
 {
     public bool $showModal = true;
+
     public ?Contact $contact = null;
+
     public string $name = '';
+
     public string $email = '';
+
     public string $phone = '';
+
     public string $notes = '';
+
     public array $selectedGroups = [];
+
     public array $availableGroups = [];
+
     public string $newGroupName = '';
+
     public bool $isCreating = false;
 
     public $errors;
@@ -72,8 +81,9 @@ class ContactModal extends Component
             } else {
                 // Create new contact — resolve user via auth guard
                 $userId = auth()->id();
-                if (!$userId) {
+                if (! $userId) {
                     $this->addError('email', 'You must be logged in to create contacts.');
+
                     return;
                 }
                 $contact = $service->create($userId, [

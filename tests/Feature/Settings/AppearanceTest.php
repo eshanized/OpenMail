@@ -2,13 +2,12 @@
 
 namespace Tests\Feature\Settings;
 
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Setting;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
-
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class AppearanceTest extends TestCase
 {

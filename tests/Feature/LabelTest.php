@@ -2,11 +2,18 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\Mailbox\LabelModal;
+use App\Livewire\Mailbox\LabelSidebar;
+use App\Livewire\Mailbox\MessageToolbar;
 use App\Models\Label;
 use App\Models\MessageMetadata;
 use App\Models\User;
+use App\Services\FolderMapper;
+use App\Services\ImapMailboxService;
 use App\Services\LabelService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -15,6 +22,7 @@ class LabelTest extends TestCase
     use RefreshDatabase;
 
     protected LabelService $labelService;
+
     protected User $user;
 
     protected function setUp(): void
@@ -34,7 +42,7 @@ class LabelTest extends TestCase
         $this->assertEquals('#2563EB', $label1->color);
 
         // Try to create duplicate with different case - should fail (service-level case-insensitive check)
-        $this->expectException(\Illuminate\Validation\ValidationException::class);
+        $this->expectException(ValidationException::class);
         $this->labelService->create($this->user->id, 'WORK', '#16A34A');
     }
 
@@ -45,7 +53,7 @@ class LabelTest extends TestCase
         $label2 = $this->labelService->create($this->user->id, 'Personal', '#16A34A');
 
         // Update label2 to have same name as label1 (case-insensitive) - should fail
-        $this->expectException(\Illuminate\Validation\ValidationException::class);
+        $this->expectException(ValidationException::class);
         $this->labelService->update($label2->id, $this->user->id, 'WORK');
 
         // Valid update should work
@@ -149,7 +157,7 @@ class LabelTest extends TestCase
 
         // Test scopeWithLabel
         $withLabel = MessageMetadata::where('user_id', $this->user->id)
-            ->whereHas('labels', fn($q) => $q->where('labels.id', $label->id))
+            ->whereHas('labels', fn ($q) => $q->where('labels.id', $label->id))
             ->get();
 
         $this->assertCount(2, $withLabel);
@@ -158,7 +166,7 @@ class LabelTest extends TestCase
 
         // Test scopeWithoutLabel
         $withoutLabel = MessageMetadata::where('user_id', $this->user->id)
-            ->whereDoesntHave('labels', fn($q) => $q->where('labels.id', $label->id))
+            ->whereDoesntHave('labels', fn ($q) => $q->where('labels.id', $label->id))
             ->get();
 
         $this->assertCount(1, $withoutLabel);
@@ -236,7 +244,7 @@ class LabelTest extends TestCase
         $this->assertEquals($label2->id, $user2Labels->first()->id);
 
         // User 1 cannot delete user 2's label
-        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+        $this->expectException(ModelNotFoundException::class);
         $this->labelService->delete($label2->id, $this->user->id);
     }
 
@@ -250,7 +258,7 @@ class LabelTest extends TestCase
         $label2 = $this->labelService->create($this->user->id, 'Personal', '#16A34A');
 
         // Test LabelSidebar component renders with labels
-        $component = Livewire::test(\App\Livewire\Mailbox\LabelSidebar::class)
+        $component = Livewire::test(LabelSidebar::class)
             ->set('activeTab', true);
 
         $component->assertOk();
@@ -273,7 +281,7 @@ class LabelTest extends TestCase
         $label = $this->labelService->create($this->user->id, 'Work', '#2563EB');
 
         // Test LabelModal renders with 10-color palette
-        $component = Livewire::test(\App\Livewire\Mailbox\LabelModal::class);
+        $component = Livewire::test(LabelModal::class);
         $component->assertOk();
 
         // Verify palette has all 10 colors
@@ -321,7 +329,7 @@ class LabelTest extends TestCase
         $this->actingAs($this->user);
 
         // Test creating a label via modal
-        $component = Livewire::test(\App\Livewire\Mailbox\LabelModal::class);
+        $component = Livewire::test(LabelModal::class);
 
         $component->call('openCreateModal')
             ->assertSet('show', true)
@@ -363,7 +371,7 @@ class LabelTest extends TestCase
         $this->actingAs($this->user);
         $label = $this->labelService->create($this->user->id, 'To Delete', '#DC2626');
 
-        $component = Livewire::test(\App\Livewire\Mailbox\LabelSidebar::class)
+        $component = Livewire::test(LabelSidebar::class)
             ->set('activeTab', true);
 
         $component->call('deleteLabel', $label->id);
@@ -380,7 +388,7 @@ class LabelTest extends TestCase
         $this->actingAs($this->user);
 
         // No labels created - should show empty state
-        $component = Livewire::test(\App\Livewire\Mailbox\LabelSidebar::class)
+        $component = Livewire::test(LabelSidebar::class)
             ->set('activeTab', true);
 
         $component->assertOk();
@@ -455,16 +463,16 @@ class LabelTest extends TestCase
 
         // Verify the toolbar component has archive-related properties and methods
         $this->assertTrue(
-            property_exists(\App\Livewire\Mailbox\MessageToolbar::class, 'showArchiveToast')
+            property_exists(MessageToolbar::class, 'showArchiveToast')
         );
         $this->assertTrue(
-            property_exists(\App\Livewire\Mailbox\MessageToolbar::class, 'archiveRevertData')
+            property_exists(MessageToolbar::class, 'archiveRevertData')
         );
         $this->assertTrue(
-            method_exists(\App\Livewire\Mailbox\MessageToolbar::class, 'archiveSelected')
+            method_exists(MessageToolbar::class, 'archiveSelected')
         );
         $this->assertTrue(
-            method_exists(\App\Livewire\Mailbox\MessageToolbar::class, 'undoArchive')
+            method_exists(MessageToolbar::class, 'undoArchive')
         );
     }
 
@@ -473,7 +481,7 @@ class LabelTest extends TestCase
     {
         // Verify FolderMapper has getArchiveFolderPath method
         $this->assertTrue(
-            method_exists(\App\Services\FolderMapper::class, 'getArchiveFolderPath')
+            method_exists(FolderMapper::class, 'getArchiveFolderPath')
         );
     }
 
@@ -482,13 +490,13 @@ class LabelTest extends TestCase
     {
         // Verify ImapMailboxService has archive methods
         $this->assertTrue(
-            method_exists(\App\Services\ImapMailboxService::class, 'getOrCreateArchiveFolder')
+            method_exists(ImapMailboxService::class, 'getOrCreateArchiveFolder')
         );
         $this->assertTrue(
-            method_exists(\App\Services\ImapMailboxService::class, 'moveMessageToArchive')
+            method_exists(ImapMailboxService::class, 'moveMessageToArchive')
         );
         $this->assertTrue(
-            method_exists(\App\Services\ImapMailboxService::class, 'moveMessageFromArchive')
+            method_exists(ImapMailboxService::class, 'moveMessageFromArchive')
         );
     }
 
@@ -496,7 +504,7 @@ class LabelTest extends TestCase
     public function test_archive_folder_detection_fallback(): void
     {
         // Test FolderMapper getArchiveFolderPath method signature and return type
-        $mapper = new \App\Services\FolderMapper();
+        $mapper = new FolderMapper;
 
         // Verify method exists with correct signature
         $reflection = new \ReflectionMethod($mapper, 'getArchiveFolderPath');

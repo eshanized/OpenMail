@@ -25,8 +25,8 @@ class InstallationBootstrap
 {
     public static function ensureBootable(string $basePath): void
     {
-        $envPath     = $basePath . DIRECTORY_SEPARATOR . '.env';
-        $examplePath = $basePath . DIRECTORY_SEPARATOR . '.env.example';
+        $envPath = $basePath.DIRECTORY_SEPARATOR.'.env';
+        $examplePath = $basePath.DIRECTORY_SEPARATOR.'.env.example';
 
         // ── Step 1: Create .env if missing ───────────────────────────────────
         if (! file_exists($envPath)) {
@@ -44,13 +44,13 @@ class InstallationBootstrap
             $hasKey = (bool) preg_match('/^APP_KEY=.{10,}$/m', $content);
 
             if (! $hasKey) {
-                $key     = 'base64:' . base64_encode(random_bytes(32));
+                $key = 'base64:'.base64_encode(random_bytes(32));
                 if (preg_match('/^APP_KEY=.*$/m', $content)) {
                     // Replace existing blank/short key line
-                    $content = preg_replace('/^APP_KEY=.*$/m', 'APP_KEY=' . $key, $content);
+                    $content = preg_replace('/^APP_KEY=.*$/m', 'APP_KEY='.$key, $content);
                 } else {
                     // Append after APP_ENV line, or at end
-                    $content .= "\nAPP_KEY=" . $key . "\n";
+                    $content .= "\nAPP_KEY=".$key."\n";
                 }
                 @file_put_contents($envPath, $content, LOCK_EX);
             }
@@ -63,7 +63,7 @@ class InstallationBootstrap
 
     private static function minimalEnvContents(string $basePath): string
     {
-        $key = 'base64:' . base64_encode(random_bytes(32));
+        $key = 'base64:'.base64_encode(random_bytes(32));
 
         return <<<ENV
 APP_NAME=OpenMail

@@ -2,14 +2,15 @@
 
 namespace App\Services;
 
-use Symfony\Component\Mime\Email;
-use Symfony\Component\Mime\Address;
-use Symfony\Component\Mime\Part\DataPart;
-use Symfony\Component\Mime\Header\UnstructuredHeader;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use App\Models\PendingSend;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Header\IdentificationHeader;
 
 class ComposerService
 {
@@ -21,23 +22,21 @@ class ComposerService
     /**
      * Build a MIME message from composer data.
      *
-     * @param array $data Composer data: to, cc, bcc, subject, body, attachments, in_reply_to, references
-     * @param string|null $userId
-     * @return Email
+     * @param  array  $data  Composer data: to, cc, bcc, subject, body, attachments, in_reply_to, references
      */
     public function buildMimeMessage(array $data, ?string $userId = null): Email
     {
-        $user = $userId ? \App\Models\User::find($userId) : Auth::user();
+        $user = $userId ? User::find($userId) : Auth::user();
 
         // Auto-insert default signature if composing (not reply/forward) and no signature already in body
         if (($data['mode'] ?? 'compose') === 'compose' && empty($data['signature_id'])) {
             $defaultSig = app(SignatureService::class)->getDefault($user);
-            if ($defaultSig && $defaultSig->content_html && !str_contains($data['body'] ?? '', $defaultSig->content_html)) {
-                $data['body'] = ($data['body'] ?? '') . '<br><br>' . $defaultSig->content_html;
+            if ($defaultSig && $defaultSig->content_html && ! str_contains($data['body'] ?? '', $defaultSig->content_html)) {
+                $data['body'] = ($data['body'] ?? '').'<br><br>'.$defaultSig->content_html;
             }
         }
 
-        $email = (new Email())
+        $email = (new Email)
             ->from(new Address($user->email, $user->name ?? ''));
 
         // Parse and set To addresses
@@ -71,19 +70,19 @@ class ComposerService
         }
 
         // Generate Message-ID
-        $messageId = Str::uuid() . '@' . config('app.domain', 'openmail.local');
-        $email->getHeaders()->add(new \Symfony\Component\Mime\Header\IdentificationHeader('Message-ID', $messageId));
+        $messageId = Str::uuid().'@'.config('app.domain', 'openmail.local');
+        $email->getHeaders()->add(new IdentificationHeader('Message-ID', $messageId));
 
         // For replies/forwards: set In-Reply-To and References headers
-        if (!empty($data['in_reply_to'])) {
+        if (! empty($data['in_reply_to'])) {
             // Remove angle brackets if present
             $inReplyTo = trim($data['in_reply_to'], '<>');
-            $email->getHeaders()->add(new \Symfony\Component\Mime\Header\IdentificationHeader('In-Reply-To', $inReplyTo));
+            $email->getHeaders()->add(new IdentificationHeader('In-Reply-To', $inReplyTo));
         }
-        if (!empty($data['references'])) {
+        if (! empty($data['references'])) {
             // Remove angle brackets from each reference
-            $refs = array_map(fn($r) => trim($r, '<>'), explode(' ', $data['references']));
-            $email->getHeaders()->add(new \Symfony\Component\Mime\Header\IdentificationHeader('References', $refs));
+            $refs = array_map(fn ($r) => trim($r, '<>'), explode(' ', $data['references']));
+            $email->getHeaders()->add(new IdentificationHeader('References', $refs));
         }
 
         return $email;
@@ -92,8 +91,7 @@ class ComposerService
     /**
      * Send a message: IMAP APPEND to Sent first, then SMTP.
      *
-     * @param int $userId
-     * @param array $data Composer data
+     * @param  array  $data  Composer data
      * @return array ['success' => bool, 'sent_uid' => string|null, 'queued' => bool]
      */
     public function sendMessage(int $userId, array $data): array
@@ -104,7 +102,7 @@ class ComposerService
         // IMAP APPEND to Sent folder FIRST (per D-17)
         $sentUid = $this->imapService->appendToSent($mimeString);
 
-        if (!$sentUid) {
+        if (! $sentUid) {
             throw new \Exception('Failed to append message to Sent folder');
         }
 
@@ -148,9 +146,7 @@ class ComposerService
     /**
      * Save a draft to IMAP Drafts folder.
      *
-     * @param int $userId
-     * @param array $data Composer data
-     * @param string|null $existingDraftUid
+     * @param  array  $data  Composer data
      * @return array ['success' => bool, 'draft_uid' => string|null]
      */
     public function saveDraft(int $userId, array $data, ?string $existingDraftUid = null): array
@@ -165,10 +161,6 @@ class ComposerService
 
     /**
      * Undo a pending send.
-     *
-     * @param int $pendingSendId
-     * @param int $userId
-     * @return bool
      */
     public function undoSend(int $pendingSendId, int $userId): bool
     {
@@ -177,7 +169,7 @@ class ComposerService
             ->where('status', 'pending')
             ->first();
 
-        if (!$pendingSend) {
+        if (! $pendingSend) {
             return false;
         }
 
@@ -197,16 +189,18 @@ class ComposerService
 
             // Only mark as cancelled after all operations succeed
             $pendingSend->update(['status' => 'cancelled']);
+
             return true;
         } catch (\Exception $e) {
             // If append to Drafts fails after deletion from Sent, the message
             // is lost. Mark as failed so it's not retried, and log the error.
             $pendingSend->update(['status' => 'failed']);
-            \Illuminate\Support\Facades\Log::error('Undo send failed - message may be lost', [
+            Log::error('Undo send failed - message may be lost', [
                 'pending_send_id' => $pendingSendId,
                 'user_id' => $userId,
                 'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
@@ -214,7 +208,6 @@ class ComposerService
     /**
      * Parse comma-separated email addresses into Address objects.
      *
-     * @param string $addressString
      * @return Address[]
      */
     private function parseAddresses(string $addressString): array
@@ -228,20 +221,19 @@ class ComposerService
                 $addresses[] = new Address($addr);
             }
         }
+
         return $addresses;
     }
 
     /**
      * Convert HTML to plain text for text part of MIME message.
-     *
-     * @param string $html
-     * @return string
      */
     private function htmlToText(string $html): string
     {
         $text = strip_tags($html);
         $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $text = preg_replace('/\s+/', ' ', $text);
+
         return wordwrap(trim($text), 78, "\n");
     }
 }

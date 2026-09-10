@@ -2,14 +2,11 @@
 
 namespace Tests\Feature\Composer;
 
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\User;
-use App\Models\PendingSend;
 use App\Services\ComposerService;
 use App\Services\ImapMailboxService;
-use Illuminate\Support\Facades\Mail;
-use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class DraftAutosaveTest extends TestCase
 {
@@ -17,7 +14,7 @@ class DraftAutosaveTest extends TestCase
 
     public function test_localstorage_key_format_matches_pattern()
     {
-        $key = 'openmail:draft:' . '550e8400-e29b-41d4-a716-446655440000';
+        $key = 'openmail:draft:'.'550e8400-e29b-41d4-a716-446655440000';
         $this->assertMatchesRegularExpression('/^openmail:draft:[0-9a-f-]{36}$/', $key);
     }
 

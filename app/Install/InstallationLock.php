@@ -7,11 +7,12 @@ namespace App\Install;
 class InstallationLock
 {
     private string $lockFile;
+
     private string $progressFile;
 
     public function __construct()
     {
-        $this->lockFile     = storage_path('installed');
+        $this->lockFile = storage_path('installed');
         $this->progressFile = storage_path('framework/install_progress.json');
     }
 
@@ -48,9 +49,9 @@ class InstallationLock
     public function markInstalling(): void
     {
         $this->writeProgress([
-            'state'      => InstallationState::Installing->value,
+            'state' => InstallationState::Installing->value,
             'started_at' => now()->toIso8601String(),
-            'pid'        => getmypid(),
+            'pid' => getmypid(),
         ]);
     }
 
@@ -64,17 +65,18 @@ class InstallationLock
     {
         $data = array_merge([
             'installed_at' => now()->toIso8601String(),
-            'version'      => config('app.version', '1.0.0'),
+            'version' => config('app.version', '1.0.0'),
         ], $metadata);
 
         $payload = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
         // Strategy 1: write to tmp then rename (atomic on POSIX)
-        $tmpFile = $this->lockFile . '.tmp.' . getmypid() . '.' . microtime(true);
+        $tmpFile = $this->lockFile.'.tmp.'.getmypid().'.'.microtime(true);
 
         if (@file_put_contents($tmpFile, $payload) !== false && @rename($tmpFile, $this->lockFile)) {
             // Success – clean up progress file
             $this->removeProgress();
+
             return;
         }
 
@@ -100,8 +102,8 @@ class InstallationLock
 
     public function markFailed(string $reason = ''): void
     {
-        $progress           = $this->readProgress();
-        $progress['state']  = InstallationState::Failed->value;
+        $progress = $this->readProgress();
+        $progress['state'] = InstallationState::Failed->value;
         $progress['failed_at'] = now()->toIso8601String();
         $progress['reason'] = $reason;
         $this->writeProgress($progress);

@@ -3,7 +3,6 @@
 namespace App\Database;
 
 use Illuminate\Database\SQLiteConnection as BaseSQLiteConnection;
-use PDO;
 
 class SQLiteConnection extends BaseSQLiteConnection
 {

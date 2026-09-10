@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Signature;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 
 class SignatureService
 {
@@ -34,6 +35,7 @@ class SignatureService
     public function update(Signature $signature, array $data): Signature
     {
         $signature->update($data);
+
         return $signature->fresh();
     }
 
@@ -70,7 +72,7 @@ class SignatureService
     /**
      * Get all signatures for a user, ordered by default first then by name.
      */
-    public function getAll(User $user): \Illuminate\Database\Eloquent\Collection
+    public function getAll(User $user): Collection
     {
         return $user->signatures()
             ->orderByRaw('is_default DESC, name ASC')

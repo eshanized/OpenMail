@@ -2,11 +2,11 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
+use App\Models\Label;
 use App\Models\MessageMetadata;
 use App\Models\User;
-use App\Models\Label;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class SearchResultsPageTest extends TestCase
 {

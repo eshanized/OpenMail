@@ -22,64 +22,64 @@ class DatabaseInstaller
      */
     public function testConnection(
         string $host,
-        int    $port,
+        int $port,
         string $database,
         string $username,
         string $password
     ): array {
-        $connectionName = 'installer_probe_' . getmypid();
+        $connectionName = 'installer_probe_'.getmypid();
 
         try {
             Config::set("database.connections.{$connectionName}", [
-                'driver'      => 'mysql',
-                'host'        => $host,
-                'port'        => $port,
-                'database'    => $database,
-                'username'    => $username,
-                'password'    => $password,
-                'charset'     => 'utf8mb4',
-                'collation'   => 'utf8mb4_unicode_ci',
-                'prefix'      => '',
-                'strict'      => true,
-                'engine'      => null,
-                'options'     => [
+                'driver' => 'mysql',
+                'host' => $host,
+                'port' => $port,
+                'database' => $database,
+                'username' => $username,
+                'password' => $password,
+                'charset' => 'utf8mb4',
+                'collation' => 'utf8mb4_unicode_ci',
+                'prefix' => '',
+                'strict' => true,
+                'engine' => null,
+                'options' => [
                     \PDO::ATTR_TIMEOUT => 5,
                     \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
                 ],
             ]);
 
-            $pdo           = DB::connection($connectionName)->getPdo();
+            $pdo = DB::connection($connectionName)->getPdo();
             $serverVersion = $pdo->getAttribute(\PDO::ATTR_SERVER_VERSION);
 
             return [
-                'success'          => true,
-                'server_version'   => $serverVersion,
+                'success' => true,
+                'server_version' => $serverVersion,
                 'database_missing' => false,
             ];
         } catch (\PDOException $e) {
             $code = (int) $e->getCode();
-            $msg  = $e->getMessage();
+            $msg = $e->getMessage();
             $databaseMissing = ($code === 1049 || str_contains($msg, 'Unknown database'));
 
             return [
-                'success'          => false,
+                'success' => false,
                 'database_missing' => $databaseMissing,
-                'error'            => $this->friendlyPdoError($e),
-                'technical'        => [
+                'error' => $this->friendlyPdoError($e),
+                'technical' => [
                     'exception' => get_class($e),
-                    'code'      => $code,
-                    'message'   => $msg,
+                    'code' => $code,
+                    'message' => $msg,
                 ],
             ];
 
         } catch (\Exception $e) {
             return [
-                'success'   => false,
-                'error'     => 'Database connection failed. Please check your credentials and try again.',
+                'success' => false,
+                'error' => 'Database connection failed. Please check your credentials and try again.',
                 'technical' => [
                     'exception' => get_class($e),
-                    'code'      => $e->getCode(),
-                    'message'   => $e->getMessage(),
+                    'code' => $e->getCode(),
+                    'message' => $e->getMessage(),
                 ],
             ];
         } finally {
@@ -104,27 +104,27 @@ class DatabaseInstaller
      */
     public function createDatabase(
         string $host,
-        int    $port,
+        int $port,
         string $database,
         string $username,
         string $password
     ): array {
-        $connectionName = 'installer_create_db_' . getmypid();
+        $connectionName = 'installer_create_db_'.getmypid();
 
         try {
             // Connect without a database — just to the server
             Config::set("database.connections.{$connectionName}", [
-                'driver'    => 'mysql',
-                'host'      => $host,
-                'port'      => $port,
-                'database'  => '',  // no database selected
-                'username'  => $username,
-                'password'  => $password,
-                'charset'   => 'utf8mb4',
+                'driver' => 'mysql',
+                'host' => $host,
+                'port' => $port,
+                'database' => '',  // no database selected
+                'username' => $username,
+                'password' => $password,
+                'charset' => 'utf8mb4',
                 'collation' => 'utf8mb4_unicode_ci',
-                'prefix'    => '',
-                'strict'    => true,
-                'options'   => [
+                'prefix' => '',
+                'strict' => true,
+                'options' => [
                     \PDO::ATTR_TIMEOUT => 5,
                     \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
                 ],
@@ -135,7 +135,7 @@ class DatabaseInstaller
             if (empty($safeName)) {
                 return [
                     'success' => false,
-                    'error'   => 'Invalid database name. Use only letters, numbers, and underscores.',
+                    'error' => 'Invalid database name. Use only letters, numbers, and underscores.',
                 ];
             }
 
@@ -146,12 +146,12 @@ class DatabaseInstaller
         } catch (\PDOException $e) {
             return [
                 'success' => false,
-                'error'   => $this->friendlyCreateDbError($e),
+                'error' => $this->friendlyCreateDbError($e),
             ];
         } catch (\Exception $e) {
             return [
                 'success' => false,
-                'error'   => 'Failed to create database: ' . $e->getMessage(),
+                'error' => 'Failed to create database: '.$e->getMessage(),
             ];
         } finally {
             try {
@@ -177,7 +177,7 @@ class DatabaseInstaller
     {
         try {
             $exitCode = Artisan::call('migrate', [
-                '--force'          => true,
+                '--force' => true,
                 '--no-interaction' => true,
             ]);
 
@@ -185,16 +185,16 @@ class DatabaseInstaller
 
             return [
                 'success' => $exitCode === 0,
-                'output'  => $output,
+                'output' => $output,
             ];
         } catch (\Exception $e) {
             return [
                 'success' => false,
-                'output'  => '',
-                'error'   => 'Migration failed: ' . $e->getMessage(),
+                'output' => '',
+                'error' => 'Migration failed: '.$e->getMessage(),
                 'technical' => [
                     'exception' => get_class($e),
-                    'message'   => $e->getMessage(),
+                    'message' => $e->getMessage(),
                 ],
             ];
         }
@@ -210,6 +210,7 @@ class DatabaseInstaller
             // If migrate:status returns without error and mentions "Ran", they've run
             Artisan::call('migrate:status', ['--no-interaction' => true]);
             $output = Artisan::output();
+
             return str_contains($output, 'Ran') || str_contains($output, 'Yes');
         } catch (\Exception) {
             return false;
@@ -222,45 +223,37 @@ class DatabaseInstaller
 
     private function friendlyPdoError(\PDOException $e): string
     {
-        $msg  = $e->getMessage();
+        $msg = $e->getMessage();
         $code = (int) $e->getCode();
 
         return match (true) {
-            str_contains($msg, 'Connection refused')
-                => 'Database connection refused. Check that MySQL/MariaDB is running and the host/port are correct.',
+            str_contains($msg, 'Connection refused') => 'Database connection refused. Check that MySQL/MariaDB is running and the host/port are correct.',
 
-            str_contains($msg, 'Connection timed out') || str_contains($msg, 'timed out')
-                => 'Database connection timed out. Check that the host is reachable and the port is open.',
+            str_contains($msg, 'Connection timed out') || str_contains($msg, 'timed out') => 'Database connection timed out. Check that the host is reachable and the port is open.',
 
-            ($code === 1049 || str_contains($msg, 'Unknown database'))
-                => 'The specified database does not exist. You can create it using the button below, or create it manually in phpMyAdmin/cPanel.',
+            ($code === 1049 || str_contains($msg, 'Unknown database')) => 'The specified database does not exist. You can create it using the button below, or create it manually in phpMyAdmin/cPanel.',
 
-            ($code === 1045 || str_contains($msg, 'Access denied'))
-                => 'Access denied. Check your database username and password.',
+            ($code === 1045 || str_contains($msg, 'Access denied')) => 'Access denied. Check your database username and password.',
 
-            str_contains($msg, 'Unknown MySQL server host') || str_contains($msg, 'php_network_getaddresses')
-                => 'Cannot resolve the database hostname. Check the host field.',
+            str_contains($msg, 'Unknown MySQL server host') || str_contains($msg, 'php_network_getaddresses') => 'Cannot resolve the database hostname. Check the host field.',
 
-            str_contains($msg, 'No such file or directory') && str_contains($msg, 'mysql')
-                => 'MySQL socket not found. Try using "127.0.0.1" as the host instead of "localhost".',
+            str_contains($msg, 'No such file or directory') && str_contains($msg, 'mysql') => 'MySQL socket not found. Try using "127.0.0.1" as the host instead of "localhost".',
 
-            default => 'Database connection failed. ' . $msg,
+            default => 'Database connection failed. '.$msg,
         };
     }
 
     private function friendlyCreateDbError(\PDOException $e): string
     {
-        $msg  = $e->getMessage();
+        $msg = $e->getMessage();
         $code = (int) $e->getCode();
 
         return match (true) {
-            ($code === 1044 || str_contains($msg, 'Access denied'))
-                => 'Access denied. Your database user does not have permission to create databases. Create the database manually in phpMyAdmin/cPanel.',
+            ($code === 1044 || str_contains($msg, 'Access denied')) => 'Access denied. Your database user does not have permission to create databases. Create the database manually in phpMyAdmin/cPanel.',
 
-            str_contains($msg, 'Connection refused')
-                => 'Cannot connect to the database server. Check that MySQL/MariaDB is running.',
+            str_contains($msg, 'Connection refused') => 'Cannot connect to the database server. Check that MySQL/MariaDB is running.',
 
-            default => 'Failed to create database: ' . $msg,
+            default => 'Failed to create database: '.$msg,
         };
     }
 }

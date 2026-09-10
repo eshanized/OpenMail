@@ -2,12 +2,14 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
+use App\Livewire\Mailbox\SearchBar;
 use App\Models\MessageMetadata;
 use App\Models\User;
-use App\Livewire\Mailbox\SearchBar;
+use App\Services\MessageSanitizer;
+use App\Services\SearchService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Tests\TestCase;
 
 class SearchTest extends TestCase
 {
@@ -164,7 +166,7 @@ class SearchTest extends TestCase
 
         // The SearchService::highlightMatches should wrap the query in <mark> tags
         // but the XSS payload should be sanitized via e() before highlighting
-        $searchService = app(\App\Services\SearchService::class);
+        $searchService = app(SearchService::class);
         $sanitizedSubject = e('<script>alert("xss")</script> Test subject');
         $highlighted = $searchService->highlightMatches($sanitizedSubject, 'Test subject');
 
@@ -181,8 +183,8 @@ class SearchTest extends TestCase
     /** @test */
     public function test_highlight_after_sanitization_snippet_no_xss(): void
     {
-        $searchService = app(\App\Services\SearchService::class);
-        $sanitizer = app(\App\Services\MessageSanitizer::class);
+        $searchService = app(SearchService::class);
+        $sanitizer = app(MessageSanitizer::class);
 
         // Simulate the search results page sanitization pipeline
         $rawSnippet = '<img src=x onerror=alert("xss")> Test snippet with meeting info';

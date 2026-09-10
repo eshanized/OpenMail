@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Services;
 
-use Tests\TestCase;
 use App\Services\FolderMapper;
 use Mockery;
+use Tests\TestCase;
 
 class FolderMapperTest extends TestCase
 {
@@ -13,7 +13,7 @@ class FolderMapperTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->mapper = new FolderMapper();
+        $this->mapper = new FolderMapper;
     }
 
     protected function tearDown(): void
@@ -104,11 +104,11 @@ class FolderMapperTest extends TestCase
     {
         $mock = Mockery::mock('alias:Webklex\PHPIMAP\Folder')
             ->makePartial();
-        
+
         $mock->attributes = $attributes;
         $mock->name = $name;
         $mock->path = $name;
-        
+
         return $mock;
     }
 }

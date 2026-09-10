@@ -54,6 +54,7 @@ class InstallationVerifier
     {
         try {
             DB::connection()->getPdo();
+
             return [
                 'name' => 'db_connection',
                 'label' => 'Database connection',
@@ -86,7 +87,7 @@ class InstallationVerifier
         $username = $config['imapUsername'] ?? '';
         $password = $config['imapPassword'] ?? '';
 
-        if (!$username || !$password) {
+        if (! $username || ! $password) {
             return [
                 'name' => 'imap_connection',
                 'label' => 'IMAP connection',
@@ -97,7 +98,7 @@ class InstallationVerifier
             ];
         }
 
-        $tester = app(\App\Services\ImapConnectionTester::class);
+        $tester = app(ImapConnectionTester::class);
         $result = $tester->test($host, $port, $encryption, $username, $password);
 
         return [
@@ -119,7 +120,7 @@ class InstallationVerifier
         $username = $config['smtpUsername'] ?? '';
         $password = $config['smtpPassword'] ?? '';
 
-        if (!$username || !$password) {
+        if (! $username || ! $password) {
             return [
                 'name' => 'smtp_connection',
                 'label' => 'SMTP connection',
@@ -130,7 +131,7 @@ class InstallationVerifier
             ];
         }
 
-        $tester = app(\App\Services\SmtpConnectionTester::class);
+        $tester = app(SmtpConnectionTester::class);
         $result = $tester->test($host, $port, $encryption, $username, $password);
 
         return [
@@ -153,7 +154,7 @@ class InstallationVerifier
 
         $allWritable = true;
         foreach ($paths as $path) {
-            if (!is_writable($path)) {
+            if (! is_writable($path)) {
                 $allWritable = false;
                 break;
             }
@@ -172,7 +173,7 @@ class InstallationVerifier
     private function checkAppKeyExists(): array
     {
         $appKey = config('app.key');
-        $hasKey = !empty($appKey) && $appKey !== 'base64:';
+        $hasKey = ! empty($appKey) && $appKey !== 'base64:';
 
         return [
             'name' => 'app_key_exists',
@@ -192,7 +193,7 @@ class InstallationVerifier
             'name' => 'php_version',
             'label' => 'PHP Version (≥8.2)',
             'passed' => $passed,
-            'error' => $passed ? null : 'PHP 8.2 or higher is required. Current: ' . PHP_VERSION,
+            'error' => $passed ? null : 'PHP 8.2 or higher is required. Current: '.PHP_VERSION,
             'fixable' => false,
             'fixStep' => null,
         ];

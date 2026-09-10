@@ -2,13 +2,16 @@
 
 namespace Tests\Feature\Composer;
 
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\User;
-use Livewire\Livewire;
-use Mockery;
+use App\Services\FolderMapper;
+use App\Services\ImapMailboxService;
+use App\Services\MessageSanitizer;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Crypt;
+use Livewire\Livewire;
+use Mockery;
+use Tests\TestCase;
 
 class ComposerIntegrationTest extends TestCase
 {
@@ -29,7 +32,7 @@ class ComposerIntegrationTest extends TestCase
 
     private function mockImapService(): void
     {
-        $mockService = Mockery::mock(\App\Services\ImapMailboxService::class);
+        $mockService = Mockery::mock(ImapMailboxService::class);
 
         $mockService->shouldReceive('getCachedFolders')
             ->andReturn([
@@ -107,15 +110,15 @@ class ComposerIntegrationTest extends TestCase
 
         $mockService->shouldReceive('getMessages')
             ->andReturn(new LengthAwarePaginator([], 0, 25));
-        
+
         // Mock getThreadHeaders for threaded view
         $mockService->shouldReceive('getThreadHeaders')->andReturn([]);
 
-        $this->app->instance(\App\Services\ImapMailboxService::class, $mockService);
+        $this->app->instance(ImapMailboxService::class, $mockService);
 
         // Also bind the FolderMapper and MessageSanitizer
-        $this->app->instance(\App\Services\FolderMapper::class, new \App\Services\FolderMapper());
-        $this->app->instance(\App\Services\MessageSanitizer::class, new \App\Services\MessageSanitizer());
+        $this->app->instance(FolderMapper::class, new FolderMapper);
+        $this->app->instance(MessageSanitizer::class, new MessageSanitizer);
     }
 
     public function test_composer_modal_renders_when_authenticated()

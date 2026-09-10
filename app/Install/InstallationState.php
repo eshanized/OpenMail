@@ -23,7 +23,7 @@ enum InstallationState: string
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::NotInstalled => 'Not Installed',
             self::Installing => 'Installing…',
             self::Installed => 'Installed',

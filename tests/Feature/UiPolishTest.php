@@ -2,14 +2,17 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Models\User;
+use App\Services\FolderMapper;
+use App\Services\ImapMailboxService;
+use App\Services\MessageSanitizer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Crypt;
 use Livewire\Livewire;
 use Mockery;
-use Illuminate\Pagination\LengthAwarePaginator;
-
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class UiPolishTest extends TestCase
 {
@@ -32,7 +35,7 @@ class UiPolishTest extends TestCase
 
     private function mockImapService(): void
     {
-        $mockService = Mockery::mock(\App\Services\ImapMailboxService::class);
+        $mockService = Mockery::mock(ImapMailboxService::class);
 
         $mockService->shouldReceive('getCachedFolders')
             ->andReturn([
@@ -76,9 +79,9 @@ class UiPolishTest extends TestCase
         $mockService->shouldReceive('getThreadHeaders')
             ->andReturn([]);
 
-        $this->app->instance(\App\Services\ImapMailboxService::class, $mockService);
-        $this->app->instance(\App\Services\FolderMapper::class, new \App\Services\FolderMapper());
-        $this->app->instance(\App\Services\MessageSanitizer::class, new \App\Services\MessageSanitizer());
+        $this->app->instance(ImapMailboxService::class, $mockService);
+        $this->app->instance(FolderMapper::class, new FolderMapper);
+        $this->app->instance(MessageSanitizer::class, new MessageSanitizer);
     }
 
     #[Test]
@@ -245,7 +248,7 @@ class UiPolishTest extends TestCase
     public function test_user_profile_dropdown_renders_with_enhanced_ui(): void
     {
         $response = $this->actingAs($this->user)
-            ->withSession(['openmail:imap_password' => \Illuminate\Support\Facades\Crypt::encrypt('test-password')])
+            ->withSession(['openmail:imap_password' => Crypt::encrypt('test-password')])
             ->get('/mailbox/INBOX');
 
         $response->assertStatus(200);

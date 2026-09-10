@@ -1,8 +1,11 @@
 <?php
 
+use App\Http\Middleware\InstallLock;
+use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Spatie\Csp\AddCspHeaders;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -12,13 +15,13 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // Security headers on all responses (SEC-10)
-        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+        $middleware->append(SecurityHeaders::class);
 
         // CSP headers via spatie/laravel-csp (SEC-03)
-        $middleware->append(\Spatie\Csp\AddCspHeaders::class);
+        $middleware->append(AddCspHeaders::class);
 
         $middleware->web(append: [
-            \App\Http\Middleware\InstallLock::class,
+            InstallLock::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

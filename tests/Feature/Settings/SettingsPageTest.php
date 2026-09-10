@@ -2,13 +2,11 @@
 
 namespace Tests\Feature\Settings;
 
-use Tests\TestCase;
 use App\Models\User;
-use App\Models\Setting;
-use App\Models\Signature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class SettingsPageTest extends TestCase
 {
@@ -107,10 +105,10 @@ class SettingsPageTest extends TestCase
                     [
                         'type' => 'paragraph',
                         'content' => [
-                            ['type' => 'text', 'text' => 'Best regards, Jane']
-                        ]
-                    ]
-                ]
+                            ['type' => 'text', 'text' => 'Best regards, Jane'],
+                        ],
+                    ],
+                ],
             ])
             ->set('isDefault', true)
             ->call('saveSignature')

@@ -2,16 +2,19 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
+use App\Models\Label;
 use App\Models\MessageMetadata;
+use App\Models\User;
+use App\Services\FolderMapper;
+use App\Services\ImapMailboxService;
+use App\Services\MessageSanitizer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Crypt;
 use Livewire\Livewire;
 use Mockery;
-use Illuminate\Pagination\LengthAwarePaginator;
-
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class IntegrationTest extends TestCase
 {
@@ -34,7 +37,7 @@ class IntegrationTest extends TestCase
 
     private function mockImapService(): void
     {
-        $mockService = Mockery::mock(\App\Services\ImapMailboxService::class);
+        $mockService = Mockery::mock(ImapMailboxService::class);
 
         $mockService->shouldReceive('getCachedFolders')
             ->andReturn([
@@ -100,13 +103,13 @@ class IntegrationTest extends TestCase
         $mockService->shouldReceive('getThreadHeaders')
             ->andReturn([]);
 
-        $this->app->instance(\App\Services\ImapMailboxService::class, $mockService);
-        $this->app->instance(\App\Services\FolderMapper::class, new \App\Services\FolderMapper());
-        $this->app->instance(\App\Services\MessageSanitizer::class, new \App\Services\MessageSanitizer());
+        $this->app->instance(ImapMailboxService::class, $mockService);
+        $this->app->instance(FolderMapper::class, new FolderMapper);
+        $this->app->instance(MessageSanitizer::class, new MessageSanitizer);
     }
 
     #[Test]
-    public function testTabbedSidebar(): void
+    public function test_tabbed_sidebar(): void
     {
         $response = $this->actingAs($this->user)
             ->withSession(['openmail:imap_password' => Crypt::encrypt('test-password')])
@@ -121,7 +124,7 @@ class IntegrationTest extends TestCase
     }
 
     #[Test]
-    public function testFolderSidebarTabSwitching(): void
+    public function test_folder_sidebar_tab_switching(): void
     {
         Livewire::actingAs($this->user)
             ->test('mailbox.folder-sidebar')
@@ -135,7 +138,7 @@ class IntegrationTest extends TestCase
     }
 
     #[Test]
-    public function testTabbedSidebarInvalidTabDefaultsToFolders(): void
+    public function test_tabbed_sidebar_invalid_tab_defaults_to_folders(): void
     {
         Livewire::actingAs($this->user)
             ->test('mailbox.folder-sidebar')
@@ -144,7 +147,7 @@ class IntegrationTest extends TestCase
     }
 
     #[Test]
-    public function testTabbedSidebarRendersAllPanels(): void
+    public function test_tabbed_sidebar_renders_all_panels(): void
     {
         // Verify all three panels are available through tab switching
         Livewire::actingAs($this->user)
@@ -157,7 +160,7 @@ class IntegrationTest extends TestCase
     }
 
     #[Test]
-    public function testDesktopTabBarActiveState(): void
+    public function test_desktop_tab_bar_active_state(): void
     {
         // Verify the FolderSidebar component renders with correct tabs via Livewire
         Livewire::actingAs($this->user)
@@ -166,7 +169,7 @@ class IntegrationTest extends TestCase
     }
 
     #[Test]
-    public function testMobileBottomNavHiddenOnDesktop(): void
+    public function test_mobile_bottom_nav_hidden_on_desktop(): void
     {
         // Verify the component renders and has active tab state
         Livewire::actingAs($this->user)
@@ -175,7 +178,7 @@ class IntegrationTest extends TestCase
     }
 
     #[Test]
-    public function testFullSearchFlow(): void
+    public function test_full_search_flow(): void
     {
         // Create test message
         MessageMetadata::factory()->create([
@@ -195,9 +198,9 @@ class IntegrationTest extends TestCase
     }
 
     #[Test]
-    public function testSearchWithLabelFilter(): void
+    public function test_search_with_label_filter(): void
     {
-        $label = \App\Models\Label::create([
+        $label = Label::create([
             'user_id' => $this->user->id,
             'name' => 'Important',
             'color' => '#DC2626',
@@ -226,9 +229,9 @@ class IntegrationTest extends TestCase
     }
 
     #[Test]
-    public function testThreadViewWithLabels(): void
+    public function test_thread_view_with_labels(): void
     {
-        $label = \App\Models\Label::create([
+        $label = Label::create([
             'user_id' => $this->user->id,
             'name' => 'Work',
             'color' => '#2563EB',
@@ -250,7 +253,7 @@ class IntegrationTest extends TestCase
     }
 
     #[Test]
-    public function testArchiveFromThreadView(): void
+    public function test_archive_from_thread_view(): void
     {
         // Verify mailbox page loads successfully (toolbar with archive renders via Livewire)
         $response = $this->actingAs($this->user)
@@ -261,7 +264,7 @@ class IntegrationTest extends TestCase
     }
 
     #[Test]
-    public function testMobileResponsive(): void
+    public function test_mobile_responsive(): void
     {
         // Verify mailbox page loads with mobile-responsive layout
         $response = $this->actingAs($this->user)
@@ -272,7 +275,7 @@ class IntegrationTest extends TestCase
     }
 
     #[Test]
-    public function testAllFiltersCombined(): void
+    public function test_all_filters_combined(): void
     {
         MessageMetadata::factory()->create([
             'user_id' => $this->user->id,
@@ -297,9 +300,9 @@ class IntegrationTest extends TestCase
     }
 
     #[Test]
-    public function testLabelChipsInThreadRow(): void
+    public function test_label_chips_in_thread_row(): void
     {
-        $label = \App\Models\Label::create([
+        $label = Label::create([
             'user_id' => $this->user->id,
             'name' => 'Review',
             'color' => '#9333EA',
@@ -321,7 +324,7 @@ class IntegrationTest extends TestCase
     }
 
     #[Test]
-    public function testContactGroupsInSidebar(): void
+    public function test_contact_groups_in_sidebar(): void
     {
         // Verify contacts tab is accessible
         Livewire::actingAs($this->user)
@@ -331,7 +334,7 @@ class IntegrationTest extends TestCase
     }
 
     #[Test]
-    public function testEmptyStatesMatchUiSpec(): void
+    public function test_empty_states_match_ui_spec(): void
     {
         // Verify search empty state text
         $response = $this->actingAs($this->user)

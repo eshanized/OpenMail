@@ -2,12 +2,13 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
+use App\Models\Label;
 use App\Models\MessageMetadata;
 use App\Models\User;
-use App\Models\Label;
 use App\Services\SearchService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Scout\Searchable;
+use Tests\TestCase;
 
 class SearchIndexingTest extends TestCase
 {
@@ -24,12 +25,12 @@ class SearchIndexingTest extends TestCase
     /** @test */
     public function message_metadata_uses_searchable_trait(): void
     {
-        $model = new MessageMetadata();
-        $this->assertArrayHasKey(\Laravel\Scout\Searchable::class, class_uses_recursive($model));
+        $model = new MessageMetadata;
+        $this->assertArrayHasKey(Searchable::class, class_uses_recursive($model));
     }
 
     /** @test */
-    public function toSearchableArray_includes_all_d05_fields(): void
+    public function to_searchable_array_includes_all_d05_fields(): void
     {
         $message = MessageMetadata::factory()->create([
             'user_id' => $this->user->id,
@@ -64,17 +65,17 @@ class SearchIndexingTest extends TestCase
     }
 
     /** @test */
-    public function searchableAs_returns_per_user_index_name(): void
+    public function searchable_as_returns_per_user_index_name(): void
     {
         $message = MessageMetadata::factory()->create([
             'user_id' => $this->user->id,
         ]);
 
-        $this->assertEquals('message_metadata_' . $this->user->id, $message->searchableAs());
+        $this->assertEquals('message_metadata_'.$this->user->id, $message->searchableAs());
     }
 
     /** @test */
-    public function shouldBeSearchable_returns_true(): void
+    public function should_be_searchable_returns_true(): void
     {
         $message = MessageMetadata::factory()->create([
             'user_id' => $this->user->id,
@@ -114,7 +115,7 @@ class SearchIndexingTest extends TestCase
             'date' => now()->subHours(2),
         ]);
 
-        $service = new SearchService();
+        $service = new SearchService;
         $results = $service->search($this->user->id, 'project alpha');
 
         $this->assertCount(2, $results);
@@ -137,7 +138,7 @@ class SearchIndexingTest extends TestCase
             'date' => now(),
         ]);
 
-        $service = new SearchService();
+        $service = new SearchService;
         $results = $service->search($this->user->id, 'Meeting', ['folder' => 'INBOX']);
 
         $this->assertCount(1, $results);
@@ -161,7 +162,7 @@ class SearchIndexingTest extends TestCase
             'date' => now()->subDay(),
         ]);
 
-        $service = new SearchService();
+        $service = new SearchService;
         $results = $service->search($this->user->id, 'message', [
             'date_from' => now()->subDays(3),
             'date_to' => now(),
@@ -190,7 +191,7 @@ class SearchIndexingTest extends TestCase
             'date' => now(),
         ]);
 
-        $service = new SearchService();
+        $service = new SearchService;
         $results = $service->search($this->user->id, 'Message', ['has_attachment' => true]);
 
         $this->assertCount(1, $results);
@@ -216,7 +217,7 @@ class SearchIndexingTest extends TestCase
             'date' => now(),
         ]);
 
-        $service = new SearchService();
+        $service = new SearchService;
         $results = $service->search($this->user->id, 'message', ['is_seen' => false]);
 
         $this->assertCount(1, $results);
@@ -242,7 +243,7 @@ class SearchIndexingTest extends TestCase
             'date' => now(),
         ]);
 
-        $service = new SearchService();
+        $service = new SearchService;
         $results = $service->search($this->user->id, 'message', ['is_flagged' => true]);
 
         $this->assertCount(1, $results);
@@ -273,7 +274,7 @@ class SearchIndexingTest extends TestCase
             'date' => now(),
         ]);
 
-        $service = new SearchService();
+        $service = new SearchService;
         $results = $service->search($this->user->id, 'message', ['labels' => [$label->id]]);
 
         $this->assertCount(1, $results);
@@ -293,7 +294,7 @@ class SearchIndexingTest extends TestCase
             ]);
         }
 
-        $service = new SearchService();
+        $service = new SearchService;
         $results = $service->instantSearch($this->user->id, 'Meeting', 8);
 
         $this->assertCount(8, $results);
@@ -318,7 +319,7 @@ class SearchIndexingTest extends TestCase
             'date' => now(),
         ]);
 
-        $service = new SearchService();
+        $service = new SearchService;
         $results = $service->search($this->user->id, 'private message');
 
         $this->assertCount(1, $results);
@@ -371,7 +372,7 @@ class SearchIndexingTest extends TestCase
             'date' => now(),
         ]);
 
-        $service = new SearchService();
+        $service = new SearchService;
         $results = $service->search($this->user->id, 'project alpha');
 
         // Both should be returned
@@ -388,7 +389,7 @@ class SearchIndexingTest extends TestCase
             'date' => now(),
         ]);
 
-        $service = new SearchService();
+        $service = new SearchService;
         // This should not throw an exception
         $results = $service->search($this->user->id, '+test -bad *query "exact"');
         $this->assertNotNull($results);
@@ -397,7 +398,7 @@ class SearchIndexingTest extends TestCase
     /** @test */
     public function sanitize_query_strips_fulltext_boolean_operators(): void
     {
-        $service = new SearchService();
+        $service = new SearchService;
 
         // FULLTEXT boolean operators: + - > < * " ( ) ~
         $malicious = '+important -junk >large <small *wildcard "phrase" (group) ~fuzzy';
@@ -426,7 +427,7 @@ class SearchIndexingTest extends TestCase
     /** @test */
     public function sanitize_query_normalizes_whitespace(): void
     {
-        $service = new SearchService();
+        $service = new SearchService;
 
         $result = $service->sanitizeQuery('  too   many    spaces  ');
         $this->assertEquals('too many spaces', $result);
@@ -435,7 +436,7 @@ class SearchIndexingTest extends TestCase
     /** @test */
     public function sanitize_query_returns_empty_for_only_operators(): void
     {
-        $service = new SearchService();
+        $service = new SearchService;
 
         $result = $service->sanitizeQuery('+-<>*()~');
         $this->assertEquals('', trim($result));

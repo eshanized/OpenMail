@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Services;
 
-use Tests\TestCase;
 use App\Services\MessageSanitizer;
+use Tests\TestCase;
 
 class MessageSanitizerTest extends TestCase
 {
@@ -12,7 +12,7 @@ class MessageSanitizerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->sanitizer = new MessageSanitizer();
+        $this->sanitizer = new MessageSanitizer;
     }
 
     public function test_script_tag_removed(): void

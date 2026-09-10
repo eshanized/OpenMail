@@ -16,7 +16,7 @@ class MessageMetadataFactory extends Factory
             'user_id' => User::factory(),
             'folder_path' => 'INBOX',
             'uid' => fake()->unique()->randomNumber(8),
-            'message_id' => '<' . fake()->uuid . '@example.com>',
+            'message_id' => '<'.fake()->uuid.'@example.com>',
             'subject' => fake()->sentence(),
             'from_address' => fake()->safeEmail(),
             'from_name' => fake()->name(),

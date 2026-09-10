@@ -1,17 +1,20 @@
 <?php
 
-use App\Http\Controllers\SetupController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
-use App\Livewire\Mailbox\FolderSidebar;
-use App\Livewire\Mailbox\MessageList;
-use App\Livewire\Mailbox\MessageViewer;
+use App\Http\Controllers\CspReportController;
+use App\Http\Controllers\SearchController;
+use App\Http\Controllers\SetupController;
+use App\Livewire\Settings\SettingsPage;
+use App\Models\Label;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    if (!file_exists(storage_path('installed'))) {
+    if (! file_exists(storage_path('installed'))) {
         return redirect('/install');
     }
+
     return redirect('/login');
 });
 
@@ -20,12 +23,13 @@ Route::get('/login', [LoginController::class, 'show'])->name('login');
 Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/settings', \App\Livewire\Settings\SettingsPage::class)
+    Route::get('/settings', SettingsPage::class)
         ->middleware('throttle:api.settings')
         ->name('settings');
 
     Route::get('/mailbox', function () {
         $defaultFolder = auth()->user()->setting('default_folder', 'INBOX');
+
         return redirect()->route('mailbox.folder', ['folderPath' => $defaultFolder]);
     })->name('mailbox');
 
@@ -42,12 +46,12 @@ Route::middleware(['auth'])->group(function () {
         ]);
     })->name('mailbox.folder')->where('folderPath', '.*');
 
-    Route::get('/search', [\App\Http\Controllers\SearchController::class, 'index'])
+    Route::get('/search', [SearchController::class, 'index'])
         ->middleware('throttle:api.search')
         ->name('search');
 
     Route::get('/labels/{label}', function (string $labelId) {
-        $label = \App\Models\Label::where('id', $labelId)
+        $label = Label::where('id', $labelId)
             ->where('user_id', auth()->id())
             ->firstOrFail();
 
@@ -62,7 +66,7 @@ Route::middleware(['auth'])->group(function () {
     })->name('settings.signatures');
 
     // Session revocation route (SET-05)
-    Route::post('/settings/sessions/revoke', [\App\Http\Controllers\Auth\LogoutController::class, 'revokeOtherSessions'])
+    Route::post('/settings/sessions/revoke', [LogoutController::class, 'revokeOtherSessions'])
         ->middleware('throttle:10,1')
         ->name('settings.sessions.revoke');
 
@@ -73,14 +77,15 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/up', function () {
     try {
-        \Illuminate\Support\Facades\DB::select('SELECT 1');
-    } catch (\Exception $e) {
+        DB::select('SELECT 1');
+    } catch (Exception $e) {
         return response('Database unreachable', 503)->header('Content-Type', 'text/plain');
     }
+
     return response('OK', 200)->header('Content-Type', 'text/plain');
 });
 
 // CSP violation reports (SEC-03, D-03) — rate-limited to prevent flooding
-Route::post('/csp-report', [\App\Http\Controllers\CspReportController::class, 'store'])
+Route::post('/csp-report', [CspReportController::class, 'store'])
     ->name('csp.report')
     ->middleware('throttle:60,1');

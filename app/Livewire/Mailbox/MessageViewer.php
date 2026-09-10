@@ -2,33 +2,55 @@
 
 namespace App\Livewire\Mailbox;
 
-use Livewire\Component;
 use App\Services\ImapMailboxService;
 use App\Services\MessageSanitizer;
+use Carbon\Carbon;
+use Carbon\CarbonInterface;
+use Livewire\Component;
+use Mockery\LegacyMockInterface;
+use Webklex\PHPIMAP\Attribute;
 
 class MessageViewer extends Component
 {
     public string $folderPath = 'INBOX';
+
     public int $uid = 0;
+
     protected ?object $message = null;
+
     public ?string $sanitizedHtml = null;
+
     public ?string $textBody = null;
+
     public bool $showImages = false;
+
     public array $folders = [];
-    
+
     // Extracted message data for view (serializable)
     public string $subject = '';
+
     public string $fromDisplay = '';
+
     public string $fromAddress = '';
+
     public string $toDisplay = '';
+
     public string $formattedDate = '';
+
     public string $messageId = '';
+
     public string $inReplyTo = '';
+
     public string $references = '';
+
     public string $ccDisplay = '';
+
     public string $bccDisplay = '';
+
     public bool $isSeen = false;
+
     public bool $isFlagged = false;
+
     public array $attachments = [];
 
     public function mount(string $folderPath, int $uid): void
@@ -50,34 +72,35 @@ class MessageViewer extends Component
         $service = app(ImapMailboxService::class);
         $this->message = $service->getMessageWithBody($this->folderPath, $this->uid);
 
-        if (!$this->message) {
+        if (! $this->message) {
             $this->dispatch('message-not-found');
+
             return;
         }
 
         $sanitizer = app(MessageSanitizer::class);
-        $isMock = $this->message instanceof \Mockery\LegacyMockInterface;
+        $isMock = $this->message instanceof LegacyMockInterface;
 
         // Extract subject
         $subject = null;
-        if (!$isMock && method_exists($this->message, 'getSubject')) {
+        if (! $isMock && method_exists($this->message, 'getSubject')) {
             $subjectAttr = $this->message->getSubject();
-            if ($subjectAttr instanceof \Webklex\PHPIMAP\Attribute) {
+            if ($subjectAttr instanceof Attribute) {
                 $subject = (string) $subjectAttr;
             }
         }
         if ($subject === null) {
             $subject = (string) ($this->message->subject ?? '');
         }
-        $this->subject = !empty(trim($subject)) ? $subject : '(No subject)';
+        $this->subject = ! empty(trim($subject)) ? $subject : '(No subject)';
 
         // Extract sender
         $fromAddress = '';
         $fromName = '';
 
-        if (!$isMock && method_exists($this->message, 'getFrom')) {
+        if (! $isMock && method_exists($this->message, 'getFrom')) {
             $fromAttr = $this->message->getFrom();
-            if ($fromAttr instanceof \Webklex\PHPIMAP\Attribute) {
+            if ($fromAttr instanceof Attribute) {
                 $fromObj = $fromAttr->first();
                 if ($fromObj) {
                     $fromAddress = $fromObj->mail ?? '';
@@ -86,9 +109,9 @@ class MessageViewer extends Component
             }
         }
 
-        if (empty($fromAddress) && empty($fromName) && !$isMock && method_exists($this->message, 'getHeader')) {
+        if (empty($fromAddress) && empty($fromName) && ! $isMock && method_exists($this->message, 'getHeader')) {
             $fromAttr = $this->message->getHeader()?->get('from');
-            if ($fromAttr instanceof \Webklex\PHPIMAP\Attribute) {
+            if ($fromAttr instanceof Attribute) {
                 $fromObj = $fromAttr->first();
                 if ($fromObj) {
                     $fromAddress = $fromObj->mail ?? '';
@@ -99,11 +122,11 @@ class MessageViewer extends Component
 
         if (empty($fromAddress) && empty($fromName)) {
             $fromProp = $this->message->from_name ?? null;
-            if (!empty($fromProp) && is_string($fromProp)) {
+            if (! empty($fromProp) && is_string($fromProp)) {
                 $fromName = $fromProp;
             }
             $addrProp = $this->message->from_address ?? null;
-            if (!empty($addrProp) && is_string($addrProp)) {
+            if (! empty($addrProp) && is_string($addrProp)) {
                 $fromAddress = $addrProp;
             }
         }
@@ -112,9 +135,10 @@ class MessageViewer extends Component
             $fromVal = null;
             try {
                 $fromVal = $this->message->from ?? null;
-            } catch (\Throwable) {}
+            } catch (\Throwable) {
+            }
 
-            if ($fromVal instanceof \Webklex\PHPIMAP\Attribute) {
+            if ($fromVal instanceof Attribute) {
                 $fromObj = $fromVal->first();
             } elseif (is_iterable($fromVal)) {
                 $fromObj = collect($fromVal)->first();
@@ -123,7 +147,7 @@ class MessageViewer extends Component
             }
 
             if (is_object($fromObj)) {
-                $fromAddress = $fromObj->mail ?? (isset($fromObj->mailbox, $fromObj->host) && $fromObj->mailbox && $fromObj->host ? $fromObj->mailbox . '@' . $fromObj->host : '');
+                $fromAddress = $fromObj->mail ?? (isset($fromObj->mailbox, $fromObj->host) && $fromObj->mailbox && $fromObj->host ? $fromObj->mailbox.'@'.$fromObj->host : '');
                 $fromName = $fromObj->personal ?? '';
             } elseif (is_string($fromObj)) {
                 $fromAddress = $fromObj;
@@ -132,33 +156,33 @@ class MessageViewer extends Component
 
         $displayProp = $this->message->from_display ?? null;
         $this->fromAddress = (string) $fromAddress;
-        $this->fromDisplay = (string) (!empty($fromName) ? $fromName : (!empty($this->fromAddress) ? $this->fromAddress : ($displayProp ?: '')));
+        $this->fromDisplay = (string) (! empty($fromName) ? $fromName : (! empty($this->fromAddress) ? $this->fromAddress : ($displayProp ?: '')));
 
         $this->toDisplay = $this->getToDisplayFromMessage($this->message);
         $this->formattedDate = $this->extractFormattedDate($this->message);
 
         $msgId = null;
-        if (!$isMock && method_exists($this->message, 'getMessageId')) {
+        if (! $isMock && method_exists($this->message, 'getMessageId')) {
             $attr = $this->message->getMessageId();
-            if ($attr instanceof \Webklex\PHPIMAP\Attribute) {
+            if ($attr instanceof Attribute) {
                 $msgId = (string) $attr;
             }
         }
         $this->messageId = (string) ($msgId ?: ($this->message->message_id ?? ''));
 
         $inReplyTo = null;
-        if (!$isMock && method_exists($this->message, 'getInReplyTo')) {
+        if (! $isMock && method_exists($this->message, 'getInReplyTo')) {
             $attr = $this->message->getInReplyTo();
-            if ($attr instanceof \Webklex\PHPIMAP\Attribute) {
+            if ($attr instanceof Attribute) {
                 $inReplyTo = (string) $attr;
             }
         }
         $this->inReplyTo = (string) ($inReplyTo ?: ($this->message->in_reply_to ?? ''));
 
         $references = null;
-        if (!$isMock && method_exists($this->message, 'getReferences')) {
+        if (! $isMock && method_exists($this->message, 'getReferences')) {
             $attr = $this->message->getReferences();
-            if ($attr instanceof \Webklex\PHPIMAP\Attribute) {
+            if ($attr instanceof Attribute) {
                 $references = (string) $attr;
             }
         }
@@ -167,22 +191,22 @@ class MessageViewer extends Component
         $this->ccDisplay = $this->getCcDisplayFromMessage($this->message);
         $this->bccDisplay = $this->getBccDisplayFromMessage($this->message);
 
-        if (isset($this->message->is_seen) && !($this->message->is_seen instanceof \Webklex\PHPIMAP\Attribute)) {
+        if (isset($this->message->is_seen) && ! ($this->message->is_seen instanceof Attribute)) {
             $this->isSeen = (bool) $this->message->is_seen;
-        } elseif (!$isMock && method_exists($this->message, 'hasFlag')) {
+        } elseif (! $isMock && method_exists($this->message, 'hasFlag')) {
             $this->isSeen = $this->message->hasFlag('seen');
-        } elseif (!$isMock && method_exists($this->message, 'getFlags')) {
+        } elseif (! $isMock && method_exists($this->message, 'getFlags')) {
             $flags = $this->message->getFlags();
             $this->isSeen = (bool) ($flags?->has('seen') ?? false);
         } else {
             $this->isSeen = false;
         }
 
-        if (isset($this->message->is_flagged) && !($this->message->is_flagged instanceof \Webklex\PHPIMAP\Attribute)) {
+        if (isset($this->message->is_flagged) && ! ($this->message->is_flagged instanceof Attribute)) {
             $this->isFlagged = (bool) $this->message->is_flagged;
-        } elseif (!$isMock && method_exists($this->message, 'hasFlag')) {
+        } elseif (! $isMock && method_exists($this->message, 'hasFlag')) {
             $this->isFlagged = $this->message->hasFlag('flagged');
-        } elseif (!$isMock && method_exists($this->message, 'getFlags')) {
+        } elseif (! $isMock && method_exists($this->message, 'getFlags')) {
             $flags = $this->message->getFlags();
             $this->isFlagged = (bool) ($flags?->has('flagged') ?? false);
         } else {
@@ -211,43 +235,44 @@ class MessageViewer extends Component
 
     protected function extractFormattedDate(object $message): string
     {
-        if (isset($message->formatted_date) && is_string($message->formatted_date) && !empty($message->formatted_date)) {
+        if (isset($message->formatted_date) && is_string($message->formatted_date) && ! empty($message->formatted_date)) {
             return $message->formatted_date;
         }
 
-        $isMock = $message instanceof \Mockery\LegacyMockInterface;
+        $isMock = $message instanceof LegacyMockInterface;
 
         $rawDate = null;
-        if (!$isMock && method_exists($message, 'getDate')) {
+        if (! $isMock && method_exists($message, 'getDate')) {
             $dateAttr = $message->getDate();
-            if ($dateAttr instanceof \Webklex\PHPIMAP\Attribute) {
+            if ($dateAttr instanceof Attribute) {
                 $rawDate = $dateAttr->first();
             }
         }
-        if (!$rawDate && !$isMock && method_exists($message, 'getHeader')) {
+        if (! $rawDate && ! $isMock && method_exists($message, 'getHeader')) {
             $dateAttr = $message->getHeader()?->get('date');
-            if ($dateAttr instanceof \Webklex\PHPIMAP\Attribute) {
+            if ($dateAttr instanceof Attribute) {
                 $rawDate = $dateAttr->first();
             }
         }
-        if (!$rawDate) {
+        if (! $rawDate) {
             try {
                 $propDate = $message->date ?? null;
-                if ($propDate instanceof \Webklex\PHPIMAP\Attribute) {
+                if ($propDate instanceof Attribute) {
                     $rawDate = $propDate->first();
                 } else {
                     $rawDate = $propDate;
                 }
-            } catch (\Throwable) {}
+            } catch (\Throwable) {
+            }
         }
 
-        if ($rawDate instanceof \Carbon\CarbonInterface) {
+        if ($rawDate instanceof CarbonInterface) {
             return $rawDate->format('M j, Y, g:i A');
         }
 
-        if (is_string($rawDate) && !empty($rawDate)) {
+        if (is_string($rawDate) && ! empty($rawDate)) {
             try {
-                return \Carbon\Carbon::parse($rawDate)->format('M j, Y, g:i A');
+                return Carbon::parse($rawDate)->format('M j, Y, g:i A');
             } catch (\Throwable) {
                 return $rawDate;
             }
@@ -258,15 +283,16 @@ class MessageViewer extends Component
 
     protected function getToDisplayFromMessage(object $message): string
     {
-        $isMock = $message instanceof \Mockery\LegacyMockInterface;
+        $isMock = $message instanceof LegacyMockInterface;
         $rawTo = null;
-        if (!$isMock && method_exists($message, 'getTo')) {
+        if (! $isMock && method_exists($message, 'getTo')) {
             $rawTo = $message->getTo();
         }
-        if (!$rawTo) {
+        if (! $rawTo) {
             try {
                 $rawTo = $message->to ?? null;
-            } catch (\Throwable) {}
+            } catch (\Throwable) {
+            }
         }
 
         return $this->formatAddresses($rawTo);
@@ -274,15 +300,16 @@ class MessageViewer extends Component
 
     protected function getCcDisplayFromMessage(object $message): string
     {
-        $isMock = $message instanceof \Mockery\LegacyMockInterface;
+        $isMock = $message instanceof LegacyMockInterface;
         $rawCc = null;
-        if (!$isMock && method_exists($message, 'getCc')) {
+        if (! $isMock && method_exists($message, 'getCc')) {
             $rawCc = $message->getCc();
         }
-        if (!$rawCc) {
+        if (! $rawCc) {
             try {
                 $rawCc = $message->cc ?? null;
-            } catch (\Throwable) {}
+            } catch (\Throwable) {
+            }
         }
 
         return $this->formatAddresses($rawCc);
@@ -290,15 +317,16 @@ class MessageViewer extends Component
 
     protected function getBccDisplayFromMessage(object $message): string
     {
-        $isMock = $message instanceof \Mockery\LegacyMockInterface;
+        $isMock = $message instanceof LegacyMockInterface;
         $rawBcc = null;
-        if (!$isMock && method_exists($message, 'getBcc')) {
+        if (! $isMock && method_exists($message, 'getBcc')) {
             $rawBcc = $message->getBcc();
         }
-        if (!$rawBcc) {
+        if (! $rawBcc) {
             try {
                 $rawBcc = $message->bcc ?? null;
-            } catch (\Throwable) {}
+            } catch (\Throwable) {
+            }
         }
 
         return $this->formatAddresses($rawBcc);
@@ -307,20 +335,20 @@ class MessageViewer extends Component
     protected function formatAddresses(mixed $raw): string
     {
         $addresses = [];
-        if ($raw instanceof \Webklex\PHPIMAP\Attribute) {
+        if ($raw instanceof Attribute) {
             $raw = $raw->all();
-        } elseif (!is_iterable($raw) && $raw !== null) {
+        } elseif (! is_iterable($raw) && $raw !== null) {
             $raw = [$raw];
         }
 
         if (is_iterable($raw)) {
             foreach ($raw as $addr) {
                 if (is_object($addr)) {
-                    $mail = $addr->mail ?? (isset($addr->mailbox, $addr->host) && $addr->mailbox && $addr->host ? $addr->mailbox . '@' . $addr->host : '');
+                    $mail = $addr->mail ?? (isset($addr->mailbox, $addr->host) && $addr->mailbox && $addr->host ? $addr->mailbox.'@'.$addr->host : '');
                     $personal = $addr->personal ?? '';
                     $addresses[] = $personal ?: ($mail ?: (string) $addr);
                 } elseif (is_array($addr)) {
-                    $mail = $addr['mail'] ?? (isset($addr['mailbox'], $addr['host']) && $addr['mailbox'] && $addr['host'] ? $addr['mailbox'] . '@' . $addr['host'] : '');
+                    $mail = $addr['mail'] ?? (isset($addr['mailbox'], $addr['host']) && $addr['mailbox'] && $addr['host'] ? $addr['mailbox'].'@'.$addr['host'] : '');
                     $personal = $addr['personal'] ?? '';
                     $addresses[] = $personal ?: ($mail ?: '');
                 } elseif (is_string($addr)) {
@@ -360,45 +388,46 @@ class MessageViewer extends Component
                 }
             }
         }
+
         return $attachments;
     }
 
     public function markAsRead(): void
     {
-        if ($this->message && !$this->isSeen) {
+        if ($this->message && ! $this->isSeen) {
             app(ImapMailboxService::class)->setFlag($this->folderPath, [$this->uid], '\\Seen', true);
         }
     }
 
     public function toggleImages(): void
     {
-        $this->showImages = !$this->showImages;
+        $this->showImages = ! $this->showImages;
         $this->loadMessage();
     }
 
     public function toggleRead(): void
     {
-        if (!$this->message) {
+        if (! $this->message) {
             return;
         }
-        $newValue = !$this->isSeen;
+        $newValue = ! $this->isSeen;
         app(ImapMailboxService::class)->setFlag($this->folderPath, [$this->uid], '\\Seen', $newValue);
         $this->loadMessage();
     }
 
     public function toggleStar(): void
     {
-        if (!$this->message) {
+        if (! $this->message) {
             return;
         }
-        $newValue = !$this->isFlagged;
+        $newValue = ! $this->isFlagged;
         app(ImapMailboxService::class)->setFlag($this->folderPath, [$this->uid], '\\Flagged', $newValue);
         $this->loadMessage();
     }
 
     public function deleteMessage(): void
     {
-        if (!$this->message) {
+        if (! $this->message) {
             return;
         }
         app(ImapMailboxService::class)->deleteMessages($this->folderPath, [$this->uid]);
@@ -407,7 +436,7 @@ class MessageViewer extends Component
 
     public function moveToFolder(string $destinationPath): void
     {
-        if (!$this->message) {
+        if (! $this->message) {
             return;
         }
         app(ImapMailboxService::class)->moveMessages($this->folderPath, [$this->uid], $destinationPath);
@@ -418,7 +447,7 @@ class MessageViewer extends Component
     {
         $replyBehavior = auth()->user()->setting('reply_behavior', 'reply');
         $mode = $replyBehavior === 'reply_all' ? 'replyAll' : 'reply';
-        
+
         $this->dispatch('openComposer', [
             'mode' => $mode,
             'message' => $this->getMessageDataForComposer(),

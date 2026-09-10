@@ -18,7 +18,7 @@ class SettingsRequest extends FormRequest
         // Profile tab rules
         if ($this->routeIs('settings.profile.update') || $this->input('tab') === 'profile') {
             $rules['name'] = ['required', 'string', 'max:255'];
-            $rules['email'] = ['required', 'email', 'max:255', 'unique:users,email,' . $this->user()->id];
+            $rules['email'] = ['required', 'email', 'max:255', 'unique:users,email,'.$this->user()->id];
         }
 
         // Mail tab rules

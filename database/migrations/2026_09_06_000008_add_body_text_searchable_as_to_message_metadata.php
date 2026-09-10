@@ -9,10 +9,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('message_metadata', function (Blueprint $table) {
-            if (!Schema::hasColumn('message_metadata', 'body_text')) {
+            if (! Schema::hasColumn('message_metadata', 'body_text')) {
                 $table->text('body_text')->nullable()->after('snippet');
             }
-            if (!Schema::hasColumn('message_metadata', 'searchable_as')) {
+            if (! Schema::hasColumn('message_metadata', 'searchable_as')) {
                 $table->string('searchable_as')->nullable()->after('body_text');
             }
         });

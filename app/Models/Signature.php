@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Services\MessageSanitizer;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Tiptap\Editor;
 
 class Signature extends Model
 {
@@ -26,12 +28,12 @@ class Signature extends Model
     {
         static::saving(function (Signature $signature): void {
             // Sanitize HTML before save using tiptap-php to render JSON → HTML
-            if ($signature->content_json && !$signature->content_html) {
+            if ($signature->content_json && ! $signature->content_html) {
                 try {
-                    if (class_exists(\Tiptap\Editor::class)) {
-                        $editor = new \Tiptap\Editor();
+                    if (class_exists(Editor::class)) {
+                        $editor = new Editor;
                         $html = $editor->setContent($signature->content_json)->getHTML();
-                        $sanitizer = app(\App\Services\MessageSanitizer::class);
+                        $sanitizer = app(MessageSanitizer::class);
                         $signature->content_html = $sanitizer->sanitizeHtml($html);
                     } else {
                         $signature->content_html = e(json_encode($signature->content_json));

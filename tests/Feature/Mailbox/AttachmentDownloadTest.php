@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\Mailbox;
 
-use Tests\TestCase;
 use App\Models\User;
 use App\Services\ImapMailboxService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
+use Tests\TestCase;
 
 class AttachmentDownloadTest extends TestCase
 {
@@ -32,23 +32,28 @@ class AttachmentDownloadTest extends TestCase
     /** @test */
     public function download_generates_uuid_based_filename()
     {
-        $mockAttachment = new class {
+        $mockAttachment = new class
+        {
             public string $name = 'document.pdf';
+
             public int $size = 102400;
+
             public string $contentType = 'application/pdf';
+
             public string $content = 'file content';
         };
 
         $mockAttachments = [$mockAttachment];
 
-        $mockMessage = new class($mockAttachments) {
+        $mockMessage = new class($mockAttachments)
+        {
             public $attachments;
-            
+
             public function __construct($attachments)
             {
                 $this->attachments = $attachments;
             }
-            
+
             public function getAttachments()
             {
                 return $this->attachments;
@@ -68,7 +73,7 @@ class AttachmentDownloadTest extends TestCase
         // Test that the download method generates UUID-based filename
         $service = app(ImapMailboxService::class);
         $attachment = $service->getAttachment('INBOX', 123, 0);
-        
+
         $this->assertNotNull($attachment);
         $this->assertEquals('document.pdf', $attachment->name);
     }
@@ -76,23 +81,28 @@ class AttachmentDownloadTest extends TestCase
     /** @test */
     public function path_traversal_in_filename_is_prevented()
     {
-        $mockAttachment = new class {
+        $mockAttachment = new class
+        {
             public string $name = '../../../etc/passwd';
+
             public int $size = 100;
+
             public string $contentType = 'application/octet-stream';
+
             public string $content = 'content';
         };
 
         $mockAttachments = [$mockAttachment];
 
-        $mockMessage = new class($mockAttachments) {
+        $mockMessage = new class($mockAttachments)
+        {
             public $attachments;
-            
+
             public function __construct($attachments)
             {
                 $this->attachments = $attachments;
             }
-            
+
             public function getAttachments()
             {
                 return $this->attachments;
@@ -117,23 +127,28 @@ class AttachmentDownloadTest extends TestCase
     /** @test */
     public function mime_type_validation_blocks_executables()
     {
-        $mockAttachment = new class {
+        $mockAttachment = new class
+        {
             public string $name = 'malware.exe';
+
             public int $size = 100;
+
             public string $contentType = 'application/x-msdownload';
+
             public string $content = 'content';
         };
 
         $mockAttachments = [$mockAttachment];
 
-        $mockMessage = new class($mockAttachments) {
+        $mockMessage = new class($mockAttachments)
+        {
             public $attachments;
-            
+
             public function __construct($attachments)
             {
                 $this->attachments = $attachments;
             }
-            
+
             public function getAttachments()
             {
                 return $this->attachments;
@@ -157,23 +172,28 @@ class AttachmentDownloadTest extends TestCase
     /** @test */
     public function content_type_header_is_set_correctly()
     {
-        $mockAttachment = new class {
+        $mockAttachment = new class
+        {
             public string $name = 'document.pdf';
+
             public int $size = 102400;
+
             public string $contentType = 'application/pdf';
+
             public string $content = 'file content';
         };
 
         $mockAttachments = [$mockAttachment];
 
-        $mockMessage = new class($mockAttachments) {
+        $mockMessage = new class($mockAttachments)
+        {
             public $attachments;
-            
+
             public function __construct($attachments)
             {
                 $this->attachments = $attachments;
             }
-            
+
             public function getAttachments()
             {
                 return $this->attachments;
@@ -197,23 +217,28 @@ class AttachmentDownloadTest extends TestCase
     /** @test */
     public function content_disposition_is_attachment_not_inline()
     {
-        $mockAttachment = new class {
+        $mockAttachment = new class
+        {
             public string $name = 'document.pdf';
+
             public int $size = 102400;
+
             public string $contentType = 'application/pdf';
+
             public string $content = 'file content';
         };
 
         $mockAttachments = [$mockAttachment];
 
-        $mockMessage = new class($mockAttachments) {
+        $mockMessage = new class($mockAttachments)
+        {
             public $attachments;
-            
+
             public function __construct($attachments)
             {
                 $this->attachments = $attachments;
             }
-            
+
             public function getAttachments()
             {
                 return $this->attachments;

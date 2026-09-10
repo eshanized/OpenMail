@@ -2,18 +2,23 @@
 
 namespace App\Livewire\Mailbox;
 
-use Livewire\Component;
-use App\Services\LabelService;
 use App\Models\Label;
+use App\Services\LabelService;
 use Illuminate\Support\Collection;
+use Livewire\Component;
 
 class LabelSidebar extends Component
 {
     public Collection $labels;
+
     public bool $showModal = false;
+
     public ?Label $editingLabel = null;
+
     public bool $activeTab = false;
+
     public bool $isLoading = true;
+
     public ?string $activeLabelId = null;
 
     protected $listeners = [

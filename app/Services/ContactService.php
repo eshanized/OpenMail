@@ -2,12 +2,10 @@
 
 namespace App\Services;
 
+use App\Exceptions\DuplicateContactException;
 use App\Models\Contact;
 use App\Models\ContactGroup;
-use App\Models\User;
 use Illuminate\Support\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
-use App\Exceptions\DuplicateContactException;
 
 class ContactService
 {
@@ -53,6 +51,7 @@ class ContactService
         }
 
         $contact->update($data);
+
         return $contact->fresh() ?? $contact;
     }
 
@@ -98,12 +97,13 @@ class ContactService
     public function createGroup(int $userId, array $data): ContactGroup
     {
         $data['user_id'] = $userId;
+
         return ContactGroup::create($data);
     }
 
     private function validateEmail(string $email): void
     {
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new \InvalidArgumentException("Invalid email format: {$email}");
         }
     }

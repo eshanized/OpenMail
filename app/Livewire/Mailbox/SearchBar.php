@@ -2,16 +2,21 @@
 
 namespace App\Livewire\Mailbox;
 
-use Livewire\Component;
 use App\Services\SearchService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
+use Livewire\Component;
 
 class SearchBar extends Component
 {
     public string $query = '';
+
     public Collection $results;
+
     public bool $loading = false;
+
     public bool $open = false;
+
     public int $highlightedIndex = -1;
 
     protected $listeners = [
@@ -33,6 +38,7 @@ class SearchBar extends Component
             $this->results = collect();
             $this->open = false;
             $this->loading = false;
+
             return;
         }
 
@@ -53,10 +59,10 @@ class SearchBar extends Component
     /**
      * Navigate to message view when a result is clicked.
      */
-    public function openResult(int $id): \Illuminate\Http\RedirectResponse
+    public function openResult(int $id): RedirectResponse
     {
         $result = $this->results->firstWhere('id', $id);
-        if (!$result) {
+        if (! $result) {
             return redirect()->back();
         }
 

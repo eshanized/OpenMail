@@ -2,17 +2,22 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Http\Middleware\SsrfProtection;
-use App\Services\MessageSanitizer;
-use App\Services\ContactService;
-use App\Services\LabelService;
-use App\Services\SearchService;
-use App\Models\User;
-use App\Models\Contact;
+use App\Install\SecurityConfigurator;
+use App\Livewire\Mailbox\AttachmentList;
+use App\Livewire\SetupWizard;
+use App\Models\ContactAutocompleteCache;
 use App\Models\Label;
 use App\Models\MessageMetadata;
+use App\Models\User;
+use App\Services\ContactAutocompleteService;
+use App\Services\ContactService;
+use App\Services\LabelService;
+use App\Services\MessageSanitizer;
+use App\Services\SearchService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 /**
  * Regression tests for security fixes found during battle testing.
@@ -31,7 +36,7 @@ class SecurityRegressionTest extends TestCase
     /** @test */
     public function ssrf_middleware_blocks_ipv4_loopback(): void
     {
-        $middleware = new SsrfProtection();
+        $middleware = new SsrfProtection;
         $this->assertTrue($middleware->isDangerousUrl('http://127.0.0.1/secret'));
         $this->assertTrue($middleware->isDangerousUrl('http://127.0.0.1:8080/admin'));
         $this->assertTrue($middleware->isDangerousUrl('http://127.1.2.3/path'));
@@ -40,7 +45,7 @@ class SecurityRegressionTest extends TestCase
     /** @test */
     public function ssrf_middleware_blocks_private_ipv4_ranges(): void
     {
-        $middleware = new SsrfProtection();
+        $middleware = new SsrfProtection;
 
         // 10.0.0.0/8
         $this->assertTrue($middleware->isDangerousUrl('http://10.0.0.1/'));
@@ -58,7 +63,7 @@ class SecurityRegressionTest extends TestCase
     /** @test */
     public function ssrf_middleware_blocks_link_local(): void
     {
-        $middleware = new SsrfProtection();
+        $middleware = new SsrfProtection;
         $this->assertTrue($middleware->isDangerousUrl('http://169.254.169.254/latest/meta-data/'));
         $this->assertTrue($middleware->isDangerousUrl('http://169.254.1.1/metadata'));
     }
@@ -66,7 +71,7 @@ class SecurityRegressionTest extends TestCase
     /** @test */
     public function ssrf_middleware_blocks_ipv6_loopback_and_private(): void
     {
-        $middleware = new SsrfProtection();
+        $middleware = new SsrfProtection;
         $this->assertTrue($middleware->isDangerousUrl('http://[::1]/'));
         $this->assertTrue($middleware->isDangerousUrl('http://[::ffff:127.0.0.1]/'));
         $this->assertTrue($middleware->isDangerousUrl('http://[fc00::1]/'));
@@ -77,7 +82,7 @@ class SecurityRegressionTest extends TestCase
     /** @test */
     public function ssrf_middleware_blocks_decimal_ip(): void
     {
-        $middleware = new SsrfProtection();
+        $middleware = new SsrfProtection;
         // 2130706433 = 127.0.0.1 in decimal
         $this->assertTrue($middleware->isDangerousUrl('http://2130706433/'));
         // 167772161 = 10.0.0.1 in decimal
@@ -87,7 +92,7 @@ class SecurityRegressionTest extends TestCase
     /** @test */
     public function ssrf_middleware_blocks_octal_ip(): void
     {
-        $middleware = new SsrfProtection();
+        $middleware = new SsrfProtection;
         // 0177.0.0.1 = 127.0.0.1 in octal
         $this->assertTrue($middleware->isDangerousUrl('http://0177.0.0.1/'));
         $this->assertTrue($middleware->isDangerousUrl('http://010.0.0.1/'));
@@ -96,7 +101,7 @@ class SecurityRegressionTest extends TestCase
     /** @test */
     public function ssrf_middleware_blocks_hex_ip(): void
     {
-        $middleware = new SsrfProtection();
+        $middleware = new SsrfProtection;
         // 0x7f.0x0.0x0.0x1 = 127.0.0.1 in hex
         $this->assertTrue($middleware->isDangerousUrl('http://0x7f.0x0.0x0.0x1/'));
     }
@@ -104,7 +109,7 @@ class SecurityRegressionTest extends TestCase
     /** @test */
     public function ssrf_middleware_blocks_0x0_0_0_0(): void
     {
-        $middleware = new SsrfProtection();
+        $middleware = new SsrfProtection;
         $this->assertTrue($middleware->isDangerousUrl('http://0.0.0.0/'));
         $this->assertTrue($middleware->isDangerousUrl('http://0/'));
     }
@@ -112,7 +117,7 @@ class SecurityRegressionTest extends TestCase
     /** @test */
     public function ssrf_middleware_blocks_dangerous_schemes(): void
     {
-        $middleware = new SsrfProtection();
+        $middleware = new SsrfProtection;
         $this->assertTrue($middleware->isDangerousUrl('javascript:alert(1)'));
         $this->assertTrue($middleware->isDangerousUrl('data:text/html,<script>alert(1)</script>'));
         $this->assertTrue($middleware->isDangerousUrl('vbscript:MsgBox(1)'));
@@ -122,7 +127,7 @@ class SecurityRegressionTest extends TestCase
     /** @test */
     public function ssrf_middleware_allows_safe_urls(): void
     {
-        $middleware = new SsrfProtection();
+        $middleware = new SsrfProtection;
         $this->assertFalse($middleware->isDangerousUrl('https://example.com'));
         $this->assertFalse($middleware->isDangerousUrl('https://google.com/search?q=test'));
         $this->assertFalse($middleware->isDangerousUrl('mailto:user@example.com'));
@@ -137,7 +142,7 @@ class SecurityRegressionTest extends TestCase
     /** @test */
     public function sanitizer_blocks_private_ips_in_email_links(): void
     {
-        $sanitizer = new MessageSanitizer();
+        $sanitizer = new MessageSanitizer;
 
         $html = '<a href="http://172.16.0.1/admin">Click</a>';
         $result = $sanitizer->sanitizeUrls($html);
@@ -152,7 +157,7 @@ class SecurityRegressionTest extends TestCase
     /** @test */
     public function sanitizer_blocks_ipv6_private_in_email_links(): void
     {
-        $sanitizer = new MessageSanitizer();
+        $sanitizer = new MessageSanitizer;
 
         $html = '<a href="http://[::1]/admin">Localhost</a>';
         $result = $sanitizer->sanitizeUrls($html);
@@ -166,7 +171,7 @@ class SecurityRegressionTest extends TestCase
     /** @test */
     public function sanitizer_blocks_decimal_ip_in_email_links(): void
     {
-        $sanitizer = new MessageSanitizer();
+        $sanitizer = new MessageSanitizer;
 
         // 2130706433 = 127.0.0.1
         $html = '<a href="http://2130706433/">Loopback</a>';
@@ -177,7 +182,7 @@ class SecurityRegressionTest extends TestCase
     /** @test */
     public function sanitizer_blocks_octal_ip_in_email_links(): void
     {
-        $sanitizer = new MessageSanitizer();
+        $sanitizer = new MessageSanitizer;
 
         $html = '<a href="http://0177.0.0.1/">Octal loopback</a>';
         $result = $sanitizer->sanitizeUrls($html);
@@ -187,7 +192,7 @@ class SecurityRegressionTest extends TestCase
     /** @test */
     public function sanitizer_blocks_hex_ip_in_email_links(): void
     {
-        $sanitizer = new MessageSanitizer();
+        $sanitizer = new MessageSanitizer;
 
         $html = '<a href="http://0x7f.0x0.0x0.0x1/">Hex loopback</a>';
         $result = $sanitizer->sanitizeUrls($html);
@@ -197,7 +202,7 @@ class SecurityRegressionTest extends TestCase
     /** @test */
     public function sanitizer_allows_safe_urls_in_email_links(): void
     {
-        $sanitizer = new MessageSanitizer();
+        $sanitizer = new MessageSanitizer;
 
         $html = '<a href="https://example.com">Safe</a>';
         $result = $sanitizer->sanitizeUrls($html);
@@ -212,7 +217,7 @@ class SecurityRegressionTest extends TestCase
     /** @test */
     public function sanitizer_blocks_javascript_schemes(): void
     {
-        $sanitizer = new MessageSanitizer();
+        $sanitizer = new MessageSanitizer;
 
         $html = '<a href="javascript:alert(1)">XSS</a>';
         $result = $sanitizer->sanitizeUrls($html);
@@ -222,7 +227,7 @@ class SecurityRegressionTest extends TestCase
     /** @test */
     public function sanitizer_handles_url_encoded_bypasses(): void
     {
-        $sanitizer = new MessageSanitizer();
+        $sanitizer = new MessageSanitizer;
 
         // URL-encoded dots should be decoded before checking
         $html = '<a href="http://127%2e0%2e0%2e1/">Encoded</a>';
@@ -238,7 +243,7 @@ class SecurityRegressionTest extends TestCase
     public function contact_search_escapes_like_wildcards(): void
     {
         $user = User::factory()->create();
-        $service = new ContactService();
+        $service = new ContactService;
 
         $service->create($user->id, ['name' => 'Test User', 'email' => 'test@example.com']);
         $service->create($user->id, ['name' => 'Another User', 'email' => 'another@example.com']);
@@ -261,7 +266,7 @@ class SecurityRegressionTest extends TestCase
         $user = User::factory()->create();
 
         // Create autocomplete cache entries
-        \App\Models\ContactAutocompleteCache::create([
+        ContactAutocompleteCache::create([
             'user_id' => $user->id,
             'email' => 'test@example.com',
             'name' => 'Test Contact',
@@ -270,7 +275,7 @@ class SecurityRegressionTest extends TestCase
             'expires_at' => now()->addDays(7),
         ]);
 
-        $service = app(\App\Services\ContactAutocompleteService::class);
+        $service = app(ContactAutocompleteService::class);
 
         // % should be treated literally
         $results = $service->search($user->id, '%');
@@ -296,7 +301,7 @@ class SecurityRegressionTest extends TestCase
         // Verify that the whitelist approach is more restrictive.
         // This is a code-structure test: the allowedMimeTypes array must be checked.
 
-        $reflection = new \ReflectionClass(\App\Livewire\Mailbox\AttachmentList::class);
+        $reflection = new \ReflectionClass(AttachmentList::class);
         $method = $reflection->getMethod('download');
         $source = file_get_contents($method->getFileName());
 
@@ -314,7 +319,7 @@ class SecurityRegressionTest extends TestCase
     public function security_configurator_enables_session_encryption(): void
     {
         // The SecurityConfigurator must set SESSION_ENCRYPT=true
-        $reflection = new \ReflectionClass(\App\Install\SecurityConfigurator::class);
+        $reflection = new \ReflectionClass(SecurityConfigurator::class);
         $method = $reflection->getMethod('apply');
         $source = file_get_contents($method->getFileName());
 
@@ -329,7 +334,7 @@ class SecurityRegressionTest extends TestCase
     /** @test */
     public function setup_wizard_encrypts_credentials_in_session(): void
     {
-        $reflection = new \ReflectionClass(\App\Livewire\SetupWizard::class);
+        $reflection = new \ReflectionClass(SetupWizard::class);
         $method = $reflection->getMethod('sessionPayload');
         $source = file_get_contents($method->getFileName());
 
@@ -343,7 +348,7 @@ class SecurityRegressionTest extends TestCase
     /** @test */
     public function setup_wizard_decrypts_credentials_on_restore(): void
     {
-        $reflection = new \ReflectionClass(\App\Livewire\SetupWizard::class);
+        $reflection = new \ReflectionClass(SetupWizard::class);
         $method = $reflection->getMethod('restoreFromSession');
         $source = file_get_contents($method->getFileName());
 
@@ -379,7 +384,7 @@ class SecurityRegressionTest extends TestCase
         $this->assertCount(1, $msg1->fresh()->labels);
 
         // User1 should NOT be able to apply user2's label (IDOR)
-        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+        $this->expectException(ModelNotFoundException::class);
         $labelService->applyToMessages($label2->id, [$msg1->id], $user1->id);
     }
 
@@ -397,7 +402,7 @@ class SecurityRegressionTest extends TestCase
         $labelService->applyToMessages($label1->id, [$msg1->id], $user1->id);
 
         // User2 tries to remove user1's label (IDOR) — should fail
-        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+        $this->expectException(ModelNotFoundException::class);
         $labelService->removeFromMessages($label1->id, [$msg1->id], $user2->id);
     }
 

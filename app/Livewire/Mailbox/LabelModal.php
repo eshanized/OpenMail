@@ -2,16 +2,21 @@
 
 namespace App\Livewire\Mailbox;
 
-use Livewire\Component;
-use App\Services\LabelService;
 use App\Models\Label;
+use App\Services\LabelService;
+use Illuminate\Validation\ValidationException;
+use Livewire\Component;
 
 class LabelModal extends Component
 {
     public bool $show = false;
+
     public ?Label $label = null;
+
     public string $name = '';
+
     public string $color = '#2563EB';
+
     public array $palette = [];
 
     protected $listeners = [
@@ -54,7 +59,7 @@ class LabelModal extends Component
             $this->show = false;
             $this->dispatch('labelSaved');
             $this->dispatch('toast', $this->label ? 'Label updated' : 'Label created', 'success');
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             $this->dispatch('toast', $e->getMessage(), 'error');
         }
     }

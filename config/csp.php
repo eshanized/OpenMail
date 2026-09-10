@@ -1,5 +1,8 @@
 <?php
 
+use App\Support\Csp\LaravelViteNonceGenerator;
+use App\Support\Csp\OpenMailPreset;
+
 /**
  * Content Security Policy Configuration
  *
@@ -59,7 +62,7 @@ return [
     | nonce injection that integrates with Vite's build pipeline.
     |
     */
-    'nonce_generator' => \App\Support\Csp\LaravelViteNonceGenerator::class,
+    'nonce_generator' => LaravelViteNonceGenerator::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -94,7 +97,7 @@ return [
     |
     */
     'presets' => [
-        \App\Support\Csp\OpenMailPreset::class,
+        OpenMailPreset::class,
     ],
 
     /*

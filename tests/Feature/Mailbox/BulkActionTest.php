@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\Mailbox;
 
-use Tests\TestCase;
 use App\Models\User;
 use App\Services\ImapMailboxService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
+use Tests\TestCase;
 
 class BulkActionTest extends TestCase
 {
@@ -44,7 +44,7 @@ class BulkActionTest extends TestCase
         // For now, verify the service method is called correctly
         $service = app(ImapMailboxService::class);
         $result = $service->setFlag('INBOX', [1, 2, 3], '\\Seen', true);
-        
+
         $this->assertTrue($result);
     }
 
@@ -61,7 +61,7 @@ class BulkActionTest extends TestCase
 
         $service = app(ImapMailboxService::class);
         $result = $service->setFlag('INBOX', [1, 2, 3], '\\Seen', false);
-        
+
         $this->assertTrue($result);
     }
 
@@ -78,7 +78,7 @@ class BulkActionTest extends TestCase
 
         $service = app(ImapMailboxService::class);
         $result = $service->setFlag('INBOX', [1, 2, 3], '\\Flagged', true);
-        
+
         $this->assertTrue($result);
     }
 
@@ -95,7 +95,7 @@ class BulkActionTest extends TestCase
 
         $service = app(ImapMailboxService::class);
         $result = $service->deleteMessages('INBOX', [1, 2, 3]);
-        
+
         $this->assertTrue($result);
     }
 
@@ -112,7 +112,7 @@ class BulkActionTest extends TestCase
 
         $service = app(ImapMailboxService::class);
         $result = $service->moveMessages('INBOX', [1, 2, 3], 'Archive');
-        
+
         $this->assertTrue($result);
     }
 

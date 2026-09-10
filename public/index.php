@@ -1,5 +1,6 @@
 <?php
 
+use App\Install\InstallationBootstrap;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 
@@ -16,9 +17,9 @@ require __DIR__.'/../vendor/autoload.php';
 // Bootstrap installer requirements (generates APP_KEY, creates .env if missing).
 // This runs BEFORE Laravel boots so the installer can reach the UI even with
 // a completely fresh deployment (no .env, no APP_KEY).
-if (! file_exists(__DIR__ . '/../storage/installed')) {
-    require_once __DIR__ . '/../app/Install/InstallationBootstrap.php';
-    \App\Install\InstallationBootstrap::ensureBootable(dirname(__DIR__));
+if (! file_exists(__DIR__.'/../storage/installed')) {
+    require_once __DIR__.'/../app/Install/InstallationBootstrap.php';
+    InstallationBootstrap::ensureBootable(dirname(__DIR__));
 }
 
 // Bootstrap Laravel and handle the request...

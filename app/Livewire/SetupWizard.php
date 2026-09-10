@@ -42,65 +42,99 @@ use Livewire\Component;
 class SetupWizard extends Component
 {
     // ── Wizard state ──────────────────────────────────────────────────────────
-    public int   $currentStep    = 1;
-    public int   $totalSteps     = 8;
+    public int $currentStep = 1;
+
+    public int $totalSteps = 8;
+
     public array $completedSteps = [];
 
     // ── Step 1: Welcome ───────────────────────────────────────────────────────
-    public string $appName     = 'OpenMail';
+    public string $appName = 'OpenMail';
+
     public string $installMode = 'fresh'; // 'fresh' | 'continue'
 
     // ── Step 2: Requirements ──────────────────────────────────────────────────
-    public array $requirements       = [];
-    public bool  $requirementsLoaded = false;
+    public array $requirements = [];
+
+    public bool $requirementsLoaded = false;
 
     // ── Step 3: Database ──────────────────────────────────────────────────────
-    public string  $dbHost          = '127.0.0.1';
-    public string  $dbPort          = '3306';
-    public string  $dbDatabase      = '';
-    public string  $dbUsername      = 'root';
-    public string  $dbPassword      = '';
-    public ?array  $dbTestResult    = null;
-    public ?array  $createDbResult  = null;
-    public ?array  $migrationResult = null;
-    public bool    $migrationsRan   = false;
+    public string $dbHost = '127.0.0.1';
+
+    public string $dbPort = '3306';
+
+    public string $dbDatabase = '';
+
+    public string $dbUsername = 'root';
+
+    public string $dbPassword = '';
+
+    public ?array $dbTestResult = null;
+
+    public ?array $createDbResult = null;
+
+    public ?array $migrationResult = null;
+
+    public bool $migrationsRan = false;
 
     // ── Step 4: Mail ──────────────────────────────────────────────────────────
-    public string  $emailDomain      = '';
-    public string  $detectedProvider = '';
-    public string  $imapHost         = '';
-    public int     $imapPort         = 993;
-    public string  $imapEncryption   = 'ssl';
-    public string  $imapUsername     = '';
-    public string  $imapPassword     = '';
-    public string  $smtpHost         = '';
-    public int     $smtpPort         = 465;
-    public string  $smtpEncryption   = 'ssl';
-    public string  $smtpUsername     = '';
-    public string  $smtpPassword     = '';
-    public ?array  $imapTestResult   = null;
-    public ?array  $smtpTestResult   = null;
+    public string $emailDomain = '';
+
+    public string $detectedProvider = '';
+
+    public string $imapHost = '';
+
+    public int $imapPort = 993;
+
+    public string $imapEncryption = 'ssl';
+
+    public string $imapUsername = '';
+
+    public string $imapPassword = '';
+
+    public string $smtpHost = '';
+
+    public int $smtpPort = 465;
+
+    public string $smtpEncryption = 'ssl';
+
+    public string $smtpUsername = '';
+
+    public string $smtpPassword = '';
+
+    public ?array $imapTestResult = null;
+
+    public ?array $smtpTestResult = null;
 
     // ── Step 5: Application settings ─────────────────────────────────────────
-    public string $appOrg      = '';
-    public string $appDomain   = '';
-    public string $appUrl      = '';
+    public string $appOrg = '';
+
+    public string $appDomain = '';
+
+    public string $appUrl = '';
+
     public string $appTimezone = 'UTC';
 
     // ── Step 6: Administrator ─────────────────────────────────────────────────
-    public string $adminName                = '';
-    public string $adminEmail               = '';
-    public string $adminPassword            = '';
+    public string $adminName = '';
+
+    public string $adminEmail = '';
+
+    public string $adminPassword = '';
+
     public string $adminPasswordConfirmation = '';
 
     // ── Step 7: Security ─────────────────────────────────────────────────────
     public bool $httpsEnabled = false;
+
     public bool $secureCookies = false;
 
     // ── Step 8: Verification ─────────────────────────────────────────────────
-    public array $verificationResults  = [];
-    public bool  $verificationRun      = false;
-    public bool  $installationComplete = false;
+    public array $verificationResults = [];
+
+    public bool $verificationRun = false;
+
+    public bool $installationComplete = false;
 
     // ── Validation rules per step ─────────────────────────────────────────────
     /** @var array<int, array<string, string>> */
@@ -110,33 +144,33 @@ class SetupWizard extends Component
         ],
         2 => [],
         3 => [
-            'dbHost'     => 'required|string',
-            'dbPort'     => 'required|integer|min:1|max:65535',
+            'dbHost' => 'required|string',
+            'dbPort' => 'required|integer|min:1|max:65535',
             'dbDatabase' => 'required|string|min:1',
             'dbUsername' => 'nullable|string',
             'dbPassword' => 'nullable|string',
         ],
         4 => [
-            'imapHost'       => 'required|string',
-            'imapPort'       => 'required|integer|min:1|max:65535',
+            'imapHost' => 'required|string',
+            'imapPort' => 'required|integer|min:1|max:65535',
             'imapEncryption' => 'required|in:ssl,tls,none',
-            'imapUsername'   => 'required|string',
-            'imapPassword'   => 'required|string',
-            'smtpHost'       => 'required|string',
-            'smtpPort'       => 'required|integer|min:1|max:65535',
+            'imapUsername' => 'required|string',
+            'imapPassword' => 'required|string',
+            'smtpHost' => 'required|string',
+            'smtpPort' => 'required|integer|min:1|max:65535',
             'smtpEncryption' => 'required|in:ssl,tls,none',
-            'smtpUsername'   => 'required|string',
-            'smtpPassword'   => 'required|string',
+            'smtpUsername' => 'required|string',
+            'smtpPassword' => 'required|string',
         ],
         5 => [
-            'appOrg'      => 'required|string|min:2|max:100',
-            'appDomain'   => 'required|string|min:3|max:255',
+            'appOrg' => 'required|string|min:2|max:100',
+            'appDomain' => 'required|string|min:3|max:255',
             'appTimezone' => 'required|timezone',
         ],
         6 => [
-            'adminName'                 => 'required|string|min:2|max:100',
-            'adminEmail'                => 'required|email',
-            'adminPassword'             => 'required|string|min:8|regex:/[A-Z]/|regex:/[a-z]/|regex:/[0-9]/|same:adminPasswordConfirmation',
+            'adminName' => 'required|string|min:2|max:100',
+            'adminEmail' => 'required|email',
+            'adminPassword' => 'required|string|min:8|regex:/[A-Z]/|regex:/[a-z]/|regex:/[0-9]/|same:adminPasswordConfirmation',
             'adminPasswordConfirmation' => 'required|string',
         ],
         7 => [],
@@ -150,13 +184,13 @@ class SetupWizard extends Component
     public function mount(): void
     {
         $this->restoreFromSession();
-        $this->requirements       = app(SystemRequirementsChecker::class)->check();
+        $this->requirements = app(SystemRequirementsChecker::class)->check();
         $this->requirementsLoaded = true;
         $this->detectInstallMode();
 
         // Pre-populate from request context
         if (! $this->httpsEnabled) {
-            $this->httpsEnabled  = request()->isSecure();
+            $this->httpsEnabled = request()->isSecure();
             $this->secureCookies = request()->isSecure();
         }
 
@@ -175,10 +209,12 @@ class SetupWizard extends Component
         if ($this->currentStep === 3) {
             if (! $this->dbTestResult || ! $this->dbTestResult['success']) {
                 $this->addError('dbConnection', 'Test the database connection successfully before proceeding.');
+
                 return;
             }
             if (! $this->migrationsRan) {
                 $this->addError('dbMigrations', 'Run database migrations successfully before proceeding.');
+
                 return;
             }
         }
@@ -186,7 +222,7 @@ class SetupWizard extends Component
         $rules = $this->stepRules[$this->currentStep] ?? [];
         if (! empty($rules)) {
             $this->validate($rules, [
-                'adminPassword.same'  => 'The password confirmation does not match.',
+                'adminPassword.same' => 'The password confirmation does not match.',
                 'adminPassword.regex' => 'The password must contain at least one uppercase letter, one lowercase letter, and one number.',
             ]);
         }
@@ -222,14 +258,14 @@ class SetupWizard extends Component
     public function testDatabaseConnection(): void
     {
         $this->validate([
-            'dbHost'     => 'required|string',
-            'dbPort'     => 'required|integer|min:1|max:65535',
+            'dbHost' => 'required|string',
+            'dbPort' => 'required|integer|min:1|max:65535',
             'dbDatabase' => 'required|string|min:1',
             'dbUsername' => 'nullable|string',
             'dbPassword' => 'nullable|string',
         ]);
 
-        $this->dbTestResult   = app(DatabaseInstaller::class)->testConnection(
+        $this->dbTestResult = app(DatabaseInstaller::class)->testConnection(
             $this->dbHost,
             (int) $this->dbPort,
             $this->dbDatabase,
@@ -238,7 +274,7 @@ class SetupWizard extends Component
         );
 
         // Reset migration state whenever connection config changes
-        $this->migrationsRan   = false;
+        $this->migrationsRan = false;
         $this->migrationResult = null;
 
         $this->saveToSession();
@@ -247,11 +283,11 @@ class SetupWizard extends Component
     public function createDatabase(): void
     {
         $this->validate([
-            'dbHost'     => 'required|string',
-            'dbPort'     => 'required|integer|min:1|max:65535',
+            'dbHost' => 'required|string',
+            'dbPort' => 'required|integer|min:1|max:65535',
             'dbDatabase' => 'required|string|min:1',
-            'dbUsername'  => 'nullable|string',
-            'dbPassword'  => 'nullable|string',
+            'dbUsername' => 'nullable|string',
+            'dbPassword' => 'nullable|string',
         ]);
 
         $this->createDbResult = app(DatabaseInstaller::class)->createDatabase(
@@ -274,6 +310,7 @@ class SetupWizard extends Component
     {
         if (! $this->dbTestResult || ! $this->dbTestResult['success']) {
             $this->addError('dbConnection', 'Test the database connection successfully first.');
+
             return;
         }
 
@@ -282,7 +319,7 @@ class SetupWizard extends Component
         Artisan::call('config:clear');
 
         $this->migrationResult = app(DatabaseInstaller::class)->runMigrations();
-        $this->migrationsRan   = $this->migrationResult['success'];
+        $this->migrationsRan = $this->migrationResult['success'];
 
         $this->saveToSession();
     }
@@ -298,14 +335,14 @@ class SetupWizard extends Component
 
             if ($detected) {
                 $this->detectedProvider = $detected['name'];
-                $this->imapHost         = $detected['imap_host'];
-                $this->imapPort         = $detected['imap_port'];
-                $this->imapEncryption   = $detected['imap_encryption'];
-                $this->smtpHost         = $detected['smtp_host'];
-                $this->smtpPort         = $detected['smtp_port'];
-                $this->smtpEncryption   = $detected['smtp_encryption'];
-                $this->imapUsername     = $this->emailDomain;
-                $this->smtpUsername     = $this->emailDomain;
+                $this->imapHost = $detected['imap_host'];
+                $this->imapPort = $detected['imap_port'];
+                $this->imapEncryption = $detected['imap_encryption'];
+                $this->smtpHost = $detected['smtp_host'];
+                $this->smtpPort = $detected['smtp_port'];
+                $this->smtpEncryption = $detected['smtp_encryption'];
+                $this->imapUsername = $this->emailDomain;
+                $this->smtpUsername = $this->emailDomain;
             }
         }
     }
@@ -313,11 +350,11 @@ class SetupWizard extends Component
     public function testImapConnection(): void
     {
         $this->validate([
-            'imapHost'       => 'required|string',
-            'imapPort'       => 'required|integer|min:1|max:65535',
+            'imapHost' => 'required|string',
+            'imapPort' => 'required|integer|min:1|max:65535',
             'imapEncryption' => 'required|in:ssl,tls,none',
-            'imapUsername'   => 'required|string',
-            'imapPassword'   => 'required|string',
+            'imapUsername' => 'required|string',
+            'imapPassword' => 'required|string',
         ]);
 
         $this->imapTestResult = app(ImapConnectionTester::class)->test(
@@ -334,11 +371,11 @@ class SetupWizard extends Component
     public function testSmtpConnection(): void
     {
         $this->validate([
-            'smtpHost'       => 'required|string',
-            'smtpPort'       => 'required|integer|min:1|max:65535',
+            'smtpHost' => 'required|string',
+            'smtpPort' => 'required|integer|min:1|max:65535',
             'smtpEncryption' => 'required|in:ssl,tls,none',
-            'smtpUsername'   => 'required|string',
-            'smtpPassword'   => 'required|string',
+            'smtpUsername' => 'required|string',
+            'smtpPassword' => 'required|string',
         ]);
 
         $this->smtpTestResult = app(SmtpConnectionTester::class)->test(
@@ -364,38 +401,38 @@ class SetupWizard extends Component
         $appKey = config('app.key');
         $hasKey = ! empty($appKey) && strlen($appKey) > 10;
         $checks[] = [
-            'name'    => 'app_key',
-            'label'   => 'Application key configured',
-            'passed'  => $hasKey,
-            'error'   => $hasKey ? null : 'APP_KEY is not set. It will be generated automatically.',
+            'name' => 'app_key',
+            'label' => 'Application key configured',
+            'passed' => $hasKey,
+            'error' => $hasKey ? null : 'APP_KEY is not set. It will be generated automatically.',
             'fixable' => false,
             'fixStep' => null,
         ];
 
         // 2. Database connection
         $dbPassed = false;
-        $dbError  = null;
+        $dbError = null;
         try {
             DB::connection()->getPdo();
             $dbPassed = true;
         } catch (\Exception $e) {
-            $dbError = 'Database connection failed: ' . $e->getMessage();
+            $dbError = 'Database connection failed: '.$e->getMessage();
         }
         $checks[] = [
-            'name'    => 'db_connection',
-            'label'   => 'Database connected',
-            'passed'  => $dbPassed,
-            'error'   => $dbError,
+            'name' => 'db_connection',
+            'label' => 'Database connected',
+            'passed' => $dbPassed,
+            'error' => $dbError,
             'fixable' => true,
             'fixStep' => 3,
         ];
 
         // 3. Migrations
         $checks[] = [
-            'name'    => 'migrations',
-            'label'   => 'Database tables created',
-            'passed'  => $this->migrationsRan,
-            'error'   => $this->migrationsRan ? null : 'Migrations have not been run. Return to the Database step.',
+            'name' => 'migrations',
+            'label' => 'Database tables created',
+            'passed' => $this->migrationsRan,
+            'error' => $this->migrationsRan ? null : 'Migrations have not been run. Return to the Database step.',
             'fixable' => true,
             'fixStep' => 3,
         ];
@@ -410,20 +447,20 @@ class SetupWizard extends Component
                 $this->imapPassword,
             );
             $checks[] = [
-                'name'      => 'imap_connection',
-                'label'     => 'IMAP (incoming mail) connected',
-                'passed'    => $imapResult['success'],
-                'error'     => $imapResult['success'] ? null : $imapResult['error'],
+                'name' => 'imap_connection',
+                'label' => 'IMAP (incoming mail) connected',
+                'passed' => $imapResult['success'],
+                'error' => $imapResult['success'] ? null : $imapResult['error'],
                 'technical' => $imapResult['technical'] ?? null,
-                'fixable'   => true,
-                'fixStep'   => 4,
+                'fixable' => true,
+                'fixStep' => 4,
             ];
         } else {
             $checks[] = [
-                'name'    => 'imap_connection',
-                'label'   => 'IMAP (incoming mail) connected',
-                'passed'  => false,
-                'error'   => 'IMAP credentials not configured.',
+                'name' => 'imap_connection',
+                'label' => 'IMAP (incoming mail) connected',
+                'passed' => false,
+                'error' => 'IMAP credentials not configured.',
                 'fixable' => true,
                 'fixStep' => 4,
             ];
@@ -439,39 +476,39 @@ class SetupWizard extends Component
                 $this->smtpPassword,
             );
             $checks[] = [
-                'name'      => 'smtp_connection',
-                'label'     => 'SMTP (outgoing mail) connected',
-                'passed'    => $smtpResult['success'],
-                'error'     => $smtpResult['success'] ? null : $smtpResult['error'],
+                'name' => 'smtp_connection',
+                'label' => 'SMTP (outgoing mail) connected',
+                'passed' => $smtpResult['success'],
+                'error' => $smtpResult['success'] ? null : $smtpResult['error'],
                 'technical' => $smtpResult['technical'] ?? null,
-                'fixable'   => true,
-                'fixStep'   => 4,
+                'fixable' => true,
+                'fixStep' => 4,
             ];
         } else {
             $checks[] = [
-                'name'    => 'smtp_connection',
-                'label'   => 'SMTP (outgoing mail) connected',
-                'passed'  => false,
-                'error'   => 'SMTP credentials not configured.',
+                'name' => 'smtp_connection',
+                'label' => 'SMTP (outgoing mail) connected',
+                'passed' => false,
+                'error' => 'SMTP credentials not configured.',
                 'fixable' => true,
                 'fixStep' => 4,
             ];
         }
 
         // 6. Filesystem
-        $storagePath    = storage_path();
-        $bootstrapPath  = base_path('bootstrap/cache');
-        $storageOk      = is_writable($storagePath);
-        $bootstrapOk    = is_writable($bootstrapPath);
-        $fsOk           = $storageOk && $bootstrapOk;
+        $storagePath = storage_path();
+        $bootstrapPath = base_path('bootstrap/cache');
+        $storageOk = is_writable($storagePath);
+        $bootstrapOk = is_writable($bootstrapPath);
+        $fsOk = $storageOk && $bootstrapOk;
         $checks[] = [
-            'name'    => 'filesystem',
-            'label'   => 'Filesystem writable',
-            'passed'  => $fsOk,
-            'error'   => $fsOk ? null : sprintf(
+            'name' => 'filesystem',
+            'label' => 'Filesystem writable',
+            'passed' => $fsOk,
+            'error' => $fsOk ? null : sprintf(
                 'Directories not writable: %s',
                 implode(', ', array_filter([
-                    $storageOk   ? null : 'storage/',
+                    $storageOk ? null : 'storage/',
                     $bootstrapOk ? null : 'bootstrap/cache/',
                 ])),
             ),
@@ -482,16 +519,16 @@ class SetupWizard extends Component
         // 7. Admin account ready
         $adminReady = ! empty($this->adminEmail) && ! empty($this->adminPassword);
         $checks[] = [
-            'name'    => 'admin_account',
-            'label'   => 'Administrator account ready',
-            'passed'  => $adminReady,
-            'error'   => $adminReady ? null : 'Administrator credentials not provided.',
+            'name' => 'admin_account',
+            'label' => 'Administrator account ready',
+            'passed' => $adminReady,
+            'error' => $adminReady ? null : 'Administrator credentials not provided.',
             'fixable' => true,
             'fixStep' => 6,
         ];
 
         $this->verificationResults = $checks;
-        $this->verificationRun     = true;
+        $this->verificationRun = true;
         $this->saveToSession();
     }
 
@@ -514,6 +551,7 @@ class SetupWizard extends Component
 
         if (! $this->getAllVerificationPassedProperty()) {
             session()->flash('error', 'Some verification checks failed. Fix the issues above before finishing.');
+
             return null;
         }
 
@@ -534,24 +572,24 @@ class SetupWizard extends Component
             // Create administrator (idempotent)
             if (! User::where('email', $this->adminEmail)->exists()) {
                 User::create([
-                    'name'     => $this->adminName ?: explode('@', $this->adminEmail)[0],
-                    'email'    => $this->adminEmail,
+                    'name' => $this->adminName ?: explode('@', $this->adminEmail)[0],
+                    'email' => $this->adminEmail,
                     'password' => Hash::make($this->adminPassword),
                 ]);
             }
 
             // Persist application settings
-            Setting::set('app_name',        $this->appName);
-            Setting::set('app_org',         $this->appOrg);
-            Setting::set('app_domain',      $this->appDomain);
-            Setting::set('app_timezone',    $this->appTimezone);
-            Setting::set('installed_at',    now()->toIso8601String());
+            Setting::set('app_name', $this->appName);
+            Setting::set('app_org', $this->appOrg);
+            Setting::set('app_domain', $this->appDomain);
+            Setting::set('app_timezone', $this->appTimezone);
+            Setting::set('installed_at', now()->toIso8601String());
             Setting::set('installed_version', '1.0.0');
 
             // Lock the installation
             $lock->markInstalled([
-                'version'     => '1.0.0',
-                'org'         => $this->appOrg,
+                'version' => '1.0.0',
+                'org' => $this->appOrg,
                 'admin_email' => $this->adminEmail,
             ]);
 
@@ -563,7 +601,8 @@ class SetupWizard extends Component
             return $this->redirectRoute('login');
         } catch (\Throwable $e) {
             $lock->markFailed($e->getMessage());
-            session()->flash('error', 'Installation failed: ' . $e->getMessage());
+            session()->flash('error', 'Installation failed: '.$e->getMessage());
+
             return null;
         }
     }
@@ -581,16 +620,16 @@ class SetupWizard extends Component
     public function resetWizard(): void
     {
         Session::forget($this->sessionKey());
-        $this->currentStep         = 1;
-        $this->completedSteps      = [];
-        $this->dbTestResult        = null;
-        $this->createDbResult      = null;
-        $this->migrationResult     = null;
-        $this->migrationsRan       = false;
-        $this->imapTestResult      = null;
-        $this->smtpTestResult      = null;
+        $this->currentStep = 1;
+        $this->completedSteps = [];
+        $this->dbTestResult = null;
+        $this->createDbResult = null;
+        $this->migrationResult = null;
+        $this->migrationsRan = false;
+        $this->imapTestResult = null;
+        $this->smtpTestResult = null;
         $this->verificationResults = [];
-        $this->verificationRun     = false;
+        $this->verificationRun = false;
         $this->saveToSession();
     }
 
@@ -602,36 +641,36 @@ class SetupWizard extends Component
     {
         app(ConfigurationWriter::class)->write([
             'DB_CONNECTION' => 'mysql',
-            'DB_HOST'       => $this->dbHost,
-            'DB_PORT'       => $this->dbPort,
-            'DB_DATABASE'   => $this->dbDatabase,
-            'DB_USERNAME'   => $this->dbUsername,
-            'DB_PASSWORD'   => $this->dbPassword,
+            'DB_HOST' => $this->dbHost,
+            'DB_PORT' => $this->dbPort,
+            'DB_DATABASE' => $this->dbDatabase,
+            'DB_USERNAME' => $this->dbUsername,
+            'DB_PASSWORD' => $this->dbPassword,
         ]);
     }
 
     private function writeMailConfigToEnv(): void
     {
         app(ConfigurationWriter::class)->write([
-            'OPENMAIL_IMAP_HOST'       => $this->imapHost,
-            'OPENMAIL_IMAP_PORT'       => (string) $this->imapPort,
+            'OPENMAIL_IMAP_HOST' => $this->imapHost,
+            'OPENMAIL_IMAP_PORT' => (string) $this->imapPort,
             'OPENMAIL_IMAP_ENCRYPTION' => $this->imapEncryption,
-            'OPENMAIL_IMAP_USERNAME'   => $this->imapUsername,
-            'OPENMAIL_IMAP_PASSWORD'   => $this->imapPassword,
-            'OPENMAIL_SMTP_HOST'       => $this->smtpHost,
-            'OPENMAIL_SMTP_PORT'       => (string) $this->smtpPort,
+            'OPENMAIL_IMAP_USERNAME' => $this->imapUsername,
+            'OPENMAIL_IMAP_PASSWORD' => $this->imapPassword,
+            'OPENMAIL_SMTP_HOST' => $this->smtpHost,
+            'OPENMAIL_SMTP_PORT' => (string) $this->smtpPort,
             'OPENMAIL_SMTP_ENCRYPTION' => $this->smtpEncryption,
-            'OPENMAIL_SMTP_USERNAME'   => $this->smtpUsername,
-            'OPENMAIL_SMTP_PASSWORD'   => $this->smtpPassword,
+            'OPENMAIL_SMTP_USERNAME' => $this->smtpUsername,
+            'OPENMAIL_SMTP_PASSWORD' => $this->smtpPassword,
         ]);
     }
 
     private function writeAppConfigToEnv(): void
     {
         app(ConfigurationWriter::class)->write([
-            'APP_NAME'     => $this->appName,
-            'APP_ENV'      => 'production',
-            'APP_URL'      => $this->appUrl ?: ('http://' . ($this->appDomain ?: 'localhost')),
+            'APP_NAME' => $this->appName,
+            'APP_ENV' => 'production',
+            'APP_URL' => $this->appUrl ?: ('http://'.($this->appDomain ?: 'localhost')),
             'APP_TIMEZONE' => $this->appTimezone,
         ]);
     }
@@ -639,9 +678,9 @@ class SetupWizard extends Component
     private function writeSecurityConfigToEnv(): void
     {
         app(ConfigurationWriter::class)->write([
-            'SESSION_LIFETIME'      => '1440',
-            'SESSION_DRIVER'        => 'database',
-            'CACHE_STORE'           => 'database',
+            'SESSION_LIFETIME' => '1440',
+            'SESSION_DRIVER' => 'database',
+            'CACHE_STORE' => 'database',
             'SESSION_SECURE_COOKIE' => $this->secureCookies ? 'true' : 'false',
         ]);
     }
@@ -654,6 +693,7 @@ class SetupWizard extends Component
     {
         if (app(InstallationLock::class)->isInstalled()) {
             $this->installMode = 'installed';
+
             return;
         }
 
@@ -678,45 +718,46 @@ class SetupWizard extends Component
         // SESSION_ENCRYPT=false and database session table compromise.
         $sensitiveKeys = ['dbPassword', 'imapPassword', 'smtpPassword', 'adminPassword', 'adminPasswordConfirmation'];
         $payload = [
-            'currentStep'               => $this->currentStep,
-            'completedSteps'            => $this->completedSteps,
-            'appName'                   => $this->appName,
-            'dbHost'                    => $this->dbHost,
-            'dbPort'                    => $this->dbPort,
-            'dbDatabase'                => $this->dbDatabase,
-            'dbUsername'                => $this->dbUsername,
-            'dbPassword'                => Crypt::encryptString($this->dbPassword),
-            'emailDomain'               => $this->emailDomain,
-            'detectedProvider'          => $this->detectedProvider,
-            'imapHost'                  => $this->imapHost,
-            'imapPort'                  => $this->imapPort,
-            'imapEncryption'            => $this->imapEncryption,
-            'imapUsername'              => $this->imapUsername,
-            'imapPassword'              => Crypt::encryptString($this->imapPassword),
-            'smtpHost'                  => $this->smtpHost,
-            'smtpPort'                  => $this->smtpPort,
-            'smtpEncryption'            => $this->smtpEncryption,
-            'smtpUsername'              => $this->smtpUsername,
-            'smtpPassword'              => Crypt::encryptString($this->smtpPassword),
-            'appOrg'                    => $this->appOrg,
-            'appDomain'                 => $this->appDomain,
-            'appUrl'                    => $this->appUrl,
-            'appTimezone'               => $this->appTimezone,
-            'adminName'                 => $this->adminName,
-            'adminEmail'                => $this->adminEmail,
-            'adminPassword'             => Crypt::encryptString($this->adminPassword),
+            'currentStep' => $this->currentStep,
+            'completedSteps' => $this->completedSteps,
+            'appName' => $this->appName,
+            'dbHost' => $this->dbHost,
+            'dbPort' => $this->dbPort,
+            'dbDatabase' => $this->dbDatabase,
+            'dbUsername' => $this->dbUsername,
+            'dbPassword' => Crypt::encryptString($this->dbPassword),
+            'emailDomain' => $this->emailDomain,
+            'detectedProvider' => $this->detectedProvider,
+            'imapHost' => $this->imapHost,
+            'imapPort' => $this->imapPort,
+            'imapEncryption' => $this->imapEncryption,
+            'imapUsername' => $this->imapUsername,
+            'imapPassword' => Crypt::encryptString($this->imapPassword),
+            'smtpHost' => $this->smtpHost,
+            'smtpPort' => $this->smtpPort,
+            'smtpEncryption' => $this->smtpEncryption,
+            'smtpUsername' => $this->smtpUsername,
+            'smtpPassword' => Crypt::encryptString($this->smtpPassword),
+            'appOrg' => $this->appOrg,
+            'appDomain' => $this->appDomain,
+            'appUrl' => $this->appUrl,
+            'appTimezone' => $this->appTimezone,
+            'adminName' => $this->adminName,
+            'adminEmail' => $this->adminEmail,
+            'adminPassword' => Crypt::encryptString($this->adminPassword),
             'adminPasswordConfirmation' => Crypt::encryptString($this->adminPasswordConfirmation),
-            'httpsEnabled'              => $this->httpsEnabled,
-            'secureCookies'             => $this->secureCookies,
-            'verificationResults'       => $this->verificationResults,
-            'verificationRun'           => $this->verificationRun,
-            'dbTestResult'              => $this->dbTestResult,
-            'createDbResult'            => $this->createDbResult,
-            'migrationResult'           => $this->migrationResult,
-            'migrationsRan'             => $this->migrationsRan,
-            'imapTestResult'            => $this->imapTestResult,
-            'smtpTestResult'            => $this->smtpTestResult,
+            'httpsEnabled' => $this->httpsEnabled,
+            'secureCookies' => $this->secureCookies,
+            'verificationResults' => $this->verificationResults,
+            'verificationRun' => $this->verificationRun,
+            'dbTestResult' => $this->dbTestResult,
+            'createDbResult' => $this->createDbResult,
+            'migrationResult' => $this->migrationResult,
+            'migrationsRan' => $this->migrationsRan,
+            'imapTestResult' => $this->imapTestResult,
+            'smtpTestResult' => $this->smtpTestResult,
         ];
+
         return $payload;
     }
 

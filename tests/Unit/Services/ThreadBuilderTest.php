@@ -2,10 +2,11 @@
 
 namespace Tests\Unit\Services;
 
-use Tests\TestCase;
 use App\Services\ThreadBuilder;
-use Illuminate\Support\Collection;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
+use Tests\TestCase;
+use Webklex\PHPIMAP\Attribute;
 
 class ThreadBuilderTest extends TestCase
 {
@@ -14,11 +15,11 @@ class ThreadBuilderTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->builder = new ThreadBuilder();
+        $this->builder = new ThreadBuilder;
     }
 
     /** @test */
-    public function buildThreads_returns_root_threads_with_nested_children_from_headers(): void
+    public function build_threads_returns_root_threads_with_nested_children_from_headers(): void
     {
         // Create messages with proper Message-ID, In-Reply-To, References
         $messages = collect([
@@ -38,7 +39,7 @@ class ThreadBuilderTest extends TestCase
     }
 
     /** @test */
-    public function extractParentId_prefers_in_reply_to_falls_back_to_last_references(): void
+    public function extract_parent_id_prefers_in_reply_to_falls_back_to_last_references(): void
     {
         $message = $this->makeMessage('msg-3', 'msg-2', 'msg-1 msg-2', 'Subject', now());
 
@@ -48,7 +49,7 @@ class ThreadBuilderTest extends TestCase
     }
 
     /** @test */
-    public function extractParentId_falls_back_to_references_when_no_in_reply_to(): void
+    public function extract_parent_id_falls_back_to_references_when_no_in_reply_to(): void
     {
         $message = $this->makeMessage('msg-3', null, 'msg-1 msg-2', 'Subject', now());
 
@@ -58,7 +59,7 @@ class ThreadBuilderTest extends TestCase
     }
 
     /** @test */
-    public function extractParentId_returns_null_when_no_headers(): void
+    public function extract_parent_id_returns_null_when_no_headers(): void
     {
         $message = $this->makeMessage('msg-1', null, null, 'Subject', now());
 
@@ -68,7 +69,7 @@ class ThreadBuilderTest extends TestCase
     }
 
     /** @test */
-    public function groupBySubject_strips_re_fwd_normalizes_whitespace_groups_by_subject_and_2day_window(): void
+    public function group_by_subject_strips_re_fwd_normalizes_whitespace_groups_by_subject_and_2day_window(): void
     {
         $messages = collect([
             $this->makeMessage('msg-1', null, null, '  Re:  Hello World  ', Carbon::parse('2024-01-01 10:00')),
@@ -82,7 +83,7 @@ class ThreadBuilderTest extends TestCase
 
         // Should have 3 groups: (msg-1, msg-2, msg-3), (msg-4), (msg-5)
         $this->assertCount(3, $grouped);
-        
+
         // First group should have msg-3 (latest date within the cluster: Jan 2)
         $firstGroup = $grouped[0];
         $this->assertEquals('msg-3', $firstGroup->message_id);
@@ -209,7 +210,7 @@ class ThreadBuilderTest extends TestCase
     }
 
     /** @test */
-    public function buildThreads_ensures_labels_is_collection_even_when_attribute_or_null_passed(): void
+    public function build_threads_ensures_labels_is_collection_even_when_attribute_or_null_passed(): void
     {
         $message = (object) [
             'message_id' => 'msg-attr',
@@ -226,7 +227,7 @@ class ThreadBuilderTest extends TestCase
             'uid' => 12,
             'folder_path' => 'INBOX',
             'snippet' => '',
-            'labels' => new \Webklex\PHPIMAP\Attribute('labels'),
+            'labels' => new Attribute('labels'),
         ];
 
         $threads = $this->builder->buildThreads(collect([$message]));

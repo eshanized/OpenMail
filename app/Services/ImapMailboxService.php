@@ -2,17 +2,17 @@
 
 namespace App\Services;
 
-use Webklex\PHPIMAP\Client;
-use Webklex\PHPIMAP\Folder;
-use Webklex\PHPIMAP\Message;
-use Webklex\PHPIMAP\Support\MessageCollection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Carbon;
-use App\Models\Folder as FolderModel;
-use App\Models\MessageMetadata;
+use Webklex\PHPIMAP\Address;
+use Webklex\PHPIMAP\Attribute;
+use Webklex\PHPIMAP\Client;
+use Webklex\PHPIMAP\Config;
+use Webklex\PHPIMAP\Folder;
+use Webklex\PHPIMAP\Message;
 
 class ImapMailboxService
 {
@@ -30,7 +30,7 @@ class ImapMailboxService
             }
         }
 
-        $config = \Webklex\PHPIMAP\Config::make();
+        $config = Config::make();
         $config->set('accounts.default.host', config('openmail.imap.host'));
         $config->set('accounts.default.port', (int) config('openmail.imap.port', 993));
         $config->set('accounts.default.encryption', config('openmail.imap.encryption', 'ssl'));
@@ -43,6 +43,7 @@ class ImapMailboxService
         $client = new Client($config);
         $client->connect();
         $this->activeClient = $client;
+
         return $client;
     }
 
@@ -147,7 +148,7 @@ class ImapMailboxService
 
         try {
             $folder = $client->getFolder($folderPath);
-            if (!$folder) {
+            if (! $folder) {
                 return new LengthAwarePaginator([], 0, $perPage, $page, [
                     'path' => request()->url(),
                     'pageName' => 'messages-page',
@@ -184,10 +185,11 @@ class ImapMailboxService
 
         try {
             $folder = $client->getFolder($folderPath);
-            if (!$folder) {
+            if (! $folder) {
                 return null;
             }
             $message = $folder->query()->getMessageByUid($uid);
+
             return $message;
         } catch (\Throwable $e) {
             $this->disconnect();
@@ -201,12 +203,13 @@ class ImapMailboxService
 
         try {
             $folder = $client->getFolder($folderPath);
-            if (!$folder) {
+            if (! $folder) {
                 return null;
             }
             $message = $folder->query()
                 ->setFetchBody(true)
                 ->getMessageByUid($uid);
+
             return $message;
         } catch (\Throwable $e) {
             $this->disconnect();
@@ -224,11 +227,12 @@ class ImapMailboxService
                 ->setFetchBody(true)
                 ->getMessageByUid($uid);
 
-            if (!$message) {
+            if (! $message) {
                 return null;
             }
 
             $attachments = $message->getAttachments();
+
             return $attachments->get($attachmentIndex);
         } catch (\Throwable $e) {
             $this->disconnect();
@@ -289,7 +293,7 @@ class ImapMailboxService
 
         try {
             $trashPath = $this->getTrashFolderPath($client);
-            if (!$trashPath) {
+            if (! $trashPath) {
                 $trashPath = $this->getOrCreateTrashFolder($client);
             }
 
@@ -330,8 +334,9 @@ class ImapMailboxService
         $client = $this->getClient();
 
         try {
-            $fullPath = $parentPath ? $parentPath . '.' . $name : $name;
+            $fullPath = $parentPath ? $parentPath.'.'.$name : $name;
             $client->createFolder($fullPath);
+
             return true;
         } catch (\Throwable $e) {
             $this->disconnect();
@@ -346,8 +351,9 @@ class ImapMailboxService
         try {
             $folder = $client->getFolder($oldPath);
             $parentPath = $this->getParentPath($oldPath);
-            $newPath = $parentPath ? $parentPath . '.' . $newName : $newName;
+            $newPath = $parentPath ? $parentPath.'.'.$newName : $newName;
             $folder->rename($newPath);
+
             return true;
         } catch (\Throwable $e) {
             $this->disconnect();
@@ -362,6 +368,7 @@ class ImapMailboxService
         try {
             $folder = $client->getFolder($folderPath);
             $folder->delete();
+
             return true;
         } catch (\Throwable $e) {
             $this->disconnect();
@@ -371,7 +378,7 @@ class ImapMailboxService
 
     public function getCachedFolderInfo(string $folderPath): array
     {
-        $cacheKey = "folder:{$folderPath}:" . Auth::id();
+        $cacheKey = "folder:{$folderPath}:".Auth::id();
 
         return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($folderPath) {
             return $this->getMessageCount($folderPath);
@@ -380,7 +387,7 @@ class ImapMailboxService
 
     public function getCachedFolders(): array
     {
-        $cacheKey = 'folders:' . Auth::id();
+        $cacheKey = 'folders:'.Auth::id();
 
         return Cache::remember($cacheKey, now()->addMinutes(5), function () {
             return $this->getFolders();
@@ -389,10 +396,10 @@ class ImapMailboxService
 
     public function refreshFolderCache(string $folderPath): void
     {
-        $cacheKey = "folder:{$folderPath}:" . Auth::id();
+        $cacheKey = "folder:{$folderPath}:".Auth::id();
         Cache::forget($cacheKey);
 
-        $cacheKey = 'folders:' . Auth::id();
+        $cacheKey = 'folders:'.Auth::id();
         Cache::forget($cacheKey);
     }
 
@@ -403,6 +410,7 @@ class ImapMailboxService
             return '';
         }
         array_pop($parts);
+
         return implode('.', $parts);
     }
 
@@ -415,6 +423,7 @@ class ImapMailboxService
                 return $folder->path;
             }
         }
+
         return null;
     }
 
@@ -429,6 +438,7 @@ class ImapMailboxService
         foreach ($fallbackNames as $name) {
             try {
                 $client->createFolder($name);
+
                 return $name;
             } catch (\Exception) {
                 continue;
@@ -441,10 +451,10 @@ class ImapMailboxService
     /**
      * Append a message to an IMAP folder.
      *
-     * @param string $folderPath The folder path
-     * @param string $mimeMessage The raw MIME message string
-     * @param array $flags IMAP flags to set
-     * @param Carbon|null $internalDate Internal date for the message
+     * @param  string  $folderPath  The folder path
+     * @param  string  $mimeMessage  The raw MIME message string
+     * @param  array  $flags  IMAP flags to set
+     * @param  Carbon|null  $internalDate  Internal date for the message
      * @return string|null The UID of the appended message
      */
     public function appendMessage(string $folderPath, string $mimeMessage, array $flags = [], ?Carbon $internalDate = null): ?string
@@ -453,7 +463,7 @@ class ImapMailboxService
 
         try {
             $folder = $client->getFolder($folderPath);
-            if (!$folder) {
+            if (! $folder) {
                 throw new \Exception("Folder not found: {$folderPath}");
             }
 
@@ -474,14 +484,14 @@ class ImapMailboxService
     /**
      * Append message to Sent folder.
      *
-     * @param string $mimeMessage The raw MIME message string
+     * @param  string  $mimeMessage  The raw MIME message string
      * @return string|null The UID of the appended message
      */
     public function appendToSent(string $mimeMessage): ?string
     {
         $sentFolder = app(FolderMapper::class)->getSentFolderPath($this->getClient());
 
-        if (!$sentFolder) {
+        if (! $sentFolder) {
             throw new \Exception('Sent folder not found');
         }
 
@@ -491,8 +501,8 @@ class ImapMailboxService
     /**
      * Append message to Drafts folder.
      *
-     * @param string $mimeMessage The raw MIME message string
-     * @param string|null $existingUid UID of existing draft to replace
+     * @param  string  $mimeMessage  The raw MIME message string
+     * @param  string|null  $existingUid  UID of existing draft to replace
      * @return string|null The UID of the appended message
      */
     public function appendToDrafts(string $mimeMessage, ?string $existingUid = null): ?string
@@ -502,7 +512,7 @@ class ImapMailboxService
         try {
             $draftsFolder = app(FolderMapper::class)->getDraftsFolderPath($client);
 
-            if (!$draftsFolder) {
+            if (! $draftsFolder) {
                 throw new \Exception('Drafts folder not found');
             }
 
@@ -526,7 +536,7 @@ class ImapMailboxService
     /**
      * Delete a message from Drafts folder by UID.
      *
-     * @param string $uid The message UID
+     * @param  string  $uid  The message UID
      * @return bool True if deleted
      */
     public function deleteFromDrafts(string $uid): bool
@@ -536,7 +546,7 @@ class ImapMailboxService
         try {
             $draftsFolder = app(FolderMapper::class)->getDraftsFolderPath($client);
 
-            if (!$draftsFolder) {
+            if (! $draftsFolder) {
                 return false;
             }
 
@@ -545,6 +555,7 @@ class ImapMailboxService
 
             if ($message) {
                 $message->delete(true); // expunge
+
                 return true;
             }
 
@@ -558,7 +569,7 @@ class ImapMailboxService
     /**
      * Delete a message from Sent folder by UID.
      *
-     * @param string $uid The message UID
+     * @param  string  $uid  The message UID
      * @return bool True if deleted
      */
     public function deleteFromSent(string $uid): bool
@@ -568,7 +579,7 @@ class ImapMailboxService
         try {
             $sentFolder = app(FolderMapper::class)->getSentFolderPath($client);
 
-            if (!$sentFolder) {
+            if (! $sentFolder) {
                 return false;
             }
 
@@ -577,6 +588,7 @@ class ImapMailboxService
 
             if ($message) {
                 $message->delete(true); // expunge
+
                 return true;
             }
 
@@ -590,7 +602,7 @@ class ImapMailboxService
     /**
      * Search for recent recipients from Sent and Inbox folders.
      *
-     * @param int $limit Maximum number of recipients to return
+     * @param  int  $limit  Maximum number of recipients to return
      * @return array Array of ['email' => ..., 'name' => ..., 'frequency' => ...]
      */
     public function searchRecipients(int $limit = 100): array
@@ -665,9 +677,6 @@ class ImapMailboxService
 
     /**
      * Parse UID from webklex appendMessage result.
-     *
-     * @param array $result
-     * @return string|null
      */
     private function parseAppendUid(array $result): ?string
     {
@@ -679,8 +688,8 @@ class ImapMailboxService
      * Fetch message headers for threading (Message-ID, In-Reply-To, References, Subject, Date).
      * Used to build thread trees for the current page + cross-folder thread roots.
      *
-     * @param string $folderPath The IMAP folder path
-     * @param array $uids Array of UIDs to fetch headers for
+     * @param  string  $folderPath  The IMAP folder path
+     * @param  array  $uids  Array of UIDs to fetch headers for
      * @return array<int, object> Array of message objects with header data
      */
     public function getThreadHeaders(string $folderPath, array $uids): array
@@ -693,10 +702,10 @@ class ImapMailboxService
 
         try {
             $folder = $client->getFolder($folderPath);
-            if (!$folder) {
+            if (! $folder) {
                 return [];
             }
-            
+
             // Fetch only headers we need for threading
             $query = $folder->query()
                 ->whereUidIn($uids)
@@ -713,19 +722,19 @@ class ImapMailboxService
                 $fromObj = null;
                 if (method_exists($msg, 'getFrom')) {
                     $fromAttr = $msg->getFrom();
-                    if ($fromAttr instanceof \Webklex\PHPIMAP\Attribute) {
+                    if ($fromAttr instanceof Attribute) {
                         $fromObj = $fromAttr->first();
                     }
                 }
-                if (!$fromObj && $header) {
+                if (! $fromObj && $header) {
                     $fromAttr = $header->get('from');
-                    if ($fromAttr instanceof \Webklex\PHPIMAP\Attribute) {
+                    if ($fromAttr instanceof Attribute) {
                         $fromObj = $fromAttr->first();
                     }
                 }
-                if (!$fromObj && isset($msg->from)) {
+                if (! $fromObj && isset($msg->from)) {
                     $fromVal = $msg->from;
-                    if ($fromVal instanceof \Webklex\PHPIMAP\Attribute) {
+                    if ($fromVal instanceof Attribute) {
                         $fromObj = $fromVal->first();
                     } elseif (is_iterable($fromVal)) {
                         $fromObj = collect($fromVal)->first();
@@ -737,23 +746,23 @@ class ImapMailboxService
                 $fromAddress = '';
                 $fromName = '';
                 if ($fromObj) {
-                    if ($fromObj instanceof \Webklex\PHPIMAP\Address) {
+                    if ($fromObj instanceof Address) {
                         $fromAddress = $fromObj->mail ?? '';
                         $fromName = $fromObj->personal ?? '';
                     } elseif (is_object($fromObj)) {
-                        $fromAddress = $fromObj->mail ?? (isset($fromObj->mailbox, $fromObj->host) && $fromObj->mailbox && $fromObj->host ? $fromObj->mailbox . '@' . $fromObj->host : '');
+                        $fromAddress = $fromObj->mail ?? (isset($fromObj->mailbox, $fromObj->host) && $fromObj->mailbox && $fromObj->host ? $fromObj->mailbox.'@'.$fromObj->host : '');
                         $fromName = $fromObj->personal ?? '';
                     } elseif (is_string($fromObj)) {
                         $fromAddress = $fromObj;
                     }
                 }
 
-                $fromDisplay = !empty($fromName) ? $fromName : (!empty($fromAddress) ? $fromAddress : 'Unknown');
+                $fromDisplay = ! empty($fromName) ? $fromName : (! empty($fromAddress) ? $fromAddress : 'Unknown');
                 $to = $msg->to ? (is_iterable($msg->to) ? collect($msg->to)->first() : $msg->to) : null;
-                
+
                 $msgId = (string) ($msg->message_id ?? $header?->get('message_id') ?? '');
                 if (empty($msgId)) {
-                    $msgId = 'uid-' . $msg->getUid() . '@openmail.local';
+                    $msgId = 'uid-'.$msg->getUid().'@openmail.local';
                 }
 
                 $rawDate = (string) ($msg->date ?? $header?->get('date') ?? '');
@@ -796,6 +805,7 @@ class ImapMailboxService
 
         try {
             $mapper = app(FolderMapper::class);
+
             return $mapper->getArchiveFolderPath($client);
         } catch (\Throwable $e) {
             $this->disconnect();
@@ -806,15 +816,15 @@ class ImapMailboxService
     /**
      * Move a message to the Archive folder.
      *
-     * @param int $messageUid The message UID
-     * @param string $sourceFolder The source folder path
+     * @param  int  $messageUid  The message UID
+     * @param  string  $sourceFolder  The source folder path
      * @return bool True if successful
      */
     public function moveMessageToArchive(int $messageUid, string $sourceFolder): bool
     {
         $archivePath = $this->getOrCreateArchiveFolder();
 
-        if (!$archivePath) {
+        if (! $archivePath) {
             throw new \Exception('Could not find or create Archive folder');
         }
 
@@ -824,15 +834,15 @@ class ImapMailboxService
     /**
      * Move a message from Archive back to a source folder (for undo).
      *
-     * @param int $messageUid The message UID
-     * @param string $sourceFolder The folder to move back to (e.g., INBOX)
+     * @param  int  $messageUid  The message UID
+     * @param  string  $sourceFolder  The folder to move back to (e.g., INBOX)
      * @return bool True if successful
      */
     public function moveMessageFromArchive(int $messageUid, string $sourceFolder): bool
     {
         $archivePath = $this->getOrCreateArchiveFolder();
 
-        if (!$archivePath) {
+        if (! $archivePath) {
             throw new \Exception('Could not find Archive folder');
         }
 

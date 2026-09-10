@@ -2,14 +2,14 @@
 
 namespace Tests\Feature\Composer;
 
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Models\User;
 use App\Models\PendingSend;
+use App\Models\User;
 use App\Services\ComposerService;
 use App\Services\ImapMailboxService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\Mail;
-use Carbon\Carbon;
+use Tests\TestCase;
 
 class UndoSendTest extends TestCase
 {
@@ -142,7 +142,7 @@ class UndoSendTest extends TestCase
         Mail::shouldReceive('raw')
             ->once()
             ->andReturnUsing(function ($message, $callback) {
-                $mockMessage = \Mockery::mock(\Illuminate\Mail\Message::class);
+                $mockMessage = \Mockery::mock(Message::class);
                 $mockMessage->shouldReceive('to')->andReturnSelf();
                 $mockMessage->shouldReceive('cc')->andReturnSelf();
                 $mockMessage->shouldReceive('bcc')->andReturnSelf();

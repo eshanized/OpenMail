@@ -2,12 +2,13 @@
 
 namespace App\Livewire\Settings;
 
-use Livewire\Component;
 use App\Models\Setting;
+use Livewire\Component;
 
 class AppearanceTab extends Component
 {
     public string $theme = 'system';
+
     public string $density = 'regular';
 
     public function mount(): void
@@ -44,14 +45,14 @@ class AppearanceTab extends Component
 
     private function validateTheme(): void
     {
-        if (!in_array($this->theme, ['light', 'dark', 'system'])) {
+        if (! in_array($this->theme, ['light', 'dark', 'system'])) {
             $this->theme = 'system';
         }
     }
 
     private function validateDensity(): void
     {
-        if (!in_array($this->density, ['compact', 'regular', 'comfortable'])) {
+        if (! in_array($this->density, ['compact', 'regular', 'comfortable'])) {
             $this->density = 'regular';
         }
     }

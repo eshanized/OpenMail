@@ -32,10 +32,10 @@ class AttachmentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'attachment.mimes' => 'The attachment type is not allowed. Allowed types: ' .
+            'attachment.mimes' => 'The attachment type is not allowed. Allowed types: '.
                 implode(', ', config('openmail.attachments.allowed_mimes', [])),
-            'attachment.max' => 'The attachment exceeds the maximum size of ' .
-                round(config('openmail.attachments.max_size', 25 * 1024 * 1024) / 1024 / 1024) . 'MB.',
+            'attachment.max' => 'The attachment exceeds the maximum size of '.
+                round(config('openmail.attachments.max_size', 25 * 1024 * 1024) / 1024 / 1024).'MB.',
         ];
     }
 }

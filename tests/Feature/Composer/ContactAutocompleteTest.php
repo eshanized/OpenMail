@@ -2,14 +2,12 @@
 
 namespace Tests\Feature\Composer;
 
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Models\User;
 use App\Models\ContactAutocompleteCache;
+use App\Models\User;
 use App\Services\ContactAutocompleteService;
 use App\Services\ImapMailboxService;
-use App\Services\FolderMapper;
-use Illuminate\Support\Collection;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class ContactAutocompleteTest extends TestCase
 {

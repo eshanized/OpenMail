@@ -10,7 +10,7 @@ class LoginController extends Controller
     public function show(Request $request)
     {
         // Check if installed
-        if (!file_exists(storage_path('installed'))) {
+        if (! file_exists(storage_path('installed'))) {
             return redirect('/install');
         }
 

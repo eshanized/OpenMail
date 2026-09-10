@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Install\InstallationLock;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class SetupController extends Controller
 {
-    public function show(Request $request): View|\Illuminate\Http\RedirectResponse
+    public function show(Request $request): View|RedirectResponse
     {
         $lock = app(InstallationLock::class);
 

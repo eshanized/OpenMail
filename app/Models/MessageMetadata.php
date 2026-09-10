@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
-use Laravel\Scout\Searchable;
 use Laravel\Scout\Attributes\SearchUsingFullText;
 use Laravel\Scout\Attributes\SearchUsingPrefix;
+use Laravel\Scout\Searchable;
 
 class MessageMetadata extends Model
 {
@@ -100,7 +100,7 @@ class MessageMetadata extends Model
      */
     public function searchableAs(): string
     {
-        return 'message_metadata_' . $this->user_id;
+        return 'message_metadata_'.$this->user_id;
     }
 
     /**
@@ -192,7 +192,7 @@ class MessageMetadata extends Model
     public function getFormattedDateAttribute(): string
     {
         $date = $this->date;
-        if (!$date) {
+        if (! $date) {
             return '';
         }
 
@@ -213,7 +213,7 @@ class MessageMetadata extends Model
      */
     public function scopeWithLabel(Builder $query, int $labelId): Builder
     {
-        return $query->whereHas('labels', fn($q) => $q->where('labels.id', $labelId));
+        return $query->whereHas('labels', fn ($q) => $q->where('labels.id', $labelId));
     }
 
     /**
@@ -221,6 +221,6 @@ class MessageMetadata extends Model
      */
     public function scopeWithoutLabel(Builder $query, int $labelId): Builder
     {
-        return $query->whereDoesntHave('labels', fn($q) => $q->where('labels.id', $labelId));
+        return $query->whereDoesntHave('labels', fn ($q) => $q->where('labels.id', $labelId));
     }
 }

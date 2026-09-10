@@ -1,10 +1,9 @@
 <?php
 
+use App\Console\Commands\InstallCommand;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
-use App\Console\Commands\ProcessPendingSends;
-use App\Console\Commands\InstallCommand;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());

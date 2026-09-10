@@ -2,21 +2,30 @@
 
 namespace App\Livewire\Mailbox;
 
+use App\Services\VCardService;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use App\Services\VCardService;
+use Sabre\VObject\Component\VCard;
+use Sabre\VObject\Reader;
 
 class ContactImportModal extends Component
 {
     use WithFileUploads;
 
     public bool $showModal = true;
+
     public $importFile = null;
+
     public array $preview = [];
+
     public string $conflictStrategy = 'skip';
+
     public ?array $importResults = null;
+
     public bool $isProcessing = false;
+
     public array $selectedContacts = [];
+
     public bool $selectAll = true;
 
     protected $listeners = [
@@ -38,15 +47,15 @@ class ContactImportModal extends Component
 
             // Parse vCard to get preview
             $vcardBlocks = preg_split('/(?=BEGIN:VCARD)/i', $content);
-            $vcardBlocks = array_filter($vcardBlocks, fn($block) => trim($block) !== '');
+            $vcardBlocks = array_filter($vcardBlocks, fn ($block) => trim($block) !== '');
 
             $this->preview = [];
             $this->selectedContacts = [];
 
             foreach ($vcardBlocks as $index => $block) {
                 try {
-                    $vcard = \Sabre\VObject\Reader::read($block);
-                    if ($vcard instanceof \Sabre\VObject\Component\VCard) {
+                    $vcard = Reader::read($block);
+                    if ($vcard instanceof VCard) {
                         $email = (string) ($vcard->EMAIL ?? '');
                         if ($email) {
                             $this->preview[] = [
@@ -64,7 +73,7 @@ class ContactImportModal extends Component
                 }
             }
         } catch (\Throwable $e) {
-            $this->dispatch('toast', 'Failed to parse vCard file: ' . $e->getMessage(), 'error');
+            $this->dispatch('toast', 'Failed to parse vCard file: '.$e->getMessage(), 'error');
         }
     }
 
@@ -81,6 +90,7 @@ class ContactImportModal extends Component
     {
         if (empty($this->selectedContacts)) {
             $this->dispatch('toast', 'No contacts selected for import', 'warning');
+
             return;
         }
 
@@ -92,7 +102,7 @@ class ContactImportModal extends Component
 
             // Filter vCard content to only include selected contacts
             $vcardBlocks = preg_split('/(?=BEGIN:VCARD)/i', $content);
-            $vcardBlocks = array_filter($vcardBlocks, fn($block) => trim($block) !== '');
+            $vcardBlocks = array_filter($vcardBlocks, fn ($block) => trim($block) !== '');
 
             $filteredContent = '';
             foreach ($this->selectedContacts as $index) {
@@ -106,7 +116,7 @@ class ContactImportModal extends Component
             $this->dispatch('contactsImported');
             $this->dispatch('toast', "Imported: {$this->importResults['imported']}, Updated: {$this->importResults['updated']}, Skipped: {$this->importResults['skipped']}", 'success');
         } catch (\Throwable $e) {
-            $this->dispatch('toast', 'Import failed: ' . $e->getMessage(), 'error');
+            $this->dispatch('toast', 'Import failed: '.$e->getMessage(), 'error');
         } finally {
             $this->isProcessing = false;
         }
@@ -119,6 +129,7 @@ class ContactImportModal extends Component
 
         if (empty($vcardContent)) {
             $this->dispatch('toast', 'No contacts to export', 'warning');
+
             return;
         }
 

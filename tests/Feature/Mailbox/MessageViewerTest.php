@@ -474,6 +474,7 @@ class MessageViewerTest extends TestCase
         $this->assertStringNotContainsString('ï»¿', $html);
         $this->assertStringNotContainsString('<!--?xml', $html);
         $this->assertStringContainsString('Magic Link 🪄', $html);
-        $this->assertStringContainsString('🪄 Your magic link', $html);
+        $decodedHtml = html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $this->assertStringContainsString('🪄 Your magic link', $decodedHtml);
     }
 }

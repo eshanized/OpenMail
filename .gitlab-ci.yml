@@ -81,7 +81,7 @@ build:frontend:
 
 lint:pint:
   stage: lint
-  image: php:8.3-cli
+  image: php:8.4-cli
   dependencies:
     - build:backend
   script:
@@ -114,7 +114,7 @@ security:npm:
 
 test:pest:
   stage: test
-  image: php:8.3-cli
+  image: php:8.4-cli
   dependencies:
     - build:backend
     - build:frontend

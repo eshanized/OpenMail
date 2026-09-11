@@ -5,6 +5,7 @@ namespace Tests\Unit\Services;
 use App\Services\FolderMapper;
 use Mockery;
 use Tests\TestCase;
+use Webklex\PHPIMAP\Folder;
 
 class FolderMapperTest extends TestCase
 {
@@ -100,15 +101,15 @@ class FolderMapperTest extends TestCase
         $this->assertEquals('My Custom Folder', $this->mapper->mapFolderName($folder));
     }
 
-    private function createMockFolder(array $attributes, string $name)
+    private function createMockFolder(array $attributes, string $name): Folder
     {
-        $mock = Mockery::mock('alias:Webklex\PHPIMAP\Folder')
-            ->makePartial();
+        $ref = new \ReflectionClass(Folder::class);
+        $folder = $ref->newInstanceWithoutConstructor();
 
-        $mock->attributes = $attributes;
-        $mock->name = $name;
-        $mock->path = $name;
+        $folder->attributes = $attributes;
+        $folder->name = $name;
+        $folder->path = $name;
 
-        return $mock;
+        return $folder;
     }
 }

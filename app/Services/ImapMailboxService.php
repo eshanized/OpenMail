@@ -306,6 +306,10 @@ class ImapMailboxService
 
     public function setFlag(string $folderPath, array $uids, string $flag, bool $value): bool
     {
+        if (empty($uids)) {
+            return true;
+        }
+
         $client = $this->getClient();
 
         try {
@@ -314,11 +318,15 @@ class ImapMailboxService
                 ->whereUidIn($uids)
                 ->get();
 
+            // webklex Message::setFlag/unsetFlag unconditionally prepends a backslash ("\\"),
+            // so we strip any leading backslash to prevent generating an invalid IMAP flag like \\SEEN.
+            $cleanFlag = ltrim(trim($flag), '\\');
+
             foreach ($messages as $message) {
                 if ($value) {
-                    $message->setFlag($flag);
+                    $message->setFlag($cleanFlag);
                 } else {
-                    $message->unsetFlag($flag);
+                    $message->unsetFlag($cleanFlag);
                 }
             }
 

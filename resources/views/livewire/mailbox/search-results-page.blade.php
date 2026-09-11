@@ -1,18 +1,18 @@
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-    <div class="flex gap-6">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="flex gap-5">
         {{-- Filter Sidebar --}}
-        <aside class="w-72 flex-shrink-0 hidden lg:block">
-            <div class="bg-white rounded-lg border border-border p-4 sticky top-6">
-                <h3 class="text-sm font-semibold text-ink mb-4">Filters</h3>
+        <aside class="w-64 flex-shrink-0 hidden lg:block">
+            <div class="bg-surface-raised rounded border border-border p-4 sticky top-4">
+                <h3 class="text-xs font-semibold uppercase tracking-wider text-ink mb-3">Filters</h3>
 
                 <form method="GET" action="{{ route('search') }}" id="filter-form">
                     <input type="hidden" name="q" value="{{ $query }}">
 
                     {{-- Folder Filter --}}
-                    <div class="mb-4">
+                    <div class="mb-3.5">
                         <label for="filter-folder" class="block text-xs font-medium text-ink-secondary mb-1">Folder</label>
                         <select name="folder" id="filter-folder"
-                                class="w-full text-sm border-border rounded-md focus:ring-primary focus:border-primary"
+                                class="w-full text-xs border border-border rounded bg-surface-raised text-ink p-1.5 focus:border-primary focus:outline-none"
                                 onchange="this.form.submit()">
                             <option value="">All folders</option>
                             @foreach($folders as $folder)
@@ -24,7 +24,7 @@
                     </div>
 
                     {{-- Date Range Presets --}}
-                    <div class="mb-4">
+                    <div class="mb-3.5">
                         <label class="block text-xs font-medium text-ink-secondary mb-1">Date Range</label>
                         <div class="flex flex-wrap gap-1">
                             @php
@@ -39,92 +39,92 @@
                             @foreach($datePresets as $preset => $label)
                                 <a href="{{ route('search', array_merge(request()->query(), ['date_preset' => $preset, 'date_from' => null, 'date_to' => null])) }}"
                                    wire:navigate
-                                   class="px-2 py-1 text-xs rounded {{ $activePreset === $preset ? 'bg-primary-subtle text-primary font-medium' : 'bg-surface-sunken text-ink-secondary hover:bg-surface-sunken' }}">
+                                   class="px-2 py-0.5 text-xs rounded {{ $activePreset === $preset ? 'bg-primary-subtle text-primary font-medium' : 'bg-surface-sunken text-ink-tertiary hover:text-ink' }}">
                                     {{ $label }}
                                 </a>
                             @endforeach
                         </div>
-                        <div class="mt-2 grid grid-cols-2 gap-2">
+                        <div class="mt-2 grid grid-cols-2 gap-1.5">
                             <div>
-                                <label for="date_from" class="block text-xs text-ink-tertiary">From</label>
+                                <label for="date_from" class="block text-[10px] text-ink-tertiary">From</label>
                                 <input type="date" name="date_from" id="date_from"
                                        value="{{ $filters['date_from'] ?? '' }}"
-                                       class="w-full text-xs border-border rounded focus:ring-primary focus:border-primary"
+                                       class="w-full text-xs border border-border rounded bg-surface-raised text-ink p-1 focus:border-primary focus:outline-none"
                                        onchange="this.form.submit()">
                             </div>
                             <div>
-                                <label for="date_to" class="block text-xs text-ink-tertiary">To</label>
+                                <label for="date_to" class="block text-[10px] text-ink-tertiary">To</label>
                                 <input type="date" name="date_to" id="date_to"
                                        value="{{ $filters['date_to'] ?? '' }}"
-                                       class="w-full text-xs border-border rounded focus:ring-primary focus:border-primary"
+                                       class="w-full text-xs border border-border rounded bg-surface-raised text-ink p-1 focus:border-primary focus:outline-none"
                                        onchange="this.form.submit()">
                             </div>
                         </div>
                     </div>
 
                     {{-- Has Attachment Toggle --}}
-                    <div class="mb-4">
+                    <div class="mb-3.5">
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" name="has_attachment" value="1"
                                    {{ ($filters['has_attachment'] ?? false) ? 'checked' : '' }}
                                    onchange="this.form.submit()"
-                                   class="w-4 h-4 text-primary border-border rounded focus:ring-primary">
-                            <span class="text-sm text-ink-secondary">Has attachment</span>
+                                   class="mail-checkbox">
+                            <span class="text-xs text-ink-secondary">Has attachment</span>
                         </label>
                     </div>
 
                     {{-- Read/Unread/Flagged --}}
-                    <div class="mb-4">
+                    <div class="mb-3.5">
                         <label class="block text-xs font-medium text-ink-secondary mb-1">Status</label>
                         <div class="space-y-1">
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <input type="radio" name="is_seen" value=""
                                        {{ !isset($filters['is_seen']) ? 'checked' : '' }}
                                        onchange="this.form.submit()"
-                                       class="w-4 h-4 text-primary border-border focus:ring-primary">
-                                <span class="text-sm text-ink-secondary">All</span>
+                                       class="accent-primary">
+                                <span class="text-xs text-ink-secondary">All</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <input type="radio" name="is_seen" value="0"
                                        {{ (isset($filters['is_seen']) && $filters['is_seen'] === false) ? 'checked' : '' }}
                                        onchange="this.form.submit()"
-                                       class="w-4 h-4 text-primary border-border focus:ring-primary">
-                                <span class="text-sm text-ink-secondary">Unread</span>
+                                       class="accent-primary">
+                                <span class="text-xs text-ink-secondary">Unread</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <input type="radio" name="is_seen" value="1"
                                        {{ (isset($filters['is_seen']) && $filters['is_seen'] === true) ? 'checked' : '' }}
                                        onchange="this.form.submit()"
-                                       class="w-4 h-4 text-primary border-border focus:ring-primary">
-                                <span class="text-sm text-ink-secondary">Read</span>
+                                       class="accent-primary">
+                                <span class="text-xs text-ink-secondary">Read</span>
                             </label>
                         </div>
                     </div>
 
                     {{-- Flagged Filter --}}
-                    <div class="mb-4">
+                    <div class="mb-3.5">
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" name="is_flagged" value="1"
                                    {{ ($filters['is_flagged'] ?? false) ? 'checked' : '' }}
                                    onchange="this.form.submit()"
-                                   class="w-4 h-4 text-primary border-border rounded focus:ring-primary">
-                            <span class="text-sm text-ink-secondary">Flagged only</span>
+                                   class="mail-checkbox">
+                            <span class="text-xs text-ink-secondary">Flagged only</span>
                         </label>
                     </div>
 
                     {{-- Labels Multi-Select --}}
                     @if($labels->isNotEmpty())
-                    <div class="mb-4">
+                    <div class="mb-3.5">
                         <label class="block text-xs font-medium text-ink-secondary mb-1">Labels</label>
-                        <div class="space-y-1 max-h-40 overflow-y-auto">
+                        <div class="space-y-1 max-h-36 overflow-y-auto">
                             @foreach($labels as $label)
                                 <label class="flex items-center gap-2 cursor-pointer">
                                     <input type="checkbox" name="labels[]" value="{{ $label->id }}"
                                            {{ in_array($label->id, $filters['labels'] ?? []) ? 'checked' : '' }}
                                            onchange="this.form.submit()"
-                                           class="w-4 h-4 text-primary border-border rounded focus:ring-primary">
-                                    <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {{ $label->color }}"></span>
-                                    <span class="text-sm text-ink-secondary truncate">{{ $label->name }}</span>
+                                           class="mail-checkbox">
+                                    <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: {{ $label->color }}"></span>
+                                    <span class="text-xs text-ink-secondary truncate">{{ $label->name }}</span>
                                 </label>
                             @endforeach
                         </div>
@@ -157,21 +157,19 @@
             @endphp
 
             @if(!empty($activeFilters))
-                <div class="flex flex-wrap gap-2 mb-4">
+                <div class="flex flex-wrap gap-1.5 mb-3">
                     @foreach($activeFilters as $filter)
                         @php
                             $remainingParams = array_merge(request()->query(), $filter['params']);
-                            // Remove null values
                             $remainingParams = array_filter($remainingParams, fn($v) => $v !== null);
-                            // Re-index labels array
                             if (isset($remainingParams['labels']) && is_array($remainingParams['labels'])) {
                                 $remainingParams['labels'] = array_values($remainingParams['labels']);
                             }
                         @endphp
-                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-surface-sunken text-ink font-medium">
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-surface-sunken border border-border text-ink-secondary">
                             {{ $filter['label'] }}
                             <a href="{{ route('search', $remainingParams) }}" wire:navigate
-                               class="ml-0.5 text-ink-tertiary hover:text-ink-secondary" aria-label="Remove filter">
+                               class="text-ink-tertiary hover:text-ink" aria-label="Remove filter">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                 </svg>
@@ -182,62 +180,64 @@
             @endif
 
             {{-- Results Header --}}
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-sm text-ink-secondary">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-xs text-ink-secondary">
                     {{ $results->total() }} result{{ $results->total() !== 1 ? 's' : '' }} for
-                    <span class="font-medium text-ink">"{{ $query }}"</span>
+                    <span class="font-semibold text-ink">"{{ $query }}"</span>
                 </h2>
             </div>
 
             {{-- Results --}}
             @if($results->isEmpty())
-                {{-- Empty State --}}
-                <div class="bg-white rounded-lg border border-border p-12 text-center">
-                    <svg class="w-16 h-16 mx-auto mb-4 text-ink-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                <div class="bg-surface-raised rounded border border-border p-12 text-center">
+                    <svg class="w-10 h-10 mx-auto mb-3 text-ink-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
-                    <h3 class="text-lg font-medium text-ink mb-2">No messages found</h3>
-                    <p class="text-sm text-ink-tertiary max-w-md mx-auto">
-                        Try adjusting your search terms or filters. Search looks through subject, sender, recipients, and message body.
+                    <h3 class="text-sm font-semibold text-ink mb-1">No messages found</h3>
+                    <p class="text-xs text-ink-tertiary max-w-sm mx-auto">
+                        Try adjusting your search terms or filters. Search matches subject, sender, recipients, and message body.
                     </p>
                 </div>
             @else
-                {{-- Results List --}}
-                <div class="bg-white rounded-lg border border-border overflow-hidden">
-                    <div class="divide-y divide-border">
+                <div class="bg-surface-raised rounded border border-border overflow-hidden">
+                    <div class="divide-y divide-border-subtle">
                         @foreach($results as $result)
+                            @php
+                                $displaySender = $result->from_name ?? $result->from_address;
+                                $avatarChar = strtoupper(substr(preg_replace('/[^a-zA-Z0-9]/', '', $displaySender) ?: 'M', 0, 1));
+                                $avatarIdx = abs(crc32($result->from_address ?? $displaySender)) % 6;
+                            @endphp
                             <a href="{{ route('message.show', ['folderPath' => $result->folder_path, 'uid' => $result->uid]) }}"
                                wire:navigate
-                               class="block px-4 py-3 hover:bg-surface-sunken transition-colors">
+                               class="block px-4 py-2.5 hover:bg-hover transition-colors">
                                 <div class="flex items-start gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-primary-subtle flex items-center justify-center text-primary font-medium text-sm flex-shrink-0">
-                                        {{ mb_substr($result->from_name ?? $result->from_address ?? '?', 0, 1) }}
+                                    <div class="w-8 h-8 rounded avatar-gradient-{{ $avatarIdx }} flex items-center justify-center font-semibold text-xs flex-shrink-0">
+                                        {{ $avatarChar }}
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <div class="flex items-center gap-2">
-                                            <span class="font-medium text-ink truncate">{{ $result->from_name ?? $result->from_address }}</span>
-                                            <span class="text-xs text-ink-tertiary flex-shrink-0">{{ $result->formatted_date }}</span>
+                                            <span class="text-xs font-semibold text-ink truncate">{{ $displaySender }}</span>
+                                            <span class="text-[11px] text-ink-tertiary flex-shrink-0 tabular-nums">{{ $result->formatted_date }}</span>
                                             @if($result->has_attachments)
-                                                <svg class="w-4 h-4 text-ink-tertiary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                                                <svg class="w-3.5 h-3.5 text-ink-tertiary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"/>
                                                 </svg>
                                             @endif
                                         </div>
-                                        {{-- Subject: sanitized via e() (HTML entity encoding) THEN highlighted (SEC-01, T-04-07) --}}
-                                        <div class="text-sm font-medium text-ink truncate mt-0.5">
+                                        {{-- Subject --}}
+                                        <div class="text-xs font-medium text-ink truncate mt-0.5">
                                             {!! app(\App\Services\SearchService::class)->highlightMatches(
                                                 e($result->subject ?? ''),
                                                 $query
                                             ) !!}
                                         </div>
                                         <div class="flex items-center gap-2 mt-0.5">
-                                            <span class="inline-flex items-center px-1.5 py-0.5 text-xs font-medium rounded bg-surface-sunken text-ink-secondary">
-                                                {{ class_basename($result->folder_path) }}
+                                            <span class="text-[10px] text-ink-tertiary">
+                                                in {{ class_basename($result->folder_path) }}
                                             </span>
-                                            {{-- Snippet: sanitized via MessageSanitizer THEN highlighted (SEC-01, T-04-07) --}}
-                                            <span class="text-sm text-ink-tertiary truncate">
+                                            <span class="text-xs text-ink-tertiary truncate">
                                                 {!! app(\App\Services\SearchService::class)->highlightMatches(
-                                                    app(\App\Services\MessageSanitizer::class)->sanitizeText(mb_strimwidth($result->snippet ?? '', 0, 160, '...')),
+                                                    app(\App\Services\MessageSanitizer::class)->sanitizeText(mb_strimwidth($result->snippet ?? '', 0, 140, '...')),
                                                     $query
                                                 ) !!}
                                             </span>
@@ -249,7 +249,7 @@
                     </div>
 
                     {{-- Pagination --}}
-                    <div class="px-4 py-3 border-t border-border-subtle">
+                    <div class="px-4 py-2.5 border-t border-border">
                         {{ $results->withQueryString()->links() }}
                     </div>
                 </div>

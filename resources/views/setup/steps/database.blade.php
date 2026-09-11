@@ -182,7 +182,7 @@
                 @if (!empty($dbTestResult['database_missing']))
                     <div class="mt-4 p-4 setup-callout-warning">
                         <div class="flex items-start gap-3">
-                            <div class="w-8 h-8 rounded-lg bg-amber-500/15 text-amber-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <div class="w-8 h-8 rounded bg-amber-500/15 text-amber-500 flex items-center justify-center flex-shrink-0 mt-0.5">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
                             </div>
                             <div class="flex-1">
@@ -195,7 +195,7 @@
                                             wire:click="createDatabase"
                                             wire:loading.attr="disabled"
                                             wire:target="createDatabase"
-                                            class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-xs font-semibold rounded-lg shadow-sm hover:brightness-105 transition-all">
+                                            class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium rounded transition-colors">
                                         <span wire:loading.remove wire:target="createDatabase">Create Database</span>
                                         <span wire:loading wire:target="createDatabase">Creating…</span>
                                     </button>
@@ -215,13 +215,13 @@
 
         {{-- Migrations Section (Shown upon successful connection) --}}
         @if ($dbTestResult && $dbTestResult['success'])
-            <div class="setup-panel border-indigo-500/20 bg-indigo-500/[0.03]">
+            <div class="setup-panel border-border bg-surface-raised">
                 <div class="flex items-center justify-between flex-wrap gap-4">
                     <div>
                         <div class="flex items-center gap-2">
                             <h3 class="text-sm font-bold text-ink">Database Migrations</h3>
                             @if ($migrationsRan)
-                                <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-emerald-500/15 text-emerald-500 border border-emerald-500/20">Ready</span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-medium uppercase bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">Ready</span>
                             @endif
                         </div>
                         <p class="text-xs text-ink-secondary mt-1">
@@ -235,7 +235,7 @@
                                 wire:loading.attr="disabled"
                                 wire:target="runMigrations"
                                 {{ $migrationsRan ? 'disabled' : '' }}
-                                class="setup-btn-primary !py-2 !px-4 text-xs font-semibold">
+                                class="setup-btn-primary !py-1.5 !px-3.5 text-xs font-medium">
                             <span wire:loading.remove wire:target="runMigrations">
                                 {{ $migrationsRan ? '✓ Migrations Installed' : 'Run Migrations' }}
                             </span>

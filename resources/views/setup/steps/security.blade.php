@@ -23,7 +23,7 @@
                 </p>
 
                 <div class="mt-3.5 flex items-center gap-2">
-                    <input type="checkbox" id="https_enabled" wire:model="httpsEnabled" class="h-4 w-4 text-indigo-600 rounded border-border focus:ring-indigo-500" checked disabled>
+                    <input type="checkbox" id="https_enabled" wire:model="httpsEnabled" class="h-4 w-4 text-primary rounded border-border focus:ring-primary" checked disabled>
                     <label for="https_enabled" class="text-xs font-semibold text-ink">HTTPS enforcement enabled</label>
                 </div>
             </div>
@@ -40,7 +40,7 @@
         <div class="setup-panel flex flex-col justify-between">
             <div>
                 <div class="flex items-center gap-2.5 mb-3">
-                    <div class="w-8 h-8 rounded-lg bg-indigo-500/15 text-indigo-500 flex items-center justify-center flex-shrink-0">
+                    <div class="w-8 h-8 rounded bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                         </svg>
@@ -75,7 +75,7 @@
         <div class="setup-panel flex flex-col justify-between">
             <div>
                 <div class="flex items-center gap-2.5 mb-3">
-                    <div class="w-8 h-8 rounded-lg bg-blue-500/15 text-blue-500 flex items-center justify-center flex-shrink-0">
+                    <div class="w-8 h-8 rounded bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
@@ -103,7 +103,7 @@
         <div class="setup-panel flex flex-col justify-between">
             <div>
                 <div class="flex items-center gap-2.5 mb-3">
-                    <div class="w-8 h-8 rounded-lg bg-purple-500/15 text-purple-500 flex items-center justify-center flex-shrink-0">
+                    <div class="w-8 h-8 rounded bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                         </svg>

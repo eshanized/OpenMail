@@ -241,28 +241,25 @@ $doc = '<!DOCTYPE html>
 }" class="email-renderer w-full">
 
     {{-- Reader Control Toolbar --}}
-    <div class="email-control-bar">
+    <div class="email-control-bar border-b border-border bg-surface-sunken px-4 py-2 flex items-center justify-between gap-2">
         <div class="flex items-center gap-1">
             {{-- Reading Mode Toggle (Focused vs Full) --}}
             <button
                 type="button"
                 @click="toggleReadingMode()"
-                class="email-control-btn"
-                :class="{ 'active': readingMode === 'focused' }"
+                class="email-control-btn px-2 py-1 text-xs text-ink-secondary hover:text-ink rounded transition-colors"
+                :class="{ 'font-semibold text-primary': readingMode === 'focused' }"
                 :title="readingMode === 'focused' ? 'Switch to Full Width' : 'Switch to Focused Reading Width'"
             >
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12"/>
-                </svg>
-                <span x-text="readingMode === 'focused' ? 'Focused' : 'Full width'">Full width</span>
+                <span x-text="readingMode === 'focused' ? 'Focused width' : 'Full width'">Full width</span>
             </button>
 
             {{-- Zoom Controls --}}
-            <div class="inline-flex items-center rounded-lg border border-border-subtle bg-surface-sunken/60 p-0.5 ml-1">
+            <div class="inline-flex items-center rounded border border-border bg-surface-raised px-1 py-0.5 ml-2 gap-1 text-xs">
                 <button
                     type="button"
                     @click="changeZoom(-10)"
-                    class="p-1 text-ink-tertiary hover:text-ink rounded hover:bg-hover transition-colors"
+                    class="p-0.5 text-ink-tertiary hover:text-ink rounded transition-colors"
                     title="Zoom Out"
                 >
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -272,14 +269,14 @@ $doc = '<!DOCTYPE html>
                 <button
                     type="button"
                     @click="resetZoom()"
-                    class="px-1.5 py-0.5 text-[11px] font-semibold text-ink-secondary hover:text-ink transition-colors font-mono"
+                    class="px-1 text-[11px] font-mono text-ink-secondary hover:text-ink transition-colors"
                     title="Reset Zoom"
                     x-text="zoomLevel + '%'"
                 >100%</button>
                 <button
                     type="button"
                     @click="changeZoom(10)"
-                    class="p-1 text-ink-tertiary hover:text-ink rounded hover:bg-hover transition-colors"
+                    class="p-0.5 text-ink-tertiary hover:text-ink rounded transition-colors"
                     title="Zoom In"
                 >
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -289,60 +286,45 @@ $doc = '<!DOCTYPE html>
             </div>
         </div>
 
-        <div class="flex items-center gap-1">
+        <div class="flex items-center gap-2">
             {{-- Dark mode adaptive toggle for email canvas --}}
             <button
                 type="button"
                 @click="toggleAdaptiveTheme()"
-                class="email-control-btn"
-                :class="{ 'active': adaptiveTheme }"
+                class="email-control-btn text-xs text-ink-secondary hover:text-ink px-2 py-1 rounded transition-colors"
+                :class="{ 'text-primary font-medium': adaptiveTheme }"
                 title="Toggle eye-comfort dark reading canvas"
             >
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"/>
-                </svg>
-                <span class="hidden sm:inline">Dark view</span>
+                <span class="hidden sm:inline">Dark canvas</span>
             </button>
 
             {{-- Print email --}}
             <button
                 type="button"
                 onclick="window.print()"
-                class="email-control-btn"
+                class="email-control-btn text-xs text-ink-secondary hover:text-ink px-2 py-1 rounded transition-colors"
                 title="Print this message"
             >
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m0 0a48.113 48.113 0 018.5 0"/>
-                </svg>
-                <span class="hidden sm:inline">Print</span>
+                <span>Print</span>
             </button>
         </div>
     </div>
 
-    {{-- Remote images blocked banner (Modern Privacy Shield) --}}
-    <div x-show="!showImages" x-transition class="email-privacy-shield">
-        <div class="flex items-center gap-2.5 min-w-0">
-            <div class="w-7 h-7 rounded-lg bg-warning/15 text-warning flex items-center justify-center flex-shrink-0">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/>
-                </svg>
-            </div>
-            <div>
-                <p class="text-xs font-semibold text-ink">
-                    Remote images are blocked for privacy.
-                </p>
-                <p class="text-[11px] text-ink-tertiary hidden sm:block">
-                    Tracking pixels and external resources are prevented from loading.
-                </p>
-            </div>
+    {{-- Remote images blocked banner (Utility notice) --}}
+    <div x-show="!showImages" x-transition class="border-b border-border bg-surface-sunken px-4 py-2 flex items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-2 text-ink-secondary">
+            <svg class="w-3.5 h-3.5 text-ink-tertiary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+            </svg>
+            <span>Remote images blocked for privacy.</span>
         </div>
         <button
             wire:click="toggleImages"
             wire:loading.attr="disabled"
-            class="px-3 py-1.5 text-xs font-semibold text-white bg-primary hover:bg-primary-hover rounded-lg shadow-sm transition-all duration-150 flex-shrink-0 flex items-center gap-1.5 cursor-pointer"
+            class="text-xs font-medium text-primary hover:underline cursor-pointer flex-shrink-0"
         >
             <span wire:loading.remove wire:target="toggleImages">Display images</span>
-            <span wire:loading wire:target="toggleImages">Loading...</span>
+            <span wire:loading wire:target="toggleImages">Loading…</span>
         </button>
     </div>
 

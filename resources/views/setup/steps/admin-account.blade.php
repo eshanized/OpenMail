@@ -129,19 +129,19 @@
         </div>
 
         {{-- Requirements Callout --}}
-        <div class="setup-panel border-indigo-500/20 bg-indigo-500/[0.02]">
-            <p class="text-xs font-bold text-indigo-600 dark:text-indigo-400">Security requirements:</p>
+        <div class="setup-panel border-border bg-surface-raised">
+            <p class="text-xs font-semibold text-ink">Security requirements:</p>
             <ul class="mt-2 text-xs text-ink-secondary space-y-1.5">
                 <li class="flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
                     At least 8 characters
                 </li>
                 <li class="flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
                     At least one uppercase (A&ndash;Z) and one lowercase letter (a&ndash;z)
                 </li>
                 <li class="flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
                     At least one digit (0&ndash;9)
                 </li>
             </ul>

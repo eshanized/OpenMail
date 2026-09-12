@@ -222,14 +222,16 @@ npm run build   # Production build
 
 ## Security
 
-- Mail passwords are encrypted at rest via Laravel's `Crypt` facade
-- Session credentials for IMAP/SMTP are stored server-side only, never exposed via URL or client-side storage
-- HTML email is never rendered as trusted application HTML
-- Remote images are blocked by default and only loaded on user consent
-- CSP headers prevent XSS and data exfiltration
-- Rate limiting protects authentication and API endpoints
-- Audit logs track security-relevant events with automatic 90-day retention
+OpenMail adheres to strict security standards including dual HTML sanitization, remote image blocking, CSP nonces, and credential encryption. Please review our [Security Policy](SECURITY.md) for vulnerability reporting guidelines.
+
+## Documentation & Community
+
+- **Non-Technical Setup Guide**: [SETUP.md](SETUP.md)
+- **Contribution Guidelines**: [CONTRIBUTING.md](CONTRIBUTING.md)
+- **Code of Conduct**: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- **Changelog**: [CHANGELOG.md](CHANGELOG.md)
 
 ## License
 
-MIT
+OpenMail is open-sourced software licensed under the [MIT license](LICENSE).
+

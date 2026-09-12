@@ -7,6 +7,7 @@ stages:
   - lint
   - test
   - package
+  - release
 
 include:
   - template: Security/Secret-Detection.gitlab-ci.yml
@@ -170,6 +171,9 @@ package:release:
         package.json \
         .env.example \
         README.md \
+        SETUP.md \
+        LICENSE \
+        CHANGELOG.md \
         -x "storage/logs/*" \
         -x "storage/framework/cache/*" \
         -x "storage/framework/sessions/*" \
@@ -185,3 +189,27 @@ package:release:
     paths:
       - "openmail-*.zip"
     expire_in: 30 days
+
+# =========================================================================
+# Stage 5: Automated GitLab Release
+# =========================================================================
+
+release:publish:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  rules:
+    - if: $CI_COMMIT_TAG
+  dependencies:
+    - package:release
+  script:
+    - echo "Publishing automated GitLab release for tag $CI_COMMIT_TAG..."
+  release:
+    name: "OpenMail $CI_COMMIT_TAG"
+    description: "Release notes for OpenMail $CI_COMMIT_TAG. See [CHANGELOG.md](CHANGELOG.md) for full change history and [SETUP.md](SETUP.md) for deployment instructions."
+    tag_name: "$CI_COMMIT_TAG"
+    ref: "$CI_COMMIT_TAG"
+    assets:
+      links:
+        - name: "Production Deployment Archive ($CI_COMMIT_TAG)"
+          url: "${CI_PROJECT_URL}/-/jobs/artifacts/${CI_COMMIT_TAG}/raw/openmail-${CI_COMMIT_TAG}.zip?job=package:release"
+

@@ -1,8 +1,9 @@
 ---
 name: Bug Report
 about: Create a report to help us improve OpenMail
-title: "[BUG] "
-labels: ["kind::bug"]
+title: '[BUG] '
+labels: 'bug'
+assignees: ''
 ---
 
 ## Summary

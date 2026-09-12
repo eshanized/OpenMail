@@ -47,5 +47,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Content Security Policy (CSP)**: Hardened CSP headers with cryptographic nonces and violation reporting endpoint.
 - **Zero-Daemon Architecture**: Database-backed sessions and cache eliminating the need for Redis, Memcached, or long-running workers on shared hosting.
 
-[1.0.1]: https://gitlab.com/eshanized/openmail/-/compare/v1.0.0...v1.0.1
-[1.0.0]: https://gitlab.com/eshanized/openmail/-/releases/v1.0.0
+[1.0.1]: https://github.com/eshanized/OpenMail/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/eshanized/OpenMail/releases/tag/v1.0.0

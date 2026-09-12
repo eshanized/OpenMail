@@ -37,12 +37,12 @@ OpenMail implements multiple layers of protection:
 
 ## Reporting a Vulnerability
 
-**Please do NOT report security vulnerabilities through public GitLab issues.**
+**Please do NOT report security vulnerabilities through public GitHub issues.**
 
 If you discover a potential security vulnerability in OpenMail, please report it responsibly:
 
 - **Email**: Send an encrypted or confidential email to **`m.eshanized@gmail.com`**.
-- **GitLab**: Use GitLab's **Confidential Issue** feature on the project repository.
+- **GitHub**: Use GitHub's **Private Vulnerability Reporting** feature on the project repository.
 
 ### What to Include in Your Report:
 - A clear description of the vulnerability.

@@ -12,7 +12,7 @@ We welcome bug reports, feature suggestions, documentation enhancements, and cod
 2. [How Can I Contribute?](#how-can-i-contribute)
    - [Reporting Bugs](#reporting-bugs)
    - [Suggesting Enhancements](#suggesting-enhancements)
-   - [Submitting a Merge Request](#submitting-a-merge-request)
+   - [Submitting a Pull Request](#submitting-a-pull-request)
 3. [Local Development Setup](#local-development-setup)
 4. [Coding Standards & Tooling](#coding-standards--tooling)
    - [PHP Code Style (Pint)](#php-code-style-pint)
@@ -32,10 +32,10 @@ All contributors and maintainers are expected to adhere to our [Code of Conduct]
 
 ### Reporting Bugs
 
-Before creating a bug report, check the [issue tracker](https://gitlab.com/eshanized/openmail/-/issues) to make sure your issue has not already been reported.
+Before creating a bug report, check the [issue tracker](https://github.com/eshanized/OpenMail/issues) to make sure your issue has not already been reported.
 
 When submitting a bug report:
-- Use our [Bug Report Template](.gitlab/issue_templates/Bug.md).
+- Use our [Bug Report Template](.github/ISSUE_TEMPLATE/bug_report.md).
 - Provide a clear and descriptive title.
 - Describe the exact steps to reproduce the issue.
 - Include your environment details: PHP version, database engine (MySQL/MariaDB), browser, and mail server provider (Gmail, Outlook, Dovecot, cPanel, etc.).
@@ -44,16 +44,16 @@ When submitting a bug report:
 ### Suggesting Enhancements
 
 We love good ideas! To suggest an enhancement:
-- Use our [Feature Request Template](.gitlab/issue_templates/Feature_Request.md).
+- Use our [Feature Request Template](.github/ISSUE_TEMPLATE/feature_request.md).
 - Clearly explain the problem the feature solves and who benefits from it.
 - Remember our primary architectural constraint: **OpenMail must run on shared hosting without requiring Redis, Elasticsearch, or background daemons**.
 
-### Submitting a Merge Request
+### Submitting a Pull Request
 
-1. **Fork** the repository on GitLab.
+1. **Fork** the repository on GitHub.
 2. Clone your fork locally:
    ```bash
-   git clone https://gitlab.com/<your-username>/openmail.git
+   git clone https://github.com/<your-username>/OpenMail.git
    cd openmail
    ```
 3. Create a descriptive feature branch:
@@ -62,8 +62,8 @@ We love good ideas! To suggest an enhancement:
    ```
 4. Follow our coding and testing standards.
 5. Commit your changes following [Conventional Commits](#git-conventions).
-6. Push to your fork and open a **Merge Request (MR)** against the `master` branch of `eshanized/openmail`.
-7. Fill out the [Merge Request Template](.gitlab/merge_request_templates/Default.md).
+6. Push to your fork and open a **Pull Request (PR)** against the `master` branch of `eshanized/OpenMail`.
+7. Fill out the [Pull Request Template](.github/pull_request_template.md).
 
 ---
 
@@ -79,7 +79,7 @@ We love good ideas! To suggest an enhancement:
 
 ```bash
 # 1. Clone your fork
-git clone https://gitlab.com/<your-username>/openmail.git
+git clone https://github.com/<your-username>/OpenMail.git
 cd openmail
 
 # 2. Install dependencies & initialize environment

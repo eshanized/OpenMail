@@ -1,5 +1,5 @@
 ## Description
-<!-- What does this Merge Request do? Reference related issues using #issue_id -->
+<!-- What does this Pull Request do? Reference related issues using #issue_id -->
 Closes #
 
 ## Type of Change

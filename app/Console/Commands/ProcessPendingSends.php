@@ -3,9 +3,10 @@
 namespace App\Console\Commands;
 
 use App\Models\PendingSend;
+use App\Models\User;
+use App\Services\ComposerService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
-use Symfony\Component\Mime\Email;
 
 class ProcessPendingSends extends Command
 {
@@ -33,21 +34,34 @@ class ProcessPendingSends extends Command
             $data = $send->message_json;
 
             try {
+                $user = User::find($send->user_id);
+
                 // Resend via SMTP using the pre-built MIME message
-                Mail::raw($send->mime_message, function ($message) use ($data) {
+                Mail::raw($send->mime_message, function ($message) use ($data, $send, $user) {
+                    if ($user) {
+                        $message->from($user->email, $user->name ?? '');
+                    }
                     $message->to($data['to'] ?? '')
                         ->cc($data['cc'] ?? '')
                         ->bcc($data['bcc'] ?? '')
                         ->subject($data['subject'] ?? '(no subject)');
 
                     // Replace Symfony's generated MIME with our pre-built one
-                    $message->using(function (Email $symfonyMessage) use ($send) {
-                        $mimeMessage = new Email;
-                        $mimeMessage = $mimeMessage->fromString($send->mime_message);
-                        foreach ($mimeMessage->getHeaders()->all() as $header) {
-                            $symfonyMessage->getHeaders()->add($header);
+                    $message->using(function ($symfonyMessage) use ($send, $data) {
+                        try {
+                            $composerService = app(ComposerService::class);
+                            $built = $composerService->buildMimeMessage($data, (string) $send->user_id);
+                            if (is_object($symfonyMessage) && method_exists($symfonyMessage, 'getHeaders')) {
+                                foreach ($built->getHeaders()->all() as $header) {
+                                    $symfonyMessage->getHeaders()->add($header);
+                                }
+                            }
+                            if (is_object($symfonyMessage) && method_exists($symfonyMessage, 'setBody') && $built->getBody()) {
+                                $symfonyMessage->setBody($built->getBody());
+                            }
+                        } catch (\Throwable) {
+                            // Fallback if rebuild fails
                         }
-                        $symfonyMessage->setBody($mimeMessage->getBody());
                     });
                 });
 

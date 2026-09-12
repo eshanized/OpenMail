@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Mailbox;
 
+use App\Models\MessageMetadata;
 use App\Services\ImapMailboxService;
+use App\Services\LabelService;
 use App\Services\MessageSanitizer;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
@@ -407,40 +409,88 @@ class MessageViewer extends Component
 
     public function toggleRead(): void
     {
-        if (! $this->message) {
+        if ($this->uid <= 0) {
             return;
         }
         $newValue = ! $this->isSeen;
-        app(ImapMailboxService::class)->setFlag($this->folderPath, [$this->uid], '\\Seen', $newValue);
-        $this->loadMessage();
+        $imap = app(ImapMailboxService::class);
+        $imap->setFlag($this->folderPath, [$this->uid], '\\Seen', $newValue);
+        $imap->refreshFolderCache($this->folderPath);
+        $this->dispatch('folder-stats-updated');
+        $this->isSeen = $newValue;
     }
 
     public function toggleStar(): void
     {
-        if (! $this->message) {
+        if ($this->uid <= 0) {
             return;
         }
         $newValue = ! $this->isFlagged;
-        app(ImapMailboxService::class)->setFlag($this->folderPath, [$this->uid], '\\Flagged', $newValue);
-        $this->loadMessage();
+        $imap = app(ImapMailboxService::class);
+        $imap->setFlag($this->folderPath, [$this->uid], '\\Flagged', $newValue);
+        $this->isFlagged = $newValue;
+    }
+
+    public function archiveMessage(): void
+    {
+        if ($this->uid <= 0) {
+            return;
+        }
+
+        $imapService = app(ImapMailboxService::class);
+        $archivePath = $imapService->getOrCreateArchiveFolder();
+        if ($archivePath && $this->folderPath !== $archivePath) {
+            $imapService->moveMessages($this->folderPath, [$this->uid], $archivePath);
+        }
+
+        $userId = auth()->id();
+        $labelService = app(LabelService::class);
+        $archiveLabel = $labelService->ensureArchiveLabel($userId);
+        $inboxLabel = $labelService->ensureInboxLabel($userId);
+
+        $messageIds = MessageMetadata::where('user_id', $userId)
+            ->where('folder_path', $this->folderPath)
+            ->where('uid', $this->uid)
+            ->pluck('id')
+            ->toArray();
+
+        if (! empty($messageIds)) {
+            $labelService->removeFromMessages($inboxLabel->id, $messageIds, $userId);
+            $labelService->applyToMessages($archiveLabel->id, $messageIds, $userId);
+        }
+
+        $imapService->refreshFolderCache($this->folderPath);
+        if ($archivePath) {
+            $imapService->refreshFolderCache($archivePath);
+        }
+        $this->dispatch('folder-stats-updated');
+
+        $this->redirect(route('mailbox.folder', ['folderPath' => $this->folderPath]), navigate: true);
     }
 
     public function deleteMessage(): void
     {
-        if (! $this->message) {
+        if ($this->uid <= 0) {
             return;
         }
-        app(ImapMailboxService::class)->deleteMessages($this->folderPath, [$this->uid]);
-        $this->redirect(route('mailbox', ['folderPath' => $this->folderPath]), navigate: true);
+        $imap = app(ImapMailboxService::class);
+        $imap->deleteMessages($this->folderPath, [$this->uid]);
+        $imap->refreshFolderCache($this->folderPath);
+        $this->dispatch('folder-stats-updated');
+        $this->redirect(route('mailbox.folder', ['folderPath' => $this->folderPath]), navigate: true);
     }
 
     public function moveToFolder(string $destinationPath): void
     {
-        if (! $this->message) {
+        if ($this->uid <= 0) {
             return;
         }
-        app(ImapMailboxService::class)->moveMessages($this->folderPath, [$this->uid], $destinationPath);
-        $this->redirect(route('mailbox', ['folderPath' => $this->folderPath]), navigate: true);
+        $imap = app(ImapMailboxService::class);
+        $imap->moveMessages($this->folderPath, [$this->uid], $destinationPath);
+        $imap->refreshFolderCache($this->folderPath);
+        $imap->refreshFolderCache($destinationPath);
+        $this->dispatch('folder-stats-updated');
+        $this->redirect(route('mailbox.folder', ['folderPath' => $this->folderPath]), navigate: true);
     }
 
     public function reply(): void

@@ -2,7 +2,7 @@
     {{-- Back navigation bar --}}
     <div class="flex items-center justify-between">
         <a
-            href="{{ route('mailbox', ['folderPath' => $folderPath]) }}"
+            href="{{ route('mailbox.folder', ['folderPath' => $folderPath]) }}"
             wire:navigate
             class="inline-flex items-center gap-1.5 text-xs font-medium text-ink-secondary hover:text-ink transition-colors group"
         >
@@ -255,6 +255,18 @@
                             @endforeach
                         </div>
                     </div>
+
+                    {{-- Archive --}}
+                    <button
+                        wire:click="archiveMessage"
+                        wire:loading.attr="disabled"
+                        class="p-1 rounded text-ink-tertiary hover:text-ink hover:bg-hover transition-colors disabled:opacity-50 cursor-pointer"
+                        title="Archive"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                        </svg>
+                    </button>
 
                     {{-- Delete (Move to Trash) --}}
                     <button

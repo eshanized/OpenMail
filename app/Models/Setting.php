@@ -20,9 +20,23 @@ class Setting extends Model
         'group',
     ];
 
-    protected $casts = [
-        'value' => 'array',
-    ];
+    public function getValueAttribute(mixed $value): mixed
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $decoded = json_decode($value, true);
+
+        return (json_last_error() === JSON_ERROR_NONE) ? $decoded : $value;
+    }
+
+    public function setValueAttribute(mixed $value): void
+    {
+        $this->attributes['value'] = is_array($value) || is_object($value) || is_string($value) || is_bool($value) || is_numeric($value)
+            ? json_encode($value)
+            : $value;
+    }
 
     public function user(): BelongsTo
     {

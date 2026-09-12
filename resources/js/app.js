@@ -121,8 +121,17 @@ document.addEventListener('alpine:init', () => {
             return `${this.currentDensity} spacing`;
         },
         init() {
-            this.currentDensity = props.initialDensity || localStorage.getItem('density') || 'regular';
-            this.currentTheme = props.initialTheme || localStorage.getItem('theme') || 'system';
+            const storedDensity = localStorage.getItem('density');
+            const storedTheme = localStorage.getItem('theme');
+
+            this.currentDensity = (props.initialDensity && props.initialDensity !== 'regular')
+                ? props.initialDensity
+                : (storedDensity || props.initialDensity || 'regular');
+
+            this.currentTheme = (props.initialTheme && props.initialTheme !== 'system')
+                ? props.initialTheme
+                : (storedTheme || props.initialTheme || 'system');
+
             applyDensityToDoc(this.currentDensity);
         },
         applyTheme(value) {

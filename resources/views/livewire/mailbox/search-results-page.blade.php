@@ -250,7 +250,7 @@
 
                     {{-- Pagination --}}
                     <div class="px-4 py-2.5 border-t border-border">
-                        {{ $results->withQueryString()->links() }}
+                        {{ $results->withQueryString()->links('pagination::tailwind') }}
                     </div>
                 </div>
             @endif

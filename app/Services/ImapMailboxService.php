@@ -452,15 +452,7 @@ class ImapMailboxService
 
     private function getTrashFolderPath(Client $client): ?string
     {
-        $folders = $client->getFolders();
-        foreach ($folders as $folder) {
-            $attributes = $folder->attributes ?? [];
-            if (in_array('\\Trash', $attributes)) {
-                return $folder->path;
-            }
-        }
-
-        return null;
+        return app(FolderMapper::class)->getTrashFolderPath($client);
     }
 
     private function getOrCreateTrashFolder(Client $client): string
@@ -555,10 +547,14 @@ class ImapMailboxService
             $folder = $client->getFolder($draftsFolder);
 
             // If existing UID provided, delete the old draft first
-            if ($existingUid) {
-                $oldMessage = $folder->query()->getMessageByUid($existingUid);
-                if ($oldMessage) {
-                    $oldMessage->delete(true); // true = expunge
+            if ($existingUid && is_numeric($existingUid)) {
+                try {
+                    $oldMessage = $folder->query()->getMessageByUid((int) $existingUid);
+                    if ($oldMessage) {
+                        $oldMessage->delete(true); // true = expunge
+                    }
+                } catch (\Throwable) {
+                    // Ignore if old draft could not be deleted
                 }
             }
 
@@ -577,6 +573,10 @@ class ImapMailboxService
      */
     public function deleteFromDrafts(string $uid): bool
     {
+        if (! is_numeric($uid)) {
+            return false;
+        }
+
         $client = $this->getClient();
 
         try {
@@ -587,12 +587,16 @@ class ImapMailboxService
             }
 
             $folder = $client->getFolder($draftsFolder);
-            $message = $folder->query()->getMessageByUid($uid);
+            try {
+                $message = $folder->query()->getMessageByUid((int) $uid);
 
-            if ($message) {
-                $message->delete(true); // expunge
+                if ($message) {
+                    $message->delete(true); // expunge
 
-                return true;
+                    return true;
+                }
+            } catch (\Throwable) {
+                return false;
             }
 
             return false;
@@ -610,6 +614,10 @@ class ImapMailboxService
      */
     public function deleteFromSent(string $uid): bool
     {
+        if (! is_numeric($uid)) {
+            return false;
+        }
+
         $client = $this->getClient();
 
         try {
@@ -620,12 +628,16 @@ class ImapMailboxService
             }
 
             $folder = $client->getFolder($sentFolder);
-            $message = $folder->query()->getMessageByUid($uid);
+            try {
+                $message = $folder->query()->getMessageByUid((int) $uid);
 
-            if ($message) {
-                $message->delete(true); // expunge
+                if ($message) {
+                    $message->delete(true); // expunge
 
-                return true;
+                    return true;
+                }
+            } catch (\Throwable) {
+                return false;
             }
 
             return false;
@@ -727,6 +739,7 @@ class ImapMailboxService
                     return (string) $matches[1];
                 }
             }
+
             // Webklex returns an array of response lines from IMAP APPEND.
             // If the command completed without exception, the append succeeded.
             return 'appended';
@@ -736,6 +749,7 @@ class ImapMailboxService
             if (preg_match('/APPENDUID\s+\d+\s+(\d+)/i', $result, $matches)) {
                 return (string) $matches[1];
             }
+
             return 'appended';
         }
 

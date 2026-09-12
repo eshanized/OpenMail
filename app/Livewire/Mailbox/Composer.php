@@ -74,6 +74,7 @@ class Composer extends Component
                 $addresses = array_filter(array_map('trim', explode(',', $value)));
                 if (empty($addresses)) {
                     $fail('The to field is required.');
+
                     return;
                 }
                 foreach ($addresses as $addr) {
@@ -87,7 +88,9 @@ class Composer extends Component
                 }
             }],
             'cc' => ['nullable', 'string', function ($attribute, $value, $fail) {
-                if (empty($value)) return;
+                if (empty($value)) {
+                    return;
+                }
                 $addresses = array_filter(array_map('trim', explode(',', $value)));
                 foreach ($addresses as $addr) {
                     $email = $addr;
@@ -100,7 +103,9 @@ class Composer extends Component
                 }
             }],
             'bcc' => ['nullable', 'string', function ($attribute, $value, $fail) {
-                if (empty($value)) return;
+                if (empty($value)) {
+                    return;
+                }
                 $addresses = array_filter(array_map('trim', explode(',', $value)));
                 foreach ($addresses as $addr) {
                     $email = $addr;
@@ -321,7 +326,7 @@ class Composer extends Component
     {
         if ($this->draftUid) {
             try {
-                app(ComposerService::class)->imapService->deleteFromDrafts($this->draftUid);
+                app(ComposerService::class)->deleteDraft($this->draftUid);
             } catch (\Exception) {
                 // Ignore errors
             }

@@ -108,8 +108,14 @@ class ComposerService
 
         // Send via SMTP using raw MIME
         try {
-            Mail::raw($mimeString, function ($message) use ($data, $mimeMessage) {
+            $user = User::find($userId) ?? Auth::user();
+
+            Mail::raw($mimeString, function ($message) use ($data, $mimeMessage, $user) {
                 $symfonyMessage = $message->getSymfonyMessage();
+
+                if ($user) {
+                    $message->from($user->email, $user->name ?? '');
+                }
 
                 $to = $this->parseAddresses($data['to'] ?? '');
                 if (! empty($to)) {
@@ -175,6 +181,22 @@ class ComposerService
         $uid = $this->imapService->appendToDrafts($mimeString, $existingDraftUid);
 
         return ['success' => true, 'draft_uid' => $uid];
+    }
+
+    /**
+     * Delete a draft from IMAP Drafts folder.
+     */
+    public function deleteDraft(string $draftUid): bool
+    {
+        return $this->imapService->deleteFromDrafts($draftUid);
+    }
+
+    /**
+     * Get the underlying IMAP mailbox service.
+     */
+    public function getImapService(): ImapMailboxService
+    {
+        return $this->imapService;
     }
 
     /**

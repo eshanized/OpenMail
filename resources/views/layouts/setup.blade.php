@@ -8,7 +8,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     {{-- Inline theme initializer --}}
-    <script>
+    <script @cspNonceAttribute>
         (function() {
             try {
                 var theme = localStorage.getItem('theme') || 'system';
@@ -18,6 +18,7 @@
                 } else {
                     document.documentElement.classList.remove('dark');
                 }
+                document.documentElement.dataset.themeInitialized = 'true';
             } catch (e) {}
         })();
     </script>

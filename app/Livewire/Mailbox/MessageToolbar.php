@@ -5,12 +5,15 @@ namespace App\Livewire\Mailbox;
 use App\Models\MessageMetadata;
 use App\Services\ImapMailboxService;
 use App\Services\LabelService;
+use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
 class MessageToolbar extends Component
 {
+    #[Reactive]
     public array $selectedUids = [];
 
+    #[Reactive]
     public string $folderPath = 'INBOX';
 
     public array $folders = [];
@@ -45,7 +48,10 @@ class MessageToolbar extends Component
         if (empty($this->selectedUids)) {
             return;
         }
-        app(ImapMailboxService::class)->setFlag($this->folderPath, $this->selectedUids, '\\Seen', true);
+        $imap = app(ImapMailboxService::class);
+        $imap->setFlag($this->folderPath, $this->selectedUids, '\\Seen', true);
+        $imap->refreshFolderCache($this->folderPath);
+        $this->dispatch('folder-stats-updated');
         $this->dispatch('selection-cleared');
     }
 
@@ -54,7 +60,10 @@ class MessageToolbar extends Component
         if (empty($this->selectedUids)) {
             return;
         }
-        app(ImapMailboxService::class)->setFlag($this->folderPath, $this->selectedUids, '\\Seen', false);
+        $imap = app(ImapMailboxService::class);
+        $imap->setFlag($this->folderPath, $this->selectedUids, '\\Seen', false);
+        $imap->refreshFolderCache($this->folderPath);
+        $this->dispatch('folder-stats-updated');
         $this->dispatch('selection-cleared');
     }
 
@@ -63,7 +72,8 @@ class MessageToolbar extends Component
         if (empty($this->selectedUids)) {
             return;
         }
-        app(ImapMailboxService::class)->setFlag($this->folderPath, $this->selectedUids, '\\Flagged', true);
+        $imap = app(ImapMailboxService::class);
+        $imap->setFlag($this->folderPath, $this->selectedUids, '\\Flagged', true);
         $this->dispatch('selection-cleared');
     }
 
@@ -72,7 +82,8 @@ class MessageToolbar extends Component
         if (empty($this->selectedUids)) {
             return;
         }
-        app(ImapMailboxService::class)->setFlag($this->folderPath, $this->selectedUids, '\\Flagged', false);
+        $imap = app(ImapMailboxService::class);
+        $imap->setFlag($this->folderPath, $this->selectedUids, '\\Flagged', false);
         $this->dispatch('selection-cleared');
     }
 
@@ -81,7 +92,10 @@ class MessageToolbar extends Component
         if (empty($this->selectedUids)) {
             return;
         }
-        app(ImapMailboxService::class)->deleteMessages($this->folderPath, $this->selectedUids);
+        $imap = app(ImapMailboxService::class);
+        $imap->deleteMessages($this->folderPath, $this->selectedUids);
+        $imap->refreshFolderCache($this->folderPath);
+        $this->dispatch('folder-stats-updated');
         $this->dispatch('selection-cleared');
     }
 
@@ -90,7 +104,11 @@ class MessageToolbar extends Component
         if (empty($this->selectedUids)) {
             return;
         }
-        app(ImapMailboxService::class)->moveMessages($this->folderPath, $this->selectedUids, $destinationPath);
+        $imap = app(ImapMailboxService::class);
+        $imap->moveMessages($this->folderPath, $this->selectedUids, $destinationPath);
+        $imap->refreshFolderCache($this->folderPath);
+        $imap->refreshFolderCache($destinationPath);
+        $this->dispatch('folder-stats-updated');
         $this->dispatch('selection-cleared');
     }
 
@@ -137,6 +155,12 @@ class MessageToolbar extends Component
                 $labelService->removeFromMessages($inboxLabel->id, $messageIds, $userId);
                 $labelService->applyToMessages($archiveLabel->id, $messageIds, $userId);
             }
+
+            $imapService->refreshFolderCache($this->folderPath);
+            if ($archivePath) {
+                $imapService->refreshFolderCache($archivePath);
+            }
+            $this->dispatch('folder-stats-updated');
 
             // Show undo toast for 5 seconds
             $this->showArchiveToast = true;
@@ -190,6 +214,9 @@ class MessageToolbar extends Component
                 $labelService->removeFromMessages($archiveLabel->id, $messageIds, $userId);
                 $labelService->applyToMessages($inboxLabel->id, $messageIds, $userId);
             }
+
+            $imapService->refreshFolderCache($sourceFolder);
+            $this->dispatch('folder-stats-updated');
 
             $this->showArchiveToast = false;
             $this->archiveRevertData = [];

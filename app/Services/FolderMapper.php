@@ -148,4 +148,37 @@ class FolderMapper
 
         return null;
     }
+
+    /**
+     * Get the Trash folder path using SPECIAL-USE or heuristic.
+     */
+    public function getTrashFolderPath(Client $client): ?string
+    {
+        $folders = $client->getFolders();
+        foreach ($folders as $folder) {
+            $attributes = $folder->attributes ?? [];
+            if (in_array('\\Trash', $attributes)) {
+                return $folder->path;
+            }
+        }
+
+        // Fallback to heuristic names
+        $fallbackNames = ['Trash', 'Deleted Items', 'Deleted Messages', 'Bin'];
+        foreach ($fallbackNames as $name) {
+            foreach ($folders as $folder) {
+                if (strcasecmp($folder->name, $name) === 0) {
+                    return $folder->path;
+                }
+            }
+        }
+
+        // Fallback to role heuristics
+        foreach ($folders as $folder) {
+            if ($this->mapFolderRole($folder) === 'trash') {
+                return $folder->path;
+            }
+        }
+
+        return null;
+    }
 }

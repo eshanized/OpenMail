@@ -275,33 +275,54 @@ class MessageList extends Component
 
     public function quickToggleRead(int $uid): void
     {
-        $messages = $this->getMessages();
-        $items = is_array($messages) ? $messages : $messages->items();
-        $message = $this->findMessageInThreads($items, $uid);
+        try {
+            $messages = $this->getMessages();
+            $items = is_array($messages) ? $messages : $messages->items();
+            $message = $this->findMessageInThreads($items, $uid);
 
-        if (! $message) {
-            return;
+            if (! $message) {
+                return;
+            }
+
+            $newValue = ! ($message->is_seen ?? false);
+            $imapService = app(ImapMailboxService::class);
+            $imapService->setFlag($this->folderPath, [$uid], '\\Seen', $newValue);
+            $imapService->refreshFolderCache($this->folderPath);
+            $this->dispatch('folder-stats-updated');
+        } catch (\Throwable $e) {
+            $this->dispatch('toast', 'Update failed: '.$e->getMessage(), 'error');
         }
-
-        $newValue = ! ($message->is_seen ?? false);
-        app(ImapMailboxService::class)->setFlag($this->folderPath, [$uid], '\\Seen', $newValue);
     }
 
     public function quickArchive(int $uid): void
     {
-        $imapService = app(ImapMailboxService::class);
-        $archivePath = $imapService->getOrCreateArchiveFolder();
-        if ($archivePath) {
-            $imapService->moveMessages($this->folderPath, [$uid], $archivePath);
-            $this->dispatch('messages-archived', ['message' => 'Conversation archived.']);
+        try {
+            $imapService = app(ImapMailboxService::class);
+            $archivePath = $imapService->getOrCreateArchiveFolder();
+            if ($archivePath) {
+                $imapService->moveMessages($this->folderPath, [$uid], $archivePath);
+                $this->selectedUids = array_values(array_diff($this->selectedUids, [$uid]));
+                $this->dispatch('messages-archived', ['message' => 'Conversation archived.']);
+                $this->dispatch('folder-stats-updated');
+            } else {
+                $this->dispatch('toast', 'Archive folder could not be found or created.', 'error');
+            }
+        } catch (\Throwable $e) {
+            $this->dispatch('toast', 'Archive failed: '.$e->getMessage(), 'error');
         }
     }
 
     public function quickDelete(int $uid): void
     {
-        $imapService = app(ImapMailboxService::class);
-        $imapService->deleteMessages($this->folderPath, [$uid]);
-        $this->dispatch('messages-archived', ['message' => 'Moved to Trash.']);
+        try {
+            $imapService = app(ImapMailboxService::class);
+            $imapService->deleteMessages($this->folderPath, [$uid]);
+            $this->selectedUids = array_values(array_diff($this->selectedUids, [$uid]));
+            $this->dispatch('messages-archived', ['message' => 'Moved to Trash.']);
+            $this->dispatch('folder-stats-updated');
+        } catch (\Throwable $e) {
+            $this->dispatch('toast', 'Delete failed: '.$e->getMessage(), 'error');
+        }
     }
 
     public function getFolderStats(): array

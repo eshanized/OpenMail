@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const html = document.documentElement;
 
     // Check if inline initializer already set them
-    const hasInlineTheme = html.classList.contains('dark');
+    const hasInlineTheme = html.dataset.themeInitialized === 'true' || html.classList.contains('dark');
     const hasInlineDensity = html.classList.contains('density-regular')
         || html.classList.contains('density-compact')
         || html.classList.contains('density-comfortable');
@@ -96,6 +96,10 @@ document.addEventListener('livewire:navigated', () => {
     const currentDensity = localStorage.getItem('density');
     if (currentDensity) {
         applyDensityToDoc(currentDensity);
+    }
+    const currentTheme = localStorage.getItem('theme');
+    if (currentTheme) {
+        applyThemeToDoc(currentTheme);
     }
     // Replay page fade-in after SPA swaps (morph preserves the main element)
     const m = main();

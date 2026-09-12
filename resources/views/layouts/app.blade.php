@@ -21,14 +21,10 @@
                     $savedDensity = auth()->user()->setting('density', null);
                 @endphp
                 @if($savedTheme)
-                    if (!localStorage.getItem('theme')) {
-                        localStorage.setItem('theme', @js($savedTheme));
-                    }
+                    localStorage.setItem('theme', @js($savedTheme));
                 @endif
                 @if($savedDensity)
-                    if (!localStorage.getItem('density')) {
-                        localStorage.setItem('density', @js($savedDensity));
-                    }
+                    localStorage.setItem('density', @js($savedDensity));
                 @endif
             @endauth
             var theme = localStorage.getItem('theme') || 'system';
@@ -37,10 +33,13 @@
 
             if (theme === 'dark' || (theme === 'system' && prefersDark)) {
                 document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
             }
 
             document.documentElement.classList.remove('density-compact', 'density-regular', 'density-comfortable');
             document.documentElement.classList.add('density-' + density);
+            document.documentElement.dataset.themeInitialized = 'true';
         })();
     </script>
 </head>

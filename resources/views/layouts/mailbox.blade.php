@@ -56,7 +56,11 @@
                 </button>
             </div>
             <div class="flex-1 flex flex-col min-h-0 overflow-hidden">
-                @yield('sidebar')
+                @hasSection('mobile-sidebar')
+                    @yield('mobile-sidebar')
+                @else
+                    @yield('sidebar')
+                @endif
                 @isset($sidebar)
                     {{ $sidebar }}
                 @endisset

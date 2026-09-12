@@ -1,50 +1,50 @@
 <div x-data="{ expandedFolders: {}, activeTab: @js($activeTab ?? 'folders') }"
-     @set-active-tab.window="activeTab = $event.detail.tab"
-     x-init="$wire.on('active-tab-changed', (tab) => { activeTab = tab; });"
+     @set-active-tab.window="activeTab = ($event.detail && $event.detail.tab) ? $event.detail.tab : $event.detail"
+     x-init="$wire.on('active-tab-changed', (data) => { activeTab = (data && data.tab) ? data.tab : (data || 'folders'); });"
      class="h-full flex flex-col min-h-0 bg-surface-raised select-none">
 
-    {{-- Desktop Tab Switcher — minimal, not segmented pill --}}
-    <div class="hidden md:block px-3 pt-3 pb-2 border-b border-border flex-shrink-0">
-        <div class="flex gap-0.5 text-xs">
+    {{-- Desktop Tab Switcher --}}
+    <div class="hidden md:block px-2 pt-2.5 pb-2 border-b border-border flex-shrink-0">
+        <div class="grid grid-cols-3 gap-1 text-xs">
             <button
                 type="button"
-                @click="$wire.setActiveTab('folders')"
-                class="flex items-center gap-1.5 px-2.5 py-1.5 rounded transition-colors duration-100 cursor-pointer
-                    {{ $activeTab === 'folders'
-                        ? 'bg-primary-subtle text-primary font-medium'
-                        : 'text-ink-tertiary hover:text-ink hover:bg-hover' }}"
+                @click="$wire.setActiveTab('folders'); activeTab = 'folders'"
+                :class="activeTab === 'folders'
+                    ? 'bg-primary-subtle text-primary font-medium'
+                    : 'text-ink-tertiary hover:text-ink hover:bg-hover'"
+                class="flex items-center justify-center gap-1 px-1.5 py-1.5 rounded transition-colors duration-100 cursor-pointer {{ $activeTab === 'folders' ? 'bg-primary-subtle text-primary font-medium' : 'text-ink-tertiary' }}"
             >
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"/>
                 </svg>
-                Folders
+                <span class="truncate">Folders</span>
             </button>
             <button
                 type="button"
-                @click="$wire.setActiveTab('contacts')"
-                class="flex items-center gap-1.5 px-2.5 py-1.5 rounded transition-colors duration-100 cursor-pointer
-                    {{ $activeTab === 'contacts'
-                        ? 'bg-primary-subtle text-primary font-medium'
-                        : 'text-ink-tertiary hover:text-ink hover:bg-hover' }}"
+                @click="$wire.setActiveTab('contacts'); activeTab = 'contacts'"
+                :class="activeTab === 'contacts'
+                    ? 'bg-primary-subtle text-primary font-medium'
+                    : 'text-ink-tertiary hover:text-ink hover:bg-hover'"
+                class="flex items-center justify-center gap-1 px-1.5 py-1.5 rounded transition-colors duration-100 cursor-pointer {{ $activeTab === 'contacts' ? 'bg-primary-subtle text-primary font-medium' : 'text-ink-tertiary' }}"
             >
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
                 </svg>
-                Contacts
+                <span class="truncate">Contacts</span>
             </button>
             <button
                 type="button"
-                @click="$wire.setActiveTab('labels')"
-                class="flex items-center gap-1.5 px-2.5 py-1.5 rounded transition-colors duration-100 cursor-pointer
-                    {{ $activeTab === 'labels'
-                        ? 'bg-primary-subtle text-primary font-medium'
-                        : 'text-ink-tertiary hover:text-ink hover:bg-hover' }}"
+                @click="$wire.setActiveTab('labels'); activeTab = 'labels'"
+                :class="activeTab === 'labels'
+                    ? 'bg-primary-subtle text-primary font-medium'
+                    : 'text-ink-tertiary hover:text-ink hover:bg-hover'"
+                class="flex items-center justify-center gap-1 px-1.5 py-1.5 rounded transition-colors duration-100 cursor-pointer {{ $activeTab === 'labels' ? 'bg-primary-subtle text-primary font-medium' : 'text-ink-tertiary' }}"
             >
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z"/>
                 </svg>
-                Labels
+                <span class="truncate">Labels</span>
             </button>
         </div>
     </div>
@@ -162,7 +162,7 @@
                                 <button
                                     type="button"
                                     class="ml-1 text-ink-tertiary hover:text-ink p-0.5 rounded hover:bg-hover transition-colors cursor-pointer"
-                                    @click.stop="expandedFolders['{{ $folder['path'] }}'] = !expandedFolders['{{ $folder['path'] }}']]"
+                                    @click.stop="expandedFolders['{{ $folder['path'] }}'] = !expandedFolders['{{ $folder['path'] }}']"
                                     aria-label="Toggle folder tree"
                                 >
                                     <svg class="w-3 h-3 transition-transform duration-100"
@@ -246,6 +246,22 @@
                                 </div>
                             </div>
                         @endforeach
+                    </div>
+                @endif
+
+                @if(empty($coreFolders) && empty($customFolders) && empty($cleanupFolders))
+                    <div class="px-3 py-6 text-center text-ink-tertiary text-xs">
+                        <p class="mb-2">No folders loaded</p>
+                        <button
+                            type="button"
+                            wire:click="refreshFolders"
+                            class="inline-flex items-center gap-1 text-primary hover:underline text-xs font-medium cursor-pointer"
+                        >
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182"/>
+                            </svg>
+                            <span>Sync Folders</span>
+                        </button>
                     </div>
                 @endif
             </div>

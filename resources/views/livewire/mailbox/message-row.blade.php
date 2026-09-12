@@ -119,7 +119,7 @@
         <div class="row-quick-actions absolute right-0 flex items-center gap-0.5 bg-surface-raised border border-border px-1 py-0.5 rounded shadow-xs">
             <button
                 type="button"
-                wire:click.stop="$parent.quickArchive({{ $message->uid }})"
+                wire:click.stop="quickArchive({{ $message->uid }})"
                 class="p-1 rounded text-ink-tertiary hover:text-ink hover:bg-hover transition-colors cursor-pointer"
                 title="Archive"
             >
@@ -129,7 +129,7 @@
             </button>
             <button
                 type="button"
-                wire:click.stop="$parent.quickDelete({{ $message->uid }})"
+                wire:click.stop="quickDelete({{ $message->uid }})"
                 class="p-1 rounded text-ink-tertiary hover:text-error hover:bg-error-subtle transition-colors cursor-pointer"
                 title="Delete"
             >
@@ -139,7 +139,7 @@
             </button>
             <button
                 type="button"
-                wire:click.stop="$parent.quickToggleRead({{ $message->uid }})"
+                wire:click.stop="quickToggleRead({{ $message->uid }})"
                 class="p-1 rounded text-ink-tertiary hover:text-primary hover:bg-hover transition-colors cursor-pointer"
                 title="{{ $message->is_seen ? 'Mark as unread' : 'Mark as read' }}"
             >

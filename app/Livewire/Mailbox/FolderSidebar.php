@@ -15,6 +15,7 @@ class FolderSidebar extends Component
 
     protected $listeners = [
         'set-active-tab' => 'setActiveTab',
+        'folder-stats-updated' => 'loadFolders',
     ];
 
     public function mount(): void
@@ -30,8 +31,12 @@ class FolderSidebar extends Component
 
     public function loadFolders(): void
     {
-        $raw = app(ImapMailboxService::class)->getCachedFolders();
-        $this->folders = $this->sortFolders($raw);
+        try {
+            $raw = app(ImapMailboxService::class)->getCachedFolders();
+            $this->folders = $this->sortFolders($raw);
+        } catch (\Throwable $e) {
+            $this->folders = [];
+        }
     }
 
     public function sortFolders(array $folders): array

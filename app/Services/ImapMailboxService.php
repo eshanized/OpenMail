@@ -266,19 +266,27 @@ class ImapMailboxService
 
     public function moveMessages(string $folderPath, array $uids, string $destinationPath): bool
     {
+        if (empty($uids)) {
+            return true;
+        }
+
         $client = $this->getClient();
 
         try {
             $folder = $client->getFolder($folderPath);
             $destFolder = $client->getFolder($destinationPath);
+            $targetPath = $destFolder ? $destFolder->path : $destinationPath;
 
             $messages = $folder->query()
                 ->whereUidIn($uids)
                 ->get();
 
             foreach ($messages as $message) {
-                $message->move($destFolder);
+                $message->move($targetPath);
             }
+
+            $this->refreshFolderCache($folderPath);
+            $this->refreshFolderCache($destinationPath);
 
             return true;
         } catch (\Throwable $e) {
@@ -289,12 +297,32 @@ class ImapMailboxService
 
     public function deleteMessages(string $folderPath, array $uids): bool
     {
+        if (empty($uids)) {
+            return true;
+        }
+
         $client = $this->getClient();
 
         try {
             $trashPath = $this->getTrashFolderPath($client);
             if (! $trashPath) {
                 $trashPath = $this->getOrCreateTrashFolder($client);
+            }
+
+            // If already inside the trash folder, permanently delete messages
+            if ($trashPath && strcasecmp($folderPath, $trashPath) === 0) {
+                $folder = $client->getFolder($folderPath);
+                $messages = $folder->query()
+                    ->whereUidIn($uids)
+                    ->get();
+
+                foreach ($messages as $message) {
+                    $message->delete(expunge: true);
+                }
+
+                $this->refreshFolderCache($folderPath);
+
+                return true;
             }
 
             return $this->moveMessages($folderPath, $uids, $trashPath);

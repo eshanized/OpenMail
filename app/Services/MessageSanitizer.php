@@ -64,9 +64,14 @@ class MessageSanitizer
 
     public function blockRemoteImages(string $html): string
     {
+        if (! str_contains(strtolower($html), '<img')) {
+            return $html;
+        }
+
         $dom = new \DOMDocument;
         libxml_use_internal_errors(true);
-        $dom->loadHTML('<?xml encoding="UTF-8">'.$html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        $encoded = mb_encode_numericentity($html, [0x80, 0x10FFFF, 0, 0x1FFFFF], 'UTF-8');
+        $dom->loadHTML($encoded, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         libxml_clear_errors();
 
         foreach ($dom->getElementsByTagName('img') as $img) {
@@ -99,9 +104,14 @@ class MessageSanitizer
      */
     public function sanitizeUrls(string $html): string
     {
+        if (! str_contains(strtolower($html), '<a')) {
+            return $html;
+        }
+
         $dom = new \DOMDocument;
         libxml_use_internal_errors(true);
-        $dom->loadHTML('<?xml encoding="UTF-8">'.$html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        $encoded = mb_encode_numericentity($html, [0x80, 0x10FFFF, 0, 0x1FFFFF], 'UTF-8');
+        $dom->loadHTML($encoded, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         libxml_clear_errors();
 
         foreach ($dom->getElementsByTagName('a') as $link) {

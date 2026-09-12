@@ -18,6 +18,8 @@
 /public/storage
 /storage/*.key
 /storage/pail
+/storage/installed
+/storage/framework/install_progress.json
 /vendor
 Homestead.json
 Homestead.yaml

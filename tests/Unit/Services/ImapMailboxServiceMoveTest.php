@@ -9,6 +9,7 @@ use Webklex\PHPIMAP\Client;
 use Webklex\PHPIMAP\Folder;
 use Webklex\PHPIMAP\Message;
 use Webklex\PHPIMAP\Query\WhereQuery;
+use Webklex\PHPIMAP\Support\FolderCollection;
 use Webklex\PHPIMAP\Support\MessageCollection;
 
 class ImapMailboxServiceMoveTest extends TestCase
@@ -47,7 +48,8 @@ class ImapMailboxServiceMoveTest extends TestCase
         $mockClient->shouldReceive('getFolder')->with('INBOX')->once()->andReturn($mockSourceFolder);
         $mockClient->shouldReceive('getFolder')->with('Archive')->once()->andReturn($mockDestFolder);
 
-        $service = new class extends ImapMailboxService {
+        $service = new class extends ImapMailboxService
+        {
             public function setActiveClient(Client $client): void
             {
                 $this->activeClient = $client;
@@ -83,10 +85,11 @@ class ImapMailboxServiceMoveTest extends TestCase
 
         $mockClient = Mockery::mock(Client::class);
         $mockClient->shouldReceive('isConnected')->andReturn(true);
-        $mockClient->shouldReceive('getFolders')->once()->andReturn(new \Webklex\PHPIMAP\Support\FolderCollection([$mockTrashFolder]));
+        $mockClient->shouldReceive('getFolders')->once()->andReturn(new FolderCollection([$mockTrashFolder]));
         $mockClient->shouldReceive('getFolder')->with('Trash')->once()->andReturn($mockTrashFolder);
 
-        $service = new class extends ImapMailboxService {
+        $service = new class extends ImapMailboxService
+        {
             public function setActiveClient(Client $client): void
             {
                 $this->activeClient = $client;

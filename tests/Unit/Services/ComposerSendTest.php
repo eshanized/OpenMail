@@ -5,12 +5,10 @@ namespace Tests\Unit\Services;
 use App\Livewire\Mailbox\Composer;
 use App\Models\User;
 use App\Services\ComposerService;
-use App\Services\FolderMapper;
 use App\Services\ImapMailboxService;
 use App\Services\MessageSanitizer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
 use Mockery;
 use ReflectionMethod;
@@ -28,7 +26,7 @@ class ComposerSendTest extends TestCase
 
     public function test_parse_append_uid_extracts_uid_from_appenduid_response(): void
     {
-        $service = new ImapMailboxService();
+        $service = new ImapMailboxService;
         $method = new ReflectionMethod($service, 'parseAppendUid');
         $method->setAccessible(true);
 
@@ -106,7 +104,7 @@ class ComposerSendTest extends TestCase
             ->once()
             ->andReturn('12345');
 
-        $sanitizer = new MessageSanitizer();
+        $sanitizer = new MessageSanitizer;
         $service = new ComposerService($mockImap, $sanitizer);
 
         $data = [

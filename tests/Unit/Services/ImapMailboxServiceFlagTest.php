@@ -48,7 +48,8 @@ class ImapMailboxServiceFlagTest extends TestCase
             ->once()
             ->andReturn($mockFolder);
 
-        $service = new class extends ImapMailboxService {
+        $service = new class extends ImapMailboxService
+        {
             public function setActiveClient(Client $client): void
             {
                 $this->activeClient = $client;
@@ -90,7 +91,8 @@ class ImapMailboxServiceFlagTest extends TestCase
             ->once()
             ->andReturn($mockFolder);
 
-        $service = new class extends ImapMailboxService {
+        $service = new class extends ImapMailboxService
+        {
             public function setActiveClient(Client $client): void
             {
                 $this->activeClient = $client;
@@ -132,7 +134,8 @@ class ImapMailboxServiceFlagTest extends TestCase
             ->once()
             ->andReturn($mockFolder);
 
-        $service = new class extends ImapMailboxService {
+        $service = new class extends ImapMailboxService
+        {
             public function setActiveClient(Client $client): void
             {
                 $this->activeClient = $client;

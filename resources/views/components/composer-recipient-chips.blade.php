@@ -21,6 +21,7 @@
 })"
     class="w-full relative"
     @keydown.window="handleKeydown($event)"
+    @composer-commit-recipients.window="addChipFromInput()"
 >
     <label for="{{ $fieldName }}-chips-input" class="block text-xs font-semibold uppercase tracking-wider text-ink-secondary mb-1.5">{{ $label }}</label>
 
@@ -59,7 +60,7 @@
             @input="onInput()"
             @keydown="onKeydown($event)"
             @focus="showDropdown = true; fetchSuggestions()"
-            @blur.debounce.200="showDropdown = false"
+            @blur="setTimeout(() => { showDropdown = false; addChipFromInput(); }, 150)"
             class="flex-1 min-w-[140px] px-1 py-1 border-0 focus:outline-none text-sm text-ink bg-transparent placeholder-ink-tertiary"
             :placeholder="chips.length === 0 ? 'name@example.com' : ''"
             autocomplete="email"
@@ -252,7 +253,15 @@
                         // Check if it's "Name <email>" format
                         const match = value.match(/^(.+?)\s*<([^>]+)>$/);
                         if (match && emailRegex.test(match[2].trim())) {
-                            this.chips.push({ email: match[2].trim(), name: match[1].trim() });
+                            const email = match[2].trim();
+                            const name = match[1].trim();
+                            if (!this.chips.some(c => c.email.toLowerCase() === email.toLowerCase())) {
+                                this.chips = [...this.chips, { email, name }];
+                            }
+                            this.inputValue = '';
+                            this.showDropdown = false;
+                            this.selectedIndex = -1;
+                            this.updateHiddenInput();
                         }
                         return;
                     }
@@ -263,10 +272,11 @@
                         return;
                     }
 
-                    this.chips.push({ email: value, name: '' });
+                    this.chips = [...this.chips, { email: value, name: '' }];
                     this.inputValue = '';
                     this.showDropdown = false;
                     this.selectedIndex = -1;
+                    this.updateHiddenInput();
                 },
 
                 removeChip(index) {

@@ -67,12 +67,63 @@ class Composer extends Component
         'openComposer' => 'openComposer',
     ];
 
-    protected $rules = [
-        'to' => 'required|email',
-        'subject' => 'required|max:255',
-        'body' => 'required',
-        'attachments.*' => 'file|max:25600', // 25MB per file
-    ];
+    protected function rules(): array
+    {
+        return [
+            'to' => ['required', 'string', function ($attribute, $value, $fail) {
+                $addresses = array_filter(array_map('trim', explode(',', $value)));
+                if (empty($addresses)) {
+                    $fail('The to field is required.');
+                    return;
+                }
+                foreach ($addresses as $addr) {
+                    $email = $addr;
+                    if (preg_match('/<([^>]+)>$/', $addr, $matches)) {
+                        $email = trim($matches[1]);
+                    }
+                    if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                        $fail("The to field contains an invalid email address: {$addr}");
+                    }
+                }
+            }],
+            'cc' => ['nullable', 'string', function ($attribute, $value, $fail) {
+                if (empty($value)) return;
+                $addresses = array_filter(array_map('trim', explode(',', $value)));
+                foreach ($addresses as $addr) {
+                    $email = $addr;
+                    if (preg_match('/<([^>]+)>$/', $addr, $matches)) {
+                        $email = trim($matches[1]);
+                    }
+                    if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                        $fail("The cc field contains an invalid email address: {$addr}");
+                    }
+                }
+            }],
+            'bcc' => ['nullable', 'string', function ($attribute, $value, $fail) {
+                if (empty($value)) return;
+                $addresses = array_filter(array_map('trim', explode(',', $value)));
+                foreach ($addresses as $addr) {
+                    $email = $addr;
+                    if (preg_match('/<([^>]+)>$/', $addr, $matches)) {
+                        $email = trim($matches[1]);
+                    }
+                    if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                        $fail("The bcc field contains an invalid email address: {$addr}");
+                    }
+                }
+            }],
+            'subject' => 'required|max:255',
+            'body' => ['required', function ($attribute, $value, $fail) {
+                $hasBody = ! empty(trim(strip_tags($value)));
+                $hasBodyHtml = ! empty(trim(strip_tags($this->bodyHtml)));
+                $hasMedia = str_contains($this->bodyHtml, '<img') || str_contains($value, '<img');
+                if (! $hasBody && ! $hasBodyHtml && ! $hasMedia) {
+                    $fail('The body field is required.');
+                }
+            }],
+            'attachments.*' => 'file|max:25600', // 25MB per file
+        ];
+    }
 
     public function mount(): void
     {
@@ -170,6 +221,14 @@ class Composer extends Component
 
     public function send(): void
     {
+        // Synchronize body and bodyHtml before validation
+        if (empty(trim($this->body)) && ! empty(trim($this->bodyHtml))) {
+            $this->body = strip_tags($this->bodyHtml);
+        }
+        if (empty(trim($this->bodyHtml)) && ! empty(trim($this->body))) {
+            $this->bodyHtml = $this->body;
+        }
+
         $this->validate();
 
         $this->sending = true;
@@ -222,13 +281,13 @@ class Composer extends Component
             $this->dispatch('composer-sent');
             $this->resetForm();
             $this->isOpen = false;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Mail send failed', [
                 'user_id' => auth()->id(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            $this->dispatch('toast', 'Failed to send message. Please check your connection and try again.', 'error');
+            $this->dispatch('toast', 'Failed to send message: '.$e->getMessage(), 'error');
         } finally {
             $this->sending = false;
         }
@@ -291,7 +350,7 @@ class Composer extends Component
             'bcc' => $this->bcc,
             'subject' => $this->subject,
             'body' => $this->bodyHtml ?: $this->body,
-            'bodyText' => $this->bodyText,
+            'bodyText' => $this->bodyText ?: strip_tags($this->bodyHtml ?: $this->body),
             'attachments' => $attachments,
             'in_reply_to' => $this->replyToMessage['message_id'] ?? null,
             'references' => $this->buildReferences($this->replyToMessage),

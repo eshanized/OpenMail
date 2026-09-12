@@ -108,25 +108,43 @@ class ComposerService
 
         // Send via SMTP using raw MIME
         try {
-            Mail::raw($mimeString, function ($message) use ($data) {
-                $message->to($this->parseAddresses($data['to'] ?? ''))
-                    ->cc($this->parseAddresses($data['cc'] ?? ''))
-                    ->bcc($this->parseAddresses($data['bcc'] ?? ''))
-                    ->subject($data['subject'] ?? '(no subject)');
+            Mail::raw($mimeString, function ($message) use ($data, $mimeMessage) {
+                $symfonyMessage = $message->getSymfonyMessage();
 
-                // Replace Symfony's generated MIME with our pre-built one
-                $message->using(function (Email $symfonyMessage) use ($mimeMessage) {
-                    // Copy all headers from our pre-built MIME message
-                    foreach ($mimeMessage->getHeaders()->all() as $header) {
-                        $symfonyMessage->getHeaders()->add($header);
+                $to = $this->parseAddresses($data['to'] ?? '');
+                if (! empty($to)) {
+                    $message->to($to);
+                }
+                if (! empty($data['cc'])) {
+                    $message->cc($this->parseAddresses($data['cc']));
+                }
+                if (! empty($data['bcc'])) {
+                    $message->bcc($this->parseAddresses($data['bcc']));
+                }
+                $message->subject($data['subject'] ?? '(no subject)');
+
+                // Replace Symfony's generated MIME headers with our pre-built ones
+                foreach ($mimeMessage->getHeaders()->all() as $header) {
+                    $name = $header->getName();
+                    if ($symfonyMessage->getHeaders()->has($name)) {
+                        $symfonyMessage->getHeaders()->remove($name);
                     }
-                    // Set body from our pre-built message
+                    $symfonyMessage->getHeaders()->add($header);
+                }
+
+                // Set body from our pre-built message
+                if ($mimeMessage->getBody()) {
                     $symfonyMessage->setBody($mimeMessage->getBody());
-                });
+                }
             });
 
             return ['success' => true, 'sent_uid' => $sentUid, 'queued' => false];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            Log::warning('SMTP send failed, queueing to pending_sends', [
+                'user_id' => $userId,
+                'error' => $e->getMessage(),
+            ]);
+
             // On SMTP failure: queue for retry (per D-18)
             $delay = config('openmail.undo_send_delay', 10);
             $pendingSend = PendingSend::create([

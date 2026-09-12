@@ -714,10 +714,32 @@ class ImapMailboxService
     /**
      * Parse UID from webklex appendMessage result.
      */
-    private function parseAppendUid(array $result): ?string
+    private function parseAppendUid(mixed $result): ?string
     {
-        // webklex returns: ['uid' => 123, 'uidvalidity' => 456] or similar
-        return isset($result['uid']) ? (string) $result['uid'] : null;
+        // If mocked or returned as array with 'uid' key
+        if (is_array($result)) {
+            if (isset($result['uid'])) {
+                return (string) $result['uid'];
+            }
+            // Check each line/item for APPENDUID (RFC 4315)
+            foreach ($result as $item) {
+                if (is_string($item) && preg_match('/APPENDUID\s+\d+\s+(\d+)/i', $item, $matches)) {
+                    return (string) $matches[1];
+                }
+            }
+            // Webklex returns an array of response lines from IMAP APPEND.
+            // If the command completed without exception, the append succeeded.
+            return 'appended';
+        }
+
+        if (is_string($result)) {
+            if (preg_match('/APPENDUID\s+\d+\s+(\d+)/i', $result, $matches)) {
+                return (string) $matches[1];
+            }
+            return 'appended';
+        }
+
+        return $result ? 'appended' : null;
     }
 
     /**

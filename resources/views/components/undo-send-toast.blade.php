@@ -1,7 +1,7 @@
 @props(['delay' => 10000, 'pendingSendId' => null])
 
 <div
-    x-data="undoSendToast()"
+    x-data="undoSendToast({{ $delay }})"
     x-show="visible"
     x-transition:enter="transition ease-out duration-300"
     x-transition:enter-start="opacity-0 transform translate-y-2"
@@ -41,15 +41,16 @@
 </div>
 
 <script>
-function undoSendToast() {
+function undoSendToast(initialDelay = 10000) {
     return {
-        visible: false,
+        visible: true,
         timer: null,
         progressEl: null,
-        duration: 10000,
+        duration: initialDelay,
 
         init() {
-            this.duration = this.$el.dataset.delay || 10000;
+            this.duration = initialDelay || 10000;
+            this.startCountdown();
             this.$watch('visible', (v) => {
                 if (v) this.startCountdown();
             });

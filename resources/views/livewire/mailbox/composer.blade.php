@@ -52,6 +52,13 @@
             if (this.imapSyncTimer) clearInterval(this.imapSyncTimer);
             document.removeEventListener('keydown', this.handleKeydown);
         },
+        send() {
+            window.dispatchEvent(new CustomEvent('composer-commit-recipients'));
+            if (this.tiptapEditor) {
+                this.$wire.syncBodyFromEditor(this.tiptapEditor.getHTML());
+            }
+            this.$wire.send();
+        },
         handleKeydown(event) {
             if (!this.open) return;
             if (event.key === 'Escape') {
@@ -60,7 +67,7 @@
             }
             if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
                 event.preventDefault();
-                this.$wire.send();
+                this.send();
             }
             if ((event.metaKey || event.ctrlKey) && event.key === 's') {
                 event.preventDefault();
@@ -236,7 +243,7 @@
             </div>
 
             {{-- Form Body --}}
-            <form class="flex-1 overflow-y-auto p-5 space-y-3" wire:submit.prevent="send">
+            <form class="flex-1 overflow-y-auto p-5 space-y-3" @submit.prevent="send()">
                 {{-- Recipient Fields --}}
                 <div class="space-y-2">
                     {{-- To Field + CC/BCC Toggles --}}
@@ -409,7 +416,7 @@
                     {{-- Primary Send Button --}}
                     <button
                         type="button"
-                        wire:click="send"
+                        @click="send()"
                         wire:loading.attr="disabled"
                         wire:target="send"
                         class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded bg-primary hover:bg-primary-hover text-white text-xs font-medium transition-colors disabled:opacity-50 cursor-pointer"
@@ -457,10 +464,12 @@
 
     @push('scripts')
         <script>
-            document.addEventListener('livewire:load', () => {
+            document.addEventListener('livewire:init', () => {
                 Livewire.on('toast', (message, type = 'info') => {
+                    let msg = typeof message === 'string' ? message : (message.message || message[0]);
+                    let t = typeof message === 'object' && message.type ? message.type : (type || message[1] || 'info');
                     window.dispatchEvent(new CustomEvent('openmail-toast', {
-                        detail: { message, type }
+                        detail: { message: msg, type: t }
                     }));
                 });
 

@@ -195,6 +195,54 @@
         {{ $slot ?? '' }}
     </main>
 
+    {{-- Global Toast Notifications --}}
+    <div
+        x-data="{
+            toasts: [],
+            add(message, type = 'info') {
+                if (!message) return;
+                const id = Date.now() + Math.random();
+                this.toasts.push({ id, message, type });
+                setTimeout(() => this.remove(id), 5000);
+            },
+            remove(id) {
+                this.toasts = this.toasts.filter(t => t.id !== id);
+            }
+        }"
+        @openmail-toast.window="add($event.detail.message, $event.detail.type)"
+        x-init="
+            document.addEventListener('livewire:init', () => {
+                Livewire.on('toast', (event) => {
+                    let msg = typeof event === 'string' ? event : (event.message || event[0]);
+                    let type = typeof event === 'object' && event.type ? event.type : (event[1] || 'info');
+                    add(msg, type);
+                });
+            });
+        "
+        class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full"
+    >
+        <template x-for="t in toasts" :key="t.id">
+            <div
+                class="pointer-events-auto flex items-center justify-between gap-3 px-4 py-3 rounded-lg border shadow-lg text-xs font-medium transition-all"
+                :class="{
+                    'bg-surface-raised border-border text-ink': t.type === 'info',
+                    'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400': t.type === 'success',
+                    'bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400': t.type === 'warning',
+                    'bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400': t.type === 'error'
+                }"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 translate-y-2"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+            >
+                <span x-text="t.message" class="flex-1"></span>
+                <button @click="remove(t.id)" class="text-ink-tertiary hover:text-ink cursor-pointer">&times;</button>
+            </div>
+        </template>
+    </div>
+
     @livewireScripts
     @stack('scripts')
 </body>

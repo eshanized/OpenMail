@@ -123,6 +123,7 @@ None yet.
 | 260911-qwk | Remove existing installation and clean deployment artifacts | 2026-09-11 | d2801b2 | [260911-qwk-remove-existing-installation-and-clean-d](./quick/260911-qwk-remove-existing-installation-and-clean-d/) |
 | 260912-8hk | Create detailed non-technical setup guide SETUP.md | 2026-09-12 | 39351e4 | [260912-8hk-create-detailed-non-technical-setup-guid](./quick/260912-8hk-create-detailed-non-technical-setup-guid/) |
 | 260912-kn6 | Make website mobile responsive and set primary color to Coral Red | 2026-09-12 | d4930b4 | [260912-kn6-make-website-mobile-responsive-and-set-p](./quick/260912-kn6-make-website-mobile-responsive-and-set-p/) |
+| 260912-ghm | Migrate repository and tooling from GitLab to GitHub | 2026-09-12 | 67c2178 | [260912-ghm-migrate-from-gitlab-to-github](./quick/260912-ghm-migrate-from-gitlab-to-github/) |
 
 
 ## Deferred Items

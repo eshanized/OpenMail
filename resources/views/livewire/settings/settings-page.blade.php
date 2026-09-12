@@ -21,7 +21,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {{-- Left: Settings Navigation Sidebar --}}
         <aside class="lg:col-span-4 xl:col-span-3 space-y-3">
-            <nav class="space-y-0.5" role="tablist" aria-label="Settings Categories">
+            <nav class="flex lg:flex-col overflow-x-auto pb-2 lg:pb-0 space-x-1 lg:space-x-0 lg:space-y-0.5 scrollbar-thin shrink-0" role="tablist" aria-label="Settings Categories">
                 @php
                     $tabIcons = [
                         'profile' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>',
@@ -45,7 +45,7 @@
                         @keydown.arrow-up.prevent="focusPrevTab('{{ $key }}')"
                         @keydown.enter.prevent="selectTab('{{ $key }}')"
                         @keydown.space.prevent="selectTab('{{ $key }}')"
-                        class="flex items-center gap-2.5 w-full px-3 py-2 rounded text-left transition-colors cursor-pointer text-xs
+                        class="flex items-center gap-2 px-3 py-2 rounded text-left transition-colors cursor-pointer text-xs whitespace-nowrap shrink-0 lg:w-full
                             {{ $activeTab === $key
                                 ? 'bg-primary-subtle text-primary font-medium'
                                 : 'text-ink-secondary hover:text-ink hover:bg-hover' }}"
@@ -53,15 +53,15 @@
                         <svg class="w-4 h-4 shrink-0 text-ink-tertiary {{ $activeTab === $key ? 'text-primary' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
                             {!! $tabIcons[$key] ?? '' !!}
                         </svg>
-                        <span class="flex-1">{{ $label }}</span>
+                        <span>{{ $label }}</span>
                     </button>
                 @endforeach
             </nav>
         </aside>
 
         {{-- Right: Tab Panels Area --}}
-        <main class="lg:col-span-8 xl:col-span-9">
-            <div class="bg-surface-raised border border-border rounded p-6">
+        <main class="lg:col-span-8 xl:col-span-9 w-full min-w-0">
+            <div class="bg-surface-raised border border-border rounded p-4 sm:p-6">
                 <div role="tabpanel" id="panel-{{ $activeTab }}" aria-labelledby="tab-{{ $activeTab }}">
                     <div class="pb-4 mb-5 border-b border-border">
                         <h2 class="text-base font-semibold text-ink">{{ $tabs[$activeTab] ?? 'Settings' }}</h2>

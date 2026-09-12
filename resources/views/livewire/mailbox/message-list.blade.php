@@ -95,14 +95,14 @@
         </div>
 
         {{-- Primary Action + Search + Thread Toggle --}}
-        <div class="flex items-center gap-2 flex-wrap">
+        <div class="flex items-center gap-2 w-full md:w-auto">
             <button
                 @click="openComposer"
                 class="inline-flex items-center gap-1.5 rounded bg-primary hover:bg-primary-hover
                        px-3 py-1.5 text-xs font-medium text-white
                        transition-colors duration-100
                        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40
-                       cursor-pointer"
+                       cursor-pointer shrink-0"
             >
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
@@ -111,14 +111,14 @@
             </button>
 
             {{-- Search bar --}}
-            <div class="w-48 sm:w-60">
+            <div class="flex-1 sm:w-60 min-w-0">
                 <livewire:mailbox.search-bar />
             </div>
 
             {{-- Thread toggle --}}
             <button
                 wire:click="toggleThreadMode"
-                class="px-2.5 py-1.5 rounded text-xs font-medium transition-colors duration-100 flex items-center gap-1.5 border cursor-pointer
+                class="px-2.5 py-1.5 rounded text-xs font-medium transition-colors duration-100 flex items-center gap-1.5 border cursor-pointer shrink-0
                     {{ $threadMode === 'threaded'
                         ? 'bg-primary-subtle text-primary border-primary/25'
                         : 'text-ink-secondary border-border hover:bg-hover hover:text-ink' }}"

@@ -101,7 +101,7 @@
     </nav>
 
     {{-- Main Step Card --}}
-    <div class="setup-card bg-surface-raised border border-border rounded p-6 sm:p-8">
+    <div class="setup-card bg-surface-raised border border-border rounded p-4 sm:p-6 md:p-8">
         @if ($currentStep === 1)
             @include('setup.steps.welcome')
         @endif

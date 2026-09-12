@@ -39,9 +39,28 @@
         $avatarIdx = abs(crc32($displaySender)) % 6;
         $isStarred = (bool) ($thread->is_flagged ?? false);
     @endphp
-    <div class="message-row flex items-center hover:bg-hover transition-colors duration-75 group">
-        {{-- Selection and Star --}}
-        <div class="flex items-center gap-1 shrink-0">
+    <div class="message-row flex items-start sm:items-center hover:bg-hover transition-colors duration-75 group cursor-pointer sm:cursor-default">
+        {{-- Selection and Star and Chevron --}}
+        <div class="flex items-center gap-1 shrink-0 pt-0.5 sm:pt-0">
+            {{-- Expand chevron (on mobile, placed right at start for easy tapping) --}}
+            <button
+                type="button"
+                class="p-1 rounded text-ink-tertiary hover:text-ink hover:bg-hover transition-colors cursor-pointer shrink-0"
+                @click.stop="toggleExpand()"
+                aria-label="Toggle thread messages"
+            >
+                <svg
+                    class="w-3.5 h-3.5 transition-transform duration-100"
+                    :class="{ 'rotate-90': expanded }"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                >
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
+                </svg>
+            </button>
+
             {{-- Checkbox --}}
             <input
                 type="checkbox"
@@ -71,42 +90,48 @@
             </button>
         </div>
 
-        {{-- Sender Avatar & Name --}}
-        <div class="flex items-center min-w-0 w-32 sm:w-44 shrink-0">
-            <div class="message-row-avatar rounded avatar-gradient-{{ $avatarIdx }} flex items-center justify-center font-semibold shrink-0 mr-2">
-                {{ $avatarChar }}
-            </div>
-            <div class="flex items-center min-w-0 gap-1 truncate">
-                <span class="truncate message-row-title {{ !$thread->is_seen ? 'font-semibold text-ink' : 'font-normal text-ink-secondary' }}">
-                    {{ $displaySender }}
-                </span>
-                @if(!$thread->is_seen)
-                    @php $unreadCount = $thread->unreadCount ?? ($thread->unread_count ?? 0); @endphp
-                    @if($unreadCount > 1)
-                        <span class="text-[10px] font-semibold text-primary tabular-nums">
-                            ({{ $unreadCount }})
-                        </span>
-                    @else
-                        <span class="w-1.5 h-1.5 rounded-full bg-primary shrink-0"></span>
-                    @endif
-                @endif
-            </div>
+        {{-- Desktop: Avatar --}}
+        <div class="message-row-avatar rounded avatar-gradient-{{ $avatarIdx }} hidden sm:flex items-center justify-center font-semibold shrink-0 mr-2 ml-1">
+            {{ $avatarChar }}
         </div>
 
         {{-- Clickable message link to open message --}}
         <a
             href="{{ route('message.show', ['folderPath' => $thread->folder_path ?? 'INBOX', 'uid' => $thread->uid]) }}"
             wire:navigate
-            class="flex items-center min-w-0 flex-1 cursor-pointer"
+            class="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center cursor-pointer ml-1.5 sm:ml-0"
         >
+            {{-- Sender + Mobile Date --}}
+            <div class="flex items-center justify-between sm:justify-start min-w-0 sm:w-44 sm:shrink-0 gap-1.5">
+                <div class="flex items-center min-w-0 gap-1 truncate">
+                    <span class="truncate message-row-title {{ !$thread->is_seen ? 'font-semibold text-ink' : 'font-normal text-ink-secondary' }}">
+                        {{ $displaySender }}
+                    </span>
+                    @if(!$thread->is_seen)
+                        @php $unreadCount = $thread->unreadCount ?? ($thread->unread_count ?? 0); @endphp
+                        @if($unreadCount > 1)
+                            <span class="text-[10px] font-semibold text-primary tabular-nums">
+                                ({{ $unreadCount }})
+                            </span>
+                        @else
+                            <span class="w-1.5 h-1.5 rounded-full bg-primary shrink-0"></span>
+                        @endif
+                    @endif
+                </div>
+                {{-- Mobile Date inline with sender --}}
+                <span class="sm:hidden text-xs text-ink-tertiary whitespace-nowrap tabular-nums shrink-0 ml-2 {{ !$thread->is_seen ? 'font-medium text-ink-secondary' : '' }}">
+                    {{ $thread->formatted_date ?? '' }}
+                </span>
+            </div>
+
             {{-- Subject + Snippet preview + Labels --}}
-            <div class="flex items-center min-w-0 flex-1 pr-2">
-                <span class="message-row-title truncate shrink-0 max-w-[65%] sm:max-w-[55%] {{ !$thread->is_seen ? 'font-medium text-ink' : 'font-normal text-ink-secondary' }}">
+            <div class="flex items-center min-w-0 flex-1 pr-2 mt-0.5 sm:mt-0">
+                <span class="message-row-title truncate shrink-0 max-w-[85%] sm:max-w-[55%] {{ !$thread->is_seen ? 'font-medium text-ink' : 'font-normal text-ink-secondary' }}">
                     {{ $thread->subject ?: '(no subject)' }}
                 </span>
                 @if(!empty($thread->snippet))
-                    <span class="message-row-desc text-ink-tertiary truncate ml-2 font-normal hidden sm:inline">
-                        &mdash; {{ Str::limit($thread->snippet, 80) }}
+                    <span class="message-row-desc text-ink-tertiary truncate ml-1.5 font-normal text-xs">
+                        <span class="hidden sm:inline">&mdash; </span>{{ Str::limit($thread->snippet, 70) }}
                     </span>
                 @endif
 
@@ -142,8 +167,8 @@
             </div>
         </a>
 
-        {{-- Right: Formatted Date & Hover Actions --}}
-        <div class="relative flex items-center justify-end w-24 sm:w-32 shrink-0 pl-1">
+        {{-- Desktop Right: Formatted Date & Hover Actions --}}
+        <div class="relative hidden sm:flex items-center justify-end w-28 sm:w-32 shrink-0 pl-1">
             <span class="row-date-display text-xs text-ink-tertiary whitespace-nowrap tabular-nums {{ !$thread->is_seen ? 'font-medium text-ink-secondary' : '' }}">
                 {{ $thread->formatted_date ?? '' }}
             </span>
@@ -187,25 +212,6 @@
                     @endif
                 </button>
             </div>
-
-            {{-- Expand chevron --}}
-            <button
-                type="button"
-                class="ml-1 p-1 rounded text-ink-tertiary hover:text-ink hover:bg-hover transition-colors cursor-pointer shrink-0"
-                @click.stop="toggleExpand()"
-                aria-label="Toggle thread messages"
-            >
-                <svg
-                    class="w-3.5 h-3.5 transition-transform duration-100"
-                    :class="{ 'rotate-90': expanded }"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    stroke-width="2"
-                >
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
-                </svg>
-            </button>
         </div>
     </div>
 

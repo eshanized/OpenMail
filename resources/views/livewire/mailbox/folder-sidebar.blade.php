@@ -3,8 +3,8 @@
      x-init="$wire.on('active-tab-changed', (data) => { activeTab = (data && data.tab) ? data.tab : (data || 'folders'); });"
      class="h-full flex flex-col min-h-0 bg-surface-raised select-none">
 
-    {{-- Desktop Tab Switcher --}}
-    <div class="hidden md:block px-2 pt-2.5 pb-2 border-b border-border flex-shrink-0">
+    {{-- Tab Switcher --}}
+    <div class="px-2 pt-2.5 pb-2 border-b border-border flex-shrink-0">
         <div class="grid grid-cols-3 gap-1 text-xs">
             <button
                 type="button"
@@ -294,47 +294,6 @@
         {{-- Labels Panel --}}
         <div x-show="activeTab === 'labels'" x-cloak class="h-full">
             <livewire:mailbox.label-sidebar :activeTab="$activeTab === 'labels'" wire:key="label-sidebar" />
-        </div>
-    </div>
-
-    {{-- Mobile Bottom Navigation --}}
-    <div class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface-raised border-t border-border"
-         style="padding-bottom: env(safe-area-inset-bottom);">
-        <div class="flex">
-            <button
-                type="button"
-                @click="$wire.setActiveTab('folders')"
-                class="flex-1 flex flex-col items-center justify-center py-2 transition-colors cursor-pointer
-                    {{ $activeTab === 'folders' ? 'text-primary' : 'text-ink-tertiary' }}"
-            >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"/>
-                </svg>
-                <span class="text-[10px] mt-0.5">Folders</span>
-            </button>
-            <button
-                type="button"
-                @click="$wire.setActiveTab('contacts')"
-                class="flex-1 flex flex-col items-center justify-center py-2 transition-colors cursor-pointer
-                    {{ $activeTab === 'contacts' ? 'text-primary' : 'text-ink-tertiary' }}"
-            >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
-                </svg>
-                <span class="text-[10px] mt-0.5">Contacts</span>
-            </button>
-            <button
-                type="button"
-                @click="$wire.setActiveTab('labels')"
-                class="flex-1 flex flex-col items-center justify-center py-2 transition-colors cursor-pointer
-                    {{ $activeTab === 'labels' ? 'text-primary' : 'text-ink-tertiary' }}"
-            >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z"/>
-                </svg>
-                <span class="text-[10px] mt-0.5">Labels</span>
-            </button>
         </div>
     </div>
 </div>

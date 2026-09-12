@@ -54,8 +54,11 @@
     <nav class="bg-surface-raised border-b border-border sticky top-0 z-30">
         <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-11 items-center">
-                {{-- Left: Brand — restrained, not a big colorful block --}}
-                <div class="flex items-center gap-3">
+                {{-- Left: Brand & Navigation --}}
+                <div class="flex items-center gap-2 sm:gap-3">
+                    @hasSection('mobile-nav-toggle')
+                        @yield('mobile-nav-toggle')
+                    @endif
                     <a href="{{ route('mailbox') }}" wire:navigate class="flex items-center gap-2 group">
                         {{-- Logo mark — simple envelope, no color background --}}
                         <svg class="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">

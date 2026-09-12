@@ -1,4 +1,4 @@
-<div class="p-8 sm:p-12">
+<div>
     <div class="mb-8">
         <h2 class="text-2xl font-bold text-ink tracking-tight">System Requirements</h2>
         <p class="mt-1 text-sm text-ink-secondary">

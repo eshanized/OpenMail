@@ -64,7 +64,7 @@
     </header>
 
     {{-- Main Container --}}
-    <main class="flex-1 max-w-3xl w-full mx-auto py-8 px-4 sm:px-6">
+    <main class="flex-1 max-w-3xl w-full mx-auto py-4 sm:py-8 px-3 sm:px-6">
         @yield('content')
     </main>
 

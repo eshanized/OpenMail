@@ -4,7 +4,7 @@
         <section>
             <fieldset>
                 <legend class="text-xs font-semibold text-ink uppercase tracking-wider mb-2.5">Theme</legend>
-                <div class="grid grid-cols-3 gap-2.5">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5">
                     @foreach(['light' => 'Light', 'dark' => 'Dark', 'system' => 'System'] as $value => $label)
                         <label class="relative cursor-pointer">
                             <input type="radio"
@@ -41,7 +41,7 @@
         <section>
             <fieldset>
                 <legend class="text-xs font-semibold text-ink uppercase tracking-wider mb-2.5">Density</legend>
-                <div class="grid grid-cols-3 gap-2.5">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5">
                     @foreach(['compact' => 'Compact', 'regular' => 'Regular', 'comfortable' => 'Comfortable'] as $value => $label)
                         <label class="relative cursor-pointer">
                             <input type="radio"

@@ -32,14 +32,14 @@
     --color-ink-tertiary: #a8a29e;
     --color-ink-inverted: #ffffff;
 
-    /* Accent — one restrained slate-blue, used sparingly */
-    --color-primary: #3d5a80;
-    --color-primary-hover: #2e4a6e;
-    --color-primary-subtle: #eef2f7;
+    /* Accent — Coral red */
+    --color-primary: #cf4234;
+    --color-primary-hover: #b83326;
+    --color-primary-subtle: #fdf2f0;
 
     /* No secondary accent — restraint is the point */
-    --color-accent: #3d5a80;
-    --color-accent-subtle: #eef2f7;
+    --color-accent: #cf4234;
+    --color-accent-subtle: #fdf2f0;
 
     /* Status — functional, not decorative */
     --color-success: #166534;
@@ -59,7 +59,7 @@
     /* Interactive states */
     --color-hover: #f0eee9;
     --color-active: #e7e5e0;
-    --color-selected: #eef2f7;
+    --color-selected: #fdf2f0;
 
     /* Shadows — very subtle */
     --shadow-xs: 0 1px 2px rgb(28 25 23 / 0.04);
@@ -119,9 +119,9 @@
     --color-ink-tertiary: #60677a;
     --color-ink-inverted: #111318;
 
-    --color-primary: #7da3c4;
-    --color-primary-hover: #8db5d4;
-    --color-primary-subtle: rgba(125, 163, 196, 0.12);
+    --color-primary: #f87168;
+    --color-primary-hover: #ff857c;
+    --color-primary-subtle: rgba(248, 113, 104, 0.12);
 
     --color-border: #302c29;
     --color-border-subtle: #252220;
@@ -129,7 +129,7 @@
 
     --color-hover: #272422;
     --color-active: #302c29;
-    --color-selected: rgba(125, 163, 196, 0.10);
+    --color-selected: rgba(248, 113, 104, 0.10);
 
     --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.18);
     --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.24), 0 1px 2px rgb(0 0 0 / 0.16);
@@ -856,13 +856,13 @@ select.glass-input {
 
 .setup-callout-info {
     background: var(--color-primary-subtle);
-    border: 1px solid rgba(61, 90, 128, 0.2);
+    border: 1px solid rgba(207, 66, 52, 0.2);
     color: var(--color-primary);
     border-radius: 4px;
 }
 :where(.dark) .setup-callout-info {
-    background: rgba(125, 163, 196, 0.08);
-    border-color: rgba(125, 163, 196, 0.2);
+    background: rgba(248, 113, 104, 0.08);
+    border-color: rgba(248, 113, 104, 0.2);
     color: var(--color-primary);
 }
 
@@ -997,7 +997,7 @@ select.glass-input {
 .email-control-btn.active {
     color: var(--color-primary);
     background-color: var(--color-primary-subtle);
-    border-color: rgba(61, 90, 128, 0.15);
+    border-color: rgba(207, 66, 52, 0.15);
 }
 
 .email-reading-surface {

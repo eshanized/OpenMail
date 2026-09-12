@@ -1,4 +1,4 @@
-<div class="p-8 sm:p-12 text-center">
+<div class="text-center">
     {{-- Success Mark --}}
     <div class="w-10 h-10 rounded-full bg-surface-sunken border border-border text-success flex items-center justify-center mx-auto mb-4">
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

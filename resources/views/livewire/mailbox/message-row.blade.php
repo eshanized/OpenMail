@@ -10,14 +10,14 @@
 @endphp
 <div
     data-uid="{{ $message->uid }}"
-    class="message-row message-row-card border-b border-border-subtle last:border-b-0 flex items-center transition-colors duration-75 group cursor-default
+    class="message-row message-row-card border-b border-border-subtle last:border-b-0 flex items-start sm:items-center transition-colors duration-75 group cursor-pointer sm:cursor-default
         {{ !$message->is_seen ? 'message-row-unread bg-surface-raised' : 'hover:bg-hover' }}
         {{ !$selected ? '' : '!bg-selected' }}
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/30"
     tabindex="0"
 >
     {{-- Selection and Star --}}
-    <div class="flex items-center gap-1 shrink-0">
+    <div class="flex items-center gap-1 shrink-0 pt-0.5 sm:pt-0">
         {{-- Checkbox --}}
         <input
             type="checkbox"
@@ -47,33 +47,38 @@
         </button>
     </div>
 
-    {{-- Sender Avatar & Name --}}
-    <div class="flex items-center min-w-0 w-32 sm:w-44 shrink-0">
-        {{-- Avatar — neutral, no gradient --}}
-        <div class="message-row-avatar rounded avatar-gradient-{{ $avatarIdx }} flex items-center justify-center font-semibold shrink-0 mr-2">
-            {{ $avatarChar }}
-        </div>
-        <div class="min-w-0 flex items-center gap-1.5">
-            <span class="truncate message-row-title {{ !$message->is_seen ? 'font-semibold text-ink' : 'font-normal text-ink-secondary' }}">
-                {{ $displaySender }}
-            </span>
-            @if(!$message->is_seen)
-                {{-- Unread dot — subtle, inline --}}
-                <span class="w-1.5 h-1.5 rounded-full bg-primary shrink-0" aria-label="Unread"></span>
-            @endif
-        </div>
+    {{-- Desktop: Avatar --}}
+    <div class="message-row-avatar rounded avatar-gradient-{{ $avatarIdx }} hidden sm:flex items-center justify-center font-semibold shrink-0 mr-2 ml-1">
+        {{ $avatarChar }}
     </div>
 
-    {{-- Message link --}}
-    <a href="{{ route('message.show', ['folderPath' => $message->folder_path ?? $folderPath, 'uid' => $message->uid]) }}" wire:navigate class="flex items-center min-w-0 flex-1 cursor-pointer">
+    {{-- Message link: full-width tap target on mobile --}}
+    <a href="{{ route('message.show', ['folderPath' => $message->folder_path ?? $folderPath, 'uid' => $message->uid]) }}" wire:navigate class="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center cursor-pointer ml-1.5 sm:ml-0">
+        {{-- Sender info + Mobile Date --}}
+        <div class="flex items-center justify-between sm:justify-start min-w-0 sm:w-44 sm:shrink-0 gap-1.5">
+            <div class="flex items-center gap-1.5 min-w-0">
+                <span class="truncate message-row-title {{ !$message->is_seen ? 'font-semibold text-ink' : 'font-normal text-ink-secondary' }}">
+                    {{ $displaySender }}
+                </span>
+                @if(!$message->is_seen)
+                    {{-- Unread dot --}}
+                    <span class="w-1.5 h-1.5 rounded-full bg-primary shrink-0" aria-label="Unread"></span>
+                @endif
+            </div>
+            {{-- Mobile Date inline with sender --}}
+            <span class="sm:hidden text-xs text-ink-tertiary whitespace-nowrap tabular-nums shrink-0 ml-2 {{ !$message->is_seen ? 'font-medium text-ink-secondary' : '' }}">
+                {{ $message->formatted_date }}
+            </span>
+        </div>
+
         {{-- Subject + Snippet Preview + Labels --}}
-        <div class="flex items-center min-w-0 flex-1 pr-2">
-            <span class="message-row-title truncate shrink-0 max-w-[55%] sm:max-w-[45%] {{ !$message->is_seen ? 'font-medium text-ink' : 'font-normal text-ink-secondary' }}">
+        <div class="flex items-center min-w-0 flex-1 pr-2 mt-0.5 sm:mt-0">
+            <span class="message-row-title truncate shrink-0 max-w-[85%] sm:max-w-[50%] {{ !$message->is_seen ? 'font-medium text-ink' : 'font-normal text-ink-secondary' }}">
                 {{ $message->subject ?: '(no subject)' }}
             </span>
             @if(!empty($message->snippet))
-                <span class="message-row-desc text-ink-tertiary truncate ml-2 font-normal hidden sm:inline">
-                    &mdash; {{ Str::limit($message->snippet, 80) }}
+                <span class="message-row-desc text-ink-tertiary truncate ml-1.5 font-normal text-xs">
+                    <span class="hidden sm:inline">&mdash; </span>{{ Str::limit($message->snippet, 70) }}
                 </span>
             @endif
 
@@ -109,13 +114,13 @@
         </div>
     </a>
 
-    {{-- Right: Date & Hover Actions --}}
-    <div class="relative flex items-center justify-end w-24 sm:w-32 shrink-0 pl-1">
+    {{-- Desktop Right: Date & Hover Actions --}}
+    <div class="relative hidden sm:flex items-center justify-end w-28 sm:w-32 shrink-0 pl-1">
         <span class="row-date-display text-xs text-ink-tertiary whitespace-nowrap tabular-nums {{ !$message->is_seen ? 'font-medium text-ink-secondary' : '' }}">
             {{ $message->formatted_date }}
         </span>
 
-        {{-- Quick Action Buttons on Hover — minimal, no backdrop blur card --}}
+        {{-- Quick Action Buttons on Hover --}}
         <div class="row-quick-actions absolute right-0 flex items-center gap-0.5 bg-surface-raised border border-border px-1 py-0.5 rounded shadow-xs">
             <button
                 type="button"

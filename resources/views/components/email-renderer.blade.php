@@ -145,6 +145,12 @@ $doc = '<!DOCTYPE html>
             border-top: 1px solid #e2e8f0;
             margin: 1.75rem 0;
         }
+        @media (max-width: 640px) {
+            body {
+                padding: 1rem 0.75rem !important;
+                font-size: 14px !important;
+            }
+        }
     </style>
 </head>
 <body>' . $renderHtml . '</body>
@@ -241,7 +247,7 @@ $doc = '<!DOCTYPE html>
 }" class="email-renderer w-full">
 
     {{-- Reader Control Toolbar --}}
-    <div class="email-control-bar border-b border-border bg-surface-sunken px-4 py-2 flex items-center justify-between gap-2">
+    <div class="email-control-bar border-b border-border bg-surface-sunken px-2.5 sm:px-4 py-1.5 sm:py-2 flex items-center justify-between gap-1.5 sm:gap-2 flex-wrap sm:flex-nowrap">
         <div class="flex items-center gap-1">
             {{-- Reading Mode Toggle (Focused vs Full) --}}
             <button

@@ -41,10 +41,10 @@
         {{-- Document surface: clean white reader with 1px border --}}
         <div class="bg-surface-raised border border-border rounded overflow-hidden">
             {{-- Message header --}}
-            <div class="p-5 sm:p-6 pb-4">
+            <div class="p-3.5 sm:p-6 pb-3 sm:pb-4">
                 {{-- Top row: Subject + Star --}}
-                <div class="flex items-start justify-between gap-4 mb-4">
-                    <h1 class="text-xl font-bold text-ink tracking-tight leading-snug">
+                <div class="flex items-start justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
+                    <h1 class="text-lg sm:text-xl font-bold text-ink tracking-tight leading-snug">
                         {{ $subject ?: '(no subject)' }}
                     </h1>
                     <button
@@ -149,7 +149,7 @@
             </div>
 
             {{-- Action bar --}}
-            <div class="px-5 sm:px-6 py-2.5 border-t border-b border-border bg-surface-sunken flex flex-wrap items-center justify-between gap-2">
+            <div class="px-3.5 sm:px-6 py-2 sm:py-2.5 border-t border-b border-border bg-surface-sunken flex flex-wrap items-center justify-between gap-2">
                 {{-- Left Actions: Reply / Forward Group --}}
                 <div class="flex items-center gap-1.5 flex-wrap">
                     {{-- Reply --}}

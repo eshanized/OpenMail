@@ -176,11 +176,11 @@
 
     {{-- Modal Container --}}
     <div
-        class="fixed inset-0 flex items-center justify-center p-3 sm:p-5"
+        class="fixed inset-0 flex items-center justify-center p-0 sm:p-4 md:p-5"
         @click.outside="closeWithConfirm()"
     >
         <div
-            class="bg-surface-raised rounded border border-border shadow-xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-fade-in"
+            class="bg-surface-raised rounded-none sm:rounded border-0 sm:border border-border shadow-xl max-w-4xl w-full h-full sm:h-auto sm:max-h-[92vh] flex flex-col overflow-hidden animate-fade-in"
             @click.outside.stop
         >
             {{-- Header --}}
@@ -243,7 +243,7 @@
             </div>
 
             {{-- Form Body --}}
-            <form class="flex-1 overflow-y-auto p-5 space-y-3" @submit.prevent="send()">
+            <form class="flex-1 overflow-y-auto p-3 sm:p-5 space-y-3" @submit.prevent="send()">
                 {{-- Recipient Fields --}}
                 <div class="space-y-2">
                     {{-- To Field + CC/BCC Toggles --}}
@@ -309,7 +309,7 @@
                         @endif
                     </div>
                     <div class="border border-border rounded overflow-hidden bg-surface-raised flex flex-col focus-within:border-primary transition-colors" wire:ignore>
-                        <div x-ref="toolbar" class="tiptap-toolbar-container border-b border-border"></div>
+                        <div x-ref="toolbar" class="tiptap-toolbar-container border-b border-border overflow-x-auto scrollbar-thin"></div>
                         <div x-ref="editor" class="tiptap-editor"></div>
                         <textarea
                             id="composer-body"

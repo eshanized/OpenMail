@@ -13,11 +13,11 @@ class DatabaseServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        DB::extend('sqlite_testing', function ($config) {
+        \Illuminate\Database\Connection::resolverFor('sqlite', function ($connection, $database, $prefix, $config) {
             return new SQLiteConnection(
-                $config['database'],
-                $config['prefix'] ?? '',
-                $config['foreign_key_constraints'] ?? true,
+                $connection,
+                $database,
+                $prefix ?? '',
                 $config
             );
         });

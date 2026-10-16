@@ -101,7 +101,7 @@ class ImapMailboxService
 
                 $attrs = [];
                 if (isset($folder->attributes)) {
-                    $attrs = $folder->attributes instanceof \Webklex\PHPIMAP\Attribute
+                    $attrs = $folder->attributes instanceof Attribute
                         ? $folder->attributes->all()
                         : (array) $folder->attributes;
                 }

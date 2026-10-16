@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Webklex\PHPIMAP\Attribute;
 use Webklex\PHPIMAP\Client;
 use Webklex\PHPIMAP\Folder;
 
@@ -44,11 +45,11 @@ class FolderMapper
     public function mapFolderRole(Folder $folder): ?string
     {
         $attributes = $folder->attributes ?? [];
-        if ($attributes instanceof \Webklex\PHPIMAP\Attribute) {
+        if ($attributes instanceof Attribute) {
             $attributes = $attributes->all();
         }
         foreach ((array) $attributes as $attr) {
-            $normalizedAttr = '\\' . ucfirst(ltrim(strtolower((string) $attr), '\\'));
+            $normalizedAttr = '\\'.ucfirst(ltrim(strtolower((string) $attr), '\\'));
             if (isset(self::ROLE_MAP[$normalizedAttr])) {
                 return self::ROLE_MAP[$normalizedAttr];
             }
@@ -96,7 +97,7 @@ class FolderMapper
      * Resolves multiple system aliases (e.g. Bin, Deleted Items, and multiple Trash folders)
      * down to a single canonical system folder per role, while preserving genuine user-created mailboxes.
      *
-     * @param array $folders Array of mapped folder data arrays
+     * @param  array  $folders  Array of mapped folder data arrays
      * @return array Deduplicated and normalized array of folders
      */
     public function normalizeFolders(array $folders): array
@@ -142,6 +143,7 @@ class FolderMapper
                 $canonical = $candidates[0];
                 $canonical['name'] = ucfirst($role);
                 $normalizedSystem[] = $canonical;
+
                 continue;
             }
 
@@ -153,7 +155,7 @@ class FolderMapper
                 $score = 0;
                 $candPath = $cand['path'] ?? '';
                 $candAttrs = $cand['attributes'] ?? [];
-                if ($candAttrs instanceof \Webklex\PHPIMAP\Attribute) {
+                if ($candAttrs instanceof Attribute) {
                     $candAttrs = $candAttrs->all();
                 }
 
@@ -238,7 +240,7 @@ class FolderMapper
         $folders = $client->getFolders();
         foreach ($folders as $folder) {
             $attributes = $folder->attributes ?? [];
-            if ($attributes instanceof \Webklex\PHPIMAP\Attribute) {
+            if ($attributes instanceof Attribute) {
                 $attributes = $attributes->all();
             }
             $attrs = array_map('strtolower', (array) $attributes);
@@ -268,7 +270,7 @@ class FolderMapper
         $folders = $client->getFolders();
         foreach ($folders as $folder) {
             $attributes = $folder->attributes ?? [];
-            if ($attributes instanceof \Webklex\PHPIMAP\Attribute) {
+            if ($attributes instanceof Attribute) {
                 $attributes = $attributes->all();
             }
             $attrs = array_map('strtolower', (array) $attributes);
@@ -299,7 +301,7 @@ class FolderMapper
         $folders = $client->getFolders();
         foreach ($folders as $folder) {
             $attributes = $folder->attributes ?? [];
-            if ($attributes instanceof \Webklex\PHPIMAP\Attribute) {
+            if ($attributes instanceof Attribute) {
                 $attributes = $attributes->all();
             }
             $attrs = array_map('strtolower', (array) $attributes);
@@ -338,7 +340,7 @@ class FolderMapper
         $folders = $client->getFolders();
         foreach ($folders as $folder) {
             $attributes = $folder->attributes ?? [];
-            if ($attributes instanceof \Webklex\PHPIMAP\Attribute) {
+            if ($attributes instanceof Attribute) {
                 $attributes = $attributes->all();
             }
             $attrs = array_map('strtolower', (array) $attributes);

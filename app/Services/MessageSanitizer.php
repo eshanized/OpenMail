@@ -15,8 +15,8 @@ class MessageSanitizer
             return $this->purifier;
         }
 
-        \HTMLPurifier_URISchemeRegistry::instance()->register('cid', new HTMLPurifier_URIScheme_cid());
-        \HTMLPurifier_URISchemeRegistry::instance()->register('data', new HTMLPurifier_URIScheme_data());
+        \HTMLPurifier_URISchemeRegistry::instance()->register('cid', new HTMLPurifier_URIScheme_cid);
+        \HTMLPurifier_URISchemeRegistry::instance()->register('data', new HTMLPurifier_URIScheme_data);
 
         $config = HTMLPurifier_Config::createDefault();
         $config->set('HTML.Doctype', 'HTML 4.01 Transitional');
@@ -112,13 +112,23 @@ class MessageSanitizer
             if ($this->isRemoteUrl($src)) {
                 $img->setAttribute('data-src', $src);
                 $img->setAttribute('src', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
-                $img->setAttribute('class', trim(($img->getAttribute('class') ?? '').' blocked-image'));
-
-                // Hide invisible 1x1 tracking pixels so they don't produce awkward empty boxes
                 $w = $img->getAttribute('width');
                 $h = $img->getAttribute('height');
-                if (($w !== '' && (int)$w <= 1) || ($h !== '' && (int)$h <= 1)) {
+                $style = strtolower($img->getAttribute('style') ?? '');
+                $isTracking = ($w !== '' && (int) $w <= 1) ||
+                    ($h !== '' && (int) $h <= 1) ||
+                    str_contains($style, 'width:1px') ||
+                    str_contains($style, 'width: 1px') ||
+                    str_contains($style, 'height:1px') ||
+                    str_contains($style, 'height: 1px') ||
+                    str_contains($style, 'display:none') ||
+                    str_contains($style, 'display: none');
+
+                if ($isTracking) {
+                    $img->setAttribute('class', trim(($img->getAttribute('class') ?? '').' blocked-image blocked-tracking'));
                     $img->setAttribute('style', 'display:none !important;');
+                } else {
+                    $img->setAttribute('class', trim(($img->getAttribute('class') ?? '').' blocked-image'));
                 }
             }
 
@@ -169,9 +179,7 @@ class MessageSanitizer
     /**
      * Resolve CID (Content-ID) inline images to base64 data URIs.
      *
-     * @param string $html
-     * @param iterable|array $attachments
-     * @return string
+     * @param  iterable|array  $attachments
      */
     public function resolveCidImages(string $html, iterable $attachments): string
     {
@@ -233,11 +241,11 @@ class MessageSanitizer
             }
 
             $base64 = base64_encode($content);
-            $dataUri = 'data:' . $mime . ';base64,' . $base64;
+            $dataUri = 'data:'.$mime.';base64,'.$base64;
 
             // Replace cid:cleanId, cid:<cleanId>, and raw encoded variants
             $html = str_ireplace(
-                ['cid:<' . $cleanId . '>', 'cid:' . $cleanId, 'cid:' . rawurlencode($cleanId)],
+                ['cid:<'.$cleanId.'>', 'cid:'.$cleanId, 'cid:'.rawurlencode($cleanId)],
                 $dataUri,
                 $html
             );
@@ -398,6 +406,7 @@ if (! class_exists('App\Services\HTMLPurifier_URIScheme_cid', false)) {
     class HTMLPurifier_URIScheme_cid extends \HTMLPurifier_URIScheme
     {
         public $browsable = true;
+
         public $may_omit_host = true;
 
         public function doValidate(&$uri, $config, $context)
@@ -405,6 +414,7 @@ if (! class_exists('App\Services\HTMLPurifier_URIScheme_cid', false)) {
             $uri->userinfo = null;
             $uri->host = null;
             $uri->port = null;
+
             return true;
         }
     }
@@ -414,8 +424,11 @@ if (! class_exists('App\Services\HTMLPurifier_URIScheme_data', false)) {
     class HTMLPurifier_URIScheme_data extends \HTMLPurifier_URIScheme
     {
         public $default_port = null;
+
         public $browsable = true;
+
         public $hierarchical = false;
+
         public $may_omit_host = true;
 
         public function doValidate(&$uri, $config, $context)
@@ -428,6 +441,7 @@ if (! class_exists('App\Services\HTMLPurifier_URIScheme_data', false)) {
             if (! preg_match('!^image/(png|jpeg|jpg|gif|webp);base64,[a-zA-Z0-9+/=]+$!i', $raw)) {
                 return false;
             }
+
             return true;
         }
     }

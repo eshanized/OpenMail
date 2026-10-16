@@ -82,7 +82,7 @@ class AttachmentList extends Component
             'video/webm',
         ];
 
-        if (! in_array($mimeType, $allowedMimeTypes, true)) {
+        if (! in_array($mimeType, $allowedMimeTypes)) {
             abort(403, 'This file type is not allowed for download');
         }
 

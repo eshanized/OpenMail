@@ -33,7 +33,8 @@ class FolderSidebar extends Component
     {
         try {
             $raw = app(ImapMailboxService::class)->getCachedFolders();
-            $this->folders = $this->sortFolders($raw);
+            $normalized = app(\App\Services\FolderMapper::class)->normalizeFolders($raw);
+            $this->folders = $this->sortFolders($normalized);
         } catch (\Throwable $e) {
             $this->folders = [];
         }

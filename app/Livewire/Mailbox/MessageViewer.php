@@ -75,8 +75,12 @@ class MessageViewer extends Component
 
     public function loadMessage(): void
     {
-        $service = app(ImapMailboxService::class);
-        $this->message = $service->getMessageWithBody($this->folderPath, $this->uid);
+        try {
+            $service = app(ImapMailboxService::class);
+            $this->message = $service->getMessageWithBody($this->folderPath, $this->uid);
+        } catch (\Throwable $e) {
+            $this->message = null;
+        }
 
         if (! $this->message) {
             $this->dispatch('message-not-found');
@@ -220,19 +224,35 @@ class MessageViewer extends Component
         }
 
         // Get HTML body and sanitize
+        $htmlBody = null;
         if (method_exists($this->message, 'getHTMLBody')) {
             $htmlBody = $this->message->getHTMLBody();
-            if ($htmlBody) {
-                $this->sanitizedHtml = $sanitizer->sanitizeHtml($htmlBody);
-            }
+        } elseif (isset($this->message->html_body)) {
+            $htmlBody = $this->message->html_body;
+        } elseif (isset($this->message->htmlBody)) {
+            $htmlBody = $this->message->htmlBody;
+        }
+
+        if (! empty($htmlBody)) {
+            $attachmentsList = method_exists($this->message, 'getAttachments')
+                ? $this->message->getAttachments()
+                : ($this->message->attachments ?? []);
+            $htmlBody = $sanitizer->resolveCidImages($htmlBody, $attachmentsList ?? []);
+            $this->sanitizedHtml = $sanitizer->sanitizeHtml($htmlBody);
         }
 
         // Get plain text body
+        $textBody = null;
         if (method_exists($this->message, 'getTextBody')) {
             $textBody = $this->message->getTextBody();
-            if ($textBody) {
-                $this->textBody = $textBody;
-            }
+        } elseif (isset($this->message->text_body)) {
+            $textBody = $this->message->text_body;
+        } elseif (isset($this->message->textBody)) {
+            $textBody = $this->message->textBody;
+        }
+
+        if (! empty($textBody)) {
+            $this->textBody = (string) $textBody;
         }
 
         // Extract attachments as simple array

@@ -30,14 +30,16 @@ class ContactModal extends Component
 
     public bool $isCreating = false;
 
-    public $errors;
-
     protected $listeners = [
         'closeModal' => 'closeModal',
     ];
 
     public function mount(?Contact $contact = null): void
     {
+        if ($contact && ! $contact->exists) {
+            $contact = null;
+        }
+
         $userId = auth()->id();
         if ($contact && $contact->user_id !== $userId) {
             abort(403, 'Unauthorized.');

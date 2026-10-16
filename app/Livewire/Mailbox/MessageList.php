@@ -221,10 +221,14 @@ class MessageList extends Component
         return $threads;
     }
 
-    public function setSort(string $field, string $dir): void
+    public function setSort(string $field, ?string $dir = null): void
     {
-        $this->sortBy = $field;
-        $this->sortDir = $dir;
+        if ($this->sortBy === $field && $dir === null) {
+            $this->sortDir = $this->sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortBy = $field;
+            $this->sortDir = $dir ?? ($field === 'date' || $field === 'size' ? 'desc' : 'asc');
+        }
         $this->resetPage('messages-page');
     }
 

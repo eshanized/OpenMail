@@ -43,7 +43,7 @@
         })();
     </script>
 </head>
-<body class="bg-surface text-ink min-h-screen antialiased">
+<body class="bg-surface text-ink min-h-screen antialiased flex flex-col">
     {{-- Route overlay fade cross --}}
     <div id="route-overlay"
          class="pointer-events-none fixed inset-0 z-[9999] opacity-0 transition-opacity duration-150"
@@ -51,8 +51,8 @@
          aria-hidden="true"></div>
 
     {{-- Application header — minimal, recedes behind content --}}
-    <nav class="bg-surface-raised border-b border-border sticky top-0 z-30">
-        <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav class="bg-surface-raised border-b border-border sticky top-0 z-30 w-full shrink-0">
+        <div class="w-full px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-11 items-center">
                 {{-- Left: Brand & Navigation --}}
                 <div class="flex items-center gap-2 sm:gap-3">
@@ -193,7 +193,7 @@
         </div>
     </nav>
 
-    <main id="app-main" class="flex-1 max-w-screen-2xl mx-auto py-6 px-4 sm:px-6 lg:px-8 w-full animate-fade-in">
+    <main id="app-main" class="flex-1 w-full min-h-0 flex flex-col animate-fade-in">
         @yield('content')
         {{ $slot ?? '' }}
     </main>

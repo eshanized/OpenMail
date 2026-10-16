@@ -1,4 +1,4 @@
-<div x-data="settingsTabs(@js(array_keys($tabs)))" x-init="init()" class="max-w-5xl mx-auto py-2">
+<div x-data="settingsTabs(@js(array_keys($tabs)))" x-init="init()" class="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
     {{-- Top Bar / Breadcrumb & Status --}}
     <div class="mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-border">
         <div>

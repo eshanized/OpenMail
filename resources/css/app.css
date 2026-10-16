@@ -101,6 +101,10 @@
     --font-size-base: 0.875rem;
 }
 
+:root {
+    color-scheme: light;
+}
+
 /* Dark mode — Tailwind 4 class strategy */
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -109,6 +113,7 @@
    Deep charcoal, warm gray — NOT pure black + neon blue
    ============================================ */
 :where(.dark) {
+    color-scheme: dark;
     --color-surface: #111318;
     --color-surface-raised: #1a1d24;
     --color-surface-sunken: #0c0e12;
@@ -529,8 +534,32 @@ html.density-comfortable,
 [x-cloak] { display: none !important; }
 
 /* ============================================
-   Scrollbar — Subtle
+   Scrollbar — Global & Subtle
    ============================================ */
+* {
+    scrollbar-color: var(--color-border) transparent;
+}
+
+.scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-border-strong);
+}
+
 .scrollbar-thin::-webkit-scrollbar {
     width: 5px;
     height: 5px;
@@ -544,6 +573,15 @@ html.density-comfortable,
 }
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background: var(--color-border-strong);
+}
+
+/* NProgress Progress Bar Styling */
+#nprogress .bar {
+    background: var(--color-primary, #f87168) !important;
+    height: 2px !important;
+}
+#nprogress .peg {
+    box-shadow: 0 0 10px var(--color-primary, #f87168), 0 0 5px var(--color-primary, #f87168) !important;
 }
 
 /* ============================================
@@ -1005,6 +1043,7 @@ select.glass-input {
     width: 100%;
     margin-left: auto;
     margin-right: auto;
+    background-color: #ffffff;
     transition: max-width 0.18s cubic-bezier(0.4, 0, 0.2, 1);
 }
 

@@ -4,7 +4,7 @@
      class="h-full flex flex-col min-h-0 bg-surface-raised select-none">
 
     {{-- Tab Switcher --}}
-    <div class="px-2 pt-2.5 pb-2 border-b border-border flex-shrink-0">
+    <div class="px-1.5 pt-2 pb-1.5 border-b border-border flex-shrink-0">
         <div class="grid grid-cols-3 gap-1 text-xs">
             <button
                 type="button"
@@ -12,7 +12,7 @@
                 :class="activeTab === 'folders'
                     ? 'bg-primary-subtle text-primary font-medium'
                     : 'text-ink-tertiary hover:text-ink hover:bg-hover'"
-                class="flex items-center justify-center gap-1 px-1.5 py-1.5 rounded transition-colors duration-100 cursor-pointer {{ $activeTab === 'folders' ? 'bg-primary-subtle text-primary font-medium' : 'text-ink-tertiary' }}"
+                class="flex items-center justify-center gap-1 px-1 py-1.5 rounded transition-colors duration-100 cursor-pointer {{ $activeTab === 'folders' ? 'bg-primary-subtle text-primary font-medium' : 'text-ink-tertiary' }}"
             >
                 <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"/>
@@ -25,7 +25,7 @@
                 :class="activeTab === 'contacts'
                     ? 'bg-primary-subtle text-primary font-medium'
                     : 'text-ink-tertiary hover:text-ink hover:bg-hover'"
-                class="flex items-center justify-center gap-1 px-1.5 py-1.5 rounded transition-colors duration-100 cursor-pointer {{ $activeTab === 'contacts' ? 'bg-primary-subtle text-primary font-medium' : 'text-ink-tertiary' }}"
+                class="flex items-center justify-center gap-1 px-1 py-1.5 rounded transition-colors duration-100 cursor-pointer {{ $activeTab === 'contacts' ? 'bg-primary-subtle text-primary font-medium' : 'text-ink-tertiary' }}"
             >
                 <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
@@ -38,7 +38,7 @@
                 :class="activeTab === 'labels'
                     ? 'bg-primary-subtle text-primary font-medium'
                     : 'text-ink-tertiary hover:text-ink hover:bg-hover'"
-                class="flex items-center justify-center gap-1 px-1.5 py-1.5 rounded transition-colors duration-100 cursor-pointer {{ $activeTab === 'labels' ? 'bg-primary-subtle text-primary font-medium' : 'text-ink-tertiary' }}"
+                class="flex items-center justify-center gap-1 px-1 py-1.5 rounded transition-colors duration-100 cursor-pointer {{ $activeTab === 'labels' ? 'bg-primary-subtle text-primary font-medium' : 'text-ink-tertiary' }}"
             >
                 <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"/>
@@ -101,6 +101,7 @@
                 <div class="space-y-0.5">
                     @foreach($coreFolders as $folder)
                         <div
+                            wire:key="folder-core-{{ md5($folder['path']) }}"
                             class="relative flex items-center px-2 py-1.5 rounded cursor-pointer transition-colors duration-100 group
                                 {{ $folder['path'] === $currentFolder
                                     ? 'bg-primary-subtle text-primary'
@@ -185,6 +186,7 @@
                         <div class="space-y-0.5">
                             @foreach($customFolders as $folder)
                                 <div
+                                    wire:key="folder-custom-{{ md5($folder['path']) }}"
                                     class="relative flex items-center px-2 py-1.5 rounded cursor-pointer transition-colors duration-100
                                         {{ $folder['path'] === $currentFolder
                                             ? 'bg-primary-subtle text-primary'
@@ -215,6 +217,7 @@
                     <div class="mt-4 pt-3 border-t border-border-subtle space-y-0.5">
                         @foreach($cleanupFolders as $folder)
                             <div
+                                wire:key="folder-cleanup-{{ md5($folder['path']) }}"
                                 class="relative flex items-center px-2 py-1.5 rounded cursor-pointer transition-colors duration-100
                                     {{ $folder['path'] === $currentFolder
                                         ? 'bg-primary-subtle text-primary'

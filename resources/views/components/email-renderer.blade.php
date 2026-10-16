@@ -52,13 +52,13 @@ $doc = '<!DOCTYPE html>
         }
         body {
             margin: 0;
-            padding: 1.75rem;
+            padding: 12px 16px;
             font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             color: #1e293b;
-            background-color: transparent;
+            background-color: #ffffff;
             word-break: break-word;
             overflow-wrap: break-word;
-            line-height: 1.65;
+            line-height: 1.6;
             font-size: 15px;
             letter-spacing: -0.01em;
         }
@@ -81,10 +81,6 @@ $doc = '<!DOCTYPE html>
             background: #0f172a !important;
             color: #f1f5f9 !important;
         }
-        body.dark-adaptive table th, 
-        body.dark-adaptive table td {
-            border-color: #334155 !important;
-        }
         a {
             color: #2563eb;
             text-decoration: underline;
@@ -96,17 +92,17 @@ $doc = '<!DOCTYPE html>
         }
         img {
             max-width: 100%;
-            height: auto;
-            border-radius: 0.375rem;
+        }
+        img.blocked-image,
+        img[data-src] {
+            display: inline-block;
+            background: rgba(226, 232, 240, 0.35);
+            max-height: 240px;
+            object-fit: contain;
         }
         table {
             max-width: 100% !important;
             border-collapse: collapse;
-            margin: 1rem 0;
-        }
-        table th, table td {
-            padding: 0.5rem 0.75rem;
-            border: 1px solid #e2e8f0;
         }
         blockquote {
             margin: 1rem 0;
@@ -147,7 +143,7 @@ $doc = '<!DOCTYPE html>
         }
         @media (max-width: 640px) {
             body {
-                padding: 1rem 0.75rem !important;
+                padding: 8px 10px !important;
                 font-size: 14px !important;
             }
         }
@@ -157,7 +153,9 @@ $doc = '<!DOCTYPE html>
 </html>';
 ?>
 
-<div x-data="{
+<div
+    wire:key="email-renderer-{{ $showImages ? 'images' : 'noimages' }}"
+    x-data="{
     showImages: @js($showImages),
     readingMode: 'full', // 'focused' or 'full'
     zoomLevel: 100, // percentage

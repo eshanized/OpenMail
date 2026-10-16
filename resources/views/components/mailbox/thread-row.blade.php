@@ -20,7 +20,7 @@
         }
     }"
     data-uid="{{ $thread->uid }}"
-    class="border-b border-border-subtle last:border-b-0 message-row-card transition-colors duration-75
+    class="border-b border-border-subtle last:border-b-0 message-row-card transition-colors duration-75 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-inset
         {{ $depth > 0 ? 'bg-surface-sunken/40' : '' }}
         {{ !$thread->is_seen ? 'message-row-unread bg-surface-raised font-medium' : '' }}"
     style="padding-left: {{ 12 + ($depth * 16) }}px;"
@@ -38,28 +38,33 @@
         }
         $avatarIdx = abs(crc32($displaySender)) % 6;
         $isStarred = (bool) ($thread->is_flagged ?? false);
+        $hasChildren = !empty($thread->children) && count($thread->children) > 0;
     @endphp
     <div class="message-row flex items-start sm:items-center hover:bg-hover transition-colors duration-75 group cursor-pointer sm:cursor-default">
         {{-- Selection and Star and Chevron --}}
         <div class="flex items-center gap-1 shrink-0 pt-0.5 sm:pt-0">
-            {{-- Expand chevron (on mobile, placed right at start for easy tapping) --}}
-            <button
-                type="button"
-                class="p-1 rounded text-ink-tertiary hover:text-ink hover:bg-hover transition-colors cursor-pointer shrink-0"
-                @click.stop="toggleExpand()"
-                aria-label="Toggle thread messages"
-            >
-                <svg
-                    class="w-3.5 h-3.5 transition-transform duration-100"
-                    :class="{ 'rotate-90': expanded }"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    stroke-width="2"
+            @if($hasChildren)
+                {{-- Expand chevron (on mobile, placed right at start for easy tapping) --}}
+                <button
+                    type="button"
+                    class="p-1 rounded text-ink-tertiary hover:text-ink hover:bg-hover focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary/40 transition-colors cursor-pointer shrink-0"
+                    @click.stop="toggleExpand()"
+                    aria-label="Toggle thread messages"
                 >
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
-                </svg>
-            </button>
+                    <svg
+                        class="w-3.5 h-3.5 transition-transform duration-100"
+                        :class="{ 'rotate-90': expanded }"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        stroke-width="2"
+                    >
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
+                    </svg>
+                </button>
+            @else
+                <span class="w-5.5 h-5.5 shrink-0 inline-block" aria-hidden="true"></span>
+            @endif
 
             {{-- Checkbox --}}
             <input

@@ -296,9 +296,9 @@
 
             {{-- Message body --}}
             <div class="email-body-content">
-                @if($sanitizedHtml)
+                @if(!empty(trim($sanitizedHtml ?? '')))
                     <x-email-renderer :html="$sanitizedHtml" :showImages="$showImages" />
-                @elseif($textBody)
+                @elseif(!empty(trim($textBody ?? '')))
                     <div class="p-6 sm:p-8">
                         <pre class="whitespace-pre-wrap font-sans text-sm text-ink leading-relaxed overflow-x-auto">{{ $textBody }}</pre>
                     </div>

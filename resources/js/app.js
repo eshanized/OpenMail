@@ -92,6 +92,10 @@ const main = () => document.getElementById('app-main');
 document.addEventListener('livewire:navigating', () => overlay()?.classList.add('opacity-100'));
 document.addEventListener('livewire:navigated', () => {
     overlay()?.classList.remove('opacity-100');
+    const np = document.getElementById('nprogress');
+    if (np) {
+        np.remove();
+    }
     // Ensure density and theme persist across Livewire navigation
     const currentDensity = localStorage.getItem('density');
     if (currentDensity) {
@@ -107,6 +111,18 @@ document.addEventListener('livewire:navigated', () => {
     m.classList.remove('animate-fade-in');
     void m.offsetWidth; // force reflow to restart animation
     m.classList.add('animate-fade-in');
+});
+
+// Clean up progress bar if a request fails or times out
+document.addEventListener('livewire:init', () => {
+    if (window.Livewire?.hook) {
+        window.Livewire.hook('request', ({ fail }) => {
+            fail(() => {
+                const np = document.getElementById('nprogress');
+                if (np) np.remove();
+            });
+        });
+    }
 });
 
 // Alpine component registrations (alpine:init) — registers settings components in the Vite bundle

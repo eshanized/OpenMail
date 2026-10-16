@@ -90,7 +90,7 @@
                 <span class="text-ink-tertiary text-xs">&middot;</span>
             @endif
             <span class="text-xs text-ink-tertiary">
-                {{ $totalCount }} {{ $threadMode === 'threaded' ? 'conversations' : 'messages' }}
+                {{ $totalCount }} messages
             </span>
         </div>
 
@@ -176,7 +176,7 @@
                     ['key' => 'size', 'dir' => 'desc', 'label' => 'Size'],
                 ] as $sort)
                     <button
-                        wire:click="setSort('{{ $sort['key'] }}', '{{ $sort['dir'] }}')"
+                        wire:click="setSort('{{ $sort['key'] }}')"
                         class="px-2 py-0.5 rounded transition-colors duration-100 cursor-pointer text-xs
                             {{ $sortBy === $sort['key']
                                 ? 'bg-primary-subtle text-primary font-medium'

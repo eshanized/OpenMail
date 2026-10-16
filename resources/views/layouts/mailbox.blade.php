@@ -14,14 +14,14 @@
 @endsection
 
 @section('content')
-<div class="h-[calc(100vh-2.75rem)] min-h-[calc(100dvh-2.75rem)] flex overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8 -my-6"
+<div class="flex-1 flex overflow-hidden w-full h-[calc(100vh-2.75rem)] min-h-[calc(100dvh-2.75rem)]"
      x-data="{
          sidebarOpen: false,
      }"
      @toggle-sidebar.window="sidebarOpen = !sidebarOpen">
 
     {{-- Desktop Sidebar --}}
-    <aside class="w-[240px] flex-shrink-0 bg-surface-raised border-r border-border flex flex-col hidden lg:flex h-full min-h-0">
+    <aside class="w-64 flex-shrink-0 bg-surface-raised border-r border-border flex flex-col hidden lg:flex h-full min-h-0">
         <div class="flex-1 flex flex-col min-h-0 overflow-hidden">
             @yield('sidebar')
             @isset($sidebar)
@@ -78,11 +78,11 @@
     </div>
 
     {{-- Main content area --}}
-    <main class="flex-1 flex flex-col min-w-0 bg-surface">
-        <div class="flex-1 overflow-y-auto scrollbar-thin p-3 sm:p-5">
+    <section class="flex-1 flex flex-col min-w-0 bg-surface h-full min-h-0 overflow-hidden">
+        <div class="flex-1 overflow-y-auto scrollbar-thin p-3 sm:p-5 min-h-0">
             @yield('mailbox-content')
             {{ $slot ?? '' }}
         </div>
-    </main>
+    </section>
 </div>
 @endsection

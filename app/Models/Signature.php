@@ -11,7 +11,7 @@ class Signature extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'content_json', 'content_html', 'is_default'];
+    protected $fillable = ['user_id', 'name', 'content_json', 'content_html', 'is_default'];
 
     protected $casts = [
         'content_json' => 'array',

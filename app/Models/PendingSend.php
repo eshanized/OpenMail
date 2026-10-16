@@ -38,6 +38,8 @@ class PendingSend extends Model
 
     public const CATEGORY_SENT_SYNC = 'sent_sync';
 
+    public const CATEGORY_NONE = 'none';
+
     protected $table = 'pending_sends';
 
     protected $fillable = [

@@ -31,9 +31,9 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-            class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md"
+            class="relative transform overflow-hidden rounded-lg bg-surface-raised border border-border text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md"
         >
-            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div class="bg-surface-raised px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <h3 class="text-lg font-semibold text-ink mb-4" id="modal-title">
                     {{ $label ? 'Edit Label' : 'Create Label' }}
                 </h3>
@@ -46,7 +46,7 @@
                         id="label-name"
                         wire:model="name"
                         maxlength="50"
-                        class="w-full px-3 py-2 border border-border rounded-lg shadow-sm focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                        class="w-full px-3 py-2 border border-border rounded-lg bg-surface text-ink shadow-sm focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
                         placeholder="Label name"
                         autofocus
                     />
@@ -91,7 +91,7 @@
                 <button
                     type="button"
                     @click="$wire.closeModal()"
-                    class="mt-3 inline-flex w-full justify-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-ink shadow-sm ring-1 ring-inset ring-border hover:bg-surface-sunken sm:mt-0 sm:w-auto"
+                    class="mt-3 inline-flex w-full justify-center rounded-lg bg-surface-raised px-4 py-2 text-sm font-semibold text-ink shadow-sm ring-1 ring-inset ring-border hover:bg-hover sm:mt-0 sm:w-auto"
                 >
                     Cancel
                 </button>

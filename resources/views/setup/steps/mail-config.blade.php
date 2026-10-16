@@ -161,7 +161,7 @@
                         @if (isset($imapTestResult['technical']))
                             <div x-data="{ open: false }" class="mt-2">
                                 <button type="button" @click="open = !open" class="text-[11px] text-rose-500 dark:text-rose-400 hover:underline">Technical details</button>
-                                <pre x-show="open" x-transition class="mt-1.5 p-2 bg-black/40 rounded text-[11px] font-mono text-rose-300 overflow-auto max-h-24 border border-rose-500/20">{{ json_encode($imapTestResult['technical'], JSON_PRETTY_PRINT) }}</pre>
+                                <pre x-show="open" x-transition class="mt-1.5 p-2 bg-black/40 rounded text-[11px] font-mono text-rose-300 overflow-x-auto break-all whitespace-pre-wrap max-w-full max-h-24 border border-rose-500/20">{{ json_encode($imapTestResult['technical'], JSON_PRETTY_PRINT) }}</pre>
                             </div>
                         @endif
                     </div>
@@ -284,7 +284,7 @@
                         @if (isset($smtpTestResult['technical']))
                             <div x-data="{ open: false }" class="mt-2">
                                 <button type="button" @click="open = !open" class="text-[11px] text-rose-500 dark:text-rose-400 hover:underline">Technical details</button>
-                                <pre x-show="open" x-transition class="mt-1.5 p-2 bg-black/40 rounded text-[11px] font-mono text-rose-300 overflow-auto max-h-24 border border-rose-500/20">{{ json_encode($smtpTestResult['technical'], JSON_PRETTY_PRINT) }}</pre>
+                                <pre x-show="open" x-transition class="mt-1.5 p-2 bg-black/40 rounded text-[11px] font-mono text-rose-300 overflow-x-auto break-all whitespace-pre-wrap max-w-full max-h-24 border border-rose-500/20">{{ json_encode($smtpTestResult['technical'], JSON_PRETTY_PRINT) }}</pre>
                             </div>
                         @endif
                     </div>

@@ -20,7 +20,6 @@
     showSuggestions: {{ $showSuggestions ? 'true' : 'false' }}
 })"
     class="w-full relative"
-    @keydown.window="handleKeydown($event)"
     @composer-commit-recipients.window="addChipFromInput()"
 >
     <label for="{{ $fieldName }}-chips-input" class="block text-xs font-semibold uppercase tracking-wider text-ink-secondary mb-1.5">{{ $label }}</label>
@@ -34,13 +33,13 @@
         aria-label="{{ $label }} recipients"
     >
         <template x-for="(chip, index) in chips" :key="chip.email + index">
-            <span class="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-lg text-xs font-medium shadow-2xs" role="option" :aria-selected="false">
-                <span class="font-medium text-ink" x-text="chip.name || chip.email"></span>
-                <span class="text-ink-tertiary font-mono text-[11px]" x-show="chip.name" x-text="'<'+chip.email+'>'"></span>
+            <span class="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-lg text-xs font-medium shadow-2xs max-w-full" role="option" :aria-selected="false">
+                <span class="font-medium text-ink truncate max-w-[130px] sm:max-w-xs" x-text="chip.name || chip.email"></span>
+                <span class="text-ink-tertiary font-mono text-[11px] truncate max-w-[110px] sm:max-w-xs" x-show="chip.name" x-text="'<'+chip.email+'>'"></span>
                 <button
                     type="button"
                     @click.prevent="removeChip(index)"
-                    class="text-ink-tertiary hover:text-error hover:bg-error-subtle p-0.5 rounded transition-colors cursor-pointer"
+                    class="text-ink-tertiary hover:text-error hover:bg-error-subtle p-0.5 rounded transition-colors cursor-pointer shrink-0"
                     :aria-label="'Remove ' + (chip.name || chip.email)"
                     tabindex="-1"
                 >
@@ -80,7 +79,7 @@
         x-transition:enter-start="opacity-0 transform -translate-y-1"
         x-transition:leave="transition ease-in duration-75"
         x-transition:leave-end="opacity-0"
-        class="absolute z-50 mt-1 w-full max-w-md bg-surface-raised border border-border rounded-xl shadow-xl overflow-hidden backdrop-blur-md"
+        class="absolute z-50 mt-1 w-full max-w-md bg-surface-raised border border-border rounded-xl shadow-xl overflow-hidden backdrop-blur-md max-h-60 overflow-y-auto"
         :id="'{{ $fieldName }}-suggestions'"
         role="listbox"
         x-ref="dropdown"
@@ -302,10 +301,6 @@
 
                 focusInput() {
                     this.$refs.input?.focus();
-                },
-
-                handleKeydown(event) {
-                    // Global keydown handler for chip removal with backspace
                 }
             }
         }

@@ -57,7 +57,8 @@
             <div class="px-3 py-3 flex-shrink-0">
                 <button
                     type="button"
-                    @click="$dispatch('openComposer', { mode: 'compose' })"
+                    @click="typeof Livewire !== 'undefined' ? Livewire.dispatch('openComposer', { mode: 'compose' }) : $dispatch('openComposer', { mode: 'compose' })"
+                    aria-label="Compose new email"
                     class="w-full text-sm font-medium py-1.5 px-3 rounded border border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 hover:border-primary/40 flex items-center gap-2 transition-colors duration-100 cursor-pointer"
                 >
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">

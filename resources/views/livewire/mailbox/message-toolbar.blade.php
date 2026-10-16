@@ -48,7 +48,7 @@
         {{-- Archive --}}
         <button
             wire:click="archiveSelected"
-            data-loading.attr="disabled"
+            wire:loading.attr="disabled"
             class="inline-flex items-center gap-1.5 rounded bg-primary hover:bg-primary-hover px-2.5 py-1 text-xs font-medium text-white transition-colors disabled:opacity-50 cursor-pointer"
             title="Archive (e)"
         >
@@ -61,7 +61,7 @@
         {{-- Delete (Move to Trash) --}}
         <button
             wire:click="bulkDelete"
-            data-loading.attr="disabled"
+            wire:loading.attr="disabled"
             class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-error hover:bg-error-subtle border border-error/20 rounded transition-colors disabled:opacity-50 cursor-pointer"
             onclick="return confirm('Move selected messages to Trash?')"
             title="Delete"
@@ -75,7 +75,7 @@
         {{-- Spam --}}
         <button
             wire:click="bulkMove('Spam')"
-            data-loading.attr="disabled"
+            wire:loading.attr="disabled"
             class="p-1 text-xs text-ink-secondary hover:text-ink hover:bg-hover border border-border rounded transition-colors disabled:opacity-50 cursor-pointer"
             title="Mark as Spam"
         >
@@ -116,7 +116,7 @@
                     @if($folder['path'] !== $folderPath)
                         <button
                             wire:click="bulkMove('{{ $folder['path'] }}')"
-                            data-loading.attr="disabled"
+                            wire:loading.attr="disabled"
                             class="w-full px-2.5 py-1.5 text-left text-xs text-ink-secondary hover:bg-hover hover:text-ink disabled:opacity-50 flex items-center gap-2 cursor-pointer"
                         >
                             <span class="truncate">{{ $folder['name'] }}</span>
@@ -129,7 +129,7 @@
         {{-- Mark read --}}
         <button
             wire:click="bulkMarkRead"
-            data-loading.attr="disabled"
+            wire:loading.attr="disabled"
             class="p-1 text-xs text-ink-secondary hover:text-ink hover:bg-hover border border-border rounded transition-colors disabled:opacity-50 cursor-pointer"
             title="Mark as read"
         >
@@ -142,7 +142,7 @@
         {{-- Mark unread --}}
         <button
             wire:click="bulkMarkUnread"
-            data-loading.attr="disabled"
+            wire:loading.attr="disabled"
             class="p-1 text-xs text-ink-secondary hover:text-ink hover:bg-hover border border-border rounded transition-colors disabled:opacity-50 cursor-pointer"
             title="Mark as unread"
         >
@@ -154,7 +154,7 @@
         {{-- Star/Flag --}}
         <button
             wire:click="bulkStar"
-            data-loading.attr="disabled"
+            wire:loading.attr="disabled"
             class="p-1 text-xs text-ink-secondary hover:text-ink hover:bg-hover border border-border rounded transition-colors disabled:opacity-50 cursor-pointer star-btn"
             title="Flag"
         >
@@ -166,7 +166,7 @@
         {{-- Unstar/Unflag --}}
         <button
             wire:click="bulkUnstar"
-            data-loading.attr="disabled"
+            wire:loading.attr="disabled"
             class="p-1 text-xs text-ink-secondary hover:text-ink hover:bg-hover border border-border rounded transition-colors disabled:opacity-50 cursor-pointer star-btn"
             title="Unflag"
         >

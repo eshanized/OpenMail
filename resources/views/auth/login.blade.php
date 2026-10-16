@@ -22,7 +22,7 @@
         })();
     </script>
 </head>
-<body class="bg-surface min-h-screen antialiased">
+<body class="bg-surface min-h-[100dvh] antialiased">
 
     {{--
         Login page — editorial, calm, trustworthy
@@ -30,7 +30,7 @@
         Design: clean two-section layout, warm light background, tight typography
     --}}
 
-    <div class="min-h-screen flex">
+    <div class="min-h-[100dvh] flex">
         {{-- Left panel: branding + identity --}}
         <div class="hidden lg:flex lg:w-5/12 xl:w-1/2 flex-col justify-between bg-surface-sunken border-r border-border p-10 xl:p-14">
             {{-- Logo --}}

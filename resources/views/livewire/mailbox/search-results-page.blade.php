@@ -1,4 +1,165 @@
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+@extends('layouts.app')
+
+@section('content')
+<div x-data="{ mobileFiltersOpen: false }" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 w-full">
+    {{-- Mobile Filter Drawer (lg:hidden) --}}
+    <div
+        x-show="mobileFiltersOpen"
+        x-cloak
+        class="fixed inset-0 z-50 lg:hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Search Filters"
+        @keydown.escape.window="mobileFiltersOpen = false"
+    >
+        <div
+            x-show="mobileFiltersOpen"
+            x-transition:enter="ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="ease-in duration-150"
+            x-transition:leave-end="opacity-0"
+            @click="mobileFiltersOpen = false"
+            class="fixed inset-0 bg-black/50 backdrop-blur-xs"
+        ></div>
+
+        <div
+            x-show="mobileFiltersOpen"
+            x-transition:enter="ease-out duration-200"
+            x-transition:enter-start="translate-x-full"
+            x-transition:enter-end="translate-x-0"
+            x-transition:leave="ease-in duration-150"
+            x-transition:leave-end="translate-x-full"
+            class="fixed inset-y-0 right-0 w-full max-w-xs bg-surface-raised border-l border-border shadow-2xl flex flex-col z-10"
+        >
+            <div class="flex items-center justify-between px-4 py-3.5 border-b border-border bg-surface-raised">
+                <div class="flex items-center gap-2">
+                    <h3 class="text-sm font-semibold text-ink">Filters</h3>
+                </div>
+                <button
+                    type="button"
+                    @click="mobileFiltersOpen = false"
+                    class="p-1.5 text-ink-tertiary hover:text-ink rounded-lg hover:bg-hover transition-colors cursor-pointer"
+                    aria-label="Close filters"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <form method="GET" action="{{ route('search') }}" id="mobile-filter-form" class="flex-1 overflow-y-auto p-4 space-y-4">
+                <input type="hidden" name="q" value="{{ $query }}">
+
+                {{-- Folder Filter --}}
+                <div>
+                    <label for="mobile-filter-folder" class="block text-xs font-semibold text-ink-secondary mb-1.5">Folder</label>
+                    <select name="folder" id="mobile-filter-folder"
+                            class="w-full text-xs border border-border rounded-lg bg-surface text-ink p-2.5 focus:border-primary focus:outline-none">
+                        <option value="">All folders</option>
+                        @foreach($folders as $folder)
+                            <option value="{{ $folder }}" {{ ($filters['folder'] ?? '') === $folder ? 'selected' : '' }}>
+                                {{ class_basename($folder) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Date Range --}}
+                <div>
+                    <label class="block text-xs font-semibold text-ink-secondary mb-1.5">Date Range</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label for="mobile_date_from" class="block text-[10px] text-ink-tertiary mb-0.5">From</label>
+                            <input type="date" name="date_from" id="mobile_date_from"
+                                   value="{{ $filters['date_from'] ?? '' }}"
+                                   class="w-full text-xs border border-border rounded-lg bg-surface text-ink p-2 focus:border-primary focus:outline-none">
+                        </div>
+                        <div>
+                            <label for="mobile_date_to" class="block text-[10px] text-ink-tertiary mb-0.5">To</label>
+                            <input type="date" name="date_to" id="mobile_date_to"
+                                   value="{{ $filters['date_to'] ?? '' }}"
+                                   class="w-full text-xs border border-border rounded-lg bg-surface text-ink p-2 focus:border-primary focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Has Attachment Toggle --}}
+                <div>
+                    <label class="flex items-center gap-2.5 py-1 cursor-pointer">
+                        <input type="checkbox" name="has_attachment" value="1"
+                               {{ ($filters['has_attachment'] ?? false) ? 'checked' : '' }}
+                               class="mail-checkbox w-4 h-4">
+                        <span class="text-xs text-ink font-medium">Has attachment</span>
+                    </label>
+                </div>
+
+                {{-- Read/Unread/Flagged --}}
+                <div>
+                    <label class="block text-xs font-semibold text-ink-secondary mb-1.5">Status</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-2.5 cursor-pointer">
+                            <input type="radio" name="is_seen" value=""
+                                   {{ !isset($filters['is_seen']) ? 'checked' : '' }}
+                                   class="accent-primary w-4 h-4">
+                            <span class="text-xs text-ink">All</span>
+                        </label>
+                        <label class="flex items-center gap-2.5 cursor-pointer">
+                            <input type="radio" name="is_seen" value="0"
+                                   {{ (isset($filters['is_seen']) && $filters['is_seen'] === false) ? 'checked' : '' }}
+                                   class="accent-primary w-4 h-4">
+                            <span class="text-xs text-ink">Unread only</span>
+                        </label>
+                        <label class="flex items-center gap-2.5 cursor-pointer">
+                            <input type="radio" name="is_seen" value="1"
+                                   {{ (isset($filters['is_seen']) && $filters['is_seen'] === true) ? 'checked' : '' }}
+                                   class="accent-primary w-4 h-4">
+                            <span class="text-xs text-ink">Read only</span>
+                        </label>
+                    </div>
+                </div>
+
+                {{-- Flagged --}}
+                <div>
+                    <label class="flex items-center gap-2.5 py-1 cursor-pointer">
+                        <input type="checkbox" name="is_flagged" value="1"
+                               {{ ($filters['is_flagged'] ?? false) ? 'checked' : '' }}
+                               class="mail-checkbox w-4 h-4">
+                        <span class="text-xs text-ink font-medium">Flagged only</span>
+                    </label>
+                </div>
+
+                {{-- Labels --}}
+                @if($labels->isNotEmpty())
+                <div>
+                    <label class="block text-xs font-semibold text-ink-secondary mb-1.5">Labels</label>
+                    <div class="space-y-2 max-h-36 overflow-y-auto pr-1">
+                        @foreach($labels as $label)
+                            <label class="flex items-center gap-2.5 cursor-pointer">
+                                <input type="checkbox" name="labels[]" value="{{ $label->id }}"
+                                       {{ in_array($label->id, $filters['labels'] ?? []) ? 'checked' : '' }}
+                                       class="mail-checkbox w-4 h-4">
+                                <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {{ $label->color }}"></span>
+                                <span class="text-xs text-ink truncate">{{ $label->name }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
+                {{-- Actions --}}
+                <div class="pt-3 border-t border-border flex items-center gap-2">
+                    <button type="submit" class="flex-1 py-2.5 px-3 text-xs font-semibold rounded-lg bg-primary text-primary-contrast shadow hover:opacity-90 transition-opacity text-center cursor-pointer">
+                        Apply Filters
+                    </button>
+                    <a href="{{ route('search', ['q' => $query]) }}" wire:navigate class="py-2.5 px-3 text-xs font-medium rounded-lg border border-border text-ink hover:bg-hover transition-colors text-center">
+                        Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="flex gap-5">
         {{-- Filter Sidebar --}}
         <aside class="w-64 flex-shrink-0 hidden lg:block">
@@ -180,11 +341,26 @@
             @endif
 
             {{-- Results Header --}}
-            <div class="flex items-center justify-between mb-3">
-                <h2 class="text-xs text-ink-secondary">
+            <div class="flex items-center justify-between mb-3 gap-2">
+                <h2 class="text-xs text-ink-secondary truncate">
                     {{ $results->total() }} result{{ $results->total() !== 1 ? 's' : '' }} for
                     <span class="font-semibold text-ink">"{{ $query }}"</span>
                 </h2>
+
+                <button
+                    type="button"
+                    @click="mobileFiltersOpen = true"
+                    class="lg:hidden inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-border bg-surface-raised text-ink hover:bg-hover transition-colors shrink-0 cursor-pointer"
+                    aria-label="Open search filters"
+                >
+                    <svg class="w-3.5 h-3.5 text-ink-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                    </svg>
+                    <span>Filters</span>
+                    @if(!empty($activeFilters))
+                        <span class="inline-flex items-center justify-center px-1.5 py-0.2 text-[10px] font-bold rounded-full bg-primary text-primary-contrast">{{ count($activeFilters) }}</span>
+                    @endif
+                </button>
             </div>
 
             {{-- Results --}}
@@ -257,3 +433,4 @@
         </div>
     </div>
 </div>
+@endsection

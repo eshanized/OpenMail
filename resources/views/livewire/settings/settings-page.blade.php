@@ -21,7 +21,31 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {{-- Left: Settings Navigation Sidebar --}}
         <aside class="lg:col-span-4 xl:col-span-3 space-y-3">
-            <nav class="flex lg:flex-col overflow-x-auto pb-2 lg:pb-0 space-x-1 lg:space-x-0 lg:space-y-0.5 scrollbar-thin shrink-0" role="tablist" aria-label="Settings Categories">
+            {{-- Mobile Category Select (lg:hidden) --}}
+            <div class="block lg:hidden">
+                <label for="mobile-settings-tab" class="sr-only">Settings Category</label>
+                <div class="relative">
+                    <select
+                        id="mobile-settings-tab"
+                        wire:change="setTab($event.target.value)"
+                        class="w-full text-xs font-semibold border border-border rounded-lg bg-surface-raised text-ink py-2.5 pl-3 pr-8 shadow-xs focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none appearance-none cursor-pointer"
+                    >
+                        @foreach($tabs as $key => $label)
+                            <option value="{{ $key }}" {{ $activeTab === $key ? 'selected' : '' }}>
+                                {{ $label }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-ink-tertiary">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Desktop Settings Navigation --}}
+            <nav class="hidden lg:flex flex-col space-y-0.5" role="tablist" aria-label="Settings Categories">
                 @php
                     $tabIcons = [
                         'profile' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>',

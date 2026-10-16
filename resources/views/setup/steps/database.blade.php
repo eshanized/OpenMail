@@ -173,7 +173,7 @@
                             </button>
                             <pre x-show="open"
                                  x-transition
-                                 class="mt-2 p-3 bg-black/40 rounded-lg text-xs font-mono text-rose-300 overflow-auto max-h-36 border border-rose-500/20">{{ json_encode($dbTestResult['technical'], JSON_PRETTY_PRINT) }}</pre>
+                                 class="mt-2 p-3 bg-black/40 rounded-lg text-xs font-mono text-rose-300 overflow-x-auto break-all whitespace-pre-wrap max-w-full max-h-36 border border-rose-500/20">{{ json_encode($dbTestResult['technical'], JSON_PRETTY_PRINT) }}</pre>
                         </div>
                     @endif
                 </div>
@@ -253,7 +253,7 @@
                 @if ($migrationResult && !$migrationResult['success'])
                     <div class="mt-4 p-3.5 setup-callout-error">
                         <p class="text-xs font-semibold text-rose-600 dark:text-rose-400">Migration failed</p>
-                        <pre class="mt-2 p-2.5 bg-black/40 rounded text-xs font-mono text-rose-300 overflow-auto max-h-32 border border-rose-500/20">{{ $migrationResult['error'] ?? 'Unknown error' }}</pre>
+                        <pre class="mt-2 p-2.5 bg-black/40 rounded text-xs font-mono text-rose-300 overflow-x-auto break-all whitespace-pre-wrap max-w-full max-h-32 border border-rose-500/20">{{ $migrationResult['error'] ?? 'Unknown error' }}</pre>
                     </div>
                 @endif
             </div>

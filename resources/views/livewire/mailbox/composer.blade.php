@@ -42,15 +42,11 @@
 
             // Load draft from LocalStorage on mount
             this.loadFromLocalStorage();
-
-            // Handle keyboard shortcuts
-            document.addEventListener('keydown', this.handleKeydown.bind(this));
         },
         destroy() {
             this.destroyTiptap();
             if (this.autosaveTimer) clearTimeout(this.autosaveTimer);
             if (this.imapSyncTimer) clearInterval(this.imapSyncTimer);
-            document.removeEventListener('keydown', this.handleKeydown);
         },
         send() {
             window.dispatchEvent(new CustomEvent('composer-commit-recipients'));
@@ -180,7 +176,7 @@
         @click.outside="closeWithConfirm()"
     >
         <div
-            class="bg-surface-raised rounded-none sm:rounded border-0 sm:border border-border shadow-xl max-w-4xl w-full h-full sm:h-auto sm:max-h-[92vh] flex flex-col overflow-hidden animate-fade-in"
+            class="bg-surface-raised rounded-none sm:rounded border-0 sm:border border-border shadow-xl max-w-4xl w-full h-[100dvh] sm:h-auto sm:max-h-[92vh] flex flex-col overflow-hidden animate-fade-in"
             @click.outside.stop
         >
             {{-- Header --}}

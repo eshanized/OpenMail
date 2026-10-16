@@ -14,14 +14,57 @@
 @endsection
 
 @section('content')
-<div class="flex-1 flex overflow-hidden w-full h-[calc(100vh-2.75rem)] min-h-[calc(100dvh-2.75rem)]"
+<div class="flex-1 flex overflow-hidden w-full h-[calc(100vh-2.75rem)] min-h-[calc(100dvh-2.75rem)] relative"
      x-data="{
          sidebarOpen: false,
+         closeSidebar() {
+             this.sidebarOpen = false;
+         }
      }"
-     @toggle-sidebar.window="sidebarOpen = !sidebarOpen">
+     @toggle-sidebar.window="sidebarOpen = !sidebarOpen"
+     @keydown.escape.window="closeSidebar()">
 
-    {{-- Desktop Sidebar --}}
-    <aside class="w-64 flex-shrink-0 bg-surface-raised border-r border-border flex flex-col hidden lg:flex h-full min-h-0">
+    {{-- Mobile backdrop overlay --}}
+    <div
+        x-show="sidebarOpen"
+        x-cloak
+        class="lg:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-xs transition-opacity duration-200"
+        @click="closeSidebar()"
+        x-transition:enter="ease-out duration-200"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="ease-in duration-150"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        aria-hidden="true"
+    ></div>
+
+    {{-- Unified Responsive Sidebar: Desktop Static + Mobile Slide-over Drawer --}}
+    <aside
+        class="fixed inset-y-0 left-0 z-50 w-[280px] max-w-[85vw] bg-surface-raised border-r border-border shadow-xl flex flex-col h-full min-h-0
+               lg:static lg:z-auto lg:w-64 lg:shadow-none lg:flex lg:translate-x-0 transition-transform duration-200 ease-in-out"
+        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+        role="dialog"
+        :aria-modal="sidebarOpen ? 'true' : 'false'"
+        aria-label="Mailbox navigation"
+        @click="if ($event.target.closest('[wire\\:click*=\'selectFolder\'], a')) { if (window.innerWidth < 1024) closeSidebar(); }"
+    >
+        {{-- Mobile Drawer Header (close button & title) --}}
+        <div class="h-11 px-4 border-b border-border flex justify-between items-center flex-shrink-0 lg:hidden">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                <span class="text-sm font-semibold text-ink">{{ config('app.name', 'OpenMail') }}</span>
+            </div>
+            <button @click="closeSidebar()" class="p-1 text-ink-tertiary hover:text-ink rounded hover:bg-hover transition-colors cursor-pointer" aria-label="Close navigation">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        {{-- Single Sidebar Content --}}
         <div class="flex-1 flex flex-col min-h-0 overflow-hidden">
             @yield('sidebar')
             @isset($sidebar)
@@ -29,53 +72,6 @@
             @endisset
         </div>
     </aside>
-
-    {{-- Mobile sidebar overlay --}}
-    <div
-        x-show="sidebarOpen"
-        x-cloak
-        class="lg:hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-xs"
-        @click="sidebarOpen = false"
-        x-transition:enter="transition ease-out duration-150"
-        x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-100"
-        x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0"
-    >
-        <div class="fixed inset-y-0 left-0 w-[280px] max-w-[85vw] bg-surface-raised border-r border-border shadow-xl flex flex-col z-50"
-             @click.stop
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="-translate-x-full"
-             x-transition:enter-end="translate-x-0"
-             x-transition:leave="transition ease-in duration-150"
-             x-transition:leave-start="translate-x-0"
-             x-transition:leave-end="-translate-x-full">
-            <div class="h-11 px-4 border-b border-border flex justify-between items-center flex-shrink-0">
-                <div class="flex items-center gap-2">
-                    <svg class="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                    </svg>
-                    <span class="text-sm font-semibold text-ink">{{ config('app.name', 'OpenMail') }}</span>
-                </div>
-                <button @click="sidebarOpen = false" class="p-1 text-ink-tertiary hover:text-ink rounded hover:bg-hover transition-colors cursor-pointer" aria-label="Close navigation">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-            <div class="flex-1 flex flex-col min-h-0 overflow-hidden" @click="if ($event.target.closest('[wire\\:click*=\'selectFolder\'], a')) sidebarOpen = false">
-                @hasSection('mobile-sidebar')
-                    @yield('mobile-sidebar')
-                @else
-                    @yield('sidebar')
-                @endif
-                @isset($sidebar)
-                    {{ $sidebar }}
-                @endisset
-            </div>
-        </div>
-    </div>
 
     {{-- Main content area --}}
     <section class="flex-1 flex flex-col min-w-0 bg-surface h-full min-h-0 overflow-hidden">

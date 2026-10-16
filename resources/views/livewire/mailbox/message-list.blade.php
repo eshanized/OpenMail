@@ -98,6 +98,7 @@
         <div class="flex items-center gap-2 w-full md:w-auto">
             <button
                 @click="openComposer"
+                aria-label="Compose new email"
                 class="inline-flex items-center gap-1.5 rounded bg-primary hover:bg-primary-hover
                        px-3 py-1.5 text-xs font-medium text-white
                        transition-colors duration-100

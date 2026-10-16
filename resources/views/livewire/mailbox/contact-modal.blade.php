@@ -12,7 +12,7 @@
     role="dialog"
     aria-modal="true"
 >
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+    <div class="flex items-end justify-center min-h-[100dvh] pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         {{-- Background overlay --}}
         <div
             class="fixed inset-0 bg-surface-sunken bg-opacity-75 transition-opacity"
@@ -21,8 +21,8 @@
         ></div>
 
         {{-- Modal panel --}}
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        <div class="inline-block align-bottom bg-surface-raised border border-border rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div class="bg-surface-raised px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div class="sm:flex sm:items-start">
                     {{-- Avatar Preview --}}
                     <div class="mx-auto flex-shrink-0 flex items-center justify-center h-16 w-16 rounded-full {{ \App\Models\Contact::colorFromEmail($email ?: 'test@test.com') }}">
@@ -44,7 +44,7 @@
                                     type="text"
                                     wire:model="name"
                                     id="name"
-                                    class="mt-1 block w-full border-border rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm"
+                                    class="mt-1 block w-full border border-border rounded-md shadow-sm bg-surface text-ink focus:ring-primary focus:border-primary sm:text-sm px-3 py-2"
                                     placeholder="John Doe"
                                 >
                             </div>
@@ -56,7 +56,7 @@
                                     type="email"
                                     wire:model="email"
                                     id="email"
-                                    class="mt-1 block w-full border-border rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm"
+                                    class="mt-1 block w-full border border-border rounded-md shadow-sm bg-surface text-ink focus:ring-primary focus:border-primary sm:text-sm px-3 py-2"
                                     placeholder="john@example.com"
                                 >
                             </div>
@@ -68,7 +68,7 @@
                                     type="tel"
                                     wire:model="phone"
                                     id="phone"
-                                    class="mt-1 block w-full border-border rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm"
+                                    class="mt-1 block w-full border border-border rounded-md shadow-sm bg-surface text-ink focus:ring-primary focus:border-primary sm:text-sm px-3 py-2"
                                     placeholder="+1 (555) 123-4567"
                                 >
                             </div>
@@ -80,7 +80,7 @@
                                     wire:model="notes"
                                     id="notes"
                                     rows="3"
-                                    class="mt-1 block w-full border-border rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm"
+                                    class="mt-1 block w-full border border-border rounded-md shadow-sm bg-surface text-ink focus:ring-primary focus:border-primary sm:text-sm px-3 py-2"
                                     placeholder="Add any notes about this contact..."
                                 ></textarea>
                             </div>
@@ -108,12 +108,12 @@
                                         type="text"
                                         wire:model="newGroupName"
                                         placeholder="New group name"
-                                        class="block w-full border-border rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm"
+                                        class="block w-full border border-border rounded-md shadow-sm bg-surface text-ink focus:ring-primary focus:border-primary sm:text-sm px-3 py-2"
                                     >
                                     <button
                                         wire:click="addGroup"
                                         type="button"
-                                        class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                                        class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary cursor-pointer shrink-0"
                                     >
                                         Add
                                     </button>
@@ -125,18 +125,18 @@
             </div>
 
             {{-- Actions --}}
-            <div class="bg-surface-sunken px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <div class="bg-surface-sunken px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse border-t border-border gap-2">
                 <button
                     type="button"
                     wire:click="save"
-                    class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary text-base font-medium text-white hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:ml-3 sm:w-auto sm:text-sm"
+                    class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary text-base font-medium text-white hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:ml-3 sm:w-auto sm:text-sm cursor-pointer"
                 >
                     Save
                 </button>
                 <button
                     type="button"
                     wire:click="closeModal"
-                    class="mt-3 w-full inline-flex justify-center rounded-md border border-border shadow-sm px-4 py-2 bg-white text-base font-medium text-ink-secondary hover:bg-surface-sunken focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:mt-0 sm:w-auto sm:text-sm"
+                    class="mt-3 w-full inline-flex justify-center rounded-md border border-border shadow-sm px-4 py-2 bg-surface-raised text-base font-medium text-ink hover:bg-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:mt-0 sm:w-auto sm:text-sm cursor-pointer"
                 >
                     Cancel
                 </button>
@@ -145,7 +145,7 @@
                         type="button"
                         wire:click="delete"
                         wire:confirm="Are you sure you want to delete this contact?"
-                        class="mt-3 w-full inline-flex justify-center rounded-md border border-danger/20 shadow-sm px-4 py-2 bg-white text-base font-medium text-danger hover:bg-danger-subtle/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-danger sm:mt-0 sm:w-auto sm:text-sm"
+                        class="mt-3 w-full inline-flex justify-center rounded-md border border-danger/20 shadow-sm px-4 py-2 bg-surface-raised text-base font-medium text-danger hover:bg-danger-subtle/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-danger sm:mt-0 sm:w-auto sm:text-sm cursor-pointer"
                     >
                         Delete
                     </button>

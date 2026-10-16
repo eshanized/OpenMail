@@ -12,7 +12,7 @@
     role="dialog"
     aria-modal="true"
 >
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+    <div class="flex items-end justify-center min-h-[100dvh] pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         {{-- Background overlay --}}
         <div
             class="fixed inset-0 bg-surface-sunken bg-opacity-75 transition-opacity"
@@ -21,8 +21,8 @@
         ></div>
 
         {{-- Modal panel --}}
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        <div class="inline-block align-bottom bg-surface-raised border border-border rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+            <div class="bg-surface-raised px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div class="sm:flex sm:items-start">
                     <div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
                         <h3 class="text-lg leading-6 font-medium text-ink" id="modal-title">
@@ -180,7 +180,7 @@
                 <button
                     type="button"
                     wire:click="exportVCard"
-                    class="mt-3 sm:mt-0 w-full inline-flex justify-center rounded-md border border-border shadow-sm px-4 py-2 bg-white text-base font-medium text-ink-secondary hover:bg-surface-sunken focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:w-auto sm:text-sm"
+                    class="mt-3 sm:mt-0 w-full inline-flex justify-center rounded-md border border-border shadow-sm px-4 py-2 bg-surface-raised text-base font-medium text-ink hover:bg-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:w-auto sm:text-sm cursor-pointer"
                 >
                     Export vCard
                 </button>
@@ -188,7 +188,7 @@
                 <button
                     type="button"
                     wire:click="closeModal"
-                    class="mt-3 sm:mt-0 sm:mr-3 w-full inline-flex justify-center rounded-md border border-border shadow-sm px-4 py-2 bg-white text-base font-medium text-ink-secondary hover:bg-surface-sunken focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:w-auto sm:text-sm"
+                    class="mt-3 sm:mt-0 sm:mr-3 w-full inline-flex justify-center rounded-md border border-border shadow-sm px-4 py-2 bg-surface-raised text-base font-medium text-ink hover:bg-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:w-auto sm:text-sm cursor-pointer"
                 >
                     Close
                 </button>

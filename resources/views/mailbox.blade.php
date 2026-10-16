@@ -1,11 +1,7 @@
 @extends('layouts.mailbox')
 
 @section('sidebar')
-    <livewire:mailbox.folder-sidebar wire:key="desktop-folder-sidebar" />
-@endsection
-
-@section('mobile-sidebar')
-    <livewire:mailbox.folder-sidebar wire:key="mobile-folder-sidebar" />
+    <livewire:mailbox.folder-sidebar wire:key="mailbox-folder-sidebar" />
 @endsection
 
 @section('mailbox-content')

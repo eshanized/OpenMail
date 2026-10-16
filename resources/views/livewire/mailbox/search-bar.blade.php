@@ -1,73 +1,4 @@
-<div class="relative" x-data="{
-    query: @entangle('query'),
-    results: @entangle('results'),
-    loading: @entangle('loading'),
-    open: @entangle('open'),
-    highlightedIndex: @entangle('highlightedIndex'),
-    debounceTimer: null,
-
-    debouncedSearch() {
-        clearTimeout(this.debounceTimer);
-        this.loading = true;
-        this.debounceTimer = setTimeout(() => {
-            @this.call('instantSearch');
-        }, 300);
-    },
-
-    focusFirstResult() {
-        if (this.results.length > 0) {
-            this.highlightedIndex = 0;
-            this.$refs.resultItem?.[0]?.focus();
-        }
-    },
-
-    navigateResults(direction) {
-        if (direction === 'down') {
-            this.highlightedIndex = Math.min(this.highlightedIndex + 1, this.results.length - 1);
-        } else {
-            this.highlightedIndex = Math.max(this.highlightedIndex - 1, 0);
-        }
-        this.$refs.resultItem?.[this.highlightedIndex]?.focus();
-    },
-
-    openResult(id) {
-        @this.call('openResult', id);
-    },
-
-    highlight(text, query) {
-        if (!query || !text) return this.escapeHtml(text || '');
-        const safeText = this.escapeHtml(text);
-        const safeQuery = this.escapeHtml(query);
-        const escaped = safeQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const regex = new RegExp('(' + escaped + ')', 'gi');
-        return safeText.replace(regex, '<mark class=\'bg-primary-subtle text-primary px-0.5 rounded\'>$1</mark>');
-    },
-
-    escapeHtml(str) {
-        return String(str || '').replace(/[&<>"']/g, (m) => ({
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#039;'
-        }[m]));
-    },
-
-    close() {
-        this.open = false;
-        this.highlightedIndex = -1;
-    }
-}" x-init="
-    window.addEventListener('keydown', (e) => {
-        if (e.key === '/' && !e.target.closest('input, textarea, select, [contenteditable]')) {
-            e.preventDefault();
-            $refs.searchInput.focus();
-        }
-    });
-    $wire.on('focus-search-input', () => {
-        $refs.searchInput.focus();
-    });
-">
+<div class="relative" x-data="searchBarComponent()" x-init="init()">
     <label for="search-input" class="sr-only">Search all mail</label>
     <div class="relative">
         <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-ink-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
@@ -94,4 +25,81 @@
     </div>
 
     @include('livewire.mailbox.search-results-dropdown')
+
+    <script>
+        function searchBarComponent() {
+            return {
+                query: @entangle('query'),
+                results: @entangle('results'),
+                loading: @entangle('loading'),
+                open: @entangle('open'),
+                highlightedIndex: @entangle('highlightedIndex'),
+                debounceTimer: null,
+
+                init() {
+                    window.addEventListener('keydown', (e) => {
+                        if (e.key === '/' && !e.target.closest('input, textarea, select, [contenteditable]')) {
+                            e.preventDefault();
+                            this.$refs.searchInput?.focus();
+                        }
+                    });
+                    this.$wire.on('focus-search-input', () => {
+                        this.$refs.searchInput?.focus();
+                    });
+                },
+
+                debouncedSearch() {
+                    clearTimeout(this.debounceTimer);
+                    this.loading = true;
+                    this.debounceTimer = setTimeout(() => {
+                        this.$wire.instantSearch();
+                    }, 300);
+                },
+
+                focusFirstResult() {
+                    if (this.results.length > 0) {
+                        this.highlightedIndex = 0;
+                        this.$refs.resultItem?.[0]?.focus();
+                    }
+                },
+
+                navigateResults(direction) {
+                    if (direction === 'down') {
+                        this.highlightedIndex = Math.min(this.highlightedIndex + 1, this.results.length - 1);
+                    } else {
+                        this.highlightedIndex = Math.max(this.highlightedIndex - 1, 0);
+                    }
+                    this.$refs.resultItem?.[this.highlightedIndex]?.focus();
+                },
+
+                openResult(id) {
+                    this.$wire.openResult(id);
+                },
+
+                highlight(text, query) {
+                    if (!query || !text) return this.escapeHtml(text || '');
+                    const safeText = this.escapeHtml(text);
+                    const safeQuery = this.escapeHtml(query);
+                    const escaped = safeQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const regex = new RegExp('(' + escaped + ')', 'gi');
+                    return safeText.replace(regex, '<mark class="bg-primary-subtle text-primary px-0.5 rounded">$1</mark>');
+                },
+
+                escapeHtml(str) {
+                    return String(str || '').replace(/[&<>"']/g, (m) => ({
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '"': '&quot;',
+                        "'": '&#039;'
+                    }[m]));
+                },
+
+                close() {
+                    this.open = false;
+                    this.highlightedIndex = -1;
+                }
+            };
+        }
+    </script>
 </div>

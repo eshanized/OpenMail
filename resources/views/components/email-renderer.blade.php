@@ -96,13 +96,26 @@ $doc = '<!DOCTYPE html>
         img.blocked-image,
         img[data-src] {
             display: inline-block;
-            background: rgba(226, 232, 240, 0.35);
-            max-height: 240px;
+            background: #f1f5f9;
+            border: 1px dashed #cbd5e1;
+            border-radius: 4px;
+            min-height: 20px;
+            max-height: 200px;
             object-fit: contain;
+            vertical-align: middle;
+        }
+        img.blocked-tracking {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            visibility: hidden !important;
         }
         table {
-            max-width: 100% !important;
-            border-collapse: collapse;
+            max-width: 100%;
+        }
+        td, th {
+            word-break: normal;
+            overflow-wrap: break-word;
         }
         blockquote {
             margin: 1rem 0;
@@ -160,25 +173,36 @@ $doc = '<!DOCTYPE html>
     readingMode: 'full', // 'focused' or 'full'
     zoomLevel: 100, // percentage
     adaptiveTheme: false,
+    lastHeight: 0,
+    resizeTimeout: null,
+    observer: null,
     resize() {
         const frame = this.$refs.emailFrame;
         if (!frame) return;
         try {
             const doc = frame.contentDocument || frame.contentWindow?.document;
             if (doc && doc.body) {
-                const height = Math.max(
-                    doc.body.scrollHeight,
-                    doc.body.offsetHeight,
-                    doc.documentElement.scrollHeight,
-                    doc.documentElement.offsetHeight
-                );
-                if (height > 0) {
-                    frame.style.height = (height + 32) + 'px';
+                // Measure actual content height without letting documentElement height loop
+                const rectHeight = doc.body.getBoundingClientRect ? doc.body.getBoundingClientRect().height : 0;
+                const scrollHeight = doc.body.scrollHeight || 0;
+                const contentHeight = Math.max(rectHeight, scrollHeight);
+
+                // Add small breathing room and enforce min-height
+                const targetHeight = Math.max(160, Math.ceil(contentHeight) + 20);
+
+                // Ignore microscopic oscillations to break infinite resize loops
+                if (Math.abs(targetHeight - this.lastHeight) >= 4) {
+                    this.lastHeight = targetHeight;
+                    frame.style.height = targetHeight + 'px';
                 }
             }
         } catch (e) {
             // Sandboxed fallback
         }
+    },
+    debouncedResize() {
+        if (this.resizeTimeout) clearTimeout(this.resizeTimeout);
+        this.resizeTimeout = setTimeout(() => this.resize(), 50);
     },
     toggleReadingMode() {
         this.readingMode = this.readingMode === 'focused' ? 'full' : 'focused';
@@ -192,7 +216,7 @@ $doc = '<!DOCTYPE html>
                 const doc = frame.contentDocument || frame.contentWindow?.document;
                 if (doc && doc.body) {
                     doc.body.style.zoom = (this.zoomLevel / 100);
-                    this.resize();
+                    this.$nextTick(() => this.resize());
                 }
             } catch (e) {}
         }
@@ -205,7 +229,7 @@ $doc = '<!DOCTYPE html>
                 const doc = frame.contentDocument || frame.contentWindow?.document;
                 if (doc && doc.body) {
                     doc.body.style.zoom = '1';
-                    this.resize();
+                    this.$nextTick(() => this.resize());
                 }
             } catch (e) {}
         }
@@ -234,13 +258,23 @@ $doc = '<!DOCTYPE html>
                 try {
                     const doc = frame.contentDocument || frame.contentWindow?.document;
                     if (doc && doc.body && window.ResizeObserver) {
-                        const observer = new ResizeObserver(() => this.resize());
-                        observer.observe(doc.body);
+                        if (this.observer) this.observer.disconnect();
+                        this.observer = new ResizeObserver(() => this.debouncedResize());
+                        this.observer.observe(doc.body);
                     }
                 } catch (e) {}
             });
         }
         this.$nextTick(() => this.resize());
+    },
+    destroy() {
+        if (this.observer) {
+            this.observer.disconnect();
+            this.observer = null;
+        }
+        if (this.resizeTimeout) {
+            clearTimeout(this.resizeTimeout);
+        }
     }
 }" class="email-renderer w-full">
 

@@ -73,7 +73,7 @@
                                 </button>
                                 <pre x-show="open"
                                      x-transition
-                                     class="mt-1.5 p-2.5 bg-black/40 rounded text-xs font-mono text-ink-secondary overflow-auto max-h-32 border border-border">{{ json_encode($check['technical'], JSON_PRETTY_PRINT) }}</pre>
+                                     class="mt-1.5 p-2.5 bg-black/40 rounded text-xs font-mono text-ink-secondary overflow-x-auto break-all whitespace-pre-wrap max-w-full max-h-32 border border-border">{{ json_encode($check['technical'], JSON_PRETTY_PRINT) }}</pre>
                             </div>
                         @endif
                     </div>

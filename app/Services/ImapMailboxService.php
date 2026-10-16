@@ -99,6 +99,13 @@ class ImapMailboxService
                     }
                 }
 
+                $attrs = [];
+                if (isset($folder->attributes)) {
+                    $attrs = $folder->attributes instanceof \Webklex\PHPIMAP\Attribute
+                        ? $folder->attributes->all()
+                        : (array) $folder->attributes;
+                }
+
                 $result[] = [
                     'path' => $folder->path,
                     'name' => $name,
@@ -110,8 +117,11 @@ class ImapMailboxService
                     'uidvalidity' => $uidvalidity,
                     'has_children' => $folder->hasChildren(),
                     'parent_path' => $this->getParentPath($folder->path),
+                    'attributes' => $attrs,
                 ];
             }
+
+            $result = $mapper->normalizeFolders($result);
 
             $rolePriority = [
                 'inbox' => 10,

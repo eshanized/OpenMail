@@ -64,7 +64,7 @@ class VCardService
                 $email = strtolower(trim($email));
 
                 if (! $email || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                    $results['errors'][] = 'Invalid or missing email in vCard: '.($email ?: '(empty)');
+                    $results['errors'][] = $email ? 'Invalid email format in vCard: '.$email : 'Missing email in vCard: (empty)';
 
                     continue;
                 }

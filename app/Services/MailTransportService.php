@@ -41,6 +41,53 @@ class MailTransportService
     }
 
     /**
+     * Create Email instance from data and userId.
+     */
+    public function createEmail(array $data, ?string $userId = null, ?string $existingMessageId = null): Email
+    {
+        $user = $userId ? User::find($userId) : null;
+
+        return $this->buildCanonicalEmail($data, $user, $existingMessageId);
+    }
+
+    /**
+     * Send MIME message or Email object.
+     */
+    public function sendMime(mixed $mimeOrEmail): array
+    {
+        if ($mimeOrEmail instanceof Email) {
+            return $this->deliver($mimeOrEmail);
+        }
+
+        $email = Email::fromString($mimeOrEmail);
+
+        return $this->deliver($email);
+    }
+
+    /**
+     * Get envelope recipients including To, Cc, and Bcc.
+     *
+     * @return Address[]
+     */
+    public function getEnvelopeRecipients(Email $email, array $bccStrings = []): array
+    {
+        $recipients = array_merge($email->getTo(), $email->getCc(), $email->getBcc());
+
+        foreach ($bccStrings as $bcc) {
+            foreach ($this->parseAddresses($bcc) as $addr) {
+                $recipients[] = $addr;
+            }
+        }
+
+        $unique = [];
+        foreach ($recipients as $recipient) {
+            $unique[$recipient->getAddress()] = $recipient;
+        }
+
+        return array_values($unique);
+    }
+
+    /**
      * Build a canonical Symfony Email object.
      *
      * @param  array  $data  Composer fields (to, cc, bcc, subject, body, attachments, in_reply_to, references, mode)

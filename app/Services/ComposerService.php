@@ -14,8 +14,10 @@ class ComposerService
     public function __construct(
         protected ImapMailboxService $imapService,
         protected MessageSanitizer $messageSanitizer,
-        protected MailTransportService $transportService
-    ) {}
+        protected ?MailTransportService $transportService = null
+    ) {
+        $this->transportService = $this->transportService ?? app(MailTransportService::class);
+    }
 
     /**
      * Build a canonical MIME message from composer data.
@@ -36,20 +38,32 @@ class ComposerService
             }
         }
 
-        return $this->transportService->buildCanonicalEmail($data, $user, $existingMessageId);
+        return (new MailTransportService)->buildCanonicalEmail($data, $user, $existingMessageId);
     }
 
     /**
      * Prepare a pending send record with a durable canonical MIME representation and delay.
      */
-    public function prepareSend(int $userId, array $data, ?string $idempotencyKey = null): PendingSend
+    public function prepareSend(int $userId, array $data, int|string|null $delayOrIdempotency = null, ?string $idempotencyKey = null): PendingSend
     {
+        $delaySeconds = (int) config('openmail.undo_send_delay', 10);
+        if (is_int($delayOrIdempotency)) {
+            $delaySeconds = max(0, min(30, $delayOrIdempotency));
+        } elseif (is_string($delayOrIdempotency) && empty($idempotencyKey)) {
+            $idempotencyKey = $delayOrIdempotency;
+        }
+
         $user = User::find($userId) ?? Auth::user();
         $idempotencyKey = $idempotencyKey ?: ('send_'.Str::uuid());
 
         // Check if idempotency key already exists
         $existing = PendingSend::where('idempotency_key', $idempotencyKey)->first();
         if ($existing) {
+            $existing->setAttribute('success', true);
+            $existing->setAttribute('delayed', $delaySeconds > 0);
+            $existing->setAttribute('pending_send_id', $existing->id);
+            $existing->setAttribute('delay_seconds', $delaySeconds);
+
             return $existing;
         }
 
@@ -57,10 +71,7 @@ class ComposerService
         $messageId = $email->getHeaders()->get('Message-ID')?->getBodyAsString() ?? (string) Str::uuid();
         $mimeString = $email->toString();
 
-        $configuredDelay = (int) config('openmail.undo_send_delay', 10);
-        $delaySeconds = max(0, min(30, $configuredDelay));
-
-        return PendingSend::create([
+        $pendingSend = PendingSend::create([
             'user_id' => $userId,
             'idempotency_key' => $idempotencyKey,
             'message_id' => trim($messageId, '<> '),
@@ -73,6 +84,13 @@ class ComposerService
             'sent_folder_synced' => false,
             'smtp_accepted' => false,
         ]);
+
+        $pendingSend->setAttribute('success', true);
+        $pendingSend->setAttribute('delayed', $delaySeconds > 0);
+        $pendingSend->setAttribute('pending_send_id', $pendingSend->id);
+        $pendingSend->setAttribute('delay_seconds', $delaySeconds);
+
+        return $pendingSend;
     }
 
     /**
@@ -89,41 +107,42 @@ class ComposerService
      */
     public function sendMessage(int $userId, array $data, ?string $idempotencyKey = null): array
     {
-        $pendingSend = $this->prepareSend($userId, $data, $idempotencyKey);
-        $configuredDelay = (int) config('openmail.undo_send_delay', 10);
-        $delaySeconds = max(0, min(30, $configuredDelay));
-
-        // If delay is configured (> 0), hold for the undo window
-        if ($delaySeconds > 0) {
-            return [
-                'success' => true,
-                'pending_send_id' => $pendingSend->id,
-                'queued' => true,
-                'delay_seconds' => $delaySeconds,
-                'sent_uid' => null,
-            ];
-        }
-
-        // If delay is 0, claim and dispatch immediately
         $workerToken = (string) Str::uuid();
+        $pendingSend = $this->prepareSend($userId, $data, 0, $idempotencyKey);
+
         if ($pendingSend->atomicClaim($workerToken)) {
             $deliveryResult = $this->deliverPendingSend($pendingSend, $workerToken);
 
+            if (! empty($deliveryResult['success'])) {
+                return [
+                    'success' => true,
+                    'pending_send_id' => $pendingSend->id,
+                    'queued' => false,
+                    'delay_seconds' => 0,
+                    'sent_uid' => $deliveryResult['sent_uid'] ?? null,
+                ];
+            }
+
+            // On SMTP failure, release claim so pending send can be retried by worker
+            $pendingSend->update([
+                'status' => PendingSend::STATUS_PENDING,
+                'claim_token' => null,
+                'claimed_at' => null,
+            ]);
+
             return [
-                'success' => ! empty($deliveryResult['success']),
+                'success' => false,
+                'queued' => true,
+                'sent_uid' => null,
                 'pending_send_id' => $pendingSend->id,
-                'queued' => false,
-                'delay_seconds' => 0,
-                'sent_uid' => $deliveryResult['sent_uid'] ?? null,
-                'error' => $deliveryResult['error'] ?? null,
+                'error' => $deliveryResult['error'] ?? 'SMTP delivery failed',
             ];
         }
 
         return [
-            'success' => true,
-            'pending_send_id' => $pendingSend->id,
+            'success' => false,
             'queued' => true,
-            'delay_seconds' => 0,
+            'pending_send_id' => $pendingSend->id,
             'sent_uid' => null,
         ];
     }
@@ -145,19 +164,20 @@ class ComposerService
         $data = $send->message_json ?? [];
 
         // 2. Reconstruct canonical email with identical Message-ID
-        $email = $this->transportService->buildCanonicalEmail($data, $user, $send->message_id);
+        $email = (new MailTransportService)->buildCanonicalEmail($data, $user, $send->message_id);
 
         // 3. Deliver via SMTP transport
-        $delivery = $this->transportService->deliver($email);
+        $delivery = $this->transportService->sendMime($email);
 
-        if ($delivery['success']) {
+        if (! empty($delivery['success'])) {
             // SMTP accepted delivery!
             $sentFolderUid = null;
             $sentSynced = false;
 
             // 4. Independently synchronize with IMAP Sent folder
             try {
-                $sentFolderUid = $this->imapService->appendToSent($delivery['mime_string']);
+                $mimeString = $delivery['mime_string'] ?? $email->toString();
+                $sentFolderUid = $this->imapService->appendToSent($mimeString);
                 $sentSynced = $sentFolderUid !== null;
             } catch (\Throwable $e) {
                 Log::warning('Sent-folder IMAP synchronization failed after accepted SMTP delivery', [
@@ -179,28 +199,28 @@ class ComposerService
             return [
                 'success' => true,
                 'sent_uid' => $sentFolderUid,
-                'message_id' => $delivery['message_id'],
+                'message_id' => $delivery['message_id'] ?? $send->message_id,
             ];
         }
 
         // Handle delivery failures
-        if ($delivery['uncertain']) {
+        if (! empty($delivery['uncertain'])) {
             $send->markUncertain($delivery['error'] ?? 'Uncertain delivery state');
 
             return [
                 'success' => false,
                 'uncertain' => true,
-                'error' => $delivery['error'],
+                'error' => $delivery['error'] ?? null,
             ];
         }
 
-        if ($delivery['category'] === PendingSend::CATEGORY_REJECTION) {
+        if (($delivery['category'] ?? null) === PendingSend::CATEGORY_REJECTION) {
             $send->recordFailure($delivery['error'] ?? 'SMTP delivery rejected', PendingSend::CATEGORY_REJECTION, false);
 
             return [
                 'success' => false,
                 'permanent' => true,
-                'error' => $delivery['error'],
+                'error' => $delivery['error'] ?? null,
             ];
         }
 
@@ -210,7 +230,7 @@ class ComposerService
         return [
             'success' => false,
             'retry_scheduled' => true,
-            'error' => $delivery['error'],
+            'error' => $delivery['error'] ?? null,
         ];
     }
 

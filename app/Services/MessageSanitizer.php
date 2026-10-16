@@ -15,40 +15,59 @@ class MessageSanitizer
             return $this->purifier;
         }
 
+        \HTMLPurifier_URISchemeRegistry::instance()->register('cid', new HTMLPurifier_URIScheme_cid());
+        \HTMLPurifier_URISchemeRegistry::instance()->register('data', new HTMLPurifier_URIScheme_data());
+
         $config = HTMLPurifier_Config::createDefault();
         $config->set('HTML.Doctype', 'HTML 4.01 Transitional');
         $config->set('HTML.DefinitionID', 'openmail-email-sanitizer');
-        $config->set('HTML.DefinitionRev', 1);
+        $config->set('HTML.DefinitionRev', 2);
         $config->set('HTML.AllowedElements', [
             'p', 'br', 'a', 'img', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th', 'div', 'span',
             'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote',
             'pre', 'code', 'strong', 'b', 'em', 'i', 'u', 's', 'sub', 'sup', 'hr',
+            'center', 'font', 'small', 'big', 'caption', 'col', 'colgroup', 'dd', 'dt', 'dl',
         ]);
         $config->set('HTML.AllowedAttributes', [
-            'a.href', 'a.target', 'a.rel', 'a.title', 'a.class',
+            'a.href', 'a.target', 'a.rel', 'a.title', 'a.class', 'a.style',
             'img.src', 'img.alt', 'img.title', 'img.width', 'img.height', 'img.style', 'img.data-src', 'img.data-srcset',
+            'img.align', 'img.border', 'img.class', 'img.hspace', 'img.vspace',
             'table.border', 'table.cellpadding', 'table.cellspacing', 'table.width', 'table.style',
+            'table.align', 'table.bgcolor', 'table.class', 'table.dir',
+            'tr.style', 'tr.bgcolor', 'tr.align', 'tr.valign', 'tr.class',
             'td.colspan', 'td.rowspan', 'td.width', 'td.height', 'td.style',
+            'td.align', 'td.valign', 'td.bgcolor', 'td.nowrap', 'td.class', 'td.scope',
             'th.colspan', 'th.rowspan', 'th.width', 'th.height', 'th.style',
+            'th.align', 'th.valign', 'th.bgcolor', 'th.nowrap', 'th.class', 'th.scope',
             'div.style', 'div.class', 'span.style', 'span.class', 'p.style', 'p.class',
             'h1.style', 'h2.style', 'h3.style', 'h4.style', 'h5.style', 'h6.style',
             'ul.style', 'ol.style', 'li.style',
             'blockquote.style', 'pre.style', 'code.style',
             'strong.style', 'em.style', 'u.style', 's.style', 'sub.style', 'sup.style',
+            'font.color', 'font.size', 'font.face', 'font.style',
+            'center.style', 'center.class',
         ]);
+        $config->set('CSS.AllowTricky', true);
+        $config->set('CSS.Proprietary', true);
         $config->set('CSS.AllowedProperties', [
             'color', 'background-color', 'font-size', 'font-family', 'font-weight',
-            'font-style', 'text-align', 'text-decoration', 'line-height',
+            'font-style', 'font-variant', 'text-align', 'text-decoration', 'line-height',
             'margin', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
             'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
             'border', 'border-top', 'border-right', 'border-bottom', 'border-left',
             'border-color', 'border-width', 'border-style',
+            'border-radius', 'border-top-left-radius', 'border-top-right-radius',
+            'border-bottom-left-radius', 'border-bottom-right-radius',
+            'border-collapse', 'border-spacing',
             'width', 'min-width', 'max-width', 'height', 'min-height', 'max-height',
+            'display', 'visibility', 'overflow', 'opacity',
+            'background', 'background-repeat', 'background-position', 'background-size',
             'float', 'clear', 'table-layout', 'vertical-align',
+            'white-space', 'letter-spacing', 'word-spacing', 'text-transform', 'text-indent',
         ]);
-        $config->set('URI.AllowedSchemes', ['http', 'https', 'mailto', 'tel']);
-        $config->set('AutoFormat.AutoParagraph', true);
-        $config->set('AutoFormat.RemoveEmpty', true);
+        $config->set('URI.AllowedSchemes', ['http' => true, 'https' => true, 'mailto' => true, 'tel' => true, 'data' => true, 'cid' => true]);
+        $config->set('AutoFormat.AutoParagraph', false);
+        $config->set('AutoFormat.RemoveEmpty', false);
         $config->set('Core.Encoding', 'UTF-8');
 
         if ($def = $config->maybeGetRawHTMLDefinition()) {
@@ -93,6 +112,14 @@ class MessageSanitizer
             if ($this->isRemoteUrl($src)) {
                 $img->setAttribute('data-src', $src);
                 $img->setAttribute('src', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
+                $img->setAttribute('class', trim(($img->getAttribute('class') ?? '').' blocked-image'));
+
+                // Hide invisible 1x1 tracking pixels so they don't produce awkward empty boxes
+                $w = $img->getAttribute('width');
+                $h = $img->getAttribute('height');
+                if (($w !== '' && (int)$w <= 1) || ($h !== '' && (int)$h <= 1)) {
+                    $img->setAttribute('style', 'display:none !important;');
+                }
             }
 
             $srcset = trim($img->getAttribute('srcset'));
@@ -134,8 +161,89 @@ class MessageSanitizer
 
         $body = $dom->getElementsByTagName('body')->item(0);
         $output = $body ? $dom->saveHTML($body) : $dom->saveHTML();
+        $output = mb_decode_numericentity($output, [0x80, 0x10FFFF, 0, 0x1FFFFF], 'UTF-8');
 
         return preg_replace('/<\!--\?xml.*?-->\s*/i', '', $output);
+    }
+
+    /**
+     * Resolve CID (Content-ID) inline images to base64 data URIs.
+     *
+     * @param string $html
+     * @param iterable|array $attachments
+     * @return string
+     */
+    public function resolveCidImages(string $html, iterable $attachments): string
+    {
+        if (trim($html) === '' || ! str_contains($html, 'cid:')) {
+            return $html;
+        }
+
+        foreach ($attachments as $attachment) {
+            $contentId = null;
+            if (is_object($attachment)) {
+                if (method_exists($attachment, 'getContentId')) {
+                    $contentId = $attachment->getContentId();
+                }
+                if (! $contentId && isset($attachment->id)) {
+                    $contentId = $attachment->id;
+                }
+                if (! $contentId && isset($attachment->content_id)) {
+                    $contentId = $attachment->content_id;
+                }
+            } elseif (is_array($attachment)) {
+                $contentId = $attachment['content_id'] ?? ($attachment['id'] ?? null);
+            }
+
+            if (! $contentId) {
+                continue;
+            }
+
+            $cleanId = trim(trim((string) $contentId), '<>');
+            if ($cleanId === '') {
+                continue;
+            }
+
+            $content = null;
+            if (is_object($attachment)) {
+                if (method_exists($attachment, 'getContent')) {
+                    $content = $attachment->getContent();
+                } elseif (isset($attachment->content)) {
+                    $content = $attachment->content;
+                }
+            } elseif (is_array($attachment)) {
+                $content = $attachment['content'] ?? null;
+            }
+
+            if ($content === null || $content === '') {
+                continue;
+            }
+
+            $mime = 'image/png';
+            if (is_object($attachment)) {
+                if (method_exists($attachment, 'getMimeType')) {
+                    $mime = $attachment->getMimeType();
+                } elseif (isset($attachment->contentType)) {
+                    $mime = $attachment->contentType;
+                } elseif (isset($attachment->content_type)) {
+                    $mime = $attachment->content_type;
+                }
+            } elseif (is_array($attachment)) {
+                $mime = $attachment['contentType'] ?? ($attachment['content_type'] ?? 'image/png');
+            }
+
+            $base64 = base64_encode($content);
+            $dataUri = 'data:' . $mime . ';base64,' . $base64;
+
+            // Replace cid:cleanId, cid:<cleanId>, and raw encoded variants
+            $html = str_ireplace(
+                ['cid:<' . $cleanId . '>', 'cid:' . $cleanId, 'cid:' . rawurlencode($cleanId)],
+                $dataUri,
+                $html
+            );
+        }
+
+        return $html;
     }
 
     /**
@@ -195,6 +303,7 @@ class MessageSanitizer
 
         $body = $dom->getElementsByTagName('body')->item(0);
         $output = $body ? $dom->saveHTML($body) : $dom->saveHTML();
+        $output = mb_decode_numericentity($output, [0x80, 0x10FFFF, 0, 0x1FFFFF], 'UTF-8');
 
         return preg_replace('/<\!--\?xml.*?-->\s*/i', '', $output);
     }
@@ -282,5 +391,44 @@ class MessageSanitizer
             FILTER_VALIDATE_IP,
             FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
         );
+    }
+}
+
+if (! class_exists('App\Services\HTMLPurifier_URIScheme_cid', false)) {
+    class HTMLPurifier_URIScheme_cid extends \HTMLPurifier_URIScheme
+    {
+        public $browsable = true;
+        public $may_omit_host = true;
+
+        public function doValidate(&$uri, $config, $context)
+        {
+            $uri->userinfo = null;
+            $uri->host = null;
+            $uri->port = null;
+            return true;
+        }
+    }
+}
+
+if (! class_exists('App\Services\HTMLPurifier_URIScheme_data', false)) {
+    class HTMLPurifier_URIScheme_data extends \HTMLPurifier_URIScheme
+    {
+        public $default_port = null;
+        public $browsable = true;
+        public $hierarchical = false;
+        public $may_omit_host = true;
+
+        public function doValidate(&$uri, $config, $context)
+        {
+            $uri->userinfo = null;
+            $uri->host = null;
+            $uri->port = null;
+            $raw = $uri->path;
+            // Only permit safe raster image MIME types in base64
+            if (! preg_match('!^image/(png|jpeg|jpg|gif|webp);base64,[a-zA-Z0-9+/=]+$!i', $raw)) {
+                return false;
+            }
+            return true;
+        }
     }
 }

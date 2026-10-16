@@ -40,10 +40,10 @@ OpenMail is a modern, self-hosted webmail application for organizations. It conn
 
 | Technology | Version | Purpose | Why Recommended |
 |------------|---------|---------|-----------------|
-| Livewire | 3.x (3.8.x) | Dynamic UI components | Built-in Alpine.js, SPA-like navigation via `wire:navigate`, reactive props, file uploads, lazy loading. Ships with Alpine — no separate CDN needed. Livewire 4.x exists but 3.x is the mature, documented choice for production. |
+| Livewire | 4.x (4.4.x) | Dynamic UI components | Built-in Alpine.js, SPA-like navigation via `wire:navigate`, reactive props, file uploads, lazy loading. Ships with Alpine — no separate CDN needed. Locked to ^4.4 in composer.json. |
 | Blade | (Laravel built-in) | Templating | Native Laravel templating; zero additional dependencies. Component-based architecture pairs perfectly with Livewire. |
 | Tailwind CSS | 4.x (4.3.x) | Utility-first CSS | Latest stable v4 with CSS-first configuration, no tailwind.config.js needed. Laravel 12 ships with Tailwind v4 integration via Vite. |
-| Alpine.js | 3.x (3.17.x) | Lightweight JS interactivity | Included automatically by Livewire 3. Used for small interactive behaviors (dropdowns, modals, toggles) without full JS framework overhead. |
+| Alpine.js | 3.x (3.17.x) | Lightweight JS interactivity | Included automatically by Livewire. Used for small interactive behaviors (dropdowns, modals, toggles) without full JS framework overhead. |
 | Vite | 6.x | Asset bundling | Laravel's default build tool. Handles CSS/JS compilation, HMR in development, optimized builds for production. |
 
 ### Mail Protocol Libraries

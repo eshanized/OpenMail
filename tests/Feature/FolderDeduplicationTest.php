@@ -17,6 +17,7 @@ class FolderDeduplicationTest extends TestCase
     use RefreshDatabase;
 
     protected User $user;
+
     protected FolderMapper $mapper;
 
     protected function setUp(): void
@@ -42,7 +43,7 @@ class FolderDeduplicationTest extends TestCase
 
         $normalized = $this->mapper->normalizeFolders($folders);
 
-        $trashFolders = array_filter($normalized, fn($f) => ($f['role'] ?? null) === 'trash');
+        $trashFolders = array_filter($normalized, fn ($f) => ($f['role'] ?? null) === 'trash');
         $this->assertCount(1, $trashFolders);
         $trash = array_values($trashFolders)[0];
         $this->assertEquals('Trash', $trash['path']);
@@ -63,7 +64,7 @@ class FolderDeduplicationTest extends TestCase
 
         $normalized = $this->mapper->normalizeFolders($folders);
 
-        $trashFolders = array_filter($normalized, fn($f) => ($f['role'] ?? null) === 'trash');
+        $trashFolders = array_filter($normalized, fn ($f) => ($f['role'] ?? null) === 'trash');
         $this->assertCount(1, $trashFolders, 'Multiple trash aliases must be consolidated to exactly one system Trash folder');
 
         $canonicalTrash = array_values($trashFolders)[0];
@@ -87,7 +88,7 @@ class FolderDeduplicationTest extends TestCase
 
         $normalized = $this->mapper->normalizeFolders($folders);
 
-        $trashFolders = array_filter($normalized, fn($f) => ($f['role'] ?? null) === 'trash');
+        $trashFolders = array_filter($normalized, fn ($f) => ($f['role'] ?? null) === 'trash');
         $this->assertCount(1, $trashFolders, 'Gmail trash and root trash alias must consolidate to single Gmail system trash');
 
         $canonicalTrash = array_values($trashFolders)[0];
@@ -108,11 +109,11 @@ class FolderDeduplicationTest extends TestCase
         $normalized = $this->mapper->normalizeFolders($folders);
 
         // System trash is exactly 1
-        $trashFolders = array_filter($normalized, fn($f) => ($f['role'] ?? null) === 'trash');
+        $trashFolders = array_filter($normalized, fn ($f) => ($f['role'] ?? null) === 'trash');
         $this->assertCount(1, $trashFolders);
 
         // Custom folders are preserved and NOT merged or lost
-        $customFolders = array_filter($normalized, fn($f) => empty($f['role']));
+        $customFolders = array_filter($normalized, fn ($f) => empty($f['role']));
         $this->assertCount(2, $customFolders);
 
         $customPaths = array_column($customFolders, 'path');
@@ -141,7 +142,7 @@ class FolderDeduplicationTest extends TestCase
 
         // Initial render: exactly one Trash folder
         $folders = $test->get('folders');
-        $trashEntries = array_filter($folders, fn($f) => ($f['role'] ?? null) === 'trash');
+        $trashEntries = array_filter($folders, fn ($f) => ($f['role'] ?? null) === 'trash');
         $this->assertCount(1, $trashEntries);
 
         // Call refreshFolders 3 times in a row
@@ -150,7 +151,7 @@ class FolderDeduplicationTest extends TestCase
         $test->call('refreshFolders');
 
         $refreshed = $test->get('folders');
-        $refreshedTrash = array_filter($refreshed, fn($f) => ($f['role'] ?? null) === 'trash');
+        $refreshedTrash = array_filter($refreshed, fn ($f) => ($f['role'] ?? null) === 'trash');
         $this->assertCount(1, $refreshedTrash, 'Repeated refresh must never re-introduce duplicate trash folders');
         $this->assertEquals('Trash', array_values($refreshedTrash)[0]['name']);
     }
@@ -170,9 +171,9 @@ class FolderDeduplicationTest extends TestCase
 
         session(['openmail:imap_password' => Crypt::encrypt('secret')]);
 
-        $inboxKey = 'folder-core-' . md5('INBOX');
-        $trashKey = 'folder-cleanup-' . md5('Trash');
-        $customKey = 'folder-custom-' . md5('Custom Projects');
+        $inboxKey = 'folder-core-'.md5('INBOX');
+        $trashKey = 'folder-cleanup-'.md5('Trash');
+        $customKey = 'folder-custom-'.md5('Custom Projects');
 
         Livewire::actingAs($this->user)
             ->test(FolderSidebar::class)

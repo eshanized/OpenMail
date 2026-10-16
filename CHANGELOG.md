@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.0] - 2026-10-16
+
+### Added
+- **Durable Email Delivery Pipeline**: Explicit state machine (`pending`, `claimed`, `processing`, `sent`, `retry_waiting`, `cancelled`, `failed`, `uncertain`) with idempotency keys and stable Message-IDs.
+- **Concurrency-Safe Worker Claiming**: Atomic compare-and-set worker claiming using unique worker tokens, bounded batching, and stale lease recovery in `pending-sends:process`.
+- **Dedicated Mail Transport Service**: Dedicated MIME construction and delivery service with explicit error categorization (`transport`, `rejection`, `uncertain`) and envelope recipient segregation (no Bcc leakage in message headers).
+- **Outbound Connection Guard**: SSRF prevention guarding SMTP and IMAP connection testers against loopback, private RFC 1918, cloud metadata IPs, and port misuse.
+- **TipTap Pure-PHP Renderer**: Built-in JSON-to-HTML converter for signatures eliminating external dependency crashes while enforcing HTML sanitization.
+- **Atomic Configuration Writer**: Safe temp-file-to-rename `.env` writer enforcing strict `0600` permissions.
+- **Delivery & Security Regression Suite**: Comprehensive feature tests covering atomic claiming, retry backoff, MIME Unicode, search XSS escaping, signature conversion, and vCard payload bounds.
+
+### Changed
+- **Decoupled SMTP and IMAP Sent Sync**: SMTP acceptance and IMAP Sent-folder synchronization now operate independently, preventing duplicate transmissions if Sent sync encounters intermittent network issues.
+- **Safe Draft Replacement**: `appendToDrafts()` appends replacement draft first, verifies new UID, and only then removes old draft, completely eliminating draft loss.
+- **Authentic IMAP Sorting**: Real in-memory sorting by sender, subject, date, and size for mail folders.
+- **Strict Quality Gates in CI**: Removed `continue-on-error` on Pint, composer audit, and npm audit; added PHP 8.2-8.4 matrix testing.
+- **Dependency Upgrades**: Upgraded `league/commonmark`, `symfony/http-foundation`, `symfony/http-kernel`, `dompurify`, and tooling dependencies to achieve 0 vulnerabilities in both Composer and npm audits.
+
+### Fixed
+- **Undo Send Countdown & Persistence**: Fixed UI race condition where `resetForm()` clobbered `pendingSendId` and toast state; implemented real server-side cancellation window before SMTP transmission.
+- **Signature HTML Corruption**: Fixed bug where signatures were stored as raw JSON strings; HTML is now properly rendered and sanitized.
+- **Search Highlighting XSS**: Fixed HTML injection vulnerability in `SearchService::highlightMatches()` and client-side search bar by pre-escaping text before wrapping in `<mark>`.
+- **Session Revocation IDOR**: Enforced server-authoritative `session()->getId()` and authentication verification on session revocation.
+- **Contact and Label Authorization**: Added ownership checks on `ContactModal`, `LabelModal`, and `MessageViewer` mutating actions.
+- **Setup Route Lock**: Removed unauthorized login bypasses while the application is in an uninstalled state.
+
+---
+
 ## [1.0.1] - 2026-09-12
 
 ### Added

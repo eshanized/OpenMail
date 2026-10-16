@@ -6,9 +6,9 @@ use App\Models\PendingSend;
 use App\Models\User;
 use App\Services\ComposerService;
 use App\Services\ImapMailboxService;
+use App\Services\MailTransportService;
 use App\Services\MessageSanitizer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Mail;
 use Symfony\Component\Mime\Email;
 use Tests\TestCase;
 
@@ -145,26 +145,33 @@ class ComposerServiceTest extends TestCase
         $this->assertStringEndsWith('>', $messageId);
     }
 
-    public function test_send_message_calls_append_to_sent_before_smtp()
+    public function test_send_message_delivers_via_smtp_before_sent_folder_sync()
     {
         $imapService = $this->createMock(ImapMailboxService::class);
         $sanitizer = $this->createMock(MessageSanitizer::class);
+        $transportService = $this->createMock(MailTransportService::class);
 
-        $appendToSentCalled = false;
+        $callOrder = [];
+
+        $transportService->method('sendMime')
+            ->willReturnCallback(function () use (&$callOrder) {
+                $callOrder[] = 'smtp';
+
+                return [
+                    'success' => true,
+                    'category' => PendingSend::CATEGORY_NONE,
+                    'message_id' => '<test@example.com>',
+                ];
+            });
 
         $imapService->method('appendToSent')
-            ->willReturnCallback(function () use (&$appendToSentCalled) {
-                $appendToSentCalled = true;
+            ->willReturnCallback(function () use (&$callOrder) {
+                $callOrder[] = 'imap_sent';
 
                 return '12345';
             });
 
-        // Mock Mail::raw to succeed without actually sending
-        Mail::shouldReceive('raw')
-            ->once()
-            ->andReturn(null);
-
-        $service = new ComposerService($imapService, $sanitizer);
+        $service = new ComposerService($imapService, $sanitizer, $transportService);
 
         $data = [
             'to' => 'recipient@example.com',
@@ -177,25 +184,25 @@ class ComposerServiceTest extends TestCase
 
         $result = $service->sendMessage($this->user->id, $data);
 
-        $this->assertTrue($appendToSentCalled);
         $this->assertTrue($result['success']);
         $this->assertEquals('12345', $result['sent_uid']);
+        $this->assertEquals(['smtp', 'imap_sent'], $callOrder);
     }
 
     public function test_send_message_creates_pending_send_on_smtp_failure()
     {
         $imapService = $this->createMock(ImapMailboxService::class);
         $sanitizer = $this->createMock(MessageSanitizer::class);
+        $transportService = $this->createMock(MailTransportService::class);
 
-        $imapService->method('appendToSent')
-            ->willReturn('12345');
+        $transportService->method('sendMime')
+            ->willReturn([
+                'success' => false,
+                'category' => PendingSend::CATEGORY_TRANSPORT,
+                'error' => 'SMTP connection failed',
+            ]);
 
-        // Mock Mail to throw exception
-        Mail::shouldReceive('raw')
-            ->once()
-            ->andThrow(new \Exception('SMTP connection failed'));
-
-        $service = new ComposerService($imapService, $sanitizer);
+        $service = new ComposerService($imapService, $sanitizer, $transportService);
 
         $data = [
             'to' => 'recipient@example.com',
@@ -215,7 +222,6 @@ class ComposerServiceTest extends TestCase
         $pendingSend = PendingSend::where('user_id', $this->user->id)->first();
         $this->assertNotNull($pendingSend);
         $this->assertEquals('pending', $pendingSend->status);
-        $this->assertEquals('12345', $pendingSend->sent_folder_uid);
     }
 
     public function test_save_draft_calls_append_to_drafts()

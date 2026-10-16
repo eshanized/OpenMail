@@ -35,10 +35,22 @@
     },
 
     highlight(text, query) {
-        if (!query || !text) return text || '';
-        const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\\\$&');
+        if (!query || !text) return this.escapeHtml(text || '');
+        const safeText = this.escapeHtml(text);
+        const safeQuery = this.escapeHtml(query);
+        const escaped = safeQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const regex = new RegExp('(' + escaped + ')', 'gi');
-        return text.replace(regex, '<mark class=\'bg-primary-subtle text-primary px-0.5 rounded\'>$1</mark>');
+        return safeText.replace(regex, '<mark class=\'bg-primary-subtle text-primary px-0.5 rounded\'>$1</mark>');
+    },
+
+    escapeHtml(str) {
+        return String(str || '').replace(/[&<>"']/g, (m) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        }[m]));
     },
 
     close() {

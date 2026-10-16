@@ -2,9 +2,9 @@
 
 <?php
 $sanitizer = app(\App\Services\MessageSanitizer::class);
-$renderHtml = $html;
+$renderHtml = $sanitizer->sanitizeHtml($html);
 if (!$showImages) {
-    $renderHtml = $sanitizer->blockRemoteImages($html);
+    $renderHtml = $sanitizer->blockRemoteImages($renderHtml);
 }
 $renderHtml = $sanitizer->sanitizeUrls($renderHtml);
 

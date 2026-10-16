@@ -64,10 +64,10 @@ Designed for deployment on shared hosting (cPanel) or VPS, it includes a WordPre
 | Layer | Technology |
 |-------|-----------|
 | Backend | Laravel 12 (PHP 8.2+) |
-| Frontend | Livewire 3 + Blade + Alpine.js + Tailwind CSS 4 |
+| Frontend | Livewire 4 + Blade + Alpine.js + Tailwind CSS 4 |
 | Rich Editor | TipTap 3 (with extensions: tables, task lists, links, emoji, images, history) |
 | Mail Reading | webklex/laravel-imap 6.x (pure PHP IMAP, no ext-imap required) |
-| Mail Sending | Symfony Mailer (via Laravel's mail system) |
+| Mail Sending | Symfony Mailer + Dedicated Outbound Transport Service |
 | HTML Sanitization | HTMLPurifier 4.x (server) + DOMPurify 3.x (client) |
 | Search | Laravel Scout with MySQL FULLTEXT (database driver) |
 | CSP | spatie/laravel-csp 3.x |
@@ -76,11 +76,15 @@ Designed for deployment on shared hosting (cPanel) or VPS, it includes a WordPre
 
 ## Requirements
 
-- PHP 8.2+ (with extensions: mbstring, xml, ctype, json)
+- PHP 8.2+ (with extensions: `mbstring`, `xml`, `ctype`, `json`, `iconv`, `intl`, `bcmath`, `pdo_mysql`)
 - MySQL 8.0+ / MariaDB 10.6+ (for full-text search)
 - Composer 2.x
-- Node.js 18+ (for development only)
+- Node.js 18+ (for asset builds)
 - Web server (Apache with mod_rewrite, or Nginx)
+
+### Testing Requirements
+
+- `pdo_sqlite` / `sqlite3` extension (e.g. `php-sqlite` package on Arch Linux / Ubuntu) for running automated tests with in-memory SQLite.
 
 ### Optional
 

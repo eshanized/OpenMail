@@ -49,19 +49,20 @@ jobs:
 
       - name: Run Laravel Pint (PSR-12 Lint)
         run: ./vendor/bin/pint --test
-        continue-on-error: true
 
       - name: Composer Security Audit
         run: composer audit --locked
-        continue-on-error: true
 
       - name: NPM Security Audit
         run: npm audit --audit-level=high
-        continue-on-error: true
 
   test:
-    name: Automated Tests & Build
+    name: Automated Tests (PHP ${{ matrix.php-version }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.2', '8.3', '8.4']
     env:
       APP_ENV: testing
       APP_KEY: base64:yWkYcFYdR67svSY0Bkl1USG9T56SmFrm6TRRYFyAlwo=
@@ -75,7 +76,7 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: ${{ matrix.php-version }}
           extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, sqlite3, dom, fileinfo
           coverage: none
           tools: composer:v2
@@ -90,8 +91,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: vendor
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          key: ${{ runner.os }}-composer-${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
+            ${{ runner.os }}-composer-${{ matrix.php-version }}-
             ${{ runner.os }}-composer-
 
       - name: Install Composer Dependencies

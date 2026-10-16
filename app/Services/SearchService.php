@@ -124,12 +124,8 @@ class SearchService
             return $snippet;
         }
 
-        // Escape regex special characters in query
-        $escapedQuery = preg_quote($query, '/');
-
         // Split query into words for multi-word highlighting
         $words = array_filter(explode(' ', trim($query)));
-
         if (empty($words)) {
             return $snippet;
         }
@@ -138,8 +134,8 @@ class SearchService
         $patterns = array_map(fn ($word) => preg_quote($word, '/'), $words);
         $pattern = '/('.implode('|', $patterns).')/iu';
 
-        // Wrap matches in <mark> tags — applied AFTER any HTML sanitization
-        return preg_replace($pattern, '<mark class="bg-yellow-100 text-yellow-900 px-0.5 rounded">$1</mark>', $snippet);
+        // Wrap matches in <mark> tags
+        return (string) preg_replace($pattern, '<mark class="bg-yellow-100 text-yellow-900 px-0.5 rounded">$1</mark>', $snippet);
     }
 
     /**

@@ -6,185 +6,275 @@ use App\Models\PendingSend;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
-use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
-use Symfony\Component\Mime\Header\IdentificationHeader;
 
 class ComposerService
 {
     public function __construct(
         protected ImapMailboxService $imapService,
-        protected MessageSanitizer $messageSanitizer
+        protected MessageSanitizer $messageSanitizer,
+        protected MailTransportService $transportService
     ) {}
 
     /**
-     * Build a MIME message from composer data.
+     * Build a canonical MIME message from composer data.
      *
      * @param  array  $data  Composer data: to, cc, bcc, subject, body, attachments, in_reply_to, references
+     * @param  string|null  $userId  User ID
+     * @param  string|null  $existingMessageId  Stable Message-ID
      */
-    public function buildMimeMessage(array $data, ?string $userId = null): Email
+    public function buildMimeMessage(array $data, ?string $userId = null, ?string $existingMessageId = null): Email
     {
         $user = $userId ? User::find($userId) : Auth::user();
 
-        // Auto-insert default signature if composing (not reply/forward) and no signature already in body
-        if (($data['mode'] ?? 'compose') === 'compose' && empty($data['signature_id'])) {
+        // Auto-insert default signature if composing (not reply/forward) and no signature already present
+        if (($data['mode'] ?? 'compose') === 'compose' && empty($data['signature_id']) && $user) {
             $defaultSig = app(SignatureService::class)->getDefault($user);
-            if ($defaultSig && $defaultSig->content_html && ! str_contains($data['body'] ?? '', $defaultSig->content_html)) {
+            if ($defaultSig && ! empty($defaultSig->content_html) && ! str_contains($data['body'] ?? '', $defaultSig->content_html)) {
                 $data['body'] = ($data['body'] ?? '').'<br><br>'.$defaultSig->content_html;
             }
         }
 
-        $email = (new Email)
-            ->from(new Address($user->email, $user->name ?? ''));
-
-        // Parse and set To addresses
-        $toAddresses = $this->parseAddresses($data['to'] ?? '');
-        $email->to(...$toAddresses);
-
-        // Parse and set CC addresses
-        $ccAddresses = $this->parseAddresses($data['cc'] ?? '');
-        $email->cc(...$ccAddresses);
-
-        // Parse and set BCC addresses
-        $bccAddresses = $this->parseAddresses($data['bcc'] ?? '');
-        $email->bcc(...$bccAddresses);
-
-        $email->subject($data['subject'] ?? '(no subject)');
-
-        // Set text body: convert HTML to plain text
-        $textBody = $this->htmlToText($data['body'] ?? '');
-        $email->text($textBody);
-
-        // Set HTML body
-        $email->html($data['body'] ?? '');
-
-        // Attach files
-        foreach ($data['attachments'] ?? [] as $att) {
-            $email->attachFromPath(
-                $att['path'],
-                $att['name'],
-                $att['mime'] ?? null
-            );
-        }
-
-        // Generate Message-ID
-        $messageId = Str::uuid().'@'.config('app.domain', 'openmail.local');
-        $email->getHeaders()->add(new IdentificationHeader('Message-ID', $messageId));
-
-        // For replies/forwards: set In-Reply-To and References headers
-        if (! empty($data['in_reply_to'])) {
-            // Remove angle brackets if present
-            $inReplyTo = trim($data['in_reply_to'], '<>');
-            $email->getHeaders()->add(new IdentificationHeader('In-Reply-To', $inReplyTo));
-        }
-        if (! empty($data['references'])) {
-            // Remove angle brackets from each reference
-            $refs = array_map(fn ($r) => trim($r, '<>'), explode(' ', $data['references']));
-            $email->getHeaders()->add(new IdentificationHeader('References', $refs));
-        }
-
-        return $email;
+        return $this->transportService->buildCanonicalEmail($data, $user, $existingMessageId);
     }
 
     /**
-     * Send a message: IMAP APPEND to Sent first, then SMTP.
-     *
-     * @param  array  $data  Composer data
-     * @return array ['success' => bool, 'sent_uid' => string|null, 'queued' => bool]
+     * Prepare a pending send record with a durable canonical MIME representation and delay.
      */
-    public function sendMessage(int $userId, array $data): array
+    public function prepareSend(int $userId, array $data, ?string $idempotencyKey = null): PendingSend
     {
-        $mimeMessage = $this->buildMimeMessage($data, (string) $userId);
-        $mimeString = $mimeMessage->toString();
+        $user = User::find($userId) ?? Auth::user();
+        $idempotencyKey = $idempotencyKey ?: ('send_'.Str::uuid());
 
-        // IMAP APPEND to Sent folder FIRST (per D-17)
-        $sentUid = $this->imapService->appendToSent($mimeString);
-
-        if (! $sentUid) {
-            throw new \Exception('Failed to append message to Sent folder');
+        // Check if idempotency key already exists
+        $existing = PendingSend::where('idempotency_key', $idempotencyKey)->first();
+        if ($existing) {
+            return $existing;
         }
 
-        // Send via SMTP using raw MIME
+        $email = $this->buildMimeMessage($data, (string) $userId);
+        $messageId = $email->getHeaders()->get('Message-ID')?->getBodyAsString() ?? (string) Str::uuid();
+        $mimeString = $email->toString();
+
+        $configuredDelay = (int) config('openmail.undo_send_delay', 10);
+        $delaySeconds = max(0, min(30, $configuredDelay));
+
+        return PendingSend::create([
+            'user_id' => $userId,
+            'idempotency_key' => $idempotencyKey,
+            'message_id' => trim($messageId, '<> '),
+            'message_json' => $data,
+            'mime_message' => $mimeString,
+            'send_at' => now()->addSeconds($delaySeconds),
+            'status' => PendingSend::STATUS_PENDING,
+            'retry_count' => 0,
+            'max_retries' => 3,
+            'sent_folder_synced' => false,
+            'smtp_accepted' => false,
+        ]);
+    }
+
+    /**
+     * Send a message through the explicit delivery pipeline.
+     *
+     * @return array{
+     *   success: bool,
+     *   pending_send_id: int,
+     *   queued: bool,
+     *   delay_seconds: int,
+     *   sent_uid: string|null,
+     *   error?: string
+     * }
+     */
+    public function sendMessage(int $userId, array $data, ?string $idempotencyKey = null): array
+    {
+        $pendingSend = $this->prepareSend($userId, $data, $idempotencyKey);
+        $configuredDelay = (int) config('openmail.undo_send_delay', 10);
+        $delaySeconds = max(0, min(30, $configuredDelay));
+
+        // If delay is configured (> 0), hold for the undo window
+        if ($delaySeconds > 0) {
+            return [
+                'success' => true,
+                'pending_send_id' => $pendingSend->id,
+                'queued' => true,
+                'delay_seconds' => $delaySeconds,
+                'sent_uid' => null,
+            ];
+        }
+
+        // If delay is 0, claim and dispatch immediately
+        $workerToken = (string) Str::uuid();
+        if ($pendingSend->atomicClaim($workerToken)) {
+            $deliveryResult = $this->deliverPendingSend($pendingSend, $workerToken);
+
+            return [
+                'success' => ! empty($deliveryResult['success']),
+                'pending_send_id' => $pendingSend->id,
+                'queued' => false,
+                'delay_seconds' => 0,
+                'sent_uid' => $deliveryResult['sent_uid'] ?? null,
+                'error' => $deliveryResult['error'] ?? null,
+            ];
+        }
+
+        return [
+            'success' => true,
+            'pending_send_id' => $pendingSend->id,
+            'queued' => true,
+            'delay_seconds' => 0,
+            'sent_uid' => null,
+        ];
+    }
+
+    /**
+     * Concurrency-safe delivery of an atomically claimed pending send.
+     */
+    public function deliverPendingSend(PendingSend $send, string $workerToken): array
+    {
+        // 1. Transition to processing
+        if (! $send->markProcessing($workerToken)) {
+            return [
+                'success' => false,
+                'error' => 'Could not transition record to processing state',
+            ];
+        }
+
+        $user = User::find($send->user_id);
+        $data = $send->message_json ?? [];
+
+        // 2. Reconstruct canonical email with identical Message-ID
+        $email = $this->transportService->buildCanonicalEmail($data, $user, $send->message_id);
+
+        // 3. Deliver via SMTP transport
+        $delivery = $this->transportService->deliver($email);
+
+        if ($delivery['success']) {
+            // SMTP accepted delivery!
+            $sentFolderUid = null;
+            $sentSynced = false;
+
+            // 4. Independently synchronize with IMAP Sent folder
+            try {
+                $sentFolderUid = $this->imapService->appendToSent($delivery['mime_string']);
+                $sentSynced = $sentFolderUid !== null;
+            } catch (\Throwable $e) {
+                Log::warning('Sent-folder IMAP synchronization failed after accepted SMTP delivery', [
+                    'pending_send_id' => $send->id,
+                    'error' => $e->getMessage(),
+                ]);
+                $send->update([
+                    'last_error' => 'Sent-folder synchronization failed: '.$e->getMessage(),
+                    'last_error_category' => PendingSend::CATEGORY_SENT_SYNC,
+                ]);
+            }
+
+            // 5. Mark sent with delivery timestamp and Sent UID
+            $send->markSent($sentFolderUid);
+            if ($sentSynced) {
+                $send->update(['sent_folder_synced' => true]);
+            }
+
+            return [
+                'success' => true,
+                'sent_uid' => $sentFolderUid,
+                'message_id' => $delivery['message_id'],
+            ];
+        }
+
+        // Handle delivery failures
+        if ($delivery['uncertain']) {
+            $send->markUncertain($delivery['error'] ?? 'Uncertain delivery state');
+
+            return [
+                'success' => false,
+                'uncertain' => true,
+                'error' => $delivery['error'],
+            ];
+        }
+
+        if ($delivery['category'] === PendingSend::CATEGORY_REJECTION) {
+            $send->recordFailure($delivery['error'] ?? 'SMTP delivery rejected', PendingSend::CATEGORY_REJECTION, false);
+
+            return [
+                'success' => false,
+                'permanent' => true,
+                'error' => $delivery['error'],
+            ];
+        }
+
+        // Retryable transport failure
+        $send->recordFailure($delivery['error'] ?? 'SMTP transport error', PendingSend::CATEGORY_TRANSPORT, true);
+
+        return [
+            'success' => false,
+            'retry_scheduled' => true,
+            'error' => $delivery['error'],
+        ];
+    }
+
+    /**
+     * Atomically undo a pending send during its cancellation window.
+     */
+    public function undoSend(int $pendingSendId, int $userId): bool
+    {
+        $pendingSend = PendingSend::where('id', $pendingSendId)
+            ->where('user_id', $userId)
+            ->first();
+
+        if (! $pendingSend || ! $pendingSend->isCancellable()) {
+            return false;
+        }
+
+        // Atomically cancel
+        if (! $pendingSend->atomicCancel()) {
+            return false;
+        }
+
         try {
-            $user = User::find($userId) ?? Auth::user();
-
-            Mail::raw($mimeString, function ($message) use ($data, $mimeMessage, $user) {
-                $symfonyMessage = $message->getSymfonyMessage();
-
-                if ($user) {
-                    $message->from($user->email, $user->name ?? '');
+            if ($pendingSend->sent_folder_uid) {
+                try {
+                    $this->imapService->deleteFromSent($pendingSend->sent_folder_uid);
+                } catch (\Throwable) {
                 }
+            }
 
-                $to = $this->parseAddresses($data['to'] ?? '');
-                if (! empty($to)) {
-                    $message->to($to);
-                }
-                if (! empty($data['cc'])) {
-                    $message->cc($this->parseAddresses($data['cc']));
-                }
-                if (! empty($data['bcc'])) {
-                    $message->bcc($this->parseAddresses($data['bcc']));
-                }
-                $message->subject($data['subject'] ?? '(no subject)');
+            // Save as draft so the user doesn't lose their compose content
+            if ($pendingSend->mime_message) {
+                $this->imapService->appendToDrafts($pendingSend->mime_message);
+            }
 
-                // Replace Symfony's generated MIME headers with our pre-built ones
-                foreach ($mimeMessage->getHeaders()->all() as $header) {
-                    $name = $header->getName();
-                    if ($symfonyMessage->getHeaders()->has($name)) {
-                        $symfonyMessage->getHeaders()->remove($name);
-                    }
-                    $symfonyMessage->getHeaders()->add($header);
-                }
-
-                // Set body from our pre-built message
-                if ($mimeMessage->getBody()) {
-                    $symfonyMessage->setBody($mimeMessage->getBody());
-                }
-            });
-
-            return ['success' => true, 'sent_uid' => $sentUid, 'queued' => false];
+            return true;
         } catch (\Throwable $e) {
-            Log::warning('SMTP send failed, queueing to pending_sends', [
-                'user_id' => $userId,
-                'error' => $e->getMessage(),
+            Log::warning('Could not save cancelled pending send to IMAP Drafts: '.$e->getMessage(), [
+                'pending_send_id' => $pendingSendId,
             ]);
 
-            // On SMTP failure: queue for retry (per D-18)
-            $delay = config('openmail.undo_send_delay', 10);
-            $pendingSend = PendingSend::create([
-                'user_id' => $userId,
-                'message_json' => $data,
-                'mime_message' => $mimeString,
-                'send_at' => now()->addSeconds($delay),
-                'status' => 'pending',
-                'sent_folder_uid' => $sentUid,
-                'retry_count' => 0,
-            ]);
-
-            return ['success' => false, 'queued' => true, 'sent_uid' => $sentUid, 'pending_send_id' => $pendingSend->id];
+            // Still returns true because the send itself was successfully cancelled before SMTP delivery!
+            return true;
         }
     }
 
     /**
-     * Save a draft to IMAP Drafts folder.
-     *
-     * @param  array  $data  Composer data
-     * @return array ['success' => bool, 'draft_uid' => string|null]
+     * Save draft to IMAP Drafts folder safely.
      */
     public function saveDraft(int $userId, array $data, ?string $existingDraftUid = null): array
     {
-        $mimeMessage = $this->buildMimeMessage($data, (string) $userId);
-        $mimeString = $mimeMessage->toString();
+        $email = $this->buildMimeMessage($data, (string) $userId);
+        $mimeString = $email->toString();
 
         $uid = $this->imapService->appendToDrafts($mimeString, $existingDraftUid);
+
+        if (! $uid) {
+            throw new \RuntimeException('Failed to persist draft to IMAP server');
+        }
 
         return ['success' => true, 'draft_uid' => $uid];
     }
 
     /**
-     * Delete a draft from IMAP Drafts folder.
+     * Delete draft from IMAP Drafts folder.
      */
     public function deleteDraft(string $draftUid): bool
     {
@@ -192,88 +282,10 @@ class ComposerService
     }
 
     /**
-     * Get the underlying IMAP mailbox service.
+     * Get underlying IMAP mailbox service.
      */
     public function getImapService(): ImapMailboxService
     {
         return $this->imapService;
-    }
-
-    /**
-     * Undo a pending send.
-     */
-    public function undoSend(int $pendingSendId, int $userId): bool
-    {
-        $pendingSend = PendingSend::where('id', $pendingSendId)
-            ->where('user_id', $userId)
-            ->where('status', 'pending')
-            ->first();
-
-        if (! $pendingSend) {
-            return false;
-        }
-
-        // Mark as cancelling first to prevent concurrent processing
-        $pendingSend->update(['status' => 'cancelling']);
-
-        try {
-            // If message was appended to Sent folder, delete it
-            if ($pendingSend->sent_folder_uid) {
-                $this->imapService->deleteFromSent($pendingSend->sent_folder_uid);
-            }
-
-            // Move to Drafts folder (per D-24)
-            if ($pendingSend->mime_message) {
-                $this->imapService->appendToDrafts($pendingSend->mime_message);
-            }
-
-            // Only mark as cancelled after all operations succeed
-            $pendingSend->update(['status' => 'cancelled']);
-
-            return true;
-        } catch (\Exception $e) {
-            // If append to Drafts fails after deletion from Sent, the message
-            // is lost. Mark as failed so it's not retried, and log the error.
-            $pendingSend->update(['status' => 'failed']);
-            Log::error('Undo send failed - message may be lost', [
-                'pending_send_id' => $pendingSendId,
-                'user_id' => $userId,
-                'error' => $e->getMessage(),
-            ]);
-
-            return false;
-        }
-    }
-
-    /**
-     * Parse comma-separated email addresses into Address objects.
-     *
-     * @return Address[]
-     */
-    private function parseAddresses(string $addressString): array
-    {
-        $addresses = [];
-        foreach (array_filter(array_map('trim', explode(',', $addressString))) as $addr) {
-            // Try to parse "Name <email>" format
-            if (preg_match('/^(.+?)\s*<(.+?)>$/', $addr, $matches)) {
-                $addresses[] = new Address(trim($matches[2]), trim($matches[1]));
-            } else {
-                $addresses[] = new Address($addr);
-            }
-        }
-
-        return $addresses;
-    }
-
-    /**
-     * Convert HTML to plain text for text part of MIME message.
-     */
-    private function htmlToText(string $html): string
-    {
-        $text = strip_tags($html);
-        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $text = preg_replace('/\s+/', ' ', $text);
-
-        return wordwrap(trim($text), 78, "\n");
     }
 }

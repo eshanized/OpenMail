@@ -7,6 +7,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
 use Webklex\PHPIMAP\Address;
 use Webklex\PHPIMAP\Attribute;
 use Webklex\PHPIMAP\Client;
@@ -160,18 +161,99 @@ class ImapMailboxService
                 ->setFetchBody(false)
                 ->leaveUnread();
 
-            match ($sortBy) {
-                'date' => $sortDir === 'desc' ? $query->setFetchOrderDesc() : $query->setFetchOrderAsc(),
-                'sender' => $sortDir === 'asc' ? $query->setFetchOrderAsc() : $query->setFetchOrderDesc(),
-                'subject' => $sortDir === 'asc' ? $query->setFetchOrderAsc() : $query->setFetchOrderDesc(),
-                'size' => $sortDir === 'desc' ? $query->setFetchOrderDesc() : $query->setFetchOrderAsc(),
-                default => $query->setFetchOrderDesc(),
+            $sortDir = strtolower($sortDir) === 'asc' ? 'asc' : 'desc';
+
+            if ($sortBy === 'date') {
+                $query = $sortDir === 'desc' ? $query->setFetchOrderDesc() : $query->setFetchOrderAsc();
+
+                return $query->paginate(
+                    per_page: $perPage,
+                    page: $page,
+                    page_name: 'messages-page'
+                );
+            }
+
+            // Real sorting for sender, subject, and size
+            $messages = $query->get();
+
+            $sorted = match ($sortBy) {
+                'sender' => $messages->sortBy(function ($m) {
+                    $from = '';
+                    if (is_object($m)) {
+                        if (method_exists($m, 'getFrom') && $m->getFrom()) {
+                            $first = $m->getFrom()->first();
+                            $from = $first?->personal ?: ($first?->mail ?: '');
+                        }
+                        if (! $from) {
+                            $from = (string) ($m->from_name ?? $m->from_address ?? $m->from ?? '');
+                        }
+                    } elseif (is_array($m)) {
+                        $from = $m['from_name'] ?? $m['from_address'] ?? '';
+                    }
+
+                    return strtolower(trim((string) $from));
+                }, SORT_NATURAL | SORT_FLAG_CASE, $sortDir === 'desc'),
+
+                'subject' => $messages->sortBy(function ($m) {
+                    $subj = '';
+                    if (is_object($m)) {
+                        if (method_exists($m, 'getSubject') && $m->getSubject()) {
+                            $subj = (string) $m->getSubject();
+                        }
+                        if (! $subj) {
+                            $subj = (string) ($m->subject ?? '');
+                        }
+                    } elseif (is_array($m)) {
+                        $subj = $m['subject'] ?? '';
+                    }
+
+                    return strtolower(trim((string) $subj));
+                }, SORT_NATURAL | SORT_FLAG_CASE, $sortDir === 'desc'),
+
+                'size' => $messages->sortBy(function ($m) {
+                    $size = 0;
+                    if (is_object($m)) {
+                        if (method_exists($m, 'getSize') && $m->getSize()) {
+                            $size = (int) (string) $m->getSize();
+                        }
+                        if (! $size) {
+                            $size = (int) ($m->size ?? 0);
+                        }
+                    } elseif (is_array($m)) {
+                        $size = (int) ($m['size'] ?? 0);
+                    }
+
+                    return $size;
+                }, SORT_NUMERIC, $sortDir === 'desc'),
+
+                default => $messages->sortBy(function ($m) {
+                    if (is_object($m)) {
+                        if (method_exists($m, 'getDate') && $m->getDate()) {
+                            return $m->getDate()->first()?->toDate()?->timestamp ?? 0;
+                        }
+                        if (isset($m->date)) {
+                            return Carbon::parse($m->date)->timestamp;
+                        }
+                    } elseif (is_array($m) && isset($m['date'])) {
+                        return Carbon::parse($m['date'])->timestamp;
+                    }
+
+                    return 0;
+                }, SORT_NUMERIC, $sortDir === 'desc'),
             };
 
-            return $query->paginate(
-                per_page: $perPage,
-                page: $page,
-                page_name: 'messages-page'
+            $total = $sorted->count();
+            $pageItems = $sorted->slice(($page - 1) * $perPage, $perPage)->values();
+
+            return new LengthAwarePaginator(
+                $pageItems,
+                $total,
+                $perPage,
+                $page,
+                [
+                    'path' => request()->url(),
+                    'pageName' => 'messages-page',
+                ]
             );
         } catch (\Throwable $e) {
             $this->disconnect();
@@ -546,19 +628,26 @@ class ImapMailboxService
 
             $folder = $client->getFolder($draftsFolder);
 
-            // If existing UID provided, delete the old draft first
-            if ($existingUid && is_numeric($existingUid)) {
+            // Append replacement first (safe persistence: never destroy old copy before new exists)
+            $newUid = $this->appendMessage($draftsFolder, $mimeMessage, ['\\Draft'], now());
+
+            if (! $newUid) {
+                throw new \RuntimeException('Failed to persist new draft message to IMAP Drafts');
+            }
+
+            // Only remove previous draft copy if the new draft was successfully created
+            if ($existingUid && is_numeric($existingUid) && (string) $existingUid !== (string) $newUid) {
                 try {
                     $oldMessage = $folder->query()->getMessageByUid((int) $existingUid);
                     if ($oldMessage) {
-                        $oldMessage->delete(true); // true = expunge
+                        $oldMessage->delete(true); // expunge
                     }
-                } catch (\Throwable) {
-                    // Ignore if old draft could not be deleted
+                } catch (\Throwable $e) {
+                    Log::warning("Could not remove superseded draft UID {$existingUid}: ".$e->getMessage());
                 }
             }
 
-            return $this->appendMessage($draftsFolder, $mimeMessage, ['\\Draft'], now());
+            return $newUid;
         } catch (\Throwable $e) {
             $this->disconnect();
             throw $e;

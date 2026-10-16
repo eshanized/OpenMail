@@ -4,21 +4,37 @@ namespace App\Services;
 
 use App\Models\Contact;
 use App\Models\ContactGroup;
+use Illuminate\Support\Facades\DB;
 use Sabre\VObject\Component\VCard;
 use Sabre\VObject\Reader;
 use Sabre\VObject\Writer;
 
 class VCardService
 {
+    private const MAX_IMPORT_BYTES = 5_242_880; // 5 MB
+
+    private const MAX_CONTACTS = 1000;
+
     public function import(string $content, int $userId, string $conflictStrategy = 'skip'): array
     {
         $results = ['imported' => 0, 'updated' => 0, 'skipped' => 0, 'errors' => []];
+
+        if (strlen($content) > self::MAX_IMPORT_BYTES) {
+            throw new \InvalidArgumentException('vCard file exceeds the maximum allowed size of 5MB.');
+        }
 
         // Split content by BEGIN:VCARD to handle multiple vCards
         $vcardBlocks = preg_split('/(?=BEGIN:VCARD)/i', $content);
         $vcardBlocks = array_filter($vcardBlocks, fn ($block) => trim($block) !== '');
 
+        $processedCount = 0;
+
         foreach ($vcardBlocks as $block) {
+            if ($processedCount >= self::MAX_CONTACTS) {
+                $results['errors'][] = 'Maximum contact import limit ('.self::MAX_CONTACTS.') reached.';
+                break;
+            }
+
             try {
                 $vcard = Reader::read($block);
             } catch (\Throwable $e) {
@@ -39,14 +55,21 @@ class VCardService
             }
 
             foreach ($cards as $card) {
+                if ($processedCount >= self::MAX_CONTACTS) {
+                    $results['errors'][] = 'Maximum contact import limit ('.self::MAX_CONTACTS.') reached.';
+                    break 2;
+                }
+
                 $email = (string) ($card->EMAIL ?? '');
-                if (! $email) {
-                    $results['errors'][] = 'Missing email in vCard';
+                $email = strtolower(trim($email));
+
+                if (! $email || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    $results['errors'][] = 'Invalid or missing email in vCard: '.($email ?: '(empty)');
 
                     continue;
                 }
 
-                $email = strtolower(trim($email));
+                $processedCount++;
 
                 $existing = Contact::where('user_id', $userId)->where('email', $email)->first();
 
@@ -58,34 +81,35 @@ class VCardService
 
                 $data = [
                     'user_id' => $userId,
-                    'name' => (string) ($card->FN ?? ''),
+                    'name' => mb_substr((string) ($card->FN ?? ''), 0, 255),
                     'email' => $email,
-                    'phone' => (string) ($card->TEL ?? ''),
-                    'notes' => (string) ($card->NOTE ?? ''),
+                    'phone' => mb_substr((string) ($card->TEL ?? ''), 0, 50),
+                    'notes' => mb_substr((string) ($card->NOTE ?? ''), 0, 1000),
                 ];
 
-                if ($existing && $conflictStrategy === 'update') {
-                    $existing->update($data);
-                    $this->syncGroups($existing, $card);
-                    $results['updated']++;
-                } elseif ($existing && $conflictStrategy === 'duplicate') {
-                    // For duplicate strategy, create a new contact with modified email
-                    $counter = 1;
-                    $baseEmail = $email;
-                    $emailParts = explode('@', $email);
-                    while (Contact::where('user_id', $userId)->where('email', $email)->exists()) {
-                        $email = $emailParts[0].'+'.$counter.'@'.$emailParts[1];
-                        $counter++;
+                DB::transaction(function () use (&$results, $existing, $conflictStrategy, $userId, $data, $card) {
+                    if ($existing && $conflictStrategy === 'update') {
+                        $existing->update($data);
+                        $this->syncGroups($existing, $card);
+                        $results['updated']++;
+                    } elseif ($existing && $conflictStrategy === 'duplicate') {
+                        $counter = 1;
+                        $emailParts = explode('@', $data['email']);
+                        $newEmail = $data['email'];
+                        while ($counter <= 100 && Contact::where('user_id', $userId)->where('email', $newEmail)->exists()) {
+                            $newEmail = $emailParts[0].'+'.$counter.'@'.$emailParts[1];
+                            $counter++;
+                        }
+                        $data['email'] = $newEmail;
+                        $contact = Contact::create($data);
+                        $this->syncGroups($contact, $card);
+                        $results['imported']++;
+                    } else {
+                        $contact = Contact::create($data);
+                        $this->syncGroups($contact, $card);
+                        $results['imported']++;
                     }
-                    $data['email'] = $email;
-                    $contact = Contact::create($data);
-                    $this->syncGroups($contact, $card);
-                    $results['imported']++;
-                } else {
-                    $contact = Contact::create($data);
-                    $this->syncGroups($contact, $card);
-                    $results['imported']++;
-                }
+                });
             }
         }
 

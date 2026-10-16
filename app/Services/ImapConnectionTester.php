@@ -10,6 +10,12 @@ use Webklex\PHPIMAP\Support\Masks\MessageMask;
 
 class ImapConnectionTester
 {
+    public function __construct(
+        protected ?OutboundConnectionGuard $guard = null
+    ) {
+        $this->guard = $guard ?? app(OutboundConnectionGuard::class);
+    }
+
     public function test(
         string $host,
         int $port,
@@ -18,6 +24,9 @@ class ImapConnectionTester
         string $password
     ): array {
         try {
+            // Enforce SSRF boundary on outbound connection sink
+            $this->guard->validateTarget($host, $port, [143, 993, 1143, 9930]);
+
             $config = new Config([
                 'default' => 'default',
                 'accounts' => [
@@ -53,6 +62,11 @@ class ImapConnectionTester
             return [
                 'success' => true,
                 'folders' => $folderNames,
+            ];
+        } catch (\InvalidArgumentException $e) {
+            return [
+                'success' => false,
+                'error' => 'Security validation failed: '.$e->getMessage(),
             ];
         } catch (ConnectionFailedException $e) {
             return [

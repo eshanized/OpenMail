@@ -1,0 +1,276 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\User;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\Mailer\Transport\TransportInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Header\IdentificationHeader;
+
+class MailTransportService
+{
+    public function __construct(
+        protected ?TransportInterface $transport = null
+    ) {}
+
+    /**
+     * Get or initialize the Symfony Mailer transport.
+     */
+    public function getTransport(): TransportInterface
+    {
+        if ($this->transport !== null) {
+            return $this->transport;
+        }
+
+        return Mail::mailer()->getSymfonyTransport();
+    }
+
+    /**
+     * Set a custom transport (useful for unit/integration tests).
+     */
+    public function setTransport(TransportInterface $transport): self
+    {
+        $this->transport = $transport;
+
+        return $this;
+    }
+
+    /**
+     * Build a canonical Symfony Email object.
+     *
+     * @param  array  $data  Composer fields (to, cc, bcc, subject, body, attachments, in_reply_to, references, mode)
+     * @param  User|null  $user  Authenticated sender
+     * @param  string|null  $existingMessageId  Stable Message-ID for retries/pending sends
+     */
+    public function buildCanonicalEmail(array $data, ?User $user, ?string $existingMessageId = null): Email
+    {
+        $email = new Email;
+
+        // Sender
+        if ($user) {
+            $email->from(new Address($user->email, $user->name ?? ''));
+        }
+
+        // Recipients
+        $toAddresses = $this->parseAddresses($data['to'] ?? '');
+        if (! empty($toAddresses)) {
+            $email->to(...$toAddresses);
+        }
+
+        $ccAddresses = $this->parseAddresses($data['cc'] ?? '');
+        if (! empty($ccAddresses)) {
+            $email->cc(...$ccAddresses);
+        }
+
+        $bccAddresses = $this->parseAddresses($data['bcc'] ?? '');
+        if (! empty($bccAddresses)) {
+            $email->bcc(...$bccAddresses);
+        }
+
+        // Subject (Unicode & Emoji safe)
+        $email->subject($data['subject'] ?? '(no subject)');
+
+        // Body: Plain text & HTML
+        $htmlBody = $data['body'] ?? '';
+        $textBody = $data['bodyText'] ?? $this->htmlToText($htmlBody);
+
+        $email->text($textBody);
+        if (! empty($htmlBody)) {
+            $email->html($htmlBody);
+        }
+
+        // Attachments
+        foreach ($data['attachments'] ?? [] as $att) {
+            $filePath = $att['path'] ?? null;
+            if ($filePath && file_exists($filePath)) {
+                $email->attachFromPath(
+                    $filePath,
+                    $att['name'] ?? basename($filePath),
+                    $att['mime'] ?? null
+                );
+            }
+        }
+
+        // Canonical Message-ID: generate once or preserve across retries
+        $domain = config('openmail.domain') ?: (config('app.domain') ?: 'openmail.local');
+        $messageId = $existingMessageId ?: (Str::uuid().'@'.$domain);
+        $cleanId = trim($messageId, '<>');
+        $email->getHeaders()->add(new IdentificationHeader('Message-ID', $cleanId));
+
+        // Threading headers: In-Reply-To and References
+        if (! empty($data['in_reply_to'])) {
+            $inReplyTo = trim($data['in_reply_to'], '<>');
+            $email->getHeaders()->add(new IdentificationHeader('In-Reply-To', $inReplyTo));
+        }
+
+        if (! empty($data['references'])) {
+            $refs = array_filter(array_map(fn ($r) => trim($r, '<>'), explode(' ', $data['references'])));
+            if (! empty($refs)) {
+                $email->getHeaders()->add(new IdentificationHeader('References', $refs));
+            }
+        }
+
+        return $email;
+    }
+
+    /**
+     * Send an email over SMTP transport with explicit outcome categorization.
+     *
+     * @return array{
+     *   success: bool,
+     *   message_id: string,
+     *   mime_string: string,
+     *   category: string|null,
+     *   error: string|null,
+     *   uncertain: bool
+     * }
+     */
+    public function deliver(Email $email): array
+    {
+        $messageId = $this->extractMessageId($email);
+        $mimeString = $email->toString();
+
+        try {
+            $transport = $this->getTransport();
+            $transport->send($email);
+
+            return [
+                'success' => true,
+                'message_id' => $messageId,
+                'mime_string' => $mimeString,
+                'category' => null,
+                'error' => null,
+                'uncertain' => false,
+            ];
+        } catch (TransportExceptionInterface $e) {
+            $errorMessage = $e->getMessage();
+            $classification = $this->classifyError($errorMessage);
+
+            Log::warning('SMTP delivery failed', [
+                'message_id' => $messageId,
+                'category' => $classification['category'],
+                'uncertain' => $classification['uncertain'],
+                'error' => $errorMessage,
+            ]);
+
+            return [
+                'success' => false,
+                'message_id' => $messageId,
+                'mime_string' => $mimeString,
+                'category' => $classification['category'],
+                'error' => $errorMessage,
+                'uncertain' => $classification['uncertain'],
+            ];
+        } catch (\Throwable $e) {
+            Log::error('Unexpected error during SMTP delivery', [
+                'message_id' => $messageId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'message_id' => $messageId,
+                'mime_string' => $mimeString,
+                'category' => 'rejection',
+                'error' => $e->getMessage(),
+                'uncertain' => false,
+            ];
+        }
+    }
+
+    /**
+     * Parse email strings into Address objects.
+     */
+    public function parseAddresses(string $raw): array
+    {
+        if (trim($raw) === '') {
+            return [];
+        }
+
+        $addresses = [];
+        // Split by comma or semicolon
+        $parts = preg_split('/[,;]/', $raw);
+
+        foreach ($parts as $part) {
+            $part = trim($part);
+            if ($part === '') {
+                continue;
+            }
+
+            // Matches "Name <email@example.com>" or just "email@example.com"
+            if (preg_match('/^(.*?)\s*<([^>]+)>$/u', $part, $matches)) {
+                $name = trim($matches[1], ' "\'');
+                $addr = trim($matches[2]);
+                if (filter_var($addr, FILTER_VALIDATE_EMAIL)) {
+                    $addresses[] = new Address($addr, $name);
+                }
+            } elseif (filter_var($part, FILTER_VALIDATE_EMAIL)) {
+                $addresses[] = new Address($part);
+            }
+        }
+
+        return $addresses;
+    }
+
+    /**
+     * Simple plain-text converter from HTML.
+     */
+    public function htmlToText(string $html): string
+    {
+        $text = preg_replace('/<br\s*\/?>/i', "\n", $html);
+        $text = preg_replace('/<\/p>/i', "\n\n", $text);
+        $text = strip_tags($text);
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        return trim(preg_replace("/\n{3,}/", "\n\n", $text));
+    }
+
+    /**
+     * Classify SMTP errors into rejection, transport retry, or uncertain acceptance.
+     */
+    protected function classifyError(string $message): array
+    {
+        // Uncertain acceptance: connection timed out or closed during or after DATA command
+        if (preg_match('/(timeout|timed out|connection reset|connection closed|broken pipe).*?(data|reading response)/i', $message) ||
+            preg_match('/after sending message body/i', $message)) {
+            return [
+                'category' => 'uncertain',
+                'uncertain' => true,
+            ];
+        }
+
+        // Definite rejection: 5xx SMTP codes
+        if (preg_match('/\b5\d{2}\b/', $message) || preg_match('/rejected|recipient unknown|user not found|relay access denied/i', $message)) {
+            return [
+                'category' => 'rejection',
+                'uncertain' => false,
+            ];
+        }
+
+        // Default: retryable transport failure (e.g. 4xx codes, connection refused before transfer)
+        return [
+            'category' => 'transport',
+            'uncertain' => false,
+        ];
+    }
+
+    /**
+     * Extract Message-ID from Symfony Email headers.
+     */
+    protected function extractMessageId(Email $email): string
+    {
+        $header = $email->getHeaders()->get('Message-ID');
+        if ($header instanceof IdentificationHeader) {
+            $ids = $header->getIds();
+
+            return ! empty($ids) ? $ids[0] : (string) Str::uuid();
+        }
+
+        return (string) Str::uuid();
+    }
+}

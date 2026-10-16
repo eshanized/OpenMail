@@ -19,6 +19,12 @@ class SmtpConnectionTester
      * @param  string  $encryption  'ssl' (implicit TLS on port 465) | 'tls' (STARTTLS on 587) | 'none'
      * @return array{success: bool, error?: string, technical?: array}
      */
+    public function __construct(
+        protected ?OutboundConnectionGuard $guard = null
+    ) {
+        $this->guard = $guard ?? app(OutboundConnectionGuard::class);
+    }
+
     public function test(
         string $host,
         int $port,
@@ -27,6 +33,9 @@ class SmtpConnectionTester
         string $password
     ): array {
         try {
+            // Enforce SSRF boundary on outbound connection sink
+            $this->guard->validateTarget($host, $port, [25, 465, 587, 2525]);
+
             $tls = ($encryption === 'ssl');
 
             $transport = new EsmtpTransport(
@@ -54,6 +63,16 @@ class SmtpConnectionTester
             return [
                 'success' => false,
                 'error' => $this->friendlyTransportError($e->getMessage()),
+                'technical' => [
+                    'exception' => get_class($e),
+                    'code' => $e->getCode(),
+                    'message' => $e->getMessage(),
+                ],
+            ];
+        } catch (\InvalidArgumentException $e) {
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
                 'technical' => [
                     'exception' => get_class($e),
                     'code' => $e->getCode(),

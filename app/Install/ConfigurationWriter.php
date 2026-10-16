@@ -69,9 +69,34 @@ class ConfigurationWriter
         }
 
         $newContent = implode("\n", $lines)."\n";
-        $result = file_put_contents($this->envPath, $newContent, LOCK_EX);
+        $dir = dirname($this->envPath);
+        $tmpFile = $dir.'/.env.tmp.'.bin2hex(random_bytes(8));
 
-        return $result !== false;
+        $bytes = @file_put_contents($tmpFile, $newContent, LOCK_EX);
+        if ($bytes === false) {
+            $result = @file_put_contents($this->envPath, $newContent, LOCK_EX);
+            if ($result !== false) {
+                @chmod($this->envPath, 0600);
+            }
+
+            return $result !== false;
+        }
+
+        @chmod($tmpFile, 0600);
+        $renamed = @rename($tmpFile, $this->envPath);
+        if (! $renamed) {
+            @unlink($tmpFile);
+            $result = @file_put_contents($this->envPath, $newContent, LOCK_EX);
+            if ($result !== false) {
+                @chmod($this->envPath, 0600);
+            }
+
+            return $result !== false;
+        }
+
+        @chmod($this->envPath, 0600);
+
+        return true;
     }
 
     /**

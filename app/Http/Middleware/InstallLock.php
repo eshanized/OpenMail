@@ -19,8 +19,8 @@ class InstallLock
 
         // If app is NOT installed and user tries any other route → redirect to /install
         if (! $request->is('install*') && ! $installed) {
-            // Allow access to login, logout, and Livewire update endpoints during setup
-            if (! $request->is('login*') && ! $request->is('logout*') && ! $request->is('livewire*')) {
+            // Allow access to Livewire update endpoints and healthcheck during setup
+            if (! $request->is('livewire*') && ! $request->is('up')) {
                 return redirect('/install');
             }
         }

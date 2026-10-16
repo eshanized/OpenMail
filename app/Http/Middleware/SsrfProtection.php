@@ -51,18 +51,21 @@ class SsrfProtection
         '/^https?:\/\/\[?::ffff:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\]?/i',
     ];
 
+    private const EXCLUDED_INPUT_KEYS = [
+        'body',
+        'content',
+        'body_html',
+        'body_plain',
+        'html',
+        'mime_message',
+        'subject',
+        'message',
+    ];
+
     public function handle(Request $request, Closure $next): Response
     {
-        // Check all input data for dangerous URLs (avoid double-scanning with except())
         $this->validateInput($request->query());
         $this->validateInput($request->post());
-        // Also scan the raw request content for embedded SSRF payloads
-        $content = $request->getContent();
-        if ($content && strlen($content) < 1_000_000) {
-            if ($this->isDangerousUrl($content)) {
-                abort(422, 'Potentially malicious URL detected in input.');
-            }
-        }
 
         return $next($request);
     }
@@ -74,13 +77,31 @@ class SsrfProtection
      */
     private function validateInput(array $data): void
     {
-        foreach ($data as $value) {
+        foreach ($data as $key => $value) {
+            $keyStr = is_string($key) ? strtolower($key) : '';
+            if (in_array($keyStr, self::EXCLUDED_INPUT_KEYS, true)) {
+                continue;
+            }
+
             if (is_string($value)) {
-                $this->validateUrl($value);
+                if ($this->looksLikeUrl($value) || $this->isDangerousUrl($value)) {
+                    $this->validateUrl($value);
+                }
             } elseif (is_array($value)) {
                 $this->validateInput($value);
             }
         }
+    }
+
+    /**
+     * Check if a string looks like a URL or dangerous scheme.
+     */
+    public function looksLikeUrl(string $value): bool
+    {
+        $trimmed = trim($value);
+
+        return preg_match('/^[a-z0-9+.-]+:\/\//i', $trimmed) === 1
+            || preg_match('/^(javascript|data|vbscript|file):/i', $trimmed) === 1;
     }
 
     /**

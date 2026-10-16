@@ -122,13 +122,20 @@ class MessageList extends Component
     {
         $perPage = (int) auth()->user()->setting('page_size', 25);
 
-        $paginator = app(ImapMailboxService::class)->getMessages(
-            $this->folderPath,
-            $this->sortBy,
-            $this->sortDir,
-            $this->getPage(),
-            $perPage
-        );
+        try {
+            $paginator = app(ImapMailboxService::class)->getMessages(
+                $this->folderPath,
+                $this->sortBy,
+                $this->sortDir,
+                $this->getPage(),
+                $perPage
+            );
+        } catch (\Throwable $e) {
+            return new LengthAwarePaginator([], 0, $perPage, $this->getPage(), [
+                'path' => request()->url(),
+                'pageName' => 'messages-page',
+            ]);
+        }
 
         if (empty($paginator->items())) {
             return $paginator;
@@ -162,14 +169,18 @@ class MessageList extends Component
         $page = $this->getPage();
         $perPage = (int) auth()->user()->setting('page_size', 25);
 
-        // Get flat messages for current page
-        $flatMessages = $imapService->getMessages(
-            $this->folderPath,
-            $this->sortBy,
-            $this->sortDir,
-            $page,
-            $perPage
-        );
+        try {
+            // Get flat messages for current page
+            $flatMessages = $imapService->getMessages(
+                $this->folderPath,
+                $this->sortBy,
+                $this->sortDir,
+                $page,
+                $perPage
+            );
+        } catch (\Throwable $e) {
+            return [];
+        }
 
         // Collect UIDs from current page
         $pageUids = collect($flatMessages->items())->map(function ($m) {

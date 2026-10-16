@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Mailbox;
 
+use App\Services\FolderMapper;
 use App\Services\ImapMailboxService;
 use Livewire\Component;
 
@@ -33,7 +34,7 @@ class FolderSidebar extends Component
     {
         try {
             $raw = app(ImapMailboxService::class)->getCachedFolders();
-            $normalized = app(\App\Services\FolderMapper::class)->normalizeFolders($raw);
+            $normalized = app(FolderMapper::class)->normalizeFolders($raw);
             $this->folders = $this->sortFolders($normalized);
         } catch (\Throwable $e) {
             $this->folders = [];

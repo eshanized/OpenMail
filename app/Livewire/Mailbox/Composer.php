@@ -380,7 +380,7 @@ class Composer extends Component
 
     public function updatedAttachments(): void
     {
-        $this->validate();
+        $this->validateOnly('attachments.*');
 
         $allowedMimes = [
             'image/jpeg', 'image/png', 'image/gif', 'image/webp',

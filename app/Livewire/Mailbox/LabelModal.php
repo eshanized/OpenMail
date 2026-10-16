@@ -39,6 +39,11 @@ class LabelModal extends Component
 
     public function openEditModal(Label $label): void
     {
+        $userId = auth()->id();
+        if (! $userId || $label->user_id !== $userId) {
+            abort(403, 'Unauthorized.');
+        }
+
         $this->label = $label;
         $this->name = $label->name;
         $this->color = $label->color;
@@ -47,13 +52,22 @@ class LabelModal extends Component
 
     public function save(): void
     {
+        $userId = auth()->id();
+        if (! $userId) {
+            abort(403, 'Unauthorized.');
+        }
+
+        if ($this->label && $this->label->user_id !== $userId) {
+            abort(403, 'Unauthorized.');
+        }
+
         $service = app(LabelService::class);
 
         try {
             if ($this->label) {
-                $service->update($this->label->id, auth()->id(), $this->name, $this->color);
+                $service->update($this->label->id, $userId, $this->name, $this->color);
             } else {
-                $service->create(auth()->id(), $this->name, $this->color);
+                $service->create($userId, $this->name, $this->color);
             }
 
             $this->show = false;

@@ -57,6 +57,10 @@ class MessageViewer extends Component
 
     public function mount(string $folderPath, int $uid): void
     {
+        if (! auth()->check()) {
+            abort(401, 'Unauthenticated.');
+        }
+
         $this->folderPath = $folderPath;
         $this->uid = $uid;
         $this->loadFolders();

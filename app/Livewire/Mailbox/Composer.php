@@ -244,7 +244,27 @@ class Composer extends Component
                 $this->getComposerData()
             );
 
-            if ($result['success']) {
+            if ($result['queued']) {
+                $this->dispatch('toast', 'Message scheduled', 'info');
+                // Audit log: send scheduled
+                $action = match ($this->mode) {
+                    'reply' => 'reply',
+                    'replyAll' => 'reply_all',
+                    'forward' => 'forward',
+                    default => 'send',
+                };
+                AuditService::send($action, [
+                    'subject' => $this->subject,
+                    'to' => $this->to,
+                    'mode' => $this->mode,
+                    'queued' => true,
+                ]);
+
+                // Show undo toast with real pending send ID and delay
+                $this->showUndoToast = true;
+                $this->pendingSendId = $result['pending_send_id'];
+                $this->undoSendDelay = ($result['delay_seconds'] ?? 10) * 1000;
+            } else {
                 $this->dispatch('toast', 'Message sent', 'success');
                 // Audit log: send action (SEC-05)
                 $action = match ($this->mode) {
@@ -258,33 +278,12 @@ class Composer extends Component
                     'to' => $this->to,
                     'mode' => $this->mode,
                 ]);
-                // For successful immediate send, show undo toast with the configured delay
-                $this->showUndoToast = true;
-                $this->pendingSendId = null; // No pending send ID for immediate sends
-                $this->undoSendDelay = config('openmail.undo_send_delay', 10) * 1000; // Convert to ms for toast
-            } else {
-                $this->dispatch('toast', 'Message queued for sending', 'warning');
-                // Audit log: send queued (SEC-05)
-                $action = match ($this->mode) {
-                    'reply' => 'reply',
-                    'replyAll' => 'reply_all',
-                    'forward' => 'forward',
-                    default => 'send',
-                };
-                AuditService::send($action, [
-                    'subject' => $this->subject,
-                    'to' => $this->to,
-                    'mode' => $this->mode,
-                    'queued' => true,
-                ]);
-                // For queued sends, the pending_send_id is in the result
-                $this->showUndoToast = true;
-                $this->pendingSendId = $result['pending_send_id'] ?? null;
-                $this->undoSendDelay = config('openmail.undo_send_delay', 10) * 1000;
+                $this->showUndoToast = false;
+                $this->pendingSendId = null;
             }
 
             $this->dispatch('composer-sent');
-            $this->resetForm();
+            $this->resetForm(clearUndo: false);
             $this->isOpen = false;
         } catch (\Throwable $e) {
             Log::error('Mail send failed', [
@@ -497,7 +496,10 @@ class Composer extends Component
         if ($this->pendingSendId) {
             $result = app(ComposerService::class)->undoSend($this->pendingSendId, auth()->id());
             if ($result) {
-                $this->dispatch('toast', 'Message moved to Drafts', 'success');
+                $this->dispatch('toast', 'Send cancelled. Message moved to Drafts.', 'success');
+                $this->dispatch('draft-updated');
+            } else {
+                $this->dispatch('toast', 'Unable to cancel: message is already being sent.', 'warning');
             }
         }
         $this->showUndoToast = false;
@@ -555,7 +557,7 @@ class Composer extends Component
         }
     }
 
-    protected function resetForm(): void
+    protected function resetForm(bool $clearUndo = true): void
     {
         $this->to = '';
         $this->cc = '';
@@ -573,8 +575,10 @@ class Composer extends Component
         $this->sending = false;
         $this->autosaveStatus = 'idle';
         $this->lastSavedAt = null;
-        $this->showUndoToast = false;
-        $this->pendingSendId = null;
+        if ($clearUndo) {
+            $this->showUndoToast = false;
+            $this->pendingSendId = null;
+        }
         $this->resetValidation();
     }
 

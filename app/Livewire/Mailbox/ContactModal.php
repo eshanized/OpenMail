@@ -38,6 +38,11 @@ class ContactModal extends Component
 
     public function mount(?Contact $contact = null): void
     {
+        $userId = auth()->id();
+        if ($contact && $contact->user_id !== $userId) {
+            abort(403, 'Unauthorized.');
+        }
+
         $this->contact = $contact;
         $this->loadGroups();
 
@@ -60,6 +65,15 @@ class ContactModal extends Component
 
     public function save(): void
     {
+        $userId = auth()->id();
+        if (! $userId) {
+            abort(403, 'You must be logged in to manage contacts.');
+        }
+
+        if ($this->contact && $this->contact->user_id !== $userId) {
+            abort(403, 'Unauthorized.');
+        }
+
         $this->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
@@ -79,13 +93,6 @@ class ContactModal extends Component
                     'notes' => $this->notes,
                 ]);
             } else {
-                // Create new contact — resolve user via auth guard
-                $userId = auth()->id();
-                if (! $userId) {
-                    $this->addError('email', 'You must be logged in to create contacts.');
-
-                    return;
-                }
                 $contact = $service->create($userId, [
                     'name' => $this->name,
                     'email' => $this->email,
@@ -94,8 +101,12 @@ class ContactModal extends Component
                 ]);
             }
 
-            // Sync groups
-            $contact->groups()->sync($this->selectedGroups);
+            // Sync groups ensuring user ownership
+            $validGroupIds = ContactGroup::forUser($userId)
+                ->whereIn('id', $this->selectedGroups)
+                ->pluck('id')
+                ->toArray();
+            $contact->groups()->sync($validGroupIds);
 
             $this->dispatch('contactSaved');
             $this->dispatch('toast', 'Contact saved', 'success');
@@ -109,7 +120,16 @@ class ContactModal extends Component
 
     public function delete(): void
     {
+        $userId = auth()->id();
+        if (! $userId) {
+            abort(403, 'Unauthorized.');
+        }
+
         if ($this->contact) {
+            if ($this->contact->user_id !== $userId) {
+                abort(403, 'Unauthorized.');
+            }
+
             $service = app(ContactService::class);
             $service->delete($this->contact);
             $this->dispatch('contactDeleted');

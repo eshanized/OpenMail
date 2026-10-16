@@ -50,7 +50,13 @@ class SecurityTab extends Component
     public function revokeOtherSessions(): void
     {
         $userId = auth()->id();
-        $currentSessionId = $this->currentSessionId;
+        if (! $userId) {
+            abort(403, 'Unauthorized.');
+        }
+
+        // Authoritative server-side current session ID - never trust client-provided state
+        $currentSessionId = session()->getId();
+        $this->currentSessionId = $currentSessionId;
 
         DB::table('sessions')
             ->where('user_id', $userId)

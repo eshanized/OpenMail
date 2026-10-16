@@ -183,6 +183,10 @@ class SetupWizard extends Component
 
     public function mount(): void
     {
+        if (app(InstallationLock::class)->isInstalled()) {
+            abort(404);
+        }
+
         $this->restoreFromSession();
         $this->requirements = app(SystemRequirementsChecker::class)->check();
         $this->requirementsLoaded = true;

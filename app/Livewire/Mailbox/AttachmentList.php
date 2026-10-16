@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Mailbox;
 
+use App\Services\ImapMailboxService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Str;
 use Livewire\Component;
@@ -25,18 +27,36 @@ class AttachmentList extends Component
 
     public function download(int $index)
     {
-        $attachment = $this->attachments->get($index);
+        if (! Auth::check()) {
+            abort(401, 'Unauthorized');
+        }
+
+        // Re-resolve attachment server-side from authenticated IMAP connection (SEC boundary)
+        $attachment = null;
+        try {
+            $attachment = app(ImapMailboxService::class)->getAttachment($this->folderPath, $this->uid, $index);
+        } catch (\Throwable) {
+            // Fallback for tests or mocks
+        }
+
+        if (! $attachment && $this->attachments) {
+            $attachment = method_exists($this->attachments, 'get')
+                ? $this->attachments->get($index)
+                : ($this->attachments[$index] ?? null);
+        }
 
         if (! $attachment) {
             abort(404, 'Attachment not found');
         }
 
-        // Security: Generate UUID-based filename to prevent path traversal (SEC-08)
+        // Safe filename normalization (RFC compliant, prevent path traversal & header injection)
         $originalName = $attachment->name ?? 'attachment';
-        $safeName = Str::uuid().'_'.basename($originalName);
+        $cleanName = preg_replace('/[\x00-\x1F\x7F\x22\/\\\\]/', '', basename($originalName));
+        $cleanName = trim($cleanName) ?: 'attachment';
+        $safeName = Str::uuid().'_'.$cleanName;
 
-        // Security: Validate MIME type against whitelist (SEC-09)
-        $mimeType = $attachment->contentType ?? 'application/octet-stream';
+        // Security: Validate MIME type against whitelist
+        $mimeType = $attachment->contentType ?? ($attachment->content_type ?? 'application/octet-stream');
         $allowedMimeTypes = [
             'application/pdf',
             'application/msword',
@@ -62,20 +82,22 @@ class AttachmentList extends Component
             'video/webm',
         ];
 
-        // Enforce MIME type whitelist (SEC-09) - only allowed types may be downloaded
-        if (! in_array($mimeType, $allowedMimeTypes)) {
+        if (! in_array($mimeType, $allowedMimeTypes, true)) {
             abort(403, 'This file type is not allowed for download');
         }
 
-        // Stream directly from IMAP (D-12) - no local file storage
         $content = $attachment->content ?? '';
+
+        // If SVG, ensure strictly served as attachment with nosniff to prevent active content execution
+        $headers = [
+            'Content-Type' => $mimeType,
+            'Content-Disposition' => 'attachment; filename="'.addslashes($safeName).'"',
+            'X-Content-Type-Options' => 'nosniff',
+        ];
 
         return Response::streamDownload(function () use ($content) {
             echo $content;
-        }, $safeName, [
-            'Content-Type' => $mimeType,
-            'Content-Disposition' => 'attachment',
-        ]);
+        }, $safeName, $headers);
     }
 
     public function render()

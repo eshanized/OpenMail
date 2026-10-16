@@ -24,6 +24,16 @@ class MailTab extends Component
     public function save(): void
     {
         $userId = auth()->id();
+        if (! $userId) {
+            abort(403, 'Unauthorized.');
+        }
+
+        $this->validate([
+            'pageSize' => 'required|integer|in:10,25,50,100',
+            'defaultFolder' => 'required|string|max:100|regex:/^[a-zA-Z0-9_\-\.\/ ]+$/',
+            'replyBehavior' => 'required|in:reply,reply_all',
+        ]);
+
         Setting::setForUser($userId, 'page_size', $this->pageSize, 'mail');
         Setting::setForUser($userId, 'default_folder', $this->defaultFolder, 'mail');
         Setting::setForUser($userId, 'reply_behavior', $this->replyBehavior, 'mail');

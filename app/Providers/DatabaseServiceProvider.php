@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use App\Database\SQLiteConnection;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Connection;
 use Illuminate\Support\ServiceProvider;
 
 class DatabaseServiceProvider extends ServiceProvider
@@ -13,7 +13,7 @@ class DatabaseServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        \Illuminate\Database\Connection::resolverFor('sqlite', function ($connection, $database, $prefix, $config) {
+        Connection::resolverFor('sqlite', function ($connection, $database, $prefix, $config) {
             return new SQLiteConnection(
                 $connection,
                 $database,

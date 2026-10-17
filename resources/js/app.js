@@ -125,6 +125,16 @@ document.addEventListener('livewire:init', () => {
     }
 });
 
+// Register the PWA shell only on secure origins. The worker deliberately does not cache
+// authenticated pages, message bodies, search results, or Livewire requests.
+if ('serviceWorker' in navigator && window.isSecureContext) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => {
+            // PWA installation is optional; keep webmail functional when registration is unavailable.
+        });
+    }, { once: true });
+}
+
 // Alpine component registrations (alpine:init) — registers settings components in the Vite bundle
 document.addEventListener('alpine:init', () => {
     Alpine.data('appearancePreview', (props = {}) => ({

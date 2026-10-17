@@ -23,6 +23,10 @@ Route::get('/login', [LoginController::class, 'show'])->name('login');
 Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('/scheduled', function () {
+        return view('scheduled-sends-page');
+    })->name('scheduled-sends');
+
     Route::get('/settings', SettingsPage::class)
         ->middleware('throttle:api.settings')
         ->name('settings');

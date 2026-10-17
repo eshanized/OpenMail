@@ -1,4 +1,4 @@
-<div class="message-viewer max-w-4xl mx-auto space-y-3">
+<div class="message-viewer premium-message-viewer max-w-5xl mx-auto space-y-4">
     {{-- Back navigation bar --}}
     <div class="flex items-center justify-between">
         <a
@@ -39,12 +39,12 @@
         @endphp
 
         {{-- Document surface: clean white reader with 1px border --}}
-        <div class="bg-surface-raised border border-border rounded overflow-hidden">
+        <div class="premium-reader-surface bg-surface-raised border border-border rounded-2xl overflow-hidden shadow-sm">
             {{-- Message header --}}
-            <div class="p-3.5 sm:p-6 pb-3 sm:pb-4">
+            <div class="p-4 sm:p-7 pb-4 sm:pb-5">
                 {{-- Top row: Subject + Star --}}
                 <div class="flex items-start justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
-                    <h1 class="text-lg sm:text-xl font-bold text-ink tracking-tight leading-snug">
+                    <h1 class="text-xl sm:text-2xl font-semibold text-ink tracking-tight leading-snug">
                         {{ $subject ?: '(no subject)' }}
                     </h1>
                     <button
@@ -68,7 +68,7 @@
                 {{-- Sender info --}}
                 <div class="flex items-start gap-3">
                     {{-- Neutral Avatar --}}
-                    <div class="w-8 h-8 rounded avatar-gradient-{{ $avatarIdx }} flex items-center justify-center text-xs font-semibold flex-shrink-0">
+                    <div class="w-10 h-10 rounded-xl avatar-gradient-{{ $avatarIdx }} flex items-center justify-center text-sm font-semibold flex-shrink-0">
                         {{ $avatarChar }}
                     </div>
 

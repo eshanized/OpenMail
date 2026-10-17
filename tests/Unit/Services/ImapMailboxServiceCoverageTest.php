@@ -97,10 +97,30 @@ class ImapMailboxServiceCoverageTest extends TestCase
         $this->assertSame($attachment, $service->getAttachment('INBOX', 9, 1));
     }
 
-    public function test_get_message_count_returns_total_unread_and_uidvalidity(): void
+    public function test_get_message_count_uses_one_status_request_when_available(): void
     {
         $client = $this->connectedClient();
         $folder = Mockery::mock(Folder::class);
+        $folder->shouldReceive('status')->once()->andReturn([
+            'messages' => 27,
+            'unseen' => 6,
+            'uidvalidity' => 440,
+        ]);
+        $folder->shouldNotReceive('examine');
+        $folder->shouldNotReceive('query');
+        $client->shouldReceive('getFolder')->with('INBOX')->once()->andReturn($folder);
+
+        $this->assertSame(
+            ['total' => 27, 'unread' => 6, 'uidvalidity' => 440],
+            $this->serviceFor($client)->getMessageCount('INBOX')
+        );
+    }
+
+    public function test_get_message_count_falls_back_when_status_is_unavailable(): void
+    {
+        $client = $this->connectedClient();
+        $folder = Mockery::mock(Folder::class);
+        $folder->shouldReceive('status')->once()->andThrow(new \RuntimeException('status unavailable'));
         $folder->shouldReceive('examine')->once()->andReturn(['exists' => 27, 'uidvalidity' => 440]);
         $query = Mockery::mock(WhereQuery::class);
         $query->shouldReceive('unseen')->once()->andReturnSelf();

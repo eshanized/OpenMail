@@ -74,9 +74,9 @@
 }" x-init="initThreadMode()">
 
     {{-- Mailbox Header & Folder Info --}}
-    <div class="mb-3 flex flex-col md:flex-row md:items-center justify-between gap-3 pb-2.5 border-b border-border">
+    <div class="mailbox-page-header mb-5 flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-border">
         <div class="flex items-center gap-3">
-            <h1 class="text-lg font-semibold tracking-tight text-ink flex items-center gap-2">
+            <h1 class="text-2xl sm:text-[1.7rem] font-semibold tracking-tight text-ink flex items-center gap-2">
                 <span>{{ ucfirst(strtolower($folderPath)) }}</span>
             </h1>
             @php
@@ -84,12 +84,12 @@
                 $totalCount = $folderStats['total'] ?? 0;
             @endphp
             @if($unreadCount > 0)
-                <span class="text-xs font-medium text-primary">
+                <span class="mailbox-unread-count text-xs font-semibold text-primary">
                     {{ $unreadCount }} unread
                 </span>
                 <span class="text-ink-tertiary text-xs">&middot;</span>
             @endif
-            <span class="text-xs text-ink-tertiary">
+            <span class="mailbox-total-count text-xs text-ink-tertiary">
                 {{ $totalCount }} messages
             </span>
         </div>
@@ -99,8 +99,8 @@
             <button
                 @click="openComposer"
                 aria-label="Compose new email"
-                class="inline-flex items-center gap-1.5 rounded bg-primary hover:bg-primary-hover
-                       px-3 py-1.5 text-xs font-medium text-white
+                class="mailbox-primary-action inline-flex items-center gap-2 rounded-xl bg-primary hover:bg-primary-hover
+                       px-4 py-2.5 text-sm font-semibold text-white
                        transition-colors duration-100
                        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40
                        cursor-pointer shrink-0"
@@ -112,7 +112,7 @@
             </button>
 
             {{-- Search bar --}}
-            <div class="flex-1 sm:w-60 min-w-0">
+            <div class="mailbox-search-container flex-1 sm:w-72 min-w-0">
                 <livewire:mailbox.search-bar />
             </div>
 
@@ -197,7 +197,7 @@
     <div
         wire:loading.remove
         wire:target="onFolderChanged,setSort,toggleThreadMode"
-        class="bg-surface-raised border border-border rounded overflow-hidden"
+        class="mailbox-message-list bg-surface-raised border border-border rounded-2xl overflow-hidden shadow-sm"
     >
         @php
             $isThreaded = $threadMode === 'threaded';

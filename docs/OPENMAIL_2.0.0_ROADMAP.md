@@ -60,6 +60,12 @@ Acceptance: security signals include evidence and limitations; rendering and URL
 
 Acceptance: every shared-mail action is authorized server-side; internal notes cannot enter outbound MIME; memberships and audit events are tested for cross-user access.
 
+## Premium UX execution slice
+
+The premium UX initiative is implemented incrementally. Its first slice establishes a consistent branded application bar, a more deliberate mailbox canvas and sidebar, clearer inbox hierarchy, refined message-reader and composer surfaces, and reduced-motion-aware micro-interactions. This visual foundation does not claim that the planned three-pane desktop workspace or every accessibility/browser acceptance gate is complete.
+
+Next slices must deliver the unified desktop conversation pane, stronger responsive navigation, keyboard/focus and screen-reader verification, and measured performance improvements. Keep the Laravel/Livewire/Tailwind architecture, self-hosting constraints, privacy controls, and existing mail behavior intact.
+
 ## Workstream 5 — UX, PWA, and accessibility (P1)
 
 - Unified three-pane desktop workspace and adaptive mobile layouts.

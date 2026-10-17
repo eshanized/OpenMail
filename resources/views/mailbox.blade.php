@@ -5,12 +5,21 @@
 @endsection
 
 @section('mailbox-content')
-    <div x-data="{ selected: [] }">
+    <div x-data="{ selected: [] }" class="mailbox-route-content h-full min-h-0">
         @if(isset($uid))
-            <livewire:mailbox.message-viewer
-                :folderPath="$folderPath"
-                :uid="$uid"
-            />
+            <div class="mailbox-three-pane" aria-label="Mailbox workspace">
+                <section class="mailbox-three-pane-list" aria-label="Messages in {{ $folderPath }}">
+                    <livewire:mailbox.message-list
+                        :folderPath="$folderPath ?? 'INBOX'"
+                    />
+                </section>
+                <section class="mailbox-three-pane-reader" aria-label="Selected message">
+                    <livewire:mailbox.message-viewer
+                        :folderPath="$folderPath"
+                        :uid="$uid"
+                    />
+                </section>
+            </div>
         @else
             <livewire:mailbox.message-list
                 :folderPath="$folderPath ?? 'INBOX'"

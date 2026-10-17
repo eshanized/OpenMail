@@ -180,7 +180,7 @@
 >
     {{-- Backdrop --}}
     <div
-        class="fixed inset-0 bg-black/40 transition-opacity"
+        class="fixed inset-0 bg-black/45 backdrop-blur-sm transition-opacity"
         @click="closeWithConfirm()"
         aria-hidden="true"
     ></div>
@@ -191,7 +191,7 @@
         @click.outside="closeWithConfirm()"
     >
         <div
-            class="bg-surface-raised rounded-none sm:rounded border-0 sm:border border-border shadow-xl max-w-4xl w-full h-[100dvh] sm:h-auto sm:max-h-[92vh] flex flex-col overflow-hidden animate-fade-in"
+            class="premium-composer bg-surface-raised rounded-none sm:rounded-2xl border-0 sm:border border-border shadow-xl max-w-5xl w-full h-[100dvh] sm:h-auto sm:max-h-[92vh] flex flex-col overflow-hidden animate-fade-in"
             @click.outside.stop
         >
             {{-- Header --}}
@@ -254,7 +254,7 @@
             </div>
 
             {{-- Form Body --}}
-            <form class="flex-1 overflow-y-auto p-3 sm:p-5 space-y-3" @submit.prevent="send()">
+            <form class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4" @submit.prevent="send()">
                 {{-- Recipient Fields --}}
                 <div class="space-y-2">
                     {{-- To Field + CC/BCC Toggles --}}

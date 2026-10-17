@@ -191,6 +191,37 @@
                         <span class="hidden sm:inline">Forward</span>
                     </button>
 
+                    {{-- Snooze --}}
+                    <div class="relative" x-data="{ open: false }">
+                        <button
+                            type="button"
+                            @click="open = !open"
+                            @keydown.escape="open = false"
+                            @click.outside="open = false"
+                            aria-haspopup="menu"
+                            :aria-expanded="open ? 'true' : 'false'"
+                            class="inline-flex items-center gap-1.5 rounded border border-border bg-surface-raised px-2.5 py-1.5 text-xs font-medium text-ink-secondary transition-colors hover:bg-hover hover:text-ink"
+                            title="Snooze this message"
+                        >
+                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                                <circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/>
+                            </svg>
+                            <span>Snooze</span>
+                        </button>
+                        <div
+                            x-show="open"
+                            x-cloak
+                            x-transition
+                            role="menu"
+                            aria-label="Snooze options"
+                            class="absolute left-0 z-50 mt-1 w-48 overflow-hidden rounded-xl border border-border bg-surface-raised py-1 shadow-lg"
+                        >
+                            <button type="button" role="menuitem" @click="open = false" wire:click="snoozeUntil('in_hour')" wire:loading.attr="disabled" class="w-full px-3 py-2 text-left text-xs text-ink-secondary transition-colors hover:bg-hover hover:text-ink">In one hour</button>
+                            <button type="button" role="menuitem" @click="open = false" wire:click="snoozeUntil('tomorrow')" wire:loading.attr="disabled" class="w-full px-3 py-2 text-left text-xs text-ink-secondary transition-colors hover:bg-hover hover:text-ink">Tomorrow morning</button>
+                            <button type="button" role="menuitem" @click="open = false" wire:click="snoozeUntil('next_week')" wire:loading.attr="disabled" class="w-full px-3 py-2 text-left text-xs text-ink-secondary transition-colors hover:bg-hover hover:text-ink">Next week</button>
+                        </div>
+                    </div>
+
                     @if(config('openmail.ai.enabled'))
                         <button
                             type="button"

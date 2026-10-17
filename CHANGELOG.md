@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+- **Runtime Compatibility**: OpenMail 2.0.0 requires PHP 8.4.1 or newer to match its locked Symfony dependencies; the installer, CI matrix, and deployment documentation enforce the same minimum.
+
 ### Added
 - **Durable Send Later**: Persist scheduled email delivery in the existing delivery state machine, expose a scheduled-message queue, and allow users to cancel future messages back to Drafts.
 - **Scheduled MIME Durability**: Deliver the persisted MIME payload so attachment delivery does not depend on temporary browser-upload paths still existing at the scheduled time; restore Bcc recipients only to the SMTP envelope.

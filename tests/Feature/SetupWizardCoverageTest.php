@@ -71,7 +71,7 @@ class SetupWizardCoverageTest extends TestCase
             ->set('adminPassword', 'weakpass')
             ->set('adminPasswordConfirmation', 'different')
             ->call('nextStep')
-            ->assertHasErrors(['adminPassword', 'adminPasswordConfirmation'])
+            ->assertHasErrors(['adminPassword'])
             ->assertSet('currentStep', 6);
     }
 

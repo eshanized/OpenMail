@@ -83,7 +83,7 @@ Acceptance: automated browser journeys cover critical flows at mobile and deskto
 ## Workstream 7 — Administration and operations (P0)
 
 - User/role management appropriate to a single organization.
-- Delivery queue inspection with retry/uncertain outcome information.
+- Delivery queue inspection with retry/uncertain outcome information. A user-scoped, read-only delivery history is implemented; automatic retries of uncertain SMTP outcomes remain intentionally unsupported.
 - Installation and upgrade diagnostics, health checks, retention settings, and safe operational logs.
 - Keep required deployment dependencies compatible with shared hosting.
 
@@ -108,4 +108,4 @@ Acceptance: diagnostics are actionable and redact secrets; upgrade and backup/re
 
 ## Current execution note
 
-Implemented slices now include durable send-later with cancellation, per-user email templates, snooze/return, saved searches, command-palette navigation, a static-only PWA shell that never caches private mail, opt-in AI summaries and editable reply drafts, and evidence-based message-security indicators. Multi-account isolation, shared inboxes/roles, richer synchronization, admin diagnostics, and complete release verification remain incomplete; this roadmap is not a claim that OpenMail 2.0 is finished.
+Implemented slices now include durable send-later with cancellation, per-user email templates, snooze/return, saved searches, user-scoped delivery activity, command-palette navigation, a static-only PWA shell that never caches private mail, opt-in AI summaries and editable reply drafts, and evidence-based message-security indicators. Multi-account isolation, shared inboxes/roles, richer synchronization, admin diagnostics, and complete release verification remain incomplete; this roadmap is not a claim that OpenMail 2.0 is finished.

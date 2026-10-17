@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Livewire\Mailbox\SaveSearchButton;
 use App\Livewire\Mailbox\SavedSearches;
+use App\Livewire\Mailbox\SaveSearchButton;
 use App\Models\SavedSearch;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;

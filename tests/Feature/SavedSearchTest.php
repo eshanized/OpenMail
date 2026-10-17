@@ -74,6 +74,13 @@ class SavedSearchTest extends TestCase
             ->assertDispatched('toast');
 
         $this->assertDatabaseHas('saved_searches', ['id' => $private->id, 'user_id' => $other->id]);
+        $this->assertDatabaseHas('saved_searches', ['id' => $visible->id, 'user_id' => $owner->id]);
+
+        Livewire::actingAs($owner)
+            ->test(SavedSearches::class)
+            ->call('deleteSearch', $visible->id)
+            ->assertDispatched('toast');
+
         $this->assertDatabaseMissing('saved_searches', ['id' => $visible->id]);
     }
 

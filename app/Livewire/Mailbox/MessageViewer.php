@@ -676,8 +676,9 @@ class MessageViewer extends Component
             return;
         }
 
-        $this->showAiAssistant = ! $this->showAiAssistant;
+        $this->showAiAssistant = !$this->showAiAssistant;
         $this->aiError = null;
+        $this->aiDataSharingConfirmed = false;
     }
 
     public function generateAiSummary(): void

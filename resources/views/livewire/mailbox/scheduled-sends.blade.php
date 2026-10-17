@@ -26,7 +26,13 @@
                         <p class="mt-1 text-xs text-ink-tertiary">
                             {{ $send->send_at?->timezone(config('app.timezone'))->format('M j, Y \\a\\t g:i A') ?? 'Delivery time unavailable' }}
                             <span aria-hidden="true"> · </span>
-                            {{ $send->status === \App\Models\PendingSend::STATUS_RETRY_WAITING ? 'Retry scheduled' : 'Scheduled' }}
+                            @if($send->status === \App\Models\PendingSend::STATUS_RETRY_WAITING)
+                                Retry scheduled
+                            @elseif($send->send_at && $send->send_at->isPast())
+                                Due — awaiting delivery
+                            @else
+                                Scheduled
+                            @endif
                         </p>
                         @if($send->last_error_category)
                             <p class="mt-1 text-xs text-warning">Previous delivery attempt: {{ str_replace('_', ' ', $send->last_error_category) }}. The message remains queued for retry.</p>

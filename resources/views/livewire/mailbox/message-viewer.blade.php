@@ -190,6 +190,22 @@
                         </svg>
                         <span class="hidden sm:inline">Forward</span>
                     </button>
+
+                    @if(config('openmail.ai.enabled'))
+                        <button
+                            type="button"
+                            wire:click="toggleAiAssistant"
+                            wire:loading.attr="disabled"
+                            class="inline-flex items-center gap-1.5 rounded border border-primary/25 bg-primary/5 px-2.5 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10 disabled:opacity-50"
+                            aria-expanded="{{ $showAiAssistant ? 'true' : 'false' }}"
+                            aria-controls="openmail-ai-assistant"
+                        >
+                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16z"/>
+                            </svg>
+                            <span>AI assist</span>
+                        </button>
+                    @endif
                 </div>
 
                 {{-- Right Actions: Status & Organizing --}}
@@ -293,6 +309,72 @@
                     </button>
                 </div>
             </div>
+
+            @if(config('openmail.ai.enabled') && $showAiAssistant)
+                <section id="openmail-ai-assistant" class="border-b border-border bg-primary/[0.03] px-4 py-4 sm:px-6" aria-labelledby="openmail-ai-title">
+                    <div class="mx-auto max-w-3xl space-y-3">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <h2 id="openmail-ai-title" class="text-sm font-semibold text-ink">OpenMail Intelligence</h2>
+                                <p class="mt-1 text-xs leading-5 text-ink-tertiary">Generate a summary or an editable reply draft. Nothing is sent automatically.</p>
+                            </div>
+                            <button type="button" wire:click="toggleAiAssistant" class="rounded p-1 text-ink-tertiary hover:bg-hover hover:text-ink" aria-label="Close AI assistant">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m6 6 12 12M18 6 6 18"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <label class="flex items-start gap-2.5 rounded-lg border border-border bg-surface-raised p-3">
+                            <input type="checkbox" wire:model="aiDataSharingConfirmed" class="mt-0.5 rounded border-border-strong text-primary focus:ring-primary">
+                            <span class="text-xs leading-5 text-ink-secondary">
+                                I confirm this message's subject, sender, and readable body may be sent to the AI endpoint configured by my administrator for this action.
+                                <span class="block mt-0.5 text-[11px] text-ink-tertiary">Only configure an endpoint you trust. The provider receives the message content; avoid this feature for confidential content when policy does not permit it.</span>
+                            </span>
+                        </label>
+                        @error('aiDataSharingConfirmed')
+                            <p class="text-xs text-error">{{ $message }}</p>
+                        @enderror
+
+                        <div class="flex flex-wrap gap-2">
+                            <button
+                                type="button"
+                                wire:click="generateAiSummary"
+                                wire:loading.attr="disabled"
+                                wire:target="generateAiSummary,generateAiReply"
+                                class="inline-flex items-center gap-2 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-white hover:bg-primary-hover disabled:opacity-50"
+                            >
+                                <span wire:loading.remove wire:target="generateAiSummary">Summarize email</span>
+                                <span wire:loading wire:target="generateAiSummary">Summarizing…</span>
+                            </button>
+                            <button
+                                type="button"
+                                wire:click="generateAiReply"
+                                wire:loading.attr="disabled"
+                                wire:target="generateAiSummary,generateAiReply"
+                                class="inline-flex items-center gap-2 rounded-lg border border-border bg-surface-raised px-3.5 py-2 text-xs font-semibold text-ink-secondary hover:bg-hover hover:text-ink disabled:opacity-50"
+                            >
+                                <span wire:loading.remove wire:target="generateAiReply">Draft a reply</span>
+                                <span wire:loading wire:target="generateAiReply">Drafting…</span>
+                            </button>
+                        </div>
+
+                        @if($aiError)
+                            <div role="alert" class="rounded-lg border border-error/25 bg-error/5 p-3 text-xs leading-5 text-error">{{ $aiError }}</div>
+                        @endif
+
+                        @if($aiSummary)
+                            <div class="rounded-xl border border-border bg-surface-raised p-4">
+                                <div class="mb-2 flex items-center justify-between gap-2">
+                                    <h3 class="text-xs font-semibold text-ink">Email summary</h3>
+                                    <button type="button" wire:click="$set('aiSummary', null)" class="text-[11px] text-ink-tertiary hover:text-ink">Dismiss</button>
+                                </div>
+                                <div class="whitespace-pre-wrap break-words text-sm leading-6 text-ink">{{ $aiSummary }}</div>
+                            </div>
+                        @endif
+                    </div>
+                </section>
+            @endif
 
             {{-- Message body --}}
             <div class="email-body-content">

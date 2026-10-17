@@ -120,7 +120,7 @@ class ImapMailboxServiceCoverageTest extends TestCase
     {
         $client = $this->connectedClient();
         $folder = Mockery::mock(Folder::class);
-        $folder->shouldReceive('status')->once()->andThrow(new \\RuntimeException('status unavailable'));
+        $folder->shouldReceive('status')->once()->andThrow(new \RuntimeException('status unavailable'));
         $folder->shouldReceive('examine')->once()->andReturn(['exists' => 27, 'uidvalidity' => 440]);
         $query = Mockery::mock(WhereQuery::class);
         $query->shouldReceive('unseen')->once()->andReturnSelf();

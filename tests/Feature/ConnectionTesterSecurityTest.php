@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Services\ImapConnectionTester;
-use App\Services\OutboundConnectionGuard;
 use App\Services\SmtpConnectionTester;
 use InvalidArgumentException;
 use Tests\TestCase;

@@ -60,7 +60,7 @@ class AiAssistantService
         if (
             $parsed === false
             || ! in_array($scheme, ['https', 'http'], true)
-            || ($scheme === 'http' && !$isLoopbackHost)
+            || ($scheme === 'http' && ! $isLoopbackHost)
             || $host === ''
             || isset($parsed['user'])
             || isset($parsed['pass'])

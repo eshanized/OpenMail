@@ -1,5 +1,9 @@
 # OpenMail 2.0.0 Implementation Roadmap
 
+## Runtime compatibility change
+
+OpenMail 2.0.0 requires PHP 8.4.1 or newer. The existing dependency lock contains Symfony 8.1 packages requiring PHP 8.4.1, so the previously advertised PHP 8.2/8.3 range could not install the committed dependencies in CI. The installer, Composer manifest, CI matrix, and deployment documentation must agree on this minimum. Administrators should confirm their hosting provider supports PHP 8.4.1 before upgrading.
+
 ## Product goal
 
 Evolve OpenMail from a secure, self-hosted IMAP/SMTP webmail interface into a more productive organizational email workspace without abandoning its deployment constraints: Laravel monolith, MySQL/MariaDB, support for cPanel/shared hosting, no required Redis, and no permanently running worker for basic mail operations.
@@ -104,4 +108,4 @@ Acceptance: diagnostics are actionable and redact secrets; upgrade and backup/re
 
 ## Current execution note
 
-The first implementation slice adds durable send-later support using the existing pending-send state machine, a user-scoped scheduled-message page, cancellation back to Drafts, and tests for persistence and ownership isolation. Other workstreams remain planned until their code and verification evidence land.
+Implemented slices now include durable send-later with cancellation, per-user email templates, snooze/return, saved searches, command-palette navigation, a static-only PWA shell that never caches private mail, opt-in AI summaries and editable reply drafts, and evidence-based message-security indicators. Multi-account isolation, shared inboxes/roles, richer synchronization, admin diagnostics, and complete release verification remain incomplete; this roadmap is not a claim that OpenMail 2.0 is finished.

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- **Durable Send Later**: Persist scheduled email delivery in the existing delivery state machine, expose a scheduled-message queue, and allow users to cancel future messages back to Drafts.
+- **Scheduled MIME Durability**: Deliver the persisted MIME payload so attachment delivery does not depend on temporary browser-upload paths still existing at the scheduled time; restore Bcc recipients only to the SMTP envelope.
+
+
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 

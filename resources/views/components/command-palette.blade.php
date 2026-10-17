@@ -7,7 +7,8 @@
         snoozedUrl: @js(route('snoozed-messages')),
         savedSearchesUrl: @js(route('saved-searches')),
         templatesUrl: @js(route('email-templates')),
-        deliveryActivityUrl: @js(route('delivery-activity'))
+        deliveryActivityUrl: @js(route('delivery-activity')),
+        remindersUrl: @js(route('follow-up-reminders'))
     })"
     @keydown.window="handleKeydown($event)"
 >

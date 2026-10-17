@@ -370,7 +370,7 @@ class Composer extends Component
             $this->showSchedulePicker = false;
             $this->resetForm();
             $this->isOpen = false;
-        } catch (\\Throwable $e) {
+        } catch (\Throwable $e) {
             Log::error('Scheduled email creation failed', [
                 'user_id' => auth()->id(),
                 'error' => $e->getMessage(),

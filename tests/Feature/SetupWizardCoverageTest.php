@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Install\DatabaseInstaller;
 use App\Livewire\SetupWizard;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Session;
 use Livewire\Livewire;
-use Mockery;
 use Tests\TestCase;
 
 class SetupWizardCoverageTest extends TestCase
@@ -103,7 +101,7 @@ class SetupWizardCoverageTest extends TestCase
             ->set('dbUsername', 'installer')
             ->call('createDatabase')
             ->assertSet('createDbResult.success', false)
-            ->assertSee('Invalid database name', false);
+            ->assertSet('createDbResult.error', 'Invalid database name. Use only letters, numbers, and underscores.');
     }
 
     public function test_run_migrations_requires_a_successful_connection_first(): void

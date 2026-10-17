@@ -24,7 +24,7 @@ This guide is written specifically for **non-technical users and administrators*
 Before starting, make sure you have:
 
 - **Shared Web Hosting or VPS** with **cPanel** (or any hosting panel like DirectAdmin, Plesk, or CyberPanel).
-- **PHP 8.2, 8.3, or 8.4** installed and enabled on your hosting account.
+- **PHP 8.4.1 or newer** installed and enabled on your hosting account.
 - **MySQL 8.0+ or MariaDB 10.6+** (standard on almost all cPanel hosts).
 - **Your Email Server Details** (IMAP & SMTP hostnames and ports). Usually:
   - IMAP Host: `mail.yourdomain.com` (Port: `993`, Encryption: `SSL/TLS`)
@@ -236,7 +236,7 @@ You will see the 8-step OpenMail setup wizard:
 - **Cause**: An extension like `pdo_mysql`, `mbstring`, or `intl` is not enabled in your PHP profile.
 - **Fix in cPanel**:
   1. Go to cPanel home and search for **Select PHP Version** (or **MultiPHP INI Editor**).
-  2. Make sure your PHP version is set to **8.2** or **8.3**.
+  2. Make sure your PHP version is set to **8.4** or newer (minimum **8.4.1**).
   3. Click on the **Extensions** tab.
   4. Check the box for the missing extension (e.g. `pdo_mysql`, `mbstring`, `fileinfo`, `curl`, `intl`).
   5. Return to the browser wizard and click **Refresh / Check Again**.
@@ -256,7 +256,7 @@ You will see the 8-step OpenMail setup wizard:
 
 ### 6. The website displays "HTTP 500 Internal Server Error"
 - **Cause**: Incorrect file permissions on `storage` or `bootstrap/cache`.
-- **Fix**: In cPanel File Manager, make sure permissions for `storage/` and `bootstrap/cache/` are set to `755` (or `775`). Also verify your server is running PHP 8.2 or newer.
+- **Fix**: In cPanel File Manager, make sure permissions for `storage/` and `bootstrap/cache/` are set to `755` (or `775`). Also verify your server is running PHP 8.4.1 or newer.
 
 ---
 

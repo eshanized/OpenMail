@@ -239,7 +239,21 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
 
-            if (!this.open) return;
+            if (!this.open) {
+                const target = event.target;
+                const isTyping = target instanceof HTMLElement
+                    && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName));
+                if (isTyping || event.metaKey || event.ctrlKey || event.altKey) return;
+
+                if (key === 'c') {
+                    event.preventDefault();
+                    this.execute(this.actions.find(action => action.id === 'compose'));
+                } else if (key === '/') {
+                    event.preventDefault();
+                    this.execute(this.actions.find(action => action.id === 'search'));
+                }
+                return;
+            }
 
             if (key === 'escape') {
                 event.preventDefault();

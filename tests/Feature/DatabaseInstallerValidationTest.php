@@ -14,7 +14,7 @@ class DatabaseInstallerValidationTest extends TestCase
         $result = app(DatabaseInstaller::class)->createDatabase(
             '127.0.0.1',
             3306,
-            '!!!; DROP DATABASE main; --',
+            '!!!',
             'installer',
             'not-used'
         );

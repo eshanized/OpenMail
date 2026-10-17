@@ -58,6 +58,8 @@ class AuthControllerCoverageTest extends TestCase
 
         $currentId = 'current-auth-session';
         $otherId = 'other-auth-session';
+        $this->app['config']->set('session.driver', 'database');
+        $this->app['config']->set('session.connection', config('database.default'));
         DB::table('sessions')->insert([
             [
                 'id' => $currentId,
@@ -77,10 +79,21 @@ class AuthControllerCoverageTest extends TestCase
             ],
         ]);
 
+        $this->withSession(['_token' => 'test-token']);
+        $sessionId = session()->getId();
+        DB::table('sessions')->insert([
+            'id' => $sessionId,
+            'user_id' => $user->id,
+            'ip_address' => '192.0.2.3',
+            'user_agent' => 'test runner',
+            'payload' => base64_encode(serialize(['_token' => 'test-token'])),
+            'last_activity' => time(),
+        ]);
+
         $response = $this->from('/settings')->post('/settings/sessions/revoke');
 
         $response->assertRedirect('/settings');
-        $this->assertDatabaseHas('sessions', ['user_id' => $user->id]);
+        $this->assertDatabaseHas('sessions', ['id' => $sessionId, 'user_id' => $user->id]);
         $this->assertDatabaseMissing('sessions', ['id' => $otherId]);
         $this->assertDatabaseHas('audit_logs', [
             'user_id' => $user->id,

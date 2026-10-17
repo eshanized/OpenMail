@@ -17,7 +17,9 @@ class SnoozedMessageService
         string $folderPath,
         int $uid,
         ?string $messageId,
-        CarbonImmutable $wakeAt
+        CarbonImmutable $wakeAt,
+        ?string $subject = null,
+        ?string $sender = null
     ): SnoozedMessage {
         if ($userId <= 0 || $uid <= 0 || trim($folderPath) === '') {
             throw new InvalidArgumentException('A valid user, folder, and message UID are required.');
@@ -31,7 +33,7 @@ class SnoozedMessageService
             throw new InvalidArgumentException('Snooze time cannot be more than one year in the future.');
         }
 
-        return DB::transaction(function () use ($userId, $folderPath, $uid, $messageId, $wakeAt): SnoozedMessage {
+        return DB::transaction(function () use ($userId, $folderPath, $uid, $messageId, $wakeAt, $subject, $sender): SnoozedMessage {
             return SnoozedMessage::query()->updateOrCreate(
                 [
                     'user_id' => $userId,
@@ -40,6 +42,8 @@ class SnoozedMessageService
                 ],
                 [
                     'message_id' => $messageId !== null ? mb_substr(trim($messageId), 0, 255) : null,
+                    'subject' => $subject !== null ? mb_substr(trim($subject), 0, 255) : null,
+                    'sender' => $sender !== null ? mb_substr(trim($sender), 0, 320) : null,
                     'wake_at' => $wakeAt,
                     'status' => SnoozedMessage::STATUS_SNOOZED,
                 ]
@@ -75,6 +79,6 @@ class SnoozedMessageService
             ->where('user_id', $userId)
             ->where('folder_path', $folderPath)
             ->active()
-            ->get(['id', 'user_id', 'folder_path', 'uid', 'message_id', 'wake_at', 'status']);
+            ->get(['id', 'user_id', 'folder_path', 'uid', 'message_id', 'subject', 'sender', 'wake_at', 'status']);
     }
 }

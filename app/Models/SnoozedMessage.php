@@ -22,6 +22,8 @@ class SnoozedMessage extends Model
         'folder_path',
         'uid',
         'message_id',
+        'subject',
+        'sender',
         'wake_at',
         'status',
     ];

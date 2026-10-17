@@ -53,11 +53,15 @@ class AiAssistantService
 
         $baseUrl = trim((string) config('openmail.ai.base_url'));
         $parsed = parse_url($baseUrl);
+        $scheme = strtolower((string) ($parsed['scheme'] ?? ''));
+        $host = strtolower(rtrim(trim((string) ($parsed['host'] ?? ''), '[]'), '.'));
+        $isLoopbackHost = in_array($host, ['localhost', '127.0.0.1', '::1'], true);
 
         if (
             $parsed === false
-            || !in_array(strtolower((string) ($parsed['scheme'] ?? '')), ['https', 'http'], true)
-            || empty($parsed['host'])
+            || !in_array($scheme, ['https', 'http'], true)
+            || ($scheme === 'http' && !$isLoopbackHost)
+            || $host === ''
             || isset($parsed['user'])
             || isset($parsed['pass'])
             || isset($parsed['query'])

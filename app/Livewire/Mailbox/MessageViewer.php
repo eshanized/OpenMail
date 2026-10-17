@@ -10,8 +10,8 @@ use App\Services\MessageSanitizer;
 use App\Services\MessageSecurityAnalyzer;
 use App\Services\SnoozedMessageService;
 use Carbon\Carbon;
-use Carbon\CarbonInterface;
 use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Mockery\LegacyMockInterface;
@@ -302,7 +302,7 @@ class MessageViewer extends Component
             return $value instanceof Attribute || is_scalar($value)
                 ? trim((string) $value)
                 : '';
-        } catch (\\Throwable) {
+        } catch (\Throwable) {
             return '';
         }
     }
@@ -614,7 +614,7 @@ class MessageViewer extends Component
                 'success'
             );
             $this->redirect(route('mailbox.folder', ['folderPath' => $this->folderPath]), navigate: true);
-        } catch (\\Throwable $exception) {
+        } catch (\Throwable $exception) {
             Log::warning('Message snooze failed', [
                 'user_id' => auth()->id(),
                 'folder' => $this->folderPath,

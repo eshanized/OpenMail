@@ -338,8 +338,27 @@ class ImapMailboxService
 
         try {
             $folder = $client->getFolder($folderPath);
-            $info = $folder->examine();
 
+            // Prefer one STATUS round trip over EXAMINE plus an UNSEEN search.
+            try {
+                $status = $folder->status();
+
+                if (is_array($status) && (
+                    array_key_exists('messages', $status)
+                    || array_key_exists('unseen', $status)
+                    || array_key_exists('uidvalidity', $status)
+                )) {
+                    return [
+                        'total' => (int) ($status['messages'] ?? 0),
+                        'unread' => (int) ($status['unseen'] ?? 0),
+                        'uidvalidity' => $status['uidvalidity'] ?? null,
+                    ];
+                }
+            } catch (\Throwable) {
+                // Fall back for servers that do not support STATUS reliably.
+            }
+
+            $info = $folder->examine();
             $unread = $folder->query()
                 ->unseen()
                 ->setFetchBody(false)

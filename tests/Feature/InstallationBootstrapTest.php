@@ -98,10 +98,10 @@ class InstallationBootstrapTest extends TestCase
             if (is_dir($path)) {
                 $this->removeDirectory($path);
             } else {
-                @unlink($path);
+                unlink($path);
             }
         }
 
-        @rmdir($directory);
+        rmdir($directory);
     }
 }

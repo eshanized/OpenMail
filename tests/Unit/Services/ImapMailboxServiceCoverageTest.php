@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\ImapMailboxService;
 use Illuminate\Support\Facades\Cache;
 use Mockery;
+use ReflectionProperty;
 use Tests\TestCase;
 use Webklex\PHPIMAP\Client;
 use Webklex\PHPIMAP\Folder;
@@ -184,7 +185,8 @@ class ImapMailboxServiceCoverageTest extends TestCase
         $service = $this->serviceFor($client);
         $service->disconnect();
 
-        $this->assertTrue(true);
+        $activeClient = new ReflectionProperty(ImapMailboxService::class, 'activeClient');
+        $this->assertNull($activeClient->getValue($service));
     }
 
     public function test_folder_cache_refresh_forgets_both_folder_keys(): void

@@ -6,7 +6,8 @@
         scheduledUrl: @js(route('scheduled-sends')),
         snoozedUrl: @js(route('snoozed-messages')),
         savedSearchesUrl: @js(route('saved-searches')),
-        templatesUrl: @js(route('email-templates'))
+        templatesUrl: @js(route('email-templates')),
+        deliveryActivityUrl: @js(route('delivery-activity'))
     })"
     @keydown.window="handleKeydown($event)"
 >

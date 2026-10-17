@@ -7,7 +7,7 @@ namespace Tests\Unit\Services;
 use App\Models\User;
 use App\Services\MailTransportService;
 use InvalidArgumentException;
-use Illuminate\Support\Facades\Log;\nuse Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Mockery;
 use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mailer\Exception\TransportException;

@@ -7,8 +7,10 @@ use App\Services\AiAssistantService;
 use App\Services\ImapMailboxService;
 use App\Services\LabelService;
 use App\Services\MessageSanitizer;
+use App\Services\SnoozedMessageService;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Mockery\LegacyMockInterface;
@@ -527,6 +529,66 @@ class MessageViewer extends Component
         $imap->refreshFolderCache($destinationPath);
         $this->dispatch('folder-stats-updated');
         $this->redirect(route('mailbox.folder', ['folderPath' => $this->folderPath]), navigate: true);
+    }
+
+    public function snoozeUntil(string $preset): void
+    {
+        $timezone = (string) config('app.timezone');
+        $now = CarbonImmutable::now($timezone);
+
+        $wakeAt = match ($preset) {
+            'in_hour' => $now->addHour(),
+            'tomorrow' => $now->addDay()->setTime(9, 0),
+            'next_week' => $now->addWeek()->setTime(9, 0),
+            default => null,
+        };
+
+        if (! $wakeAt) {
+            $this->dispatch('toast', 'Choose a valid snooze time.', 'warning');
+
+            return;
+        }
+
+        if ($this->uid <= 0 || trim($this->folderPath) === '') {
+            $this->dispatch('toast', 'This message cannot be snoozed because its mailbox location is invalid.', 'error');
+
+            return;
+        }
+
+        // Re-fetch from the authenticated mailbox instead of trusting hydrated display fields.
+        $this->loadMessage();
+        if (! $this->message) {
+            $this->dispatch('toast', 'This message is no longer available.', 'warning');
+
+            return;
+        }
+
+        try {
+            app(SnoozedMessageService::class)->snooze(
+                (int) auth()->id(),
+                $this->folderPath,
+                $this->uid,
+                trim($this->messageId) !== '' ? $this->messageId : null,
+                $wakeAt,
+                $this->subject,
+                $this->fromDisplay ?: $this->fromAddress
+            );
+
+            $this->dispatch(
+                'toast',
+                'Message snoozed until '.$wakeAt->timezone($timezone)->format('M j, g:i A').'.',
+                'success'
+            );
+            $this->redirect(route('mailbox.folder', ['folderPath' => $this->folderPath]), navigate: true);
+        } catch (\\Throwable $exception) {
+            Log::warning('Message snooze failed', [
+                'user_id' => auth()->id(),
+                'folder' => $this->folderPath,
+                'uid' => $this->uid,
+                'exception' => $exception::class,
+            ]);
+            $this->dispatch('toast', 'Could not snooze this message. Try again.', 'error');
+        }
     }
 
     public function reply(): void

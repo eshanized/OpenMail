@@ -4,6 +4,7 @@ namespace App\Livewire\Mailbox;
 
 use App\Models\MessageMetadata;
 use App\Services\ImapMailboxService;
+use App\Services\SnoozedMessageService;
 use App\Services\ThreadBuilder;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
@@ -81,6 +82,8 @@ class MessageList extends Component
             ? $this->getThreadedMessages()
             : $this->getFlatMessages();
 
+        $messages = $this->filterSnoozedMessages($messages);
+
         if ($this->quickFilter === 'unread') {
             if (is_array($messages)) {
                 return array_values(array_filter($messages, fn ($t) => ($t->unreadCount ?? ($t->is_seen ? 0 : 1)) > 0));
@@ -116,6 +119,93 @@ class MessageList extends Component
         }
 
         return $messages;
+    }
+
+    protected function filterSnoozedMessages(LengthAwarePaginator|array $messages): LengthAwarePaginator|array
+    {
+        $userId = (int) auth()->id();
+        if ($userId <= 0) {
+            return $messages;
+        }
+
+        $snoozed = app(SnoozedMessageService::class)->activeForFolder($userId, $this->folderPath);
+        if ($snoozed->isEmpty()) {
+            return $messages;
+        }
+
+        $byUid = $snoozed->keyBy('uid');
+
+        if ($messages instanceof LengthAwarePaginator) {
+            $items = $messages->getCollection()
+                ->reject(fn ($message): bool => $this->isSnoozedMessage($message, $byUid))
+                ->values();
+
+            return new LengthAwarePaginator(
+                $items,
+                max(0, $messages->total() - $snoozed->count()),
+                $messages->perPage(),
+                $messages->currentPage(),
+                [
+                    'path' => request()->url(),
+                    'pageName' => 'messages-page',
+                    'query' => request()->query(),
+                ]
+            );
+        }
+
+        // In threaded mode a conversation is snoozed as a unit, matching the
+        // expected behavior when a later reply arrives in an existing thread.
+        return array_values(array_filter(
+            $messages,
+            fn ($thread): bool => ! $this->threadContainsSnoozedMessage($thread, $byUid)
+        ));
+    }
+
+    protected function threadContainsSnoozedMessage(mixed $thread, Collection $byUid): bool
+    {
+        if ($this->isSnoozedMessage($thread, $byUid)) {
+            return true;
+        }
+
+        $children = is_array($thread)
+            ? ($thread['children'] ?? [])
+            : (is_object($thread) ? ($thread->children ?? []) : []);
+
+        foreach ($children as $child) {
+            if ($this->threadContainsSnoozedMessage($child, $byUid)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected function isSnoozedMessage(mixed $message, Collection $byUid): bool
+    {
+        $uid = is_array($message)
+            ? ($message['uid'] ?? null)
+            : (is_object($message) ? ($message->uid ?? null) : null);
+
+        if (! is_numeric($uid) || (int) $uid <= 0) {
+            return false;
+        }
+
+        $snoozed = $byUid->get((int) $uid);
+        if (! $snoozed) {
+            return false;
+        }
+
+        $messageId = is_array($message)
+            ? trim((string) ($message['message_id'] ?? ''))
+            : (is_object($message) ? trim((string) ($message->message_id ?? '')) : '');
+
+        // If a Message-ID was recorded, refuse to hide a different message in
+        // case the server reuses a UID after a mailbox reset.
+        if ($snoozed->message_id !== null && $snoozed->message_id !== '') {
+            return $messageId !== '' && hash_equals((string) $snoozed->message_id, $messageId);
+        }
+
+        return true;
     }
 
     public function getFlatMessages(): LengthAwarePaginator

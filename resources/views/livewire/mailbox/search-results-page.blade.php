@@ -341,12 +341,14 @@
             @endif
 
             {{-- Results Header --}}
-            <div class="flex items-center justify-between mb-3 gap-2">
+            <div class="flex flex-wrap items-center justify-between mb-3 gap-2">
                 <h2 class="text-xs text-ink-secondary truncate">
                     {{ $results->total() }} result{{ $results->total() !== 1 ? 's' : '' }} for
                     <span class="font-semibold text-ink">"{{ $query }}"</span>
                 </h2>
 
+                <div class="flex items-center gap-2">
+                    <livewire:mailbox.save-search-button :query="$query" :filters="$filters" :key="'save-search-'.sha1($query.'|'.json_encode($filters))" />
                 <button
                     type="button"
                     @click="mobileFiltersOpen = true"
@@ -361,6 +363,7 @@
                         <span class="inline-flex items-center justify-center px-1.5 py-0.2 text-[10px] font-bold rounded-full bg-primary text-primary-contrast">{{ count($activeFilters) }}</span>
                     @endif
                 </button>
+                </div>
             </div>
 
             {{-- Results --}}

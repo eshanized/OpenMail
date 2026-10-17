@@ -86,6 +86,20 @@
 
             <div class="px-3 pb-2">
                 <a
+                    href="{{ route('saved-searches') }}"
+                    wire:navigate
+                    class="flex items-center gap-2 rounded border border-border px-3 py-2 text-xs font-medium text-ink-secondary hover:bg-hover hover:text-ink transition-colors"
+                    aria-label="View saved searches"
+                >
+                    <svg class="h-4 w-4 text-ink-tertiary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                        <circle cx="10.8" cy="10.8" r="6.8"/><path stroke-linecap="round" stroke-linejoin="round" d="m16 16 4.2 4.2"/>
+                    </svg>
+                    <span>Saved searches</span>
+                </a>
+            </div>
+
+            <div class="px-3 pb-2">
+                <a
                     href="{{ route('snoozed-messages') }}"
                     wire:navigate
                     class="flex items-center gap-2 rounded border border-border px-3 py-2 text-xs font-medium text-ink-secondary hover:bg-hover hover:text-ink transition-colors"

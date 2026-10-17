@@ -9,7 +9,6 @@ use App\Http\Requests\SettingsRequest;
 use App\Http\Requests\SignatureRequest;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Tests\TestCase;
 

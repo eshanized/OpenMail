@@ -258,7 +258,7 @@ class Composer extends Component
         $html = $this->bodyHtml !== '' ? $this->bodyHtml : $this->body;
         $html = preg_replace('/<br\s*\/?\s*>|<\/(?:p|div|li|h[1-6])>/i', "\n", $html) ?? $html;
         $draftText = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $draftText = trim(preg_replace("/[ \\t]+\\n/", "\\n", $draftText) ?? $draftText);
+        $draftText = trim(preg_replace('/[ \t]+\n/', "\n", $draftText) ?? $draftText);
 
         if ($draftText === '') {
             $this->aiRewriteError = 'Add some draft text before requesting a rewrite.';

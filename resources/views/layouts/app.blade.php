@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#f45b55">
+    <meta name="theme-color" content="#cf4234">
     <meta name="application-name" content="OpenMail">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -58,19 +58,19 @@
          aria-hidden="true"></div>
 
     {{-- Application header — minimal, recedes behind content --}}
-    <nav class="bg-surface-raised border-b border-border sticky top-0 z-30 w-full shrink-0">
+    <nav class="app-topbar bg-surface-raised border-b border-border sticky top-0 z-30 w-full shrink-0">
         <div class="w-full px-2.5 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-11 items-center gap-1.5 sm:gap-4">
+            <div class="flex justify-between h-14 items-center gap-1.5 sm:gap-4">
                 {{-- Left: Brand & Navigation --}}
                 <div class="flex items-center gap-1.5 sm:gap-3 min-w-0">
                     @hasSection('mobile-nav-toggle')
                         @yield('mobile-nav-toggle')
                     @endif
-                    <a href="{{ route('mailbox') }}" wire:navigate class="flex items-center gap-1.5 sm:gap-2 group min-w-0">
+                    <a href="{{ route('mailbox') }}" wire:navigate class="brand-link flex items-center gap-2 sm:gap-2.5 group min-w-0">
                         {{-- Logo mark — simple envelope, no color background --}}
-                        <svg class="w-5 h-5 text-primary shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                        <span class="brand-mark flex h-8 w-8 items-center justify-center rounded-xl bg-primary shadow-sm"><svg class="h-4 w-4 text-white shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                        </svg>
+                        </svg></span>
                         <span class="text-sm font-semibold text-ink tracking-tight group-hover:text-primary transition-colors duration-150 truncate">
                             {{ config('app.name', 'OpenMail') }}
                         </span>

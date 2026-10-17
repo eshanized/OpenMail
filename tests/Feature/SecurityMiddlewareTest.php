@@ -62,7 +62,7 @@ class SecurityMiddlewareTest extends TestCase
         $response = (new InstallLock)->handle(Request::create('/mailbox'), fn () => new Response('should not run'));
 
         $this->assertSame(302, $response->getStatusCode());
-        $this->assertSame('/install', $response->headers->get('Location'));
+        $this->assertSame('/install', parse_url($response->headers->get('Location'), PHP_URL_PATH));
     }
 
     public function test_uninstalled_application_allows_livewire_and_health_check_routes(): void

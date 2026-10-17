@@ -281,7 +281,6 @@ class MessageViewer extends Component
         $this->attachments = $this->extractAttachments($this->message);
         $this->securitySignals = app(MessageSecurityAnalyzer::class)->analyze(
             $this->fromAddress,
-            $this->fromDisplay,
             $this->readHeaderValue($this->message, 'reply-to'),
             $this->readHeaderValue($this->message, 'authentication-results'),
             $this->sanitizedHtml,

@@ -70,11 +70,11 @@ class MailTransportService
         }
 
         if (! is_string($mimeOrEmail) || trim($mimeOrEmail) === '') {
-            throw new \\InvalidArgumentException('A non-empty MIME message is required.');
+            throw new \InvalidArgumentException('A non-empty MIME message is required.');
         }
 
         if (! $user) {
-            throw new \\InvalidArgumentException('A sender is required to deliver a persisted MIME message.');
+            throw new \InvalidArgumentException('A sender is required to deliver a persisted MIME message.');
         }
 
         return $this->deliverRawMime($mimeOrEmail, $user, $envelopeData);
@@ -146,7 +146,7 @@ class MailTransportService
                 'error' => $e->getMessage(),
                 'uncertain' => $classification['uncertain'],
             ];
-        } catch (\\Throwable $e) {
+        } catch (\Throwable $e) {
             Log::error('Unexpected error delivering persisted MIME', [
                 'message_id' => $messageId,
                 'error' => $e->getMessage(),

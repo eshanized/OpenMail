@@ -217,6 +217,7 @@ document.addEventListener('alpine:init', () => {
                 { id: 'inbox', label: 'Open inbox', description: 'View your incoming mail', icon: 'inbox', shortcut: 'G I' },
                 { id: 'search', label: 'Search mail', description: 'Focus the mailbox search field', icon: 'search', shortcut: '/' },
                 { id: 'scheduled', label: 'Scheduled messages', description: 'Review or cancel future sends', icon: 'clock' },
+                { id: 'snoozed', label: 'Snoozed messages', description: 'Review messages hidden until their return time', icon: 'clock' },
                 { id: 'templates', label: 'Email templates', description: 'Manage reusable message text', icon: 'template' },
                 { id: 'settings', label: 'Settings', description: 'Appearance, mail, and security preferences', icon: 'settings' },
             ];
@@ -281,6 +282,7 @@ document.addEventListener('alpine:init', () => {
             }
         },
         execute(action) {
+            if (!action) return;
             this.closePalette();
 
             if (action.id === 'compose') {
@@ -304,6 +306,7 @@ document.addEventListener('alpine:init', () => {
             const destination = {
                 inbox: urls.inboxUrl || urls.mailboxUrl,
                 scheduled: urls.scheduledUrl,
+                snoozed: urls.snoozedUrl,
                 templates: urls.templatesUrl,
                 settings: urls.settingsUrl,
             }[action.id];

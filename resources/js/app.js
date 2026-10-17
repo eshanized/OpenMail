@@ -220,6 +220,7 @@ document.addEventListener('alpine:init', () => {
                 { id: 'snoozed', label: 'Snoozed messages', description: 'Review messages hidden until their return time', icon: 'clock' },
                 { id: 'saved-searches', label: 'Saved searches', description: 'Run or manage your reusable search filters', icon: 'search' },
                 { id: 'templates', label: 'Email templates', description: 'Manage reusable message text', icon: 'template' },
+                { id: 'delivery-activity', label: 'Delivery activity', description: 'Review sent, failed, and uncertain messages', icon: 'clock' },
                 { id: 'settings', label: 'Settings', description: 'Appearance, mail, and security preferences', icon: 'settings' },
             ];
         },
@@ -309,6 +310,7 @@ document.addEventListener('alpine:init', () => {
                 scheduled: urls.scheduledUrl,
                 snoozed: urls.snoozedUrl,
                 'saved-searches': urls.savedSearchesUrl,
+                'delivery-activity': urls.deliveryActivityUrl,
                 templates: urls.templatesUrl,
                 settings: urls.settingsUrl,
             }[action.id];

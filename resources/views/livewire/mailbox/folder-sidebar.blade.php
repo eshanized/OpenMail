@@ -86,6 +86,20 @@
 
             <div class="px-3 pb-2">
                 <a
+                    href="{{ route('delivery-activity') }}"
+                    wire:navigate
+                    class="flex items-center gap-2 rounded border border-border px-3 py-2 text-xs font-medium text-ink-secondary hover:bg-hover hover:text-ink transition-colors"
+                    aria-label="View delivery activity"
+                >
+                    <svg class="h-4 w-4 text-ink-tertiary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M7 14l4-4 4 4 5-7"/>
+                    </svg>
+                    <span>Delivery activity</span>
+                </a>
+            </div>
+
+            <div class="px-3 pb-2">
+                <a
                     href="{{ route('saved-searches') }}"
                     wire:navigate
                     class="flex items-center gap-2 rounded border border-border px-3 py-2 text-xs font-medium text-ink-secondary hover:bg-hover hover:text-ink transition-colors"

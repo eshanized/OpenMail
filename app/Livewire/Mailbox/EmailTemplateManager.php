@@ -28,7 +28,13 @@ class EmailTemplateManager extends Component
     {
         $template = EmailTemplate::query()
             ->where('user_id', auth()->id())
-            ->findOrFail($templateId);
+            ->find($templateId);
+
+        if (! $template) {
+            $this->dispatch('toast', 'Template not found.', 'warning');
+
+            return;
+        }
 
         $this->editingTemplateId = (int) $template->id;
         $this->name = $template->name;

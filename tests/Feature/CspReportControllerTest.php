@@ -33,7 +33,7 @@ class CspReportControllerTest extends TestCase
             'blocked-uri' => 'https://tracker.example.test',
             'violated-directive' => 'script-src',
             'line-number' => 12,
-        ],], JSON_THROW_ON_ERROR));
+        ]], JSON_THROW_ON_ERROR));
 
         $response = app(CspReportController::class)->store($request);
 

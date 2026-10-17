@@ -4,6 +4,7 @@ namespace App\Livewire\Mailbox;
 
 use App\Models\MessageMetadata;
 use App\Services\AiAssistantService;
+use App\Services\FollowUpReminderService;
 use App\Services\ImapMailboxService;
 use App\Services\LabelService;
 use App\Services\MessageSanitizer;
@@ -61,6 +62,10 @@ class MessageViewer extends Component
     public array $attachments = [];
 
     public array $securitySignals = [];
+
+    public bool $showFollowUpPicker = false;
+
+    public string $followUpAt = '';
 
     public bool $showAiAssistant = false;
 
@@ -622,6 +627,91 @@ class MessageViewer extends Component
                 'exception' => $exception::class,
             ]);
             $this->dispatch('toast', 'Could not snooze this message. Try again.', 'error');
+        }
+    }
+
+    public function toggleFollowUpPicker(): void
+    {
+        $this->showFollowUpPicker = ! $this->showFollowUpPicker;
+
+        if ($this->showFollowUpPicker && $this->followUpAt === '') {
+            $this->followUpAt = CarbonImmutable::now(config('app.timezone'))
+                ->addDay()
+                ->startOfHour()
+                ->format('Y-m-d\\TH:i');
+        }
+
+        $this->resetValidation('followUpAt');
+    }
+
+    public function scheduleFollowUp(): void
+    {
+        $validated = $this->validate([
+            'followUpAt' => ['required', 'date_format:Y-m-d\\TH:i'],
+        ]);
+
+        $timezone = (string) config('app.timezone');
+        $remindAt = CarbonImmutable::createFromFormat(
+            '!Y-m-d\\TH:i',
+            $validated['followUpAt'],
+            $timezone
+        );
+        $now = CarbonImmutable::now($timezone);
+
+        if (! $remindAt || $remindAt->lessThanOrEqualTo($now->addMinute())) {
+            $this->addError('followUpAt', 'Choose a reminder time at least one minute from now.');
+
+            return;
+        }
+
+        if ($remindAt->greaterThan($now->addYear())) {
+            $this->addError('followUpAt', 'Reminders can be scheduled up to one year ahead.');
+
+            return;
+        }
+
+        if ($this->uid <= 0 || trim($this->folderPath) === '') {
+            $this->dispatch('toast', 'This message cannot be reminded because its mailbox location is invalid.', 'error');
+
+            return;
+        }
+
+        try {
+            // refresh the selected message before persisting identity and display details.
+            $this->loadMessage();
+
+            if (! $this->message) {
+                $this->dispatch('toast', 'This message is no longer available.', 'warning');
+
+                return;
+            }
+
+            app(FollowUpReminderService::class)->schedule(
+                (int) auth()->id(),
+                $this->folderPath,
+                $this->uid,
+                trim($this->messageId) !== '' ? $this->messageId : null,
+                $this->subject,
+                $this->fromDisplay ?: $this->fromAddress,
+                $remindAt
+            );
+
+            $this->dispatch(
+                'toast',
+                'Follow-up reminder set for '.$remindAt->timezone($timezone)->format('M j, Y g:i A').'.',
+                'success'
+            );
+            $this->showFollowUpPicker = false;
+            $this->followUpAt = '';
+            $this->resetValidation('followUpAt');
+        } catch (\\Throwable $exception) {
+            Log::warning('Follow-up reminder creation failed', [
+                'user_id' => auth()->id(),
+                'folder' => $this->folderPath,
+                'uid' => $this->uid,
+                'exception' => $exception::class,
+            ]);
+            $this->dispatch('toast', 'Could not set the follow-up reminder. Try again.', 'error');
         }
     }
 

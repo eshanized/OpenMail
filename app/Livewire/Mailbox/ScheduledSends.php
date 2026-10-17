@@ -44,7 +44,6 @@ class ScheduledSends extends Component
                 PendingSend::STATUS_PENDING,
                 PendingSend::STATUS_RETRY_WAITING,
             ])
-            ->where('send_at', '>', now())
             ->orderBy('send_at')
             ->paginate(20);
 

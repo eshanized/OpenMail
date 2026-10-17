@@ -69,6 +69,7 @@ class ScheduledSendTest extends TestCase
 
             $send = PendingSend::query()->findOrFail($result['pending_send_id']);
             $this->assertNotEmpty($send->mime_message);
+            $this->assertArrayNotHasKey('path', $send->message_json['attachments'][0]);
 
             // A scheduled send must not depend on the temporary upload existing later.
             unlink($path);

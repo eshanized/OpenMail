@@ -47,7 +47,7 @@ class ModelRelationsTest extends TestCase
         $this->assertSame($user->id, $cache->user->id);
         $this->assertSame(7, $cache->fresh()->frequency);
         $this->assertInstanceOf(Carbon::class, $cache->fresh()->last_used_at);
-        $this->assertInstanceOf(\Illuminate\Support\Carbon::class, $cache->fresh()->expires_at);
+        $this->assertInstanceOf(Carbon::class, $cache->fresh()->expires_at);
     }
 
     public function test_email_template_belongs_to_its_owner(): void
@@ -113,7 +113,7 @@ class ModelRelationsTest extends TestCase
 
         $this->assertSame($user->id, $cache->user->id);
         $this->assertSame(123, $cache->fresh()->uid);
-        $this->assertInstanceOf(\Illuminate\Support\Carbon::class, $cache->fresh()->date);
-        $this->assertInstanceOf(\Illuminate\Support\Carbon::class, $cache->fresh()->expires_at);
+        $this->assertInstanceOf(Carbon::class, $cache->fresh()->date);
+        $this->assertInstanceOf(Carbon::class, $cache->fresh()->expires_at);
     }
 }

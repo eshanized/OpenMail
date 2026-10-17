@@ -339,7 +339,7 @@ class ImapMailboxService
         try {
             $folder = $client->getFolder($folderPath);
 
-            // Prefer one STATUS round trip over EXAMINE plus an UNSEEN search.
+            // prefer one STATUS round trip over EXAMINE plus an UNSEEN search.
             try {
                 $status = $folder->status();
 
@@ -355,7 +355,7 @@ class ImapMailboxService
                     ];
                 }
             } catch (\Throwable) {
-                // Fall back for servers that do not support STATUS reliably.
+                // fall back for servers that do not support STATUS reliably.
             }
 
             $info = $folder->examine();

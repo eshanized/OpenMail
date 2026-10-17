@@ -1223,8 +1223,8 @@ select.glass-input {
 
  
 /* ============================================
-   Premium UX foundation
-   Keep the interface calm, fast, and content-first.
+   premium UX foundation
+   keep the interface calm, fast, and content-first.
    ============================================ */
 .app-topbar {
     min-height: 3.5rem;
@@ -1338,7 +1338,7 @@ select.glass-input {
 }
 
 
-/* Selected-message workspace: navigation sidebar + message list + reader. */
+/* selected-message workspace: navigation sidebar + message list + reader. */
 .mailbox-three-pane {
     display: grid;
     grid-template-columns: minmax(320px, 37%) minmax(0, 1fr);

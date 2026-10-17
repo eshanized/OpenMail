@@ -35,6 +35,10 @@ Route::middleware(['auth'])->group(function () {
         return view('snoozed-messages-page');
     })->name('snoozed-messages');
 
+    Route::get('/saved-searches', function () {
+        return view('saved-searches-page');
+    })->name('saved-searches');
+
     Route::get('/settings', SettingsPage::class)
         ->middleware('throttle:api.settings')
         ->name('settings');

@@ -69,13 +69,23 @@ class ImapMailboxServiceCoverageTest extends TestCase
         $this->assertSame($message, $this->serviceFor($client)->getMessageWithBody('INBOX', 7));
     }
 
-    public function test_get_attachment_returns_null_for_missing_message_and_requested_attachment_for_match(): void
+    public function test_get_attachment_returns_null_for_missing_index_and_requested_attachment_for_match(): void
     {
         $client = $this->connectedClient();
         $folder = Mockery::mock(Folder::class);
         $query = Mockery::mock(WhereQuery::class);
         $query->shouldReceive('setFetchBody')->with(true)->twice()->andReturnSelf();
-        $query->shouldReceive('getMessageByUid')->with(8)->once()->andReturn(null);
+        $missingAttachmentMessage = Mockery::mock(Message::class);
+        $missingAttachments = new class
+        {
+            public function get(int $index): ?string
+            {
+                return null;
+            }
+        };
+        $missingAttachmentMessage->shouldReceive('getAttachments')->once()->andReturn($missingAttachments);
+        $query->shouldReceive('getMessageByUid')->with(8)->once()->andReturn($missingAttachmentMessage);
+
         $message = Mockery::mock(Message::class);
         $attachments = new class
         {

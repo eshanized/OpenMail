@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\Auth\LogoutController;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
@@ -53,11 +55,11 @@ class AuthControllerCoverageTest extends TestCase
 
     public function test_revoke_other_sessions_keeps_current_session_and_audits_the_action(): void
     {
-        File::put(storage_path('installed'), '{}');
         $user = User::factory()->create();
         $this->actingAs($user);
-        $currentId = session()->getId();
 
+        $currentId = 'current-auth-session';
+        $otherId = 'other-auth-session';
         DB::table('sessions')->insert([
             [
                 'id' => $currentId,
@@ -68,7 +70,7 @@ class AuthControllerCoverageTest extends TestCase
                 'last_activity' => time(),
             ],
             [
-                'id' => 'other-auth-session',
+                'id' => $otherId,
                 'user_id' => $user->id,
                 'ip_address' => '192.0.2.2',
                 'user_agent' => 'other browser',
@@ -77,9 +79,20 @@ class AuthControllerCoverageTest extends TestCase
             ],
         ]);
 
-        $this->post('/settings/sessions/revoke')->assertRedirect();
+        $store = session();
+        $store->setId($currentId);
+        $request = Request::create('/settings/sessions/revoke', 'POST', [], [], [], [
+            'HTTP_REFERER' => '/settings',
+            'REMOTE_ADDR' => '192.0.2.1',
+        ]);
+        $request->setLaravelSession($store);
+        $request->setUserResolver(fn () => $user);
+
+        $response = app(LogoutController::class)->revokeOtherSessions($request);
+
+        $this->assertSame('/settings', $response->getTargetUrl());
         $this->assertDatabaseHas('sessions', ['id' => $currentId, 'user_id' => $user->id]);
-        $this->assertDatabaseMissing('sessions', ['id' => 'other-auth-session']);
+        $this->assertDatabaseMissing('sessions', ['id' => $otherId]);
         $this->assertDatabaseHas('audit_logs', [
             'user_id' => $user->id,
             'event_type' => 'auth.sessions.revoked',

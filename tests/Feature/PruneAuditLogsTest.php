@@ -7,6 +7,7 @@ namespace Tests\Feature;
 use App\Models\AuditLog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class PruneAuditLogsTest extends TestCase
@@ -25,6 +26,9 @@ class PruneAuditLogsTest extends TestCase
             'description' => 'recent event',
             'created_at' => now()->subDays(89),
         ]);
+
+        DB::table('audit_logs')->where('id', $old->id)->update(['created_at' => now()->subDays(91)]);
+        DB::table('audit_logs')->where('id', $recent->id)->update(['created_at' => now()->subDays(89)]);
 
         $exitCode = Artisan::call('audit:prune');
 

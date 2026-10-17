@@ -422,7 +422,7 @@
                         @else
                             <span class="rounded-full border border-border bg-surface-sunken px-2 py-0.5 text-[10px] font-medium text-ink-tertiary">Review indicators</span>
                         @endif
-                        <svg class="ml-auto h-3.5 w-3.5 shrink-0 text-ink-tertiary transition-transform [[open]_&]:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                        <svg class="ml-auto h-3.5 w-3.5 shrink-0 text-ink-tertiary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/>
                         </svg>
                     </summary>

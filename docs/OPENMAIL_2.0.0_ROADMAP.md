@@ -70,7 +70,7 @@ Acceptance: every shared-mail action is authorized server-side; internal notes c
 
 - Unified three-pane desktop workspace and adaptive mobile layouts.
 - Keyboard-first command palette, shortcut help, focus management, and screen-reader labels.
-- Installable PWA shell and optional browser notifications.
+- Installable PWA shell and optional browser notifications. The first slice includes a manifest, app icon, and static-asset service worker; authenticated documents and mailbox content are intentionally never cached.
 - Resilient draft editing and clear online/offline/sync state.
 - Do not claim full offline mailbox operation unless storage, encryption, revocation, and conflict resolution are actually implemented.
 

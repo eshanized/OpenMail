@@ -7,7 +7,7 @@ namespace Tests\Unit\Services;
 use App\Models\User;
 use App\Services\MailTransportService;
 use InvalidArgumentException;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Log;\nuse Illuminate\Support\Facades\File;
 use Mockery;
 use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mailer\Exception\TransportException;
@@ -47,7 +47,7 @@ class MailTransportServiceTest extends TestCase
 
     public function test_canonical_email_includes_sender_recipients_body_and_thread_headers(): void
     {
-        $user = User::factory()->create(['name' => 'Mail Sender', 'email' => 'sender@example.test']);
+        $user = new User(['name' => 'Mail Sender', 'email' => 'sender@example.test']);
         $service = new MailTransportService;
 
         $email = $service->buildCanonicalEmail([
@@ -99,7 +99,7 @@ class MailTransportServiceTest extends TestCase
             $this->assertCount(1, $email->getAttachments());
             $this->assertSame('sample.txt', $email->getAttachments()[0]->getFilename());
         } finally {
-            @unlink($path);
+            unlink($path);
         }
     }
 
@@ -125,7 +125,7 @@ class MailTransportServiceTest extends TestCase
         $transport = Mockery::mock(TransportInterface::class);
         $transport->shouldReceive('send')->once()->with(Mockery::type(Email::class))->andReturn(null);
         $service = new MailTransportService($transport);
-        $email = $service->buildCanonicalEmail(['to' => 'to@example.test', 'subject' => 'Hello'], null, 'delivery-id@example.test');
+        $email = $service->buildCanonicalEmail(['to' => 'to@example.test', 'subject' => 'Hello'], null, 'delivery-id@example.test');\n        $email->from('sender@example.test');
 
         $result = $service->deliver($email);
 
@@ -144,7 +144,7 @@ class MailTransportServiceTest extends TestCase
         Log::shouldReceive('warning')->once();
 
         $service = new MailTransportService($transport);
-        $result = $service->deliver((new MailTransportService)->buildCanonicalEmail(['to' => 'to@example.test'], null));
+        $result = $service->deliver((new MailTransportService)->buildCanonicalEmail(['to' => 'to@example.test'], null)->from('sender@example.test'));
 
         $this->assertFalse($result['success']);
         $this->assertSame('rejection', $result['category']);
@@ -158,7 +158,7 @@ class MailTransportServiceTest extends TestCase
         Log::shouldReceive('warning')->once();
 
         $service = new MailTransportService($transport);
-        $result = $service->deliver((new MailTransportService)->buildCanonicalEmail(['to' => 'to@example.test'], null));
+        $result = $service->deliver((new MailTransportService)->buildCanonicalEmail(['to' => 'to@example.test'], null)->from('sender@example.test'));
 
         $this->assertFalse($result['success']);
         $this->assertSame('uncertain', $result['category']);
@@ -172,7 +172,7 @@ class MailTransportServiceTest extends TestCase
         Log::shouldReceive('error')->once();
 
         $service = new MailTransportService($transport);
-        $result = $service->deliver((new MailTransportService)->buildCanonicalEmail(['to' => 'to@example.test'], null));
+        $result = $service->deliver((new MailTransportService)->buildCanonicalEmail(['to' => 'to@example.test'], null)->from('sender@example.test'));
 
         $this->assertFalse($result['success']);
         $this->assertSame('rejection', $result['category']);
@@ -201,7 +201,7 @@ class MailTransportServiceTest extends TestCase
 
     public function test_raw_mime_without_envelope_recipients_is_rejected(): void
     {
-        $user = User::factory()->create();
+        $user = new User(['name' => 'Mail Sender', 'email' => 'sender@example.test']);
         $result = (new MailTransportService)->sendMime(
             "Message-ID: <raw-id@example.test>\r\nSubject: retained\r\n\r\nBody",
             $user,
@@ -217,13 +217,13 @@ class MailTransportServiceTest extends TestCase
 
     public function test_raw_mime_delivery_uses_envelope_recipients_without_rewriting_the_mime(): void
     {
-        $user = User::factory()->create(['email' => 'sender@example.test']);
+        $user = new User(['name' => 'Mail Sender', 'email' => 'sender@example.test']);
         $rawMime = "Message-ID: <raw-id@example.test>\r\nSubject: retained\r\n\r\nBody";
         $transport = Mockery::mock(TransportInterface::class);
         $transport->shouldReceive('send')->once()->with(
             Mockery::on(fn ($message) => $message instanceof RawMessage && $message->toString() === $rawMime),
             Mockery::on(function ($envelope): bool {
-                if (! $envelope instanceof Envelope) {
+                if ($envelope instanceof Envelope === false) {
                     return false;
                 }
 

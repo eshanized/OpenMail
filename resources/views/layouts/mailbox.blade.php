@@ -14,7 +14,7 @@
 @endsection
 
 @section('content')
-<div class="flex-1 flex overflow-hidden w-full h-[calc(100vh-2.75rem)] min-h-[calc(100dvh-2.75rem)] relative"
+<div class="mailbox-workspace flex-1 flex overflow-hidden w-full h-[calc(100vh-3.5rem)] min-h-[calc(100dvh-3.5rem)] relative"
      x-data="{
          sidebarOpen: false,
          closeSidebar() {
@@ -42,7 +42,7 @@
     {{-- Unified Responsive Sidebar: Desktop Static + Mobile Slide-over Drawer --}}
     <aside
         class="fixed inset-y-0 left-0 z-50 w-[280px] max-w-[85vw] bg-surface-raised border-r border-border shadow-xl flex flex-col h-full min-h-0
-               lg:static lg:z-auto lg:w-64 lg:shadow-none lg:flex lg:translate-x-0 transition-transform duration-200 ease-in-out"
+               lg:static lg:z-auto lg:w-[280px] lg:shadow-none lg:flex lg:translate-x-0 transition-transform duration-200 ease-in-out"
         :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
         role="dialog"
         :aria-modal="sidebarOpen ? 'true' : 'false'"
@@ -74,8 +74,8 @@
     </aside>
 
     {{-- Main content area --}}
-    <section class="flex-1 flex flex-col min-w-0 bg-surface h-full min-h-0 overflow-hidden">
-        <div class="flex-1 overflow-y-auto scrollbar-thin p-3 sm:p-5 min-h-0">
+    <section class="mailbox-main-content flex-1 flex flex-col min-w-0 bg-surface h-full min-h-0 overflow-hidden">
+        <div class="mailbox-content-scroll flex-1 overflow-y-auto scrollbar-thin p-3 sm:p-5 lg:p-7 min-h-0">
             @yield('mailbox-content')
             {{ $slot ?? '' }}
         </div>

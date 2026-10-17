@@ -41,17 +41,7 @@ Acceptance: schedule and snooze state survives restarts; cancelled messages do n
 
 Acceptance: cross-account reads and writes are denied server-side; account switch does not leak data through cached UI, search, attachment URLs, or background jobs.
 
-## Workstream 3 — OpenMail Intelligence (P0)
-
-- Provider abstraction for configurable remote APIs and optional local model endpoints.
-- Thread summaries, editable reply drafts, tone rewrite, translation, and action-item extraction.
-- Explicit per-provider enablement, payload disclosure, timeouts, bounded input/output size, and redacted diagnostics.
-- Treat inbound mail content as untrusted prompt input and never expose tools capable of sending/deleting messages to model output.
-- Never send generated email automatically; require user review and explicit send.
-
-Acceptance: tests cover provider failures, malformed output, prompt-injection content, privacy settings, and maximum payload sizes. AI is optional and core mailbox functionality remains usable without it.
-
-## Workstream 4 — Trust and security center (P0)
+## Workstream 3 — Trust and security center (P0)
 
 - Present sender authentication results (SPF/DKIM/DMARC) only when trustworthy evidence is available in headers or a verified provider API.
 - Explain reply-to/from mismatches, external sender context, suspicious URL patterns, and risky attachments.
@@ -61,7 +51,7 @@ Acceptance: tests cover provider failures, malformed output, prompt-injection co
 
 Acceptance: security signals include evidence and limitations; rendering and URL/attachment tests include adversarial fixtures; no diagnostics expose mailbox credentials or message bodies.
 
-## Workstream 5 — Shared inbox and collaboration (P1)
+## Workstream 4 — Shared inbox and collaboration (P1)
 
 - Shared addresses such as support/sales with explicit membership.
 - Conversation assignment, status tracking, internal notes, collision warnings, and assignment history.
@@ -70,7 +60,7 @@ Acceptance: security signals include evidence and limitations; rendering and URL
 
 Acceptance: every shared-mail action is authorized server-side; internal notes cannot enter outbound MIME; memberships and audit events are tested for cross-user access.
 
-## Workstream 6 — UX, PWA, and accessibility (P1)
+## Workstream 5 — UX, PWA, and accessibility (P1)
 
 - Unified three-pane desktop workspace and adaptive mobile layouts.
 - Keyboard-first command palette, shortcut help, focus management, and screen-reader labels.
@@ -80,7 +70,7 @@ Acceptance: every shared-mail action is authorized server-side; internal notes c
 
 Acceptance: automated browser journeys cover critical flows at mobile and desktop widths; no horizontal overflow, inaccessible primary actions, or uncaught browser-console errors in the supported matrix.
 
-## Workstream 7 — Administration and operations (P0)
+## Workstream 6 — Administration and operations (P0)
 
 - User/role management appropriate to a single organization.
 - Delivery queue inspection with retry/uncertain outcome information. A user-scoped, read-only delivery history is implemented; automatic retries of uncertain SMTP outcomes remain intentionally unsupported.
@@ -108,4 +98,4 @@ Acceptance: diagnostics are actionable and redact secrets; upgrade and backup/re
 
 ## Current execution note
 
-Implemented slices now include durable send-later with cancellation, per-user email templates, snooze/return, persisted follow-up reminders with due/upcoming states, saved searches, user-scoped delivery activity, command-palette navigation, a static-only PWA shell that never caches private mail, opt-in AI summaries and editable reply drafts, and evidence-based message-security indicators. Follow-up reminders are surfaced in OpenMail and do not yet send push notifications. Multi-account isolation, shared inboxes/roles, richer synchronization, admin diagnostics, bulk operations, saved inbox views, broader AI actions, browser-level accessibility verification, and complete release verification remain incomplete; this roadmap is not a claim that OpenMail 2.0 is finished.
+Implemented slices now include durable send-later with cancellation, per-user email templates, snooze/return, persisted follow-up reminders with due/upcoming states, saved searches, user-scoped delivery activity, command-palette navigation, a static-only PWA shell that never caches private mail, and evidence-based message-security indicators. OpenMail does not include an AI/LLM integration and does not send email bodies or drafts to AI analysis providers. Follow-up reminders are surfaced in OpenMail and do not send push notifications. Multi-account isolation, shared inboxes/roles, richer synchronization, admin diagnostics, bulk operations, saved inbox views, browser-level accessibility verification, and complete release verification remain incomplete; this roadmap is not a claim that OpenMail 2.0 is finished.

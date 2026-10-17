@@ -43,6 +43,7 @@ Designed for deployment on shared hosting (cPanel) or VPS, it includes a WordPre
 - **Rate limiting** — Per-route throttling on settings, search, CSP reports, and session revocation endpoints
 - **Attachment validation** — MIME type inspection (not just file extension) with configurable allowlist
 - **Secure credential handling** — IMAP/SMTP passwords encrypted via Laravel's Crypt, never stored in plaintext
+- **No external AI analysis** — OpenMail has no AI/LLM provider integration and does not transmit email bodies or drafts to AI analysis services
 
 ### Setup & Administration
 

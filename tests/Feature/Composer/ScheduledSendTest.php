@@ -13,6 +13,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
+use Symfony\Component\Mime\Email;
 
 class ScheduledSendTest extends TestCase
 {
@@ -71,7 +72,7 @@ class ScheduledSendTest extends TestCase
 
             // A scheduled send must not depend on the temporary upload existing later.
             unlink($path);
-            $restoredEmail = \\Symfony\\Component\\Mime\\Email::fromString($send->mime_message);
+            $restoredEmail = Email::fromString($send->mime_message);
 
             $this->assertCount(1, $restoredEmail->getAttachments());
             $this->assertSame('report.txt', $restoredEmail->getAttachments()[0]->getFilename());

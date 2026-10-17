@@ -208,11 +208,25 @@ class ComposerService
         $user = User::find($send->user_id);
         $data = $send->message_json ?? [];
 
-        // 2. Reconstruct canonical email with identical Message-ID
-        $email = (new MailTransportService)->buildCanonicalEmail($data, $user, $send->message_id);
+        // 2. Prefer the persisted MIME payload so temporary upload paths are not needed
+        // when a scheduled message is delivered hours or days after composition.
+        $transportService = $this->transportService ?? app(MailTransportService::class);
+
+        if (is_string($send->mime_message) && $send->mime_message !== '') {
+            $email = Email::fromString($send->mime_message);
+            $bccAddresses = $transportService->parseAddresses((string) ($data['bcc'] ?? ''));
+
+            // Bcc is intentionally absent from serialized MIME headers; restore it only
+            // to the in-memory envelope recipients used by the SMTP transport.
+            if ($bccAddresses !== []) {
+                $email->bcc(...$bccAddresses);
+            }
+        } else {
+            $email = $transportService->buildCanonicalEmail($data, $user, $send->message_id);
+        }
 
         // 3. Deliver via SMTP transport
-        $delivery = $this->transportService->sendMime($email);
+        $delivery = $transportService->sendMime($email);
 
         if (! empty($delivery['success'])) {
             // SMTP accepted delivery!

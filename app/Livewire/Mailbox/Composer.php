@@ -4,7 +4,6 @@ namespace App\Livewire\Mailbox;
 
 use App\Models\EmailTemplate;
 use App\Models\Signature;
-use App\Services\AiAssistantService;
 use App\Services\AuditService;
 use App\Services\ComposerService;
 use App\Services\ContactAutocompleteService;
@@ -72,19 +71,8 @@ class Composer extends Component
 
     public string $scheduledAt = '';
 
-    public bool $showAiRewritePanel = false;
-
-    public bool $aiRewriteConsent = false;
-
-    public bool $aiRewriteBusy = false;
-
-    public string $aiRewriteTone = 'professional';
-
-    public ?string $aiRewriteError = null;
-
     protected $listeners = [
         'openComposer' => 'openComposer',
-        'applyAiDraft' => 'applyAiDraft',
     ];
 
     protected function rules(): array
@@ -215,108 +203,6 @@ class Composer extends Component
 
         $this->dispatch('load-template-content', html: $this->bodyHtml);
         $this->dispatch('toast', 'Template inserted. Review the message before sending.', 'success');
-    }
-
-    public function toggleAiRewritePanel(): void
-    {
-        if (! app(AiAssistantService::class)->isEnabled()) {
-            $this->dispatch('toast', 'AI assistance is disabled or not configured by the administrator.', 'info');
-
-            return;
-        }
-
-        $this->showAiRewritePanel = ! $this->showAiRewritePanel;
-        $this->aiRewriteConsent = false;
-        $this->aiRewriteError = null;
-        $this->resetValidation('aiRewriteConsent');
-    }
-
-    public function rewriteWithAi(): void
-    {
-        if (! $this->aiRewriteConsent) {
-            $this->addError('aiRewriteConsent', 'Confirm that the draft may be shared with the configured AI endpoint for this rewrite.');
-
-            return;
-        }
-
-        $allowedTones = ['professional', 'concise', 'friendly', 'formal', 'empathetic'];
-        if (! in_array($this->aiRewriteTone, $allowedTones, true)) {
-            $this->aiRewriteTone = 'professional';
-            $this->addError('aiRewriteTone', 'Choose a supported writing tone.');
-
-            return;
-        }
-
-        $assistant = app(AiAssistantService::class);
-        if (! $assistant->isEnabled()) {
-            $this->aiRewriteError = 'AI assistance is disabled or not configured by the administrator.';
-            $this->aiRewriteConsent = false;
-
-            return;
-        }
-
-        $html = $this->bodyHtml !== '' ? $this->bodyHtml : $this->body;
-        $html = preg_replace('/<br\s*\/?\s*>|<\/(?:p|div|li|h[1-6])>/i', "\n", $html) ?? $html;
-        $draftText = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $draftText = trim(preg_replace('/[ \t]+\n/', "\n", $draftText) ?? $draftText);
-
-        if ($draftText === '') {
-            $this->aiRewriteError = 'Add some draft text before requesting a rewrite.';
-            $this->aiRewriteConsent = false;
-
-            return;
-        }
-
-        $this->aiRewriteBusy = true;
-        $this->aiRewriteError = null;
-
-        try {
-            $rewritten = trim($assistant->rewriteDraft($this->subject, $draftText, $this->aiRewriteTone));
-
-            if ($rewritten === '') {
-                $this->aiRewriteError = 'The AI provider returned an empty draft. Your original text was kept.';
-
-                return;
-            }
-
-            // Escape the model output before placing it into the rich-text editor.
-            $this->body = $rewritten;
-            $this->bodyText = $rewritten;
-            $this->bodyHtml = nl2br(e($rewritten));
-            $this->dispatch('load-template-content', html: $this->bodyHtml);
-            $this->showAiRewritePanel = false;
-            $this->dispatch('toast', 'AI rewrite ready. Review it before sending.', 'success');
-        } catch (\Throwable $exception) {
-            Log::warning('OpenMail AI draft rewrite failed', [
-                'user_id' => auth()->id(),
-                'tone' => $this->aiRewriteTone,
-                'exception' => $exception::class,
-            ]);
-            $this->aiRewriteError = 'The AI rewrite failed. Your original draft was kept.';
-        } finally {
-            $this->aiRewriteBusy = false;
-            $this->aiRewriteConsent = false;
-            $this->resetValidation('aiRewriteConsent');
-        }
-    }
-
-    public function applyAiDraft(string $to, string $subject, string $body): void
-    {
-        if (! filter_var(trim($to), FILTER_VALIDATE_EMAIL)) {
-            $this->dispatch('toast', 'AI reply could not be applied because the sender address is invalid.', 'warning');
-
-            return;
-        }
-
-        $this->resetForm();
-        $this->isOpen = true;
-        $this->mode = 'compose';
-        $this->to = trim($to);
-        $this->subject = mb_substr(trim($subject), 0, 255);
-        $this->body = trim($body);
-        $this->bodyText = trim($body);
-        $this->bodyHtml = nl2br(e(trim($body)));
-        $this->dispatch('load-template-content', html: $this->bodyHtml);
     }
 
     public function openComposer(array $params = []): void
@@ -819,11 +705,6 @@ class Composer extends Component
         $this->draftUid = null;
         $this->showSchedulePicker = false;
         $this->scheduledAt = '';
-        $this->showAiRewritePanel = false;
-        $this->aiRewriteConsent = false;
-        $this->aiRewriteBusy = false;
-        $this->aiRewriteTone = 'professional';
-        $this->aiRewriteError = null;
         $this->showCc = false;
         $this->showBcc = false;
         $this->compositionId = (string) Str::uuid();

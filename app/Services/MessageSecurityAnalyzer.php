@@ -21,7 +21,7 @@ class MessageSecurityAnalyzer
     /**
      * Analyze observable indicators only; do not infer that a message is safe.
      *
-     * @param array<int, array{name?: string, size?: int, contentType?: string}> $attachments
+     * @param  array<int, array{name?: string, size?: int, contentType?: string}>  $attachments
      * @return array<int, array{level: string, title: string, detail: string}>
      */
     public function analyze(
@@ -120,7 +120,7 @@ class MessageSecurityAnalyzer
             return [];
         }
 
-        $document = new DOMDocument();
+        $document = new DOMDocument;
         $previous = libxml_use_internal_errors(true);
 
         try {

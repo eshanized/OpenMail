@@ -47,11 +47,6 @@ jobs:
       - name: Install Composer Dependencies
         run: composer install --prefer-dist --no-progress
 
-      - name: Diagnose remaining Pint diffs
-        run: |
-          ./vendor/bin/pint app/Services/MailTransportService.php app/Services/MessageSecurityAnalyzer.php
-          git --no-pager diff --unified=3 -- app/Services/MailTransportService.php app/Services/MessageSecurityAnalyzer.php
-
       - name: Run Laravel Pint (PSR-12 Lint)
         run: ./vendor/bin/pint --test
 

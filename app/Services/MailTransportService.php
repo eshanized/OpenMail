@@ -18,8 +18,7 @@ class MailTransportService
 {
     public function __construct(
         protected ?TransportInterface $transport = null
-    ) {
-    }
+    ) {}
 
     /**
      * Get or initialize the Symfony Mailer transport.
@@ -60,7 +59,7 @@ class MailTransportService
      * authenticated sender and composer recipient data so the SMTP envelope can be
      * rebuilt independently of message headers (especially Bcc).
      *
-     * @param array<string, mixed> $envelopeData
+     * @param  array<string, mixed>  $envelopeData
      * @return array{success: bool, message_id: string, mime_string: string, category: string|null, error: string|null, uncertain: bool}
      */
     public function sendMime(mixed $mimeOrEmail, ?User $user = null, array $envelopeData = []): array
@@ -423,7 +422,7 @@ class MailTransportService
         if ($header instanceof IdentificationHeader) {
             $ids = $header->getIds();
 
-            return !empty($ids) ? $ids[0] : (string) Str::uuid();
+            return ! empty($ids) ? $ids[0] : (string) Str::uuid();
         }
 
         return (string) Str::uuid();

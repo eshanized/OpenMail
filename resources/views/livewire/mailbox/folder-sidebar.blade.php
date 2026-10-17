@@ -69,6 +69,21 @@
                 </button>
             </div>
 
+            <div class="px-3 pb-2">
+                <a
+                    href="{{ route('scheduled-sends') }}"
+                    wire:navigate
+                    class="flex items-center gap-2 rounded border border-border px-3 py-2 text-xs font-medium text-ink-secondary hover:bg-hover hover:text-ink transition-colors"
+                    aria-label="View scheduled messages"
+                >
+                    <svg class="h-4 w-4 text-ink-tertiary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/>
+                    </svg>
+                    <span>Scheduled</span>
+                </a>
+            </div>
+
             {{-- Skeleton loading during refreshFolders --}}
             <div wire:loading wire:target="refreshFolders" class="space-y-1 px-3 py-1" aria-hidden="true">
                 @foreach([1, 2, 3, 4, 5] as $i)

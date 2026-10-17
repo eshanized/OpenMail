@@ -43,6 +43,10 @@ Route::middleware(['auth'])->group(function () {
         return view('delivery-activity-page');
     })->name('delivery-activity');
 
+    Route::get('/reminders', function () {
+        return view('follow-up-reminders-page');
+    })->name('follow-up-reminders');
+
     Route::get('/settings', SettingsPage::class)
         ->middleware('throttle:api.settings')
         ->name('settings');

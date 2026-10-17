@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\PendingSend;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -44,7 +45,7 @@ class ComposerService
     /**
      * Prepare a pending send record with a durable canonical MIME representation and delay.
      */
-    public function prepareSend(int $userId, array $data, int|string|null $delayOrIdempotency = null, ?string $idempotencyKey = null): PendingSend
+    public function prepareSend(int $userId, array $data, int|string|null $delayOrIdempotency = null, ?string $idempotencyKey = null, ?CarbonImmutable $scheduledAt = null): PendingSend
     {
         $delaySeconds = (int) config('openmail.undo_send_delay', 10);
         if (is_int($delayOrIdempotency)) {
@@ -57,7 +58,9 @@ class ComposerService
         $idempotencyKey = $idempotencyKey ?: ('send_'.Str::uuid());
 
         // Check if idempotency key already exists
-        $existing = PendingSend::where('idempotency_key', $idempotencyKey)->first();
+        $existing = PendingSend::where('user_id', $userId)
+            ->where('idempotency_key', $idempotencyKey)
+            ->first();
         if ($existing) {
             $existing->setAttribute('success', true);
             $existing->setAttribute('delayed', $delaySeconds > 0);
@@ -77,7 +80,8 @@ class ComposerService
             'message_id' => trim($messageId, '<> '),
             'message_json' => $data,
             'mime_message' => $mimeString,
-            'send_at' => now()->addSeconds($delaySeconds),
+            'send_at' => $scheduledAt ?? now()->addSeconds($delaySeconds),
+            'is_scheduled' => $scheduledAt !== null,
             'status' => PendingSend::STATUS_PENDING,
             'retry_count' => 0,
             'max_retries' => 3,
@@ -91,6 +95,47 @@ class ComposerService
         $pendingSend->setAttribute('delay_seconds', $delaySeconds);
 
         return $pendingSend;
+    }
+
+    /**
+     * Persist a message for future delivery without attempting SMTP immediately.
+     *
+     * Scheduled messages use the same durable state machine and worker as ordinary
+     * delayed sends, but are explicitly marked so they can be listed and managed.
+     *
+     * @return array{success: bool, pending_send_id: int, queued: bool, scheduled: bool, send_at: string}
+     */
+    public function scheduleMessage(
+        int $userId,
+        array $data,
+        CarbonImmutable $scheduledAt,
+        ?string $idempotencyKey = null
+    ): array {
+        $now = CarbonImmutable::now(config('app.timezone'));
+
+        if ($scheduledAt->lessThanOrEqualTo($now->addMinute())) {
+            throw new \\InvalidArgumentException('Scheduled send time must be at least one minute in the future.');
+        }
+
+        if ($scheduledAt->greaterThan($now->addYear())) {
+            throw new \\InvalidArgumentException('Scheduled send time cannot be more than one year in the future.');
+        }
+
+        $pendingSend = $this->prepareSend(
+            $userId,
+            $data,
+            0,
+            $idempotencyKey,
+            $scheduledAt
+        );
+
+        return [
+            'success' => true,
+            'pending_send_id' => (int) $pendingSend->id,
+            'queued' => true,
+            'scheduled' => true,
+            'send_at' => $pendingSend->send_at->toIso8601String(),
+        ];
     }
 
     /**

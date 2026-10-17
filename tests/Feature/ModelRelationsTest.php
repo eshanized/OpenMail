@@ -11,6 +11,7 @@ use App\Models\Folder;
 use App\Models\ThreadHeaderCache;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 class ModelRelationsTest extends TestCase
@@ -45,7 +46,7 @@ class ModelRelationsTest extends TestCase
 
         $this->assertSame($user->id, $cache->user->id);
         $this->assertSame(7, $cache->fresh()->frequency);
-        $this->assertInstanceOf(\Illuminate\Support\Carbon::class, $cache->fresh()->last_used_at);
+        $this->assertInstanceOf(Carbon::class, $cache->fresh()->last_used_at);
         $this->assertInstanceOf(\Illuminate\Support\Carbon::class, $cache->fresh()->expires_at);
     }
 

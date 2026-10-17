@@ -159,7 +159,7 @@ class MailTransportServiceTest extends TestCase
         Log::shouldReceive('warning')->once();
 
         $service = new MailTransportService($transport);
-        $result = $service->deliver((new MailTransportService)->buildCanonicalEmail(['to' => 'to@example.test'], null)->from('sender@example.test')->from('sender@example.test'));
+        $result = $service->deliver((new MailTransportService)->buildCanonicalEmail(['to' => 'to@example.test'], null)->from('sender@example.test'));
 
         $this->assertFalse($result['success']);
         $this->assertSame('uncertain', $result['category']);
@@ -173,7 +173,7 @@ class MailTransportServiceTest extends TestCase
         Log::shouldReceive('error')->once();
 
         $service = new MailTransportService($transport);
-        $result = $service->deliver((new MailTransportService)->buildCanonicalEmail(['to' => 'to@example.test'], null)->from('sender@example.test')->from('sender@example.test'));
+        $result = $service->deliver((new MailTransportService)->buildCanonicalEmail(['to' => 'to@example.test'], null)->from('sender@example.test'));
 
         $this->assertFalse($result['success']);
         $this->assertSame('rejection', $result['category']);

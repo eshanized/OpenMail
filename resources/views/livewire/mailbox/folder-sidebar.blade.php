@@ -84,6 +84,21 @@
                 </a>
             </div>
 
+            <div class="px-3 pb-2">
+                <a
+                    href="{{ route('email-templates') }}"
+                    wire:navigate
+                    class="flex items-center gap-2 rounded border border-border px-3 py-2 text-xs font-medium text-ink-secondary hover:bg-hover hover:text-ink transition-colors"
+                    aria-label="Manage email templates"
+                >
+                    <svg class="h-4 w-4 text-ink-tertiary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-9a1.5 1.5 0 00-1.5-1.5h-12a1.5 1.5 0 00-1.5 1.5v15l4.5-3h9a1.5 1.5 0 001.5-1.5v-1.5"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 8.25h7.5m-7.5 3h7.5"/>
+                    </svg>
+                    <span>Email templates</span>
+                </a>
+            </div>
+
             {{-- Skeleton loading during refreshFolders --}}
             <div wire:loading wire:target="refreshFolders" class="space-y-1 px-3 py-1" aria-hidden="true">
                 @foreach([1, 2, 3, 4, 5] as $i)

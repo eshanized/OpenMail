@@ -47,7 +47,7 @@ class AiAssistantService
 
     protected function complete(string $systemPrompt, string $userContent): string
     {
-        if (!$this->isEnabled()) {
+        if (! $this->isEnabled()) {
             throw new RuntimeException('The administrator has not enabled an AI provider.');
         }
 
@@ -59,7 +59,7 @@ class AiAssistantService
 
         if (
             $parsed === false
-            || !in_array($scheme, ['https', 'http'], true)
+            || ! in_array($scheme, ['https', 'http'], true)
             || ($scheme === 'http' && !$isLoopbackHost)
             || $host === ''
             || isset($parsed['user'])
@@ -71,7 +71,7 @@ class AiAssistantService
         }
 
         $endpoint = rtrim($baseUrl, '/');
-        if (!str_ends_with($endpoint, '/chat/completions')) {
+        if (! str_ends_with($endpoint, '/chat/completions')) {
             $endpoint .= '/chat/completions';
         }
 
@@ -101,7 +101,7 @@ class AiAssistantService
             $response->throw();
             $content = $response->json('choices.0.message.content');
 
-            if (!is_string($content) || trim($content) === '') {
+            if (! is_string($content) || trim($content) === '') {
                 throw new RuntimeException('The AI provider returned an empty or unsupported response.');
             }
 

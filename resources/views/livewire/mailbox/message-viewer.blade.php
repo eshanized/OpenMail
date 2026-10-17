@@ -191,6 +191,22 @@
                         <span class="hidden sm:inline">Forward</span>
                     </button>
 
+                    {{-- Follow-up reminder --}}
+                    <button
+                        type="button"
+                        wire:click="toggleFollowUpPicker"
+                        wire:loading.attr="disabled"
+                        class="inline-flex items-center gap-1.5 rounded border border-border bg-surface-raised px-2.5 py-1.5 text-xs font-medium text-ink-secondary transition-colors hover:bg-hover hover:text-ink disabled:opacity-50"
+                        aria-expanded="{{ $showFollowUpPicker ? 'true' : 'false' }}"
+                        aria-controls="follow-up-reminder-picker"
+                        title="Set a follow-up reminder"
+                    >
+                        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                            <circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/>
+                        </svg>
+                        <span>Remind me</span>
+                    </button>
+
                     {{-- Snooze --}}
                     <div class="relative" x-data="{ open: false }">
                         <button
@@ -405,6 +421,46 @@
                         @endif
                     </div>
                 </section>
+            @endif
+
+            @if($showFollowUpPicker)
+                <form id="follow-up-reminder-picker" wire:submit="scheduleFollowUp" class="mx-auto w-full max-w-3xl rounded-xl border border-border bg-surface-raised p-4">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                        <div class="min-w-0 flex-1">
+                            <label for="follow-up-at" class="mb-1 block text-xs font-semibold text-ink-secondary">Remind me on</label>
+                            <input
+                                id="follow-up-at"
+                                type="datetime-local"
+                                wire:model="followUpAt"
+                                min="{{ now()->addMinutes(2)->format('Y-m-d\\TH:i') }}"
+                                required
+                                class="w-full max-w-sm rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                                aria-describedby="follow-up-reminder-help"
+                            >
+                            <p id="follow-up-reminder-help" class="mt-1 text-[11px] leading-5 text-ink-tertiary">Uses {{ config('app.timezone') }}. This reminder will appear in Follow-up reminders in OpenMail; it does not send a push notification.</p>
+                            @error('followUpAt')
+                                <p class="mt-1 text-xs text-error">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button
+                                type="submit"
+                                wire:loading.attr="disabled"
+                                wire:target="scheduleFollowUp"
+                                class="rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-white hover:bg-primary-hover disabled:opacity-50"
+                            >
+                                <span wire:loading.remove wire:target="scheduleFollowUp">Set reminder</span>
+                                <span wire:loading wire:target="scheduleFollowUp">Saving…</span>
+                            </button>
+                            <button
+                                type="button"
+                                wire:click="toggleFollowUpPicker"
+                                wire:loading.attr="disabled"
+                                class="rounded-lg border border-border px-3 py-2 text-xs font-medium text-ink-secondary hover:bg-hover disabled:opacity-50"
+                            >Cancel</button>
+                        </div>
+                    </div>
+                </form>
             @endif
 
             {{-- Message security indicators --}}

@@ -44,6 +44,44 @@ class ScheduledSendTest extends TestCase
         $this->assertEquals($scheduledAt->timestamp, $send->send_at->timestamp);
     }
 
+    public function test_scheduled_mime_keeps_attachments_after_temporary_upload_file_is_removed(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $path = tempnam(sys_get_temp_dir(), 'openmail-scheduled-');
+        $this->assertNotFalse($path);
+        file_put_contents($path, 'attachment content that must survive until scheduled delivery');
+
+        try {
+            $result = app(ComposerService::class)->scheduleMessage($user->id, [
+                'to' => 'recipient@example.com',
+                'subject' => 'Persistent attachment',
+                'body' => '<p>See attached.</p>',
+                'attachments' => [[
+                    'path' => $path,
+                    'name' => 'report.txt',
+                    'mime' => 'text/plain',
+                    'size' => filesize($path),
+                ]],
+            ], CarbonImmutable::now(config('app.timezone'))->addHours(2));
+
+            $send = PendingSend::query()->findOrFail($result['pending_send_id']);
+            $this->assertNotEmpty($send->mime_message);
+
+            // A scheduled send must not depend on the temporary upload existing later.
+            unlink($path);
+            $restoredEmail = \\Symfony\\Component\\Mime\\Email::fromString($send->mime_message);
+
+            $this->assertCount(1, $restoredEmail->getAttachments());
+            $this->assertSame('report.txt', $restoredEmail->getAttachments()[0]->getFilename());
+        } finally {
+            if (is_file($path)) {
+                unlink($path);
+            }
+        }
+    }
+
     public function test_schedule_message_rejects_times_that_are_too_soon_or_too_far_away(): void
     {
         $user = User::factory()->create();

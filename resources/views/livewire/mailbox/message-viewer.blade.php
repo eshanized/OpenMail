@@ -407,6 +407,50 @@
                 </section>
             @endif
 
+            {{-- Message security indicators --}}
+            @if(!empty($securitySignals))
+                @php($securityWarningCount = collect($securitySignals)->where('level', 'warning')->count())
+                <details class="mx-auto w-full max-w-3xl overflow-hidden rounded-xl border border-border bg-surface-raised">
+                    <summary class="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-xs font-semibold text-ink hover:bg-hover [&::-webkit-details-marker]:hidden">
+                        <svg class="h-4 w-4 shrink-0 {{ $securityWarningCount > 0 ? 'text-warning' : 'text-ink-tertiary' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3 3.5 7v5.5c0 4.2 3.6 6.8 8.5 8.5 4.9-1.7 8.5-4.3 8.5-8.5V7L12 3z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 3h.01"/>
+                        </svg>
+                        <span>Message security</span>
+                        @if($securityWarningCount > 0)
+                            <span class="rounded-full border border-warning/25 bg-warning/10 px-2 py-0.5 text-[10px] font-semibold text-warning">{{ $securityWarningCount }} warning{{ $securityWarningCount === 1 ? '' : 's' }}</span>
+                        @else
+                            <span class="rounded-full border border-border bg-surface-sunken px-2 py-0.5 text-[10px] font-medium text-ink-tertiary">Review indicators</span>
+                        @endif
+                        <svg class="ml-auto h-3.5 w-3.5 shrink-0 text-ink-tertiary transition-transform [[open]_&]:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/>
+                        </svg>
+                    </summary>
+                    <div class="border-t border-border px-4 py-3">
+                        <p class="mb-3 text-[11px] leading-5 text-ink-tertiary">
+                            These are observable clues, not a guarantee that a message is safe. Authentication values may come from unverified headers, and OpenMail does not independently verify every sender or scan attachments for malware.
+                        </p>
+                        <ul class="space-y-2">
+                            @foreach($securitySignals as $signal)
+                                <li class="flex items-start gap-2.5 rounded-lg border {{ $signal['level'] === 'warning' ? 'border-warning/20 bg-warning/5' : 'border-border bg-surface' }} px-3 py-2.5">
+                                    <span class="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full {{ $signal['level'] === 'warning' ? 'bg-warning/10 text-warning' : 'bg-surface-sunken text-ink-tertiary' }}" aria-hidden="true">
+                                        @if($signal['level'] === 'warning')
+                                            <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M10.3 3.9 2.8 17a2 2 0 001.7 3h15a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>
+                                        @else
+                                            <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 11v5m0-8h.01"/></svg>
+                                        @endif
+                                    </span>
+                                    <span class="min-w-0">
+                                        <span class="block text-xs font-semibold text-ink">{{ $signal['title'] }}</span>
+                                        <span class="mt-0.5 block break-words text-xs leading-5 text-ink-secondary">{{ $signal['detail'] }}</span>
+                                    </span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </details>
+            @endif
+
             {{-- Message body --}}
             <div class="email-body-content">
                 @if(!empty(trim($sanitizedHtml ?? '')))

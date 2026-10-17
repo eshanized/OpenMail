@@ -40,6 +40,13 @@
                 localStorage.removeItem('openmail:draft:' + data.compositionId);
             });
 
+            Livewire.on('load-template-content', (data) => {
+                if (this.tiptapEditor && this.tiptapEditor.editor && data && typeof data.html === 'string') {
+                    this.tiptapEditor.editor.commands.setContent(data.html);
+                    this.tiptapEditor.editor.commands.focus('end');
+                }
+            });
+
             // Load draft from LocalStorage on mount
             this.loadFromLocalStorage();
         },
@@ -302,14 +309,30 @@
 
                 {{-- Body & Editor --}}
                 <div>
-                    <div class="flex items-center justify-between mb-1">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
                         <label for="composer-body" class="block text-xs font-medium text-ink-secondary">Message</label>
-                        @if($mode === 'compose')
-                            <x-signature-dropdown
-                                :signatures="$signatures ?? collect()"
-                                :default-signature="$defaultSignature"
-                            />
-                        @endif
+                        <div class="flex items-center gap-2">
+                            @if($mode === 'compose' && count($templates) > 0)
+                                <label for="composer-template-selector" class="sr-only">Insert email template</label>
+                                <select
+                                    id="composer-template-selector"
+                                    wire:change="applyTemplate($event.target.value)"
+                                    class="max-w-[180px] rounded border border-border bg-surface-raised px-2 py-1 text-xs text-ink-secondary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                                    aria-label="Insert email template"
+                                >
+                                    <option value="">Insert template…</option>
+                                    @foreach($templates as $template)
+                                        <option value="{{ $template['id'] }}">{{ $template['name'] }}</option>
+                                    @endforeach
+                                </select>
+                            @endif
+                            @if($mode === 'compose')
+                                <x-signature-dropdown
+                                    :signatures="$signatures ?? collect()"
+                                    :default-signature="$defaultSignature"
+                                />
+                            @endif
+                        </div>
                     </div>
                     <div class="border border-border rounded overflow-hidden bg-surface-raised flex flex-col focus-within:border-primary transition-colors" wire:ignore>
                         <div x-ref="toolbar" class="tiptap-toolbar-container border-b border-border overflow-x-auto scrollbar-thin"></div>

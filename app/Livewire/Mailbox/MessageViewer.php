@@ -7,6 +7,7 @@ use App\Services\AiAssistantService;
 use App\Services\ImapMailboxService;
 use App\Services\LabelService;
 use App\Services\MessageSanitizer;
+use App\Services\MessageSecurityAnalyzer;
 use App\Services\SnoozedMessageService;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
@@ -59,6 +60,8 @@ class MessageViewer extends Component
 
     public array $attachments = [];
 
+    public array $securitySignals = [];
+
     public bool $showAiAssistant = false;
 
     public bool $aiDataSharingConfirmed = false;
@@ -89,6 +92,11 @@ class MessageViewer extends Component
 
     public function loadMessage(): void
     {
+        $this->sanitizedHtml = null;
+        $this->textBody = null;
+        $this->attachments = [];
+        $this->securitySignals = [];
+
         try {
             $service = app(ImapMailboxService::class);
             $this->message = $service->getMessageWithBody($this->folderPath, $this->uid);
@@ -269,8 +277,35 @@ class MessageViewer extends Component
             $this->textBody = (string) $textBody;
         }
 
-        // Extract attachments as simple array
+        // Extract attachments and analyze observable security hints.
         $this->attachments = $this->extractAttachments($this->message);
+        $this->securitySignals = app(MessageSecurityAnalyzer::class)->analyze(
+            $this->fromAddress,
+            $this->fromDisplay,
+            $this->readHeaderValue($this->message, 'reply-to'),
+            $this->readHeaderValue($this->message, 'authentication-results'),
+            $this->sanitizedHtml,
+            $this->attachments,
+            (string) auth()->user()?->email
+        );
+    }
+
+    protected function readHeaderValue(object $message, string $name): string
+    {
+        if ($message instanceof LegacyMockInterface || ! method_exists($message, 'getHeader')) {
+            return '';
+        }
+
+        try {
+            $header = $message->getHeader();
+            $value = $header?->get($name);
+
+            return $value instanceof Attribute || is_scalar($value)
+                ? trim((string) $value)
+                : '';
+        } catch (\\Throwable) {
+            return '';
+        }
     }
 
     protected function extractFormattedDate(object $message): string
@@ -754,6 +789,7 @@ class MessageViewer extends Component
             'isSeen' => $this->isSeen,
             'isFlagged' => $this->isFlagged,
             'attachments' => $this->attachments,
+            'securitySignals' => $this->securitySignals,
         ]);
     }
 }

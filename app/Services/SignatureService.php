@@ -52,6 +52,7 @@ class SignatureService
         if ($wasDefault) {
             $nextDefault = Signature::where('user_id', $userId)
                 ->latest()
+                ->orderByDesc('id')
                 ->first();
             if ($nextDefault) {
                 $nextDefault->update(['is_default' => true]);

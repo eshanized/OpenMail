@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Mailbox;
 
+use App\Models\EmailTemplate;
 use App\Models\Signature;
 use App\Services\AuditService;
 use App\Services\ComposerService;
@@ -53,6 +54,8 @@ class Composer extends Component
     public $signatures;
 
     public ?array $defaultSignature = null;
+
+    public array $templates = [];
 
     public string $autosaveStatus = 'idle'; // idle, saving, saved, error
 
@@ -139,6 +142,7 @@ class Composer extends Component
     {
         $this->compositionId = (string) Str::uuid();
         $this->loadSignatures();
+        $this->loadTemplates();
     }
 
     public function loadSignatures(): void
@@ -158,10 +162,54 @@ class Composer extends Component
         ] : null;
     }
 
+    public function loadTemplates(): void
+    {
+        $userId = auth()->id();
+        if (! $userId) {
+            $this->templates = [];
+
+            return;
+        }
+
+        $this->templates = EmailTemplate::query()
+            ->where('user_id', $userId)
+            ->orderBy('name')
+            ->get(['id', 'name', 'subject', 'body'])
+            ->map(static fn (EmailTemplate $template): array => [
+                'id' => (int) $template->id,
+                'name' => $template->name,
+                'subject' => $template->subject,
+                'body' => $template->body,
+            ])
+            ->all();
+    }
+
+    public function applyTemplate(int $templateId): void
+    {
+        $template = EmailTemplate::query()
+            ->where('user_id', auth()->id())
+            ->find($templateId);
+
+        if (! $template) {
+            $this->dispatch('toast', 'Template not found.', 'warning');
+
+            return;
+        }
+
+        $this->subject = $template->subject ?? $this->subject;
+        $this->body = $template->body;
+        $this->bodyText = $template->body;
+        $this->bodyHtml = nl2br(e($template->body));
+
+        $this->dispatch('load-template-content', html: $this->bodyHtml);
+        $this->dispatch('toast', 'Template inserted. Review the message before sending.', 'success');
+    }
+
     public function openComposer(array $params = []): void
     {
         $this->resetForm();
         $this->loadSignatures();
+        $this->loadTemplates();
         $this->mode = $params['mode'] ?? 'compose';
 
         if (in_array($this->mode, ['reply', 'replyAll', 'forward']) && isset($params['message'])) {

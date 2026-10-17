@@ -7,6 +7,7 @@ namespace Tests\Unit\Services;
 use App\Models\User;
 use App\Services\MailTransportService;
 use InvalidArgumentException;
+use Illuminate\Support\Facades\Log;
 use Mockery;
 use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mailer\Exception\TransportException;
@@ -96,7 +97,7 @@ class MailTransportServiceTest extends TestCase
             ], null);
 
             $this->assertCount(1, $email->getAttachments());
-            $this->assertSame('sample.txt', $email->getAttachments()[0]->getPreparedHeaders()->getHeaderParameter('Content-Disposition', 'filename'));
+            $this->assertSame('sample.txt', $email->getAttachments()[0]->getFilename());
         } finally {
             @unlink($path);
         }
@@ -140,7 +141,7 @@ class MailTransportServiceTest extends TestCase
     {
         $transport = Mockery::mock(TransportInterface::class);
         $transport->shouldReceive('send')->once()->andThrow(new TransportException('550 recipient rejected'));
-        \Illuminate\Support\Facades\Log::shouldReceive('warning')->once();
+        Log::shouldReceive('warning')->once();
 
         $service = new MailTransportService($transport);
         $result = $service->deliver((new MailTransportService)->buildCanonicalEmail(['to' => 'to@example.test'], null));
@@ -154,7 +155,7 @@ class MailTransportServiceTest extends TestCase
     {
         $transport = Mockery::mock(TransportInterface::class);
         $transport->shouldReceive('send')->once()->andThrow(new TransportException('Connection timed out after sending message body'));
-        \Illuminate\Support\Facades\Log::shouldReceive('warning')->once();
+        Log::shouldReceive('warning')->once();
 
         $service = new MailTransportService($transport);
         $result = $service->deliver((new MailTransportService)->buildCanonicalEmail(['to' => 'to@example.test'], null));
@@ -168,7 +169,7 @@ class MailTransportServiceTest extends TestCase
     {
         $transport = Mockery::mock(TransportInterface::class);
         $transport->shouldReceive('send')->once()->andThrow(new \RuntimeException('unexpected adapter failure'));
-        \Illuminate\Support\Facades\Log::shouldReceive('error')->once();
+        Log::shouldReceive('error')->once();
 
         $service = new MailTransportService($transport);
         $result = $service->deliver((new MailTransportService)->buildCanonicalEmail(['to' => 'to@example.test'], null));

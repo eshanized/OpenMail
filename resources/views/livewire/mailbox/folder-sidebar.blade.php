@@ -1,7 +1,7 @@
 <div x-data="{ expandedFolders: {}, activeTab: @js($activeTab ?? 'folders') }"
      @set-active-tab.window="activeTab = ($event.detail && $event.detail.tab) ? $event.detail.tab : $event.detail"
      x-init="$wire.on('active-tab-changed', (data) => { activeTab = (data && data.tab) ? data.tab : (data || 'folders'); });"
-     class="h-full flex flex-col min-h-0 bg-surface-raised select-none">
+     class="premium-folder-sidebar h-full flex flex-col min-h-0 bg-surface-raised select-none">
 
     {{-- Tab Switcher --}}
     <div class="px-1.5 pt-2 pb-1.5 border-b border-border flex-shrink-0">
@@ -59,7 +59,7 @@
                     type="button"
                     @click="typeof Livewire !== 'undefined' ? Livewire.dispatch('openComposer', { mode: 'compose' }) : $dispatch('openComposer', { mode: 'compose' })"
                     aria-label="Compose new email"
-                    class="w-full text-sm font-medium py-1.5 px-3 rounded border border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 hover:border-primary/40 flex items-center gap-2 transition-colors duration-100 cursor-pointer"
+                    class="premium-compose-sidebar-action w-full text-sm font-semibold py-2.5 px-3 rounded-xl border border-transparent bg-primary text-white shadow-sm hover:bg-primary-hover flex items-center gap-2 transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                 >
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/>

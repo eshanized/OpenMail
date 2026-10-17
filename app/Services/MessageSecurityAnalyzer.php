@@ -130,7 +130,7 @@ class MessageSecurityAnalyzer
             $seen = [];
 
             foreach ($links as $link) {
-                if (! $link instanceof DOMElement) {
+                if (! ($link instanceof DOMElement)) {
                     continue;
                 }
 

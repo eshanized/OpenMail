@@ -125,6 +125,16 @@ document.addEventListener('livewire:init', () => {
     }
 });
 
+// Register the PWA shell only on secure origins. The worker deliberately does not cache
+// authenticated pages, message bodies, search results, or Livewire requests.
+if ('serviceWorker' in navigator && window.isSecureContext) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => {
+            // PWA installation is optional; keep webmail functional when registration is unavailable.
+        });
+    }, { once: true });
+}
+
 // Alpine component registrations (alpine:init) — registers settings components in the Vite bundle
 document.addEventListener('alpine:init', () => {
     Alpine.data('appearancePreview', (props = {}) => ({
@@ -194,5 +204,120 @@ document.addEventListener('alpine:init', () => {
         },
         activeTab: null,
         tabKeys: tabKeys,
+    }));
+
+    Alpine.data('commandPalette', (urls = {}) => ({
+        open: false,
+        query: '',
+        activeIndex: 0,
+        actions: [],
+        init() {
+            this.actions = [
+                { id: 'compose', label: 'Compose email', description: 'Start a new message', icon: 'compose', shortcut: 'C' },
+                { id: 'inbox', label: 'Open inbox', description: 'View your incoming mail', icon: 'inbox', shortcut: 'G I' },
+                { id: 'search', label: 'Search mail', description: 'Focus the mailbox search field', icon: 'search', shortcut: '/' },
+                { id: 'scheduled', label: 'Scheduled messages', description: 'Review or cancel future sends', icon: 'clock' },
+                { id: 'snoozed', label: 'Snoozed messages', description: 'Review messages hidden until their return time', icon: 'clock' },
+                { id: 'saved-searches', label: 'Saved searches', description: 'Run or manage your reusable search filters', icon: 'search' },
+                { id: 'templates', label: 'Email templates', description: 'Manage reusable message text', icon: 'template' },
+                { id: 'delivery-activity', label: 'Delivery activity', description: 'Review sent, failed, and uncertain messages', icon: 'clock' },
+                { id: 'follow-up-reminders', label: 'Follow-up reminders', description: 'Review due and upcoming follow-ups', icon: 'clock' },
+                { id: 'settings', label: 'Settings', description: 'Appearance, mail, and security preferences', icon: 'settings' },
+            ];
+        },
+        get filteredActions() {
+            const query = this.query.trim().toLocaleLowerCase();
+            if (!query) return this.actions;
+            return this.actions.filter(action =>
+                [action.label, action.description, action.id].some(value =>
+                    value.toLocaleLowerCase().includes(query)
+                )
+            );
+        },
+        openPalette() {
+            this.open = true;
+            this.query = '';
+            this.activeIndex = 0;
+            this.$nextTick(() => this.$refs.queryInput?.focus());
+        },
+        closePalette() {
+            this.open = false;
+            this.query = '';
+            this.activeIndex = 0;
+        },
+        handleKeydown(event) {
+            const key = event.key.toLowerCase();
+            if ((event.metaKey || event.ctrlKey) && key === 'k') {
+                event.preventDefault();
+                this.open ? this.closePalette() : this.openPalette();
+                return;
+            }
+
+            if (!this.open) {
+                const target = event.target;
+                const isTyping = target instanceof HTMLElement
+                    && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName));
+                if (isTyping || event.metaKey || event.ctrlKey || event.altKey) return;
+
+                if (key === 'c') {
+                    event.preventDefault();
+                    this.execute(this.actions.find(action => action.id === 'compose'));
+                } else if (key === '/') {
+                    event.preventDefault();
+                    this.execute(this.actions.find(action => action.id === 'search'));
+                }
+                return;
+            }
+
+            if (key === 'escape') {
+                event.preventDefault();
+                this.closePalette();
+            } else if (key === 'arrowdown') {
+                event.preventDefault();
+                this.activeIndex = Math.min(this.activeIndex + 1, Math.max(0, this.filteredActions.length - 1));
+            } else if (key === 'arrowup') {
+                event.preventDefault();
+                this.activeIndex = Math.max(0, this.activeIndex - 1);
+            } else if (key === 'enter') {
+                event.preventDefault();
+                const action = this.filteredActions[this.activeIndex];
+                if (action) this.execute(action);
+            }
+        },
+        execute(action) {
+            if (!action) return;
+            this.closePalette();
+
+            if (action.id === 'compose') {
+                if (document.querySelector('[data-openmail-composer]') && window.Livewire) {
+                    window.Livewire.dispatch('openComposer', { mode: 'compose' });
+                } else {
+                    window.location.assign(urls.inboxUrl || urls.mailboxUrl);
+                }
+                return;
+            }
+
+            if (action.id === 'search') {
+                if (document.querySelector('[data-openmail-search-input]') && window.Livewire) {
+                    window.Livewire.dispatch('focus-search');
+                } else {
+                    window.location.assign(urls.inboxUrl || urls.mailboxUrl);
+                }
+                return;
+            }
+
+            const destination = {
+                inbox: urls.inboxUrl || urls.mailboxUrl,
+                scheduled: urls.scheduledUrl,
+                snoozed: urls.snoozedUrl,
+                'saved-searches': urls.savedSearchesUrl,
+                'delivery-activity': urls.deliveryActivityUrl,
+                'follow-up-reminders': urls.remindersUrl,
+                templates: urls.templatesUrl,
+                settings: urls.settingsUrl,
+            }[action.id];
+
+            if (destination) window.location.assign(destination);
+        },
     }));
 });

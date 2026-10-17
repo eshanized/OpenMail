@@ -30,13 +30,18 @@ class SearchController extends Controller
         ];
 
         // Remove empty filters
-        $filters = array_filter($filters, function ($v) {
-            if (is_array($v)) {
-                return ! empty($v);
+        $filters = array_filter($filters, function ($value, $key) {
+            if (is_array($value)) {
+                return ! empty($value);
             }
 
-            return $v !== null && $v !== '' && $v !== false;
-        });
+            // false is a meaningful value for is_seen=false (unread messages).
+            if ($key === 'is_seen') {
+                return $value !== null;
+            }
+
+            return $value !== null && $value !== '' && $value !== false;
+        }, ARRAY_FILTER_USE_BOTH);
 
         $searchService = app(SearchService::class);
         $results = $searchService->search(

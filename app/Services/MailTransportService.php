@@ -6,11 +6,13 @@ use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\Transport\TransportInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mime\Header\IdentificationHeader;
+use Symfony\Component\Mime\RawMessage;
 
 class MailTransportService
 {
@@ -51,17 +53,122 @@ class MailTransportService
     }
 
     /**
-     * Send MIME message or Email object.
+     * Send a canonical Email or a previously serialized MIME payload.
+     *
+     * Raw MIME is sent without parsing or rewriting it. For queued sends, supply the
+     * authenticated sender and composer recipient data so the SMTP envelope can be
+     * rebuilt independently of message headers (especially Bcc).
+     *
+     * @param  array<string, mixed>  $envelopeData
+     * @return array{success: bool, message_id: string, mime_string: string, category: string|null, error: string|null, uncertain: bool}
      */
-    public function sendMime(mixed $mimeOrEmail): array
+    public function sendMime(mixed $mimeOrEmail, ?User $user = null, array $envelopeData = []): array
     {
         if ($mimeOrEmail instanceof Email) {
             return $this->deliver($mimeOrEmail);
         }
 
-        $email = Email::fromString($mimeOrEmail);
+        if (! is_string($mimeOrEmail) || trim($mimeOrEmail) === '') {
+            throw new \InvalidArgumentException('A non-empty MIME message is required.');
+        }
 
-        return $this->deliver($email);
+        if (! $user) {
+            throw new \InvalidArgumentException('A sender is required to deliver a persisted MIME message.');
+        }
+
+        return $this->deliverRawMime($mimeOrEmail, $user, $envelopeData);
+    }
+
+    /**
+     * Deliver previously serialized MIME while keeping envelope recipients separate
+     * from message headers. This preserves attachments and avoids leaking Bcc.
+     *
+     * @param  array<string, mixed>  $envelopeData
+     */
+    protected function deliverRawMime(string $mimeString, User $user, array $envelopeData): array
+    {
+        $recipients = array_merge(
+            $this->parseAddresses((string) ($envelopeData['to'] ?? '')),
+            $this->parseAddresses((string) ($envelopeData['cc'] ?? '')),
+            $this->parseAddresses((string) ($envelopeData['bcc'] ?? ''))
+        );
+
+        $uniqueRecipients = [];
+        foreach ($recipients as $recipient) {
+            $uniqueRecipients[strtolower($recipient->getAddress())] = $recipient;
+        }
+
+        $messageId = $this->extractMessageIdFromMime($mimeString);
+        if ($uniqueRecipients === []) {
+            return [
+                'success' => false,
+                'message_id' => $messageId,
+                'mime_string' => $mimeString,
+                'category' => 'rejection',
+                'error' => 'The message has no valid envelope recipients.',
+                'uncertain' => false,
+            ];
+        }
+
+        $rawMessage = new RawMessage($mimeString);
+        $envelope = new Envelope(
+            new Address($user->email),
+            array_values($uniqueRecipients)
+        );
+
+        try {
+            $this->getTransport()->send($rawMessage, $envelope);
+
+            return [
+                'success' => true,
+                'message_id' => $messageId,
+                'mime_string' => $mimeString,
+                'category' => null,
+                'error' => null,
+                'uncertain' => false,
+            ];
+        } catch (TransportExceptionInterface $e) {
+            $classification = $this->classifyError($e->getMessage());
+
+            Log::warning('SMTP delivery of persisted MIME failed', [
+                'message_id' => $messageId,
+                'category' => $classification['category'],
+                'uncertain' => $classification['uncertain'],
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'message_id' => $messageId,
+                'mime_string' => $mimeString,
+                'category' => $classification['category'],
+                'error' => $e->getMessage(),
+                'uncertain' => $classification['uncertain'],
+            ];
+        } catch (\Throwable $e) {
+            Log::error('Unexpected error delivering persisted MIME', [
+                'message_id' => $messageId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'message_id' => $messageId,
+                'mime_string' => $mimeString,
+                'category' => 'rejection',
+                'error' => $e->getMessage(),
+                'uncertain' => false,
+            ];
+        }
+    }
+
+    protected function extractMessageIdFromMime(string $mimeString): string
+    {
+        if (preg_match('/^Message-ID:\s*<?([^>\r\n]+)>?/im', $mimeString, $matches)) {
+            return trim($matches[1]);
+        }
+
+        return (string) Str::uuid();
     }
 
     /**

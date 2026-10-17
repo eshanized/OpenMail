@@ -2,12 +2,15 @@
 
 namespace App\Livewire\Mailbox;
 
+use App\Models\EmailTemplate;
 use App\Models\Signature;
+use App\Services\AiAssistantService;
 use App\Services\AuditService;
 use App\Services\ComposerService;
 use App\Services\ContactAutocompleteService;
 use App\Services\MessageSanitizer;
 use App\Services\SignatureService;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Livewire\Component;
@@ -53,6 +56,8 @@ class Composer extends Component
 
     public ?array $defaultSignature = null;
 
+    public array $templates = [];
+
     public string $autosaveStatus = 'idle'; // idle, saving, saved, error
 
     public ?string $lastSavedAt = null;
@@ -63,8 +68,23 @@ class Composer extends Component
 
     public int $undoSendDelay = 10;
 
+    public bool $showSchedulePicker = false;
+
+    public string $scheduledAt = '';
+
+    public bool $showAiRewritePanel = false;
+
+    public bool $aiRewriteConsent = false;
+
+    public bool $aiRewriteBusy = false;
+
+    public string $aiRewriteTone = 'professional';
+
+    public ?string $aiRewriteError = null;
+
     protected $listeners = [
         'openComposer' => 'openComposer',
+        'applyAiDraft' => 'applyAiDraft',
     ];
 
     protected function rules(): array
@@ -134,6 +154,7 @@ class Composer extends Component
     {
         $this->compositionId = (string) Str::uuid();
         $this->loadSignatures();
+        $this->loadTemplates();
     }
 
     public function loadSignatures(): void
@@ -153,10 +174,156 @@ class Composer extends Component
         ] : null;
     }
 
+    public function loadTemplates(): void
+    {
+        $userId = auth()->id();
+        if (! $userId) {
+            $this->templates = [];
+
+            return;
+        }
+
+        $this->templates = EmailTemplate::query()
+            ->where('user_id', $userId)
+            ->orderBy('name')
+            ->get(['id', 'name', 'subject', 'body'])
+            ->map(static fn (EmailTemplate $template): array => [
+                'id' => (int) $template->id,
+                'name' => $template->name,
+                'subject' => $template->subject,
+                'body' => $template->body,
+            ])
+            ->all();
+    }
+
+    public function applyTemplate(int $templateId): void
+    {
+        $template = EmailTemplate::query()
+            ->where('user_id', auth()->id())
+            ->find($templateId);
+
+        if (! $template) {
+            $this->dispatch('toast', 'Template not found.', 'warning');
+
+            return;
+        }
+
+        $this->subject = $template->subject ?? $this->subject;
+        $this->body = $template->body;
+        $this->bodyText = $template->body;
+        $this->bodyHtml = nl2br(e($template->body));
+
+        $this->dispatch('load-template-content', html: $this->bodyHtml);
+        $this->dispatch('toast', 'Template inserted. Review the message before sending.', 'success');
+    }
+
+    public function toggleAiRewritePanel(): void
+    {
+        if (! app(AiAssistantService::class)->isEnabled()) {
+            $this->dispatch('toast', 'AI assistance is disabled or not configured by the administrator.', 'info');
+
+            return;
+        }
+
+        $this->showAiRewritePanel = ! $this->showAiRewritePanel;
+        $this->aiRewriteConsent = false;
+        $this->aiRewriteError = null;
+        $this->resetValidation('aiRewriteConsent');
+    }
+
+    public function rewriteWithAi(): void
+    {
+        if (! $this->aiRewriteConsent) {
+            $this->addError('aiRewriteConsent', 'Confirm that the draft may be shared with the configured AI endpoint for this rewrite.');
+
+            return;
+        }
+
+        $allowedTones = ['professional', 'concise', 'friendly', 'formal', 'empathetic'];
+        if (! in_array($this->aiRewriteTone, $allowedTones, true)) {
+            $this->aiRewriteTone = 'professional';
+            $this->addError('aiRewriteTone', 'Choose a supported writing tone.');
+
+            return;
+        }
+
+        $assistant = app(AiAssistantService::class);
+        if (! $assistant->isEnabled()) {
+            $this->aiRewriteError = 'AI assistance is disabled or not configured by the administrator.';
+            $this->aiRewriteConsent = false;
+
+            return;
+        }
+
+        $html = $this->bodyHtml !== '' ? $this->bodyHtml : $this->body;
+        $html = preg_replace('/<br\s*\/?\s*>|<\/(?:p|div|li|h[1-6])>/i', "\n", $html) ?? $html;
+        $draftText = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $draftText = trim(preg_replace('/[ \t]+\n/', "\n", $draftText) ?? $draftText);
+
+        if ($draftText === '') {
+            $this->aiRewriteError = 'Add some draft text before requesting a rewrite.';
+            $this->aiRewriteConsent = false;
+
+            return;
+        }
+
+        $this->aiRewriteBusy = true;
+        $this->aiRewriteError = null;
+
+        try {
+            $rewritten = trim($assistant->rewriteDraft($this->subject, $draftText, $this->aiRewriteTone));
+
+            if ($rewritten === '') {
+                $this->aiRewriteError = 'The AI provider returned an empty draft. Your original text was kept.';
+
+                return;
+            }
+
+            // Escape the model output before placing it into the rich-text editor.
+            $this->body = $rewritten;
+            $this->bodyText = $rewritten;
+            $this->bodyHtml = nl2br(e($rewritten));
+            $this->dispatch('load-template-content', html: $this->bodyHtml);
+            $this->showAiRewritePanel = false;
+            $this->dispatch('toast', 'AI rewrite ready. Review it before sending.', 'success');
+        } catch (\Throwable $exception) {
+            Log::warning('OpenMail AI draft rewrite failed', [
+                'user_id' => auth()->id(),
+                'tone' => $this->aiRewriteTone,
+                'exception' => $exception::class,
+            ]);
+            $this->aiRewriteError = 'The AI rewrite failed. Your original draft was kept.';
+        } finally {
+            $this->aiRewriteBusy = false;
+            $this->aiRewriteConsent = false;
+            $this->resetValidation('aiRewriteConsent');
+        }
+    }
+
+    public function applyAiDraft(string $to, string $subject, string $body): void
+    {
+        if (! filter_var(trim($to), FILTER_VALIDATE_EMAIL)) {
+            $this->dispatch('toast', 'AI reply could not be applied because the sender address is invalid.', 'warning');
+
+            return;
+        }
+
+        $this->resetForm();
+        $this->isOpen = true;
+        $this->mode = 'compose';
+        $this->to = trim($to);
+        $this->subject = mb_substr(trim($subject), 0, 255);
+        $this->body = trim($body);
+        $this->bodyText = trim($body);
+        $this->bodyHtml = nl2br(e(trim($body)));
+        $this->dispatch('load-template-content', html: $this->bodyHtml);
+    }
+
     public function openComposer(array $params = []): void
     {
         $this->resetForm();
         $this->loadSignatures();
+        $this->loadTemplates();
         $this->mode = $params['mode'] ?? 'compose';
 
         if (in_array($this->mode, ['reply', 'replyAll', 'forward']) && isset($params['message'])) {
@@ -292,6 +459,87 @@ class Composer extends Component
                 'trace' => $e->getTraceAsString(),
             ]);
             $this->dispatch('toast', 'Failed to send message: '.$e->getMessage(), 'error');
+        } finally {
+            $this->sending = false;
+        }
+    }
+
+    public function toggleSchedulePicker(): void
+    {
+        $this->showSchedulePicker = ! $this->showSchedulePicker;
+
+        if ($this->showSchedulePicker && $this->scheduledAt === '') {
+            $this->scheduledAt = CarbonImmutable::now(config('app.timezone'))
+                ->addHour()
+                ->startOfMinute()
+                ->format('Y-m-d\\TH:i');
+        }
+    }
+
+    public function scheduleSend(): void
+    {
+        if (empty(trim($this->body)) && ! empty(trim($this->bodyHtml))) {
+            $this->body = strip_tags($this->bodyHtml);
+        }
+
+        if (empty(trim($this->bodyHtml)) && ! empty(trim($this->body))) {
+            $this->bodyHtml = $this->body;
+        }
+
+        $this->validate();
+        $this->validate([
+            'scheduledAt' => ['required', 'date_format:Y-m-d\\TH:i'],
+        ]);
+
+        $scheduledAt = CarbonImmutable::createFromFormat(
+            '!Y-m-d\\TH:i',
+            $this->scheduledAt,
+            config('app.timezone')
+        );
+
+        if (! $scheduledAt || $scheduledAt->lessThanOrEqualTo(CarbonImmutable::now(config('app.timezone'))->addMinute())) {
+            $this->addError('scheduledAt', 'Choose a time at least one minute from now.');
+
+            return;
+        }
+
+        if ($scheduledAt->greaterThan(CarbonImmutable::now(config('app.timezone'))->addYear())) {
+            $this->addError('scheduledAt', 'Messages can be scheduled up to one year ahead.');
+
+            return;
+        }
+
+        $this->sending = true;
+
+        try {
+            $result = app(ComposerService::class)->scheduleMessage(
+                (int) auth()->id(),
+                $this->getComposerData(),
+                $scheduledAt,
+                hash('sha256', 'openmail:schedule:'.auth()->id().':'.$this->compositionId)
+            );
+
+            AuditService::send('schedule_send', [
+                'subject' => $this->subject,
+                'to' => $this->to,
+                'mode' => $this->mode,
+                'scheduled_at' => $result['send_at'],
+                'pending_send_id' => $result['pending_send_id'],
+            ]);
+
+            $this->dispatch('toast', 'Message scheduled successfully.', 'success');
+            $this->dispatch('composer-sent');
+            $this->dispatch('clear-draft-storage', ['compositionId' => $this->compositionId]);
+            $this->showSchedulePicker = false;
+            $this->resetForm();
+            $this->isOpen = false;
+        } catch (\Throwable $e) {
+            Log::error('Scheduled email creation failed', [
+                'user_id' => auth()->id(),
+                'error' => $e->getMessage(),
+            ]);
+
+            $this->dispatch('toast', 'Could not schedule this message. Review the selected time and try again.', 'error');
         } finally {
             $this->sending = false;
         }
@@ -569,6 +817,13 @@ class Composer extends Component
         $this->attachments = [];
         $this->replyToMessage = null;
         $this->draftUid = null;
+        $this->showSchedulePicker = false;
+        $this->scheduledAt = '';
+        $this->showAiRewritePanel = false;
+        $this->aiRewriteConsent = false;
+        $this->aiRewriteBusy = false;
+        $this->aiRewriteTone = 'professional';
+        $this->aiRewriteError = null;
         $this->showCc = false;
         $this->showBcc = false;
         $this->compositionId = (string) Str::uuid();

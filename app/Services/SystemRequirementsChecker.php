@@ -67,7 +67,7 @@ class SystemRequirementsChecker
 
     private function checkPhpVersion(): array
     {
-        $required = '8.2.0';
+        $required = '8.4.1';
         $current = PHP_VERSION;
         $passed = version_compare($current, $required, '>=');
 

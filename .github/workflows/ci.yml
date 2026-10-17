@@ -62,7 +62,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-version: ['8.2', '8.3', '8.4']
+        php-version: ['8.4']
     env:
       APP_ENV: testing
       APP_KEY: base64:yWkYcFYdR67svSY0Bkl1USG9T56SmFrm6TRRYFyAlwo=

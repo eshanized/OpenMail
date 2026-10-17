@@ -69,6 +69,92 @@
                 </button>
             </div>
 
+            <div class="px-3 pb-2">
+                <a
+                    href="{{ route('scheduled-sends') }}"
+                    wire:navigate
+                    class="flex items-center gap-2 rounded border border-border px-3 py-2 text-xs font-medium text-ink-secondary hover:bg-hover hover:text-ink transition-colors"
+                    aria-label="View scheduled messages"
+                >
+                    <svg class="h-4 w-4 text-ink-tertiary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/>
+                    </svg>
+                    <span>Scheduled</span>
+                </a>
+            </div>
+
+            <div class="px-3 pb-2">
+                <a
+                    href="{{ route('follow-up-reminders') }}"
+                    wire:navigate
+                    class="flex items-center gap-2 rounded border border-border px-3 py-2 text-xs font-medium text-ink-secondary hover:bg-hover hover:text-ink transition-colors"
+                    aria-label="View follow-up reminders"
+                >
+                    <svg class="h-4 w-4 text-ink-tertiary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/>
+                    </svg>
+                    <span>Follow-up reminders</span>
+                </a>
+            </div>
+
+            <div class="px-3 pb-2">
+                <a
+                    href="{{ route('delivery-activity') }}"
+                    wire:navigate
+                    class="flex items-center gap-2 rounded border border-border px-3 py-2 text-xs font-medium text-ink-secondary hover:bg-hover hover:text-ink transition-colors"
+                    aria-label="View delivery activity"
+                >
+                    <svg class="h-4 w-4 text-ink-tertiary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M7 14l4-4 4 4 5-7"/>
+                    </svg>
+                    <span>Delivery activity</span>
+                </a>
+            </div>
+
+            <div class="px-3 pb-2">
+                <a
+                    href="{{ route('saved-searches') }}"
+                    wire:navigate
+                    class="flex items-center gap-2 rounded border border-border px-3 py-2 text-xs font-medium text-ink-secondary hover:bg-hover hover:text-ink transition-colors"
+                    aria-label="View saved searches"
+                >
+                    <svg class="h-4 w-4 text-ink-tertiary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                        <circle cx="10.8" cy="10.8" r="6.8"/><path stroke-linecap="round" stroke-linejoin="round" d="m16 16 4.2 4.2"/>
+                    </svg>
+                    <span>Saved searches</span>
+                </a>
+            </div>
+
+            <div class="px-3 pb-2">
+                <a
+                    href="{{ route('snoozed-messages') }}"
+                    wire:navigate
+                    class="flex items-center gap-2 rounded border border-border px-3 py-2 text-xs font-medium text-ink-secondary hover:bg-hover hover:text-ink transition-colors"
+                    aria-label="View snoozed messages"
+                >
+                    <svg class="h-4 w-4 text-ink-tertiary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/>
+                    </svg>
+                    <span>Snoozed</span>
+                </a>
+            </div>
+
+            <div class="px-3 pb-2">
+                <a
+                    href="{{ route('email-templates') }}"
+                    wire:navigate
+                    class="flex items-center gap-2 rounded border border-border px-3 py-2 text-xs font-medium text-ink-secondary hover:bg-hover hover:text-ink transition-colors"
+                    aria-label="Manage email templates"
+                >
+                    <svg class="h-4 w-4 text-ink-tertiary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-9a1.5 1.5 0 00-1.5-1.5h-12a1.5 1.5 0 00-1.5 1.5v15l4.5-3h9a1.5 1.5 0 001.5-1.5v-1.5"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 8.25h7.5m-7.5 3h7.5"/>
+                    </svg>
+                    <span>Email templates</span>
+                </a>
+            </div>
+
             {{-- Skeleton loading during refreshFolders --}}
             <div wire:loading wire:target="refreshFolders" class="space-y-1 px-3 py-1" aria-hidden="true">
                 @foreach([1, 2, 3, 4, 5] as $i)

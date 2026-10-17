@@ -3,11 +3,17 @@
 namespace App\Livewire\Mailbox;
 
 use App\Models\MessageMetadata;
+use App\Services\AiAssistantService;
+use App\Services\FollowUpReminderService;
 use App\Services\ImapMailboxService;
 use App\Services\LabelService;
 use App\Services\MessageSanitizer;
+use App\Services\MessageSecurityAnalyzer;
+use App\Services\SnoozedMessageService;
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Mockery\LegacyMockInterface;
 use Webklex\PHPIMAP\Attribute;
@@ -55,6 +61,28 @@ class MessageViewer extends Component
 
     public array $attachments = [];
 
+    public array $securitySignals = [];
+
+    public bool $showFollowUpPicker = false;
+
+    public string $followUpAt = '';
+
+    public bool $showAiAssistant = false;
+
+    public bool $aiDataSharingConfirmed = false;
+
+    public bool $aiBusy = false;
+
+    public ?string $aiSummary = null;
+
+    public ?string $aiActionItems = null;
+
+    public ?string $aiTranslation = null;
+
+    public string $aiTargetLanguage = 'Bengali';
+
+    public ?string $aiError = null;
+
     public function mount(string $folderPath, int $uid): void
     {
         if (! auth()->check()) {
@@ -75,6 +103,11 @@ class MessageViewer extends Component
 
     public function loadMessage(): void
     {
+        $this->sanitizedHtml = null;
+        $this->textBody = null;
+        $this->attachments = [];
+        $this->securitySignals = [];
+
         try {
             $service = app(ImapMailboxService::class);
             $this->message = $service->getMessageWithBody($this->folderPath, $this->uid);
@@ -255,8 +288,34 @@ class MessageViewer extends Component
             $this->textBody = (string) $textBody;
         }
 
-        // Extract attachments as simple array
+        // Extract attachments and analyze observable security hints.
         $this->attachments = $this->extractAttachments($this->message);
+        $this->securitySignals = app(MessageSecurityAnalyzer::class)->analyze(
+            $this->fromAddress,
+            $this->readHeaderValue($this->message, 'reply-to'),
+            $this->readHeaderValue($this->message, 'authentication-results'),
+            $this->sanitizedHtml,
+            $this->attachments,
+            (string) auth()->user()?->email
+        );
+    }
+
+    protected function readHeaderValue(object $message, string $name): string
+    {
+        if ($message instanceof LegacyMockInterface || ! method_exists($message, 'getHeader')) {
+            return '';
+        }
+
+        try {
+            $header = $message->getHeader();
+            $value = $header?->get($name);
+
+            return $value instanceof Attribute || is_scalar($value)
+                ? trim((string) $value)
+                : '';
+        } catch (\Throwable) {
+            return '';
+        }
     }
 
     protected function extractFormattedDate(object $message): string
@@ -517,6 +576,151 @@ class MessageViewer extends Component
         $this->redirect(route('mailbox.folder', ['folderPath' => $this->folderPath]), navigate: true);
     }
 
+    public function snoozeUntil(string $preset): void
+    {
+        $timezone = (string) config('app.timezone');
+        $now = CarbonImmutable::now($timezone);
+
+        $wakeAt = match ($preset) {
+            'in_hour' => $now->addHour(),
+            'tomorrow' => $now->addDay()->setTime(9, 0),
+            'next_week' => $now->addWeek()->setTime(9, 0),
+            default => null,
+        };
+
+        if (! $wakeAt) {
+            $this->dispatch('toast', 'Choose a valid snooze time.', 'warning');
+
+            return;
+        }
+
+        if ($this->uid <= 0 || trim($this->folderPath) === '') {
+            $this->dispatch('toast', 'This message cannot be snoozed because its mailbox location is invalid.', 'error');
+
+            return;
+        }
+
+        // Re-fetch from the authenticated mailbox instead of trusting hydrated display fields.
+        $this->loadMessage();
+        if (! $this->message) {
+            $this->dispatch('toast', 'This message is no longer available.', 'warning');
+
+            return;
+        }
+
+        try {
+            app(SnoozedMessageService::class)->snooze(
+                (int) auth()->id(),
+                $this->folderPath,
+                $this->uid,
+                trim($this->messageId) !== '' ? $this->messageId : null,
+                $wakeAt,
+                $this->subject,
+                $this->fromDisplay ?: $this->fromAddress
+            );
+
+            $this->dispatch(
+                'toast',
+                'Message snoozed until '.$wakeAt->timezone($timezone)->format('M j, g:i A').'.',
+                'success'
+            );
+            $this->redirect(route('mailbox.folder', ['folderPath' => $this->folderPath]), navigate: true);
+        } catch (\Throwable $exception) {
+            Log::warning('Message snooze failed', [
+                'user_id' => auth()->id(),
+                'folder' => $this->folderPath,
+                'uid' => $this->uid,
+                'exception' => $exception::class,
+            ]);
+            $this->dispatch('toast', 'Could not snooze this message. Try again.', 'error');
+        }
+    }
+
+    public function toggleFollowUpPicker(): void
+    {
+        $this->showFollowUpPicker = ! $this->showFollowUpPicker;
+
+        if ($this->showFollowUpPicker && $this->followUpAt === '') {
+            $this->followUpAt = CarbonImmutable::now(config('app.timezone'))
+                ->addDay()
+                ->startOfHour()
+                ->format('Y-m-d\\TH:i');
+        }
+
+        $this->resetValidation('followUpAt');
+    }
+
+    public function scheduleFollowUp(): void
+    {
+        $validated = $this->validate([
+            'followUpAt' => ['required', 'date_format:Y-m-d\\TH:i'],
+        ]);
+
+        $timezone = (string) config('app.timezone');
+        $remindAt = CarbonImmutable::createFromFormat(
+            '!Y-m-d\\TH:i',
+            $validated['followUpAt'],
+            $timezone
+        );
+        $now = CarbonImmutable::now($timezone);
+
+        if (! $remindAt || $remindAt->lessThanOrEqualTo($now->addMinute())) {
+            $this->addError('followUpAt', 'Choose a reminder time at least one minute from now.');
+
+            return;
+        }
+
+        if ($remindAt->greaterThan($now->addYear())) {
+            $this->addError('followUpAt', 'Reminders can be scheduled up to one year ahead.');
+
+            return;
+        }
+
+        if ($this->uid <= 0 || trim($this->folderPath) === '') {
+            $this->dispatch('toast', 'This message cannot be reminded because its mailbox location is invalid.', 'error');
+
+            return;
+        }
+
+        try {
+            // refresh the selected message before persisting identity and display details.
+            $this->loadMessage();
+
+            if (! $this->message) {
+                $this->dispatch('toast', 'This message is no longer available.', 'warning');
+
+                return;
+            }
+
+            app(FollowUpReminderService::class)->schedule(
+                (int) auth()->id(),
+                $this->folderPath,
+                $this->uid,
+                trim($this->messageId) !== '' ? $this->messageId : null,
+                $this->subject,
+                $this->fromDisplay ?: $this->fromAddress,
+                $remindAt
+            );
+
+            $this->dispatch(
+                'toast',
+                'Follow-up reminder set for '.$remindAt->timezone($timezone)->format('M j, Y g:i A').'.',
+                'success'
+            );
+            $this->showFollowUpPicker = false;
+            $this->followUpAt = '';
+            $this->resetValidation('followUpAt');
+        } catch (\Throwable $exception) {
+            Log::warning('Follow-up reminder creation failed', [
+                'user_id' => auth()->id(),
+                'folder' => $this->folderPath,
+                'uid' => $this->uid,
+                'exception' => $exception::class,
+            ]);
+            $this->dispatch('toast', 'Could not set the follow-up reminder. Try again.', 'error');
+        }
+    }
+
     public function reply(): void
     {
         $replyBehavior = auth()->user()->setting('reply_behavior', 'reply');
@@ -560,6 +764,145 @@ class MessageViewer extends Component
         ];
     }
 
+    public function toggleAiAssistant(): void
+    {
+        if (! app(AiAssistantService::class)->isEnabled()) {
+            $this->dispatch('toast', 'AI assistance is disabled or not configured by the administrator.', 'info');
+
+            return;
+        }
+
+        $this->showAiAssistant = ! $this->showAiAssistant;
+        $this->aiError = null;
+        $this->aiDataSharingConfirmed = false;
+    }
+
+    public function generateAiSummary(): void
+    {
+        $this->runAiAction('summary');
+    }
+
+    public function generateAiReply(): void
+    {
+        $this->runAiAction('reply');
+    }
+
+    public function generateAiActionItems(): void
+    {
+        $this->runAiAction('action_items');
+    }
+
+    public function translateEmail(): void
+    {
+        $this->runAiAction('translate');
+    }
+
+    protected function runAiAction(string $task): void
+    {
+        if (! in_array($task, ['summary', 'reply', 'action_items', 'translate'], true)) {
+            return;
+        }
+
+        if (! $this->aiDataSharingConfirmed) {
+            $this->addError('aiDataSharingConfirmed', 'Confirm that this message may be shared with the configured AI endpoint.');
+
+            return;
+        }
+
+        $assistant = app(AiAssistantService::class);
+        if (! $assistant->isEnabled()) {
+            $this->aiError = 'AI assistance is disabled or not configured by the administrator.';
+
+            return;
+        }
+
+        $this->aiBusy = true;
+        $this->aiError = null;
+
+        try {
+            // Reload from the authenticated mailbox so client-mutated Livewire properties
+            // are not used as the source of email content sent to the AI provider.
+            $this->loadMessage();
+
+            if (! $this->message || $this->uid <= 0) {
+                $this->aiError = 'This message is no longer available.';
+
+                return;
+            }
+
+            $content = trim((string) ($this->textBody ?: strip_tags($this->sanitizedHtml ?? '')));
+            $content = html_entity_decode($content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $content = preg_replace('/[\\t ]+/u', ' ', $content) ?? $content;
+            $content = trim($content);
+
+            if ($content === '') {
+                $this->aiError = 'This message has no readable text to analyze.';
+
+                return;
+            }
+
+            if ($task === 'summary') {
+                $this->aiSummary = $assistant->summarize($this->subject, $this->fromAddress, $content);
+                $this->dispatch('toast', 'Email summary is ready.', 'success');
+
+                return;
+            }
+
+            if ($task === 'action_items') {
+                $this->aiActionItems = $assistant->extractActionItems($this->subject, $this->fromAddress, $content);
+                $this->dispatch('toast', 'Potential action items are ready. Verify them against the original email.', 'success');
+
+                return;
+            }
+
+            if ($task === 'translate') {
+                $language = trim($this->aiTargetLanguage);
+
+                if (
+                    mb_strlen($language) > 64
+                    || preg_match('/^[\p{L}\p{M}][\p{L}\p{M}\s()\-]{1,63}$/u', $language) !== 1
+                ) {
+                    $this->addError('aiTargetLanguage', 'Enter a language name, such as Bengali or English.');
+
+                    return;
+                }
+
+                $this->aiTranslation = $assistant->translate(
+                    $this->subject,
+                    $this->fromAddress,
+                    $content,
+                    $language
+                );
+                $this->dispatch('toast', 'Translation is ready. Check names, dates, and technical terms.', 'success');
+
+                return;
+            }
+
+            if (! filter_var($this->fromAddress, FILTER_VALIDATE_EMAIL)) {
+                $this->aiError = 'The sender address is not valid enough to prepare a reply.';
+
+                return;
+            }
+
+            $draft = $assistant->draftReply($this->subject, $this->fromAddress, $content);
+            $replySubject = preg_match('/^re:/i', $this->subject) ? $this->subject : 'Re: '.$this->subject;
+
+            // This event only fills an editable composer. It never sends the message.
+            $this->dispatch('applyAiDraft', to: $this->fromAddress, subject: $replySubject, body: $draft);
+            $this->dispatch('toast', 'AI reply draft created. Review it before sending.', 'success');
+        } catch (\Throwable $exception) {
+            Log::warning('Message AI action failed', [
+                'user_id' => auth()->id(),
+                'task' => $task,
+                'exception' => $exception::class,
+            ]);
+            $this->aiError = 'The AI request failed. Check provider configuration and try again.';
+        } finally {
+            $this->aiBusy = false;
+            $this->aiDataSharingConfirmed = false;
+        }
+    }
+
     public function render()
     {
         return view('livewire.mailbox.message-viewer', [
@@ -583,6 +926,7 @@ class MessageViewer extends Component
             'isSeen' => $this->isSeen,
             'isFlagged' => $this->isFlagged,
             'attachments' => $this->attachments,
+            'securitySignals' => $this->securitySignals,
         ]);
     }
 }

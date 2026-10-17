@@ -51,6 +51,15 @@ return [
     |
     */
 
+    'ai' => [
+        'enabled' => env('OPENMAIL_AI_ENABLED', false),
+        'base_url' => env('OPENMAIL_AI_BASE_URL', ''),
+        'api_key' => env('OPENMAIL_AI_API_KEY', ''),
+        'model' => env('OPENMAIL_AI_MODEL', ''),
+        'timeout' => (int) env('OPENMAIL_AI_TIMEOUT', 20),
+        'max_input_chars' => 16000,
+    ],
+
     'default_encryption' => 'ssl',
     'default_imap_port' => 993,
     'default_smtp_port' => 465,

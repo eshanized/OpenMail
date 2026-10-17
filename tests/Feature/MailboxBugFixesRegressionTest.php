@@ -94,9 +94,18 @@ class MailboxBugFixesRegressionTest extends TestCase
         $this->assertNotEmpty($messages);
         $last = is_array($messages) ? end($messages) : $messages->last();
         $email = method_exists($last, 'getOriginalMessage') ? $last->getOriginalMessage() : $last;
-        $from = method_exists($email, 'getFrom') ? $email->getFrom() : [];
-        $this->assertNotEmpty($from);
-        $this->assertEquals($this->user->email, $from[0]->getAddress());
+
+        if (method_exists($email, 'getFrom')) {
+            $from = $email->getFrom();
+            $this->assertNotEmpty($from);
+            $this->assertEquals($this->user->email, $from[0]->getAddress());
+        } else {
+            $this->assertTrue(method_exists($email, 'toString'));
+            $this->assertMatchesRegularExpression(
+                '/^From:.*'.preg_quote($this->user->email, '/').'/mi',
+                $email->toString()
+            );
+        }
     }
 
     public function test_message_viewer_actions_function_without_unhydrated_message_property(): void

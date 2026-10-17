@@ -190,6 +190,69 @@
                         </svg>
                         <span class="hidden sm:inline">Forward</span>
                     </button>
+
+                    {{-- Follow-up reminder --}}
+                    <button
+                        type="button"
+                        wire:click="toggleFollowUpPicker"
+                        wire:loading.attr="disabled"
+                        class="inline-flex items-center gap-1.5 rounded border border-border bg-surface-raised px-2.5 py-1.5 text-xs font-medium text-ink-secondary transition-colors hover:bg-hover hover:text-ink disabled:opacity-50"
+                        aria-expanded="{{ $showFollowUpPicker ? 'true' : 'false' }}"
+                        aria-controls="follow-up-reminder-picker"
+                        title="Set a follow-up reminder"
+                    >
+                        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                            <circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/>
+                        </svg>
+                        <span>Remind me</span>
+                    </button>
+
+                    {{-- Snooze --}}
+                    <div class="relative" x-data="{ open: false }">
+                        <button
+                            type="button"
+                            @click="open = !open"
+                            @keydown.escape="open = false"
+                            @click.outside="open = false"
+                            aria-haspopup="menu"
+                            :aria-expanded="open ? 'true' : 'false'"
+                            class="inline-flex items-center gap-1.5 rounded border border-border bg-surface-raised px-2.5 py-1.5 text-xs font-medium text-ink-secondary transition-colors hover:bg-hover hover:text-ink"
+                            title="Snooze this message"
+                        >
+                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                                <circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/>
+                            </svg>
+                            <span>Snooze</span>
+                        </button>
+                        <div
+                            x-show="open"
+                            x-cloak
+                            x-transition
+                            role="menu"
+                            aria-label="Snooze options"
+                            class="absolute left-0 z-50 mt-1 w-48 overflow-hidden rounded-xl border border-border bg-surface-raised py-1 shadow-lg"
+                        >
+                            <button type="button" role="menuitem" @click="open = false" wire:click="snoozeUntil('in_hour')" wire:loading.attr="disabled" class="w-full px-3 py-2 text-left text-xs text-ink-secondary transition-colors hover:bg-hover hover:text-ink">In one hour</button>
+                            <button type="button" role="menuitem" @click="open = false" wire:click="snoozeUntil('tomorrow')" wire:loading.attr="disabled" class="w-full px-3 py-2 text-left text-xs text-ink-secondary transition-colors hover:bg-hover hover:text-ink">Tomorrow morning</button>
+                            <button type="button" role="menuitem" @click="open = false" wire:click="snoozeUntil('next_week')" wire:loading.attr="disabled" class="w-full px-3 py-2 text-left text-xs text-ink-secondary transition-colors hover:bg-hover hover:text-ink">Next week</button>
+                        </div>
+                    </div>
+
+                    @if(config('openmail.ai.enabled'))
+                        <button
+                            type="button"
+                            wire:click="toggleAiAssistant"
+                            wire:loading.attr="disabled"
+                            class="inline-flex items-center gap-1.5 rounded border border-primary/25 bg-primary/5 px-2.5 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10 disabled:opacity-50"
+                            aria-expanded="{{ $showAiAssistant ? 'true' : 'false' }}"
+                            aria-controls="openmail-ai-assistant"
+                        >
+                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16z"/>
+                            </svg>
+                            <span>AI assist</span>
+                        </button>
+                    @endif
                 </div>
 
                 {{-- Right Actions: Status & Organizing --}}
@@ -293,6 +356,218 @@
                     </button>
                 </div>
             </div>
+
+            @if(config('openmail.ai.enabled') && $showAiAssistant)
+                <section id="openmail-ai-assistant" class="border-b border-border bg-primary/[0.03] px-4 py-4 sm:px-6" aria-labelledby="openmail-ai-title">
+                    <div class="mx-auto max-w-3xl space-y-3">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <h2 id="openmail-ai-title" class="text-sm font-semibold text-ink">OpenMail Intelligence</h2>
+                                <p class="mt-1 text-xs leading-5 text-ink-tertiary">Generate a summary or an editable reply draft. Nothing is sent automatically.</p>
+                            </div>
+                            <button type="button" wire:click="toggleAiAssistant" class="rounded p-1 text-ink-tertiary hover:bg-hover hover:text-ink" aria-label="Close AI assistant">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m6 6 12 12M18 6 6 18"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <label class="flex items-start gap-2.5 rounded-lg border border-border bg-surface-raised p-3">
+                            <input type="checkbox" wire:model="aiDataSharingConfirmed" class="mt-0.5 rounded border-border-strong text-primary focus:ring-primary">
+                            <span class="text-xs leading-5 text-ink-secondary">
+                                I confirm this message's subject, sender, and readable body may be sent to the AI endpoint configured by my administrator for this action.
+                                <span class="block mt-0.5 text-[11px] text-ink-tertiary">Only configure an endpoint you trust. The provider receives the message content; avoid this feature for confidential content when policy does not permit it.</span>
+                            </span>
+                        </label>
+                        @error('aiDataSharingConfirmed')
+                            <p class="text-xs text-error">{{ $message }}</p>
+                        @enderror
+
+                        <div class="flex flex-col gap-3">
+                            <div class="flex flex-wrap gap-2">
+                                <button
+                                    type="button"
+                                    wire:click="generateAiSummary"
+                                    wire:loading.attr="disabled"
+                                    wire:target="generateAiSummary,generateAiReply,generateAiActionItems,translateEmail"
+                                    class="inline-flex items-center gap-2 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-white hover:bg-primary-hover disabled:opacity-50"
+                                >
+                                    <span wire:loading.remove wire:target="generateAiSummary">Summarize email</span>
+                                    <span wire:loading wire:target="generateAiSummary">Summarizing…</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    wire:click="generateAiActionItems"
+                                    wire:loading.attr="disabled"
+                                    wire:target="generateAiSummary,generateAiReply,generateAiActionItems,translateEmail"
+                                    class="inline-flex items-center gap-2 rounded-lg border border-border bg-surface-raised px-3.5 py-2 text-xs font-semibold text-ink-secondary hover:bg-hover hover:text-ink disabled:opacity-50"
+                                >
+                                    <span wire:loading.remove wire:target="generateAiActionItems">Extract action items</span>
+                                    <span wire:loading wire:target="generateAiActionItems">Extracting…</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    wire:click="generateAiReply"
+                                    wire:loading.attr="disabled"
+                                    wire:target="generateAiSummary,generateAiReply,generateAiActionItems,translateEmail"
+                                    class="inline-flex items-center gap-2 rounded-lg border border-border bg-surface-raised px-3.5 py-2 text-xs font-semibold text-ink-secondary hover:bg-hover hover:text-ink disabled:opacity-50"
+                                >
+                                    <span wire:loading.remove wire:target="generateAiReply">Draft a reply</span>
+                                    <span wire:loading wire:target="generateAiReply">Drafting…</span>
+                                </button>
+                            </div>
+
+                            <div class="flex flex-col gap-2 sm:flex-row sm:items-end">
+                                <div class="min-w-0 flex-1 sm:max-w-xs">
+                                    <label for="ai-target-language" class="mb-1 block text-xs font-medium text-ink-secondary">Translate into</label>
+                                    <input
+                                        id="ai-target-language"
+                                        type="text"
+                                        wire:model="aiTargetLanguage"
+                                        maxlength="64"
+                                        autocomplete="off"
+                                        placeholder="e.g. Bengali"
+                                        class="w-full rounded-lg border border-border bg-surface-raised px-3 py-2 text-xs text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                                    >
+                                    @error('aiTargetLanguage')
+                                        <p class="mt-1 text-xs text-error">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <button
+                                    type="button"
+                                    wire:click="translateEmail"
+                                    wire:loading.attr="disabled"
+                                    wire:target="generateAiSummary,generateAiReply,generateAiActionItems,translateEmail"
+                                    class="inline-flex items-center justify-center rounded-lg border border-border bg-surface-raised px-3.5 py-2 text-xs font-semibold text-ink-secondary hover:bg-hover hover:text-ink disabled:opacity-50"
+                                >
+                                    <span wire:loading.remove wire:target="translateEmail">Translate email</span>
+                                    <span wire:loading wire:target="translateEmail">Translating…</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        @if($aiError)
+                            <div role="alert" class="rounded-lg border border-error/25 bg-error/5 p-3 text-xs leading-5 text-error">{{ $aiError }}</div>
+                        @endif
+
+                        @if($aiSummary)
+                            <div class="rounded-xl border border-border bg-surface-raised p-4">
+                                <div class="mb-2 flex items-center justify-between gap-2">
+                                    <h3 class="text-xs font-semibold text-ink">Email summary</h3>
+                                    <button type="button" wire:click="$set('aiSummary', null)" class="text-[11px] text-ink-tertiary hover:text-ink">Dismiss</button>
+                                </div>
+                                <div class="whitespace-pre-wrap break-words text-sm leading-6 text-ink">{{ $aiSummary }}</div>
+                            </div>
+                        @endif
+
+                        @if($aiActionItems)
+                            <div class="rounded-xl border border-border bg-surface-raised p-4">
+                                <div class="mb-2 flex items-center justify-between gap-2">
+                                    <h3 class="text-xs font-semibold text-ink">Potential action items</h3>
+                                    <button type="button" wire:click="$set('aiActionItems', null)" class="text-[11px] text-ink-tertiary hover:text-ink">Dismiss</button>
+                                </div>
+                                <p class="mb-2 text-[11px] text-ink-tertiary">AI may infer or omit context. Verify each item against the original email before acting.</p>
+                                <div class="whitespace-pre-wrap break-words text-sm leading-6 text-ink">{{ $aiActionItems }}</div>
+                            </div>
+                        @endif
+
+                        @if($aiTranslation)
+                            <div class="rounded-xl border border-border bg-surface-raised p-4">
+                                <div class="mb-2 flex items-center justify-between gap-2">
+                                    <h3 class="text-xs font-semibold text-ink">Translation · {{ $aiTargetLanguage }}</h3>
+                                    <button type="button" wire:click="$set('aiTranslation', null)" class="text-[11px] text-ink-tertiary hover:text-ink">Dismiss</button>
+                                </div>
+                                <p class="mb-2 text-[11px] text-ink-tertiary">Check names, dates, numbers, and technical terms against the source.</p>
+                                <div class="whitespace-pre-wrap break-words text-sm leading-6 text-ink">{{ $aiTranslation }}</div>
+                            </div>
+                        @endif
+                    </div>
+                </section>
+            @endif
+
+            @if($showFollowUpPicker)
+                <form id="follow-up-reminder-picker" wire:submit="scheduleFollowUp" class="mx-auto w-full max-w-3xl rounded-xl border border-border bg-surface-raised p-4">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                        <div class="min-w-0 flex-1">
+                            <label for="follow-up-at" class="mb-1 block text-xs font-semibold text-ink-secondary">Remind me on</label>
+                            <input
+                                id="follow-up-at"
+                                type="datetime-local"
+                                wire:model="followUpAt"
+                                min="{{ now()->addMinutes(2)->format('Y-m-d\\TH:i') }}"
+                                required
+                                class="w-full max-w-sm rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                                aria-describedby="follow-up-reminder-help"
+                            >
+                            <p id="follow-up-reminder-help" class="mt-1 text-[11px] leading-5 text-ink-tertiary">Uses {{ config('app.timezone') }}. This reminder will appear in Follow-up reminders in OpenMail; it does not send a push notification.</p>
+                            @error('followUpAt')
+                                <p class="mt-1 text-xs text-error">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button
+                                type="submit"
+                                wire:loading.attr="disabled"
+                                wire:target="scheduleFollowUp"
+                                class="rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-white hover:bg-primary-hover disabled:opacity-50"
+                            >
+                                <span wire:loading.remove wire:target="scheduleFollowUp">Set reminder</span>
+                                <span wire:loading wire:target="scheduleFollowUp">Saving…</span>
+                            </button>
+                            <button
+                                type="button"
+                                wire:click="toggleFollowUpPicker"
+                                wire:loading.attr="disabled"
+                                class="rounded-lg border border-border px-3 py-2 text-xs font-medium text-ink-secondary hover:bg-hover disabled:opacity-50"
+                            >Cancel</button>
+                        </div>
+                    </div>
+                </form>
+            @endif
+
+            {{-- Message security indicators --}}
+            @if(!empty($securitySignals))
+                @php($securityWarningCount = collect($securitySignals)->where('level', 'warning')->count())
+                <details class="mx-auto w-full max-w-3xl overflow-hidden rounded-xl border border-border bg-surface-raised">
+                    <summary class="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-xs font-semibold text-ink hover:bg-hover [&::-webkit-details-marker]:hidden">
+                        <svg class="h-4 w-4 shrink-0 {{ $securityWarningCount > 0 ? 'text-warning' : 'text-ink-tertiary' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3 3.5 7v5.5c0 4.2 3.6 6.8 8.5 8.5 4.9-1.7 8.5-4.3 8.5-8.5V7L12 3z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 3h.01"/>
+                        </svg>
+                        <span>Message security</span>
+                        @if($securityWarningCount > 0)
+                            <span class="rounded-full border border-warning/25 bg-warning/10 px-2 py-0.5 text-[10px] font-semibold text-warning">{{ $securityWarningCount }} warning{{ $securityWarningCount === 1 ? '' : 's' }}</span>
+                        @else
+                            <span class="rounded-full border border-border bg-surface-sunken px-2 py-0.5 text-[10px] font-medium text-ink-tertiary">Review indicators</span>
+                        @endif
+                        <svg class="ml-auto h-3.5 w-3.5 shrink-0 text-ink-tertiary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/>
+                        </svg>
+                    </summary>
+                    <div class="border-t border-border px-4 py-3">
+                        <p class="mb-3 text-[11px] leading-5 text-ink-tertiary">
+                            These are observable clues, not a guarantee that a message is safe. Authentication values may come from unverified headers, and OpenMail does not independently verify every sender or scan attachments for malware.
+                        </p>
+                        <ul class="space-y-2">
+                            @foreach($securitySignals as $signal)
+                                <li class="flex items-start gap-2.5 rounded-lg border {{ $signal['level'] === 'warning' ? 'border-warning/20 bg-warning/5' : 'border-border bg-surface' }} px-3 py-2.5">
+                                    <span class="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full {{ $signal['level'] === 'warning' ? 'bg-warning/10 text-warning' : 'bg-surface-sunken text-ink-tertiary' }}" aria-hidden="true">
+                                        @if($signal['level'] === 'warning')
+                                            <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M10.3 3.9 2.8 17a2 2 0 001.7 3h15a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>
+                                        @else
+                                            <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 11v5m0-8h.01"/></svg>
+                                        @endif
+                                    </span>
+                                    <span class="min-w-0">
+                                        <span class="block text-xs font-semibold text-ink">{{ $signal['title'] }}</span>
+                                        <span class="mt-0.5 block break-words text-xs leading-5 text-ink-secondary">{{ $signal['detail'] }}</span>
+                                    </span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </details>
+            @endif
 
             {{-- Message body --}}
             <div class="email-body-content">

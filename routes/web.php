@@ -23,6 +23,30 @@ Route::get('/login', [LoginController::class, 'show'])->name('login');
 Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('/scheduled', function () {
+        return view('scheduled-sends-page');
+    })->name('scheduled-sends');
+
+    Route::get('/templates', function () {
+        return view('templates-page');
+    })->name('email-templates');
+
+    Route::get('/snoozed', function () {
+        return view('snoozed-messages-page');
+    })->name('snoozed-messages');
+
+    Route::get('/saved-searches', function () {
+        return view('saved-searches-page');
+    })->name('saved-searches');
+
+    Route::get('/delivery-activity', function () {
+        return view('delivery-activity-page');
+    })->name('delivery-activity');
+
+    Route::get('/reminders', function () {
+        return view('follow-up-reminders-page');
+    })->name('follow-up-reminders');
+
     Route::get('/settings', SettingsPage::class)
         ->middleware('throttle:api.settings')
         ->name('settings');

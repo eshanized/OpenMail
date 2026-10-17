@@ -31,7 +31,7 @@ OpenMail is a modern, self-hosted webmail application for organizations. It conn
 
 | Technology | Version | Purpose | Why Recommended |
 |------------|---------|---------|-----------------|
-| PHP | 8.3+ | Runtime | Laravel 12 minimum requirement; 8.3 is current LTS-quality with typed constants, readonly classes, and performance improvements. Laravel 13 also supports 8.3-8.5. |
+| PHP | 8.4.1+ | Runtime | Laravel 12 minimum requirement; 8.3 is current LTS-quality with typed constants, readonly classes, and performance improvements. Laravel 13 also supports 8.3-8.5. |
 | Laravel | 12.x | Backend framework | Latest stable with long support window (security until Feb 2027). Laravel 12 introduced Livewire starter kits and streamlined structure. Avoids 13.x which is too new (released Mar 2026, AI-focused features not needed here). |
 | MySQL/MariaDB | 8.0+ / 10.6+ | Database | Required for shared hosting compatibility. MySQL full-text search powers application-level search without external services. MariaDB is the default on cPanel. |
 | Composer | 2.x | Dependency management | Standard PHP dependency manager; required for installation. |
@@ -166,7 +166,7 @@ OpenMail is a modern, self-hosted webmail application for organizations. It conn
 
 | Package | Compatible With | Notes |
 |---------|-----------------|-------|
-| laravel/framework ^12.0 | PHP 8.2 - 8.5 | PHP 8.3 recommended for production |
+| laravel/framework ^12.0 | PHP 8.2 - 8.5 | PHP 8.4.1 minimum for OpenMail 2.0 |
 | livewire/livewire ^3.8 | Laravel 10, 11, 12, 13 | Livewire 3.x supports Laravel 10+ |
 | webklex/laravel-imap ^6.2 | Laravel 6+ | Requires `webklex/php-imap ^6.2.0` |
 | php-mime-mail-parser ^10.0 | PHP 8.2+ | Requires `ext-mailparse` PECL extension |

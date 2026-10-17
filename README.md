@@ -63,7 +63,7 @@ Designed for deployment on shared hosting (cPanel) or VPS, it includes a WordPre
 
 | Layer | Technology |
 |-------|-----------|
-| Backend | Laravel 12 (PHP 8.2+) |
+| Backend | Laravel 12 (PHP 8.4.1+) |
 | Frontend | Livewire 4 + Blade + Alpine.js + Tailwind CSS 4 |
 | Rich Editor | TipTap 3 (with extensions: tables, task lists, links, emoji, images, history) |
 | Mail Reading | webklex/laravel-imap 6.x (pure PHP IMAP, no ext-imap required) |
@@ -76,7 +76,7 @@ Designed for deployment on shared hosting (cPanel) or VPS, it includes a WordPre
 
 ## Requirements
 
-- PHP 8.2+ (with extensions: `mbstring`, `xml`, `ctype`, `json`, `iconv`, `intl`, `bcmath`, `pdo_mysql`)
+- PHP 8.4.1+ (with extensions: `mbstring`, `xml`, `ctype`, `json`, `iconv`, `intl`, `bcmath`, `pdo_mysql`)
 - MySQL 8.0+ / MariaDB 10.6+ (for full-text search)
 - Composer 2.x
 - Node.js 18+ (for asset builds)

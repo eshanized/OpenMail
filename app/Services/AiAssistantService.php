@@ -38,7 +38,7 @@ class AiAssistantService
         $maxInput = max(1000, min(50000, (int) config('openmail.ai.max_input_chars', 16000)));
         $body = trim(mb_substr($body, 0, $maxInput));
 
-        return "Subject: ".mb_substr(trim($subject), 0, 255)
+        return 'Subject: '.mb_substr(trim($subject), 0, 255)
             ."\nFrom: ".mb_substr(trim($sender), 0, 320)
             ."\n\n--- BEGIN UNTRUSTED EMAIL BODY ---\n"
             .$body
@@ -47,7 +47,7 @@ class AiAssistantService
 
     protected function complete(string $systemPrompt, string $userContent): string
     {
-        if (! $this->isEnabled()) {
+        if (!$this->isEnabled()) {
             throw new RuntimeException('The administrator has not enabled an AI provider.');
         }
 
@@ -56,7 +56,7 @@ class AiAssistantService
 
         if (
             $parsed === false
-            || ! in_array(strtolower((string) ($parsed['scheme'] ?? '')), ['https', 'http'], true)
+            || !in_array(strtolower((string) ($parsed['scheme'] ?? '')), ['https', 'http'], true)
             || empty($parsed['host'])
             || isset($parsed['user'])
             || isset($parsed['pass'])
@@ -67,7 +67,7 @@ class AiAssistantService
         }
 
         $endpoint = rtrim($baseUrl, '/');
-        if (! str_ends_with($endpoint, '/chat/completions')) {
+        if (!str_ends_with($endpoint, '/chat/completions')) {
             $endpoint .= '/chat/completions';
         }
 
@@ -97,7 +97,7 @@ class AiAssistantService
             $response->throw();
             $content = $response->json('choices.0.message.content');
 
-            if (! is_string($content) || trim($content) === '') {
+            if (!is_string($content) || trim($content) === '') {
                 throw new RuntimeException('The AI provider returned an empty or unsupported response.');
             }
 

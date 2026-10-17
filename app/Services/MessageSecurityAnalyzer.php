@@ -26,7 +26,6 @@ class MessageSecurityAnalyzer
      */
     public function analyze(
         string $fromAddress,
-        string $fromName,
         string $replyToHeader,
         string $authenticationResults,
         ?string $sanitizedHtml,

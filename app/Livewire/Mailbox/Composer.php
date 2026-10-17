@@ -286,7 +286,7 @@ class Composer extends Component
             $this->dispatch('load-template-content', html: $this->bodyHtml);
             $this->showAiRewritePanel = false;
             $this->dispatch('toast', 'AI rewrite ready. Review it before sending.', 'success');
-        } catch (\\Throwable $exception) {
+        } catch (\Throwable $exception) {
             Log::warning('OpenMail AI draft rewrite failed', [
                 'user_id' => auth()->id(),
                 'tone' => $this->aiRewriteTone,

@@ -13,7 +13,6 @@ class MessageSecurityAnalyzerTest extends TestCase
     {
         $signals = app(MessageSecurityAnalyzer::class)->analyze(
             'billing@outside.example',
-            'billing@outside.example',
             'Reply desk <payments@different.example>',
             'mx.example; spf=fail; dkim=pass; dmarc=fail',
             '<p><a href="https://xn--pple-43d.com/login">apple.com</a></p>',
@@ -39,7 +38,6 @@ class MessageSecurityAnalyzerTest extends TestCase
     {
         $signals = app(MessageSecurityAnalyzer::class)->analyze(
             'colleague@company.example',
-            '',
             '',
             '',
             '<p>Hello</p>',

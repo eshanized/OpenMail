@@ -1,0 +1,22 @@
+{
+  "id": "/",
+  "name": "OpenMail",
+  "short_name": "OpenMail",
+  "description": "Secure, self-hosted webmail for your organization.",
+  "lang": "en",
+  "start_url": "/mailbox",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#f45b55",
+  "categories": ["productivity", "communication"],
+  "icons": [
+    {
+      "src": "/icons/openmail.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

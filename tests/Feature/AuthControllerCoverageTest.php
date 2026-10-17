@@ -77,7 +77,7 @@ class AuthControllerCoverageTest extends TestCase
             ],
         ]);
 
-        $response = $this->post('/settings/sessions/revoke')->from('/settings');
+        $response = $this->from('/settings')->post('/settings/sessions/revoke');
 
         $response->assertRedirect('/settings');
         $this->assertDatabaseHas('sessions', ['user_id' => $user->id]);

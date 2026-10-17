@@ -75,6 +75,12 @@ class MessageViewer extends Component
 
     public ?string $aiSummary = null;
 
+    public ?string $aiActionItems = null;
+
+    public ?string $aiTranslation = null;
+
+    public string $aiTargetLanguage = 'Bengali';
+
     public ?string $aiError = null;
 
     public function mount(string $folderPath, int $uid): void
@@ -781,9 +787,19 @@ class MessageViewer extends Component
         $this->runAiAction('reply');
     }
 
+    public function generateAiActionItems(): void
+    {
+        $this->runAiAction('action_items');
+    }
+
+    public function translateEmail(): void
+    {
+        $this->runAiAction('translate');
+    }
+
     protected function runAiAction(string $task): void
     {
-        if (! in_array($task, ['summary', 'reply'], true)) {
+        if (! in_array($task, ['summary', 'reply', 'action_items', 'translate'], true)) {
             return;
         }
 
@@ -828,6 +844,36 @@ class MessageViewer extends Component
             if ($task === 'summary') {
                 $this->aiSummary = $assistant->summarize($this->subject, $this->fromAddress, $content);
                 $this->dispatch('toast', 'Email summary is ready.', 'success');
+
+                return;
+            }
+
+            if ($task === 'action_items') {
+                $this->aiActionItems = $assistant->extractActionItems($this->subject, $this->fromAddress, $content);
+                $this->dispatch('toast', 'Potential action items are ready. Verify them against the original email.', 'success');
+
+                return;
+            }
+
+            if ($task === 'translate') {
+                $language = trim($this->aiTargetLanguage);
+
+                if (
+                    mb_strlen($language) > 64
+                    || preg_match('/^[\\p{L}\\p{M}][\\p{L}\\p{M}\\s()\\-]{1,63}$/u', $language) !== 1
+                ) {
+                    $this->addError('aiTargetLanguage', 'Enter a language name, such as Bengali or English.');
+
+                    return;
+                }
+
+                $this->aiTranslation = $assistant->translate(
+                    $this->subject,
+                    $this->fromAddress,
+                    $content,
+                    $language
+                );
+                $this->dispatch('toast', 'Translation is ready. Check names, dates, and technical terms.', 'success');
 
                 return;
             }

@@ -114,11 +114,11 @@ class ComposerService
         $now = CarbonImmutable::now(config('app.timezone'));
 
         if ($scheduledAt->lessThanOrEqualTo($now->addMinute())) {
-            throw new \\InvalidArgumentException('Scheduled send time must be at least one minute in the future.');
+            throw new \InvalidArgumentException('Scheduled send time must be at least one minute in the future.');
         }
 
         if ($scheduledAt->greaterThan($now->addYear())) {
-            throw new \\InvalidArgumentException('Scheduled send time cannot be more than one year in the future.');
+            throw new \InvalidArgumentException('Scheduled send time cannot be more than one year in the future.');
         }
 
         $pendingSend = $this->prepareSend(

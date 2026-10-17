@@ -218,6 +218,7 @@ document.addEventListener('alpine:init', () => {
                 { id: 'search', label: 'Search mail', description: 'Focus the mailbox search field', icon: 'search', shortcut: '/' },
                 { id: 'scheduled', label: 'Scheduled messages', description: 'Review or cancel future sends', icon: 'clock' },
                 { id: 'snoozed', label: 'Snoozed messages', description: 'Review messages hidden until their return time', icon: 'clock' },
+                { id: 'saved-searches', label: 'Saved searches', description: 'Run or manage your reusable search filters', icon: 'search' },
                 { id: 'templates', label: 'Email templates', description: 'Manage reusable message text', icon: 'template' },
                 { id: 'settings', label: 'Settings', description: 'Appearance, mail, and security preferences', icon: 'settings' },
             ];
@@ -307,6 +308,7 @@ document.addEventListener('alpine:init', () => {
                 inbox: urls.inboxUrl || urls.mailboxUrl,
                 scheduled: urls.scheduledUrl,
                 snoozed: urls.snoozedUrl,
+                'saved-searches': urls.savedSearchesUrl,
                 templates: urls.templatesUrl,
                 settings: urls.settingsUrl,
             }[action.id];

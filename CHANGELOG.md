@@ -10,6 +10,10 @@ All notable changes to this project will be documented in this file.
 ### Added
 - **Durable Send Later**: Persist scheduled email delivery in the existing delivery state machine, expose a scheduled-message queue, and allow users to cancel future messages back to Drafts.
 - **Scheduled MIME Durability**: Deliver the persisted MIME payload so attachment delivery does not depend on temporary browser-upload paths still existing at the scheduled time; restore Bcc recipients only to the SMTP envelope.
+- **Email Productivity**: Add user-scoped templates, snooze/return, saved searches, and a keyboard command palette.
+- **Delivery Activity**: Add a user-scoped, status-filterable delivery history with explicit warnings for uncertain SMTP outcomes and without exposing raw transport error text.
+- **AI and Trust**: Add opt-in email summaries and editable reply drafts plus evidence-limited message security indicators.
+- **Installable PWA Shell**: Add a manifest, icon, and static-only service worker that does not cache private mailbox content.
 
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),

@@ -407,7 +407,36 @@
             </form>
 
             {{-- Footer Action Bar --}}
-            <div class="flex items-center justify-between px-5 py-3 bg-surface-sunken border-t border-border">
+            <div class="flex flex-col gap-2 px-5 py-3 bg-surface-sunken border-t border-border">
+                @if($showSchedulePicker)
+                    <div class="flex flex-col sm:flex-row sm:items-end gap-2 rounded border border-border bg-surface-raised p-3">
+                        <div class="flex-1 min-w-0">
+                            <label for="composer-scheduled-at" class="block text-xs font-medium text-ink-secondary mb-1">Schedule delivery</label>
+                            <input
+                                id="composer-scheduled-at"
+                                type="datetime-local"
+                                wire:model="scheduledAt"
+                                min="{{ now()->addMinutes(2)->format('Y-m-d\\TH:i') }}"
+                                class="w-full max-w-sm px-3 py-1.5 bg-surface border border-border-strong rounded text-sm text-ink focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                                aria-describedby="composer-schedule-help"
+                            >
+                            <p id="composer-schedule-help" class="mt-1 text-[11px] text-ink-tertiary">Times use the application timezone ({{ config('app.timezone') }}). Scheduled messages can be cancelled from Scheduled.</p>
+                            @error('scheduledAt')
+                                <p class="mt-1 text-xs text-error">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <button
+                            type="button"
+                            wire:click="scheduleSend"
+                            wire:loading.attr="disabled"
+                            wire:target="scheduleSend"
+                            class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded bg-primary hover:bg-primary-hover text-white text-xs font-medium transition-colors disabled:opacity-50 cursor-pointer"
+                        >
+                            <span wire:loading.remove wire:target="scheduleSend">Confirm schedule</span>
+                            <span wire:loading wire:target="scheduleSend">Scheduling…</span>
+                        </button>
+                    </div>
+                @endif
                 <div class="flex items-center gap-2.5">
                     {{-- Primary Send Button --}}
                     <button
@@ -430,6 +459,22 @@
                             </svg>
                             <span>Sending…</span>
                         </span>
+                    </button>
+
+                    <button
+                        type="button"
+                        wire:click="toggleSchedulePicker"
+                        wire:loading.attr="disabled"
+                        wire:target="toggleSchedulePicker scheduleSend"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-border text-ink-secondary hover:text-ink hover:bg-hover text-xs font-medium transition-colors disabled:opacity-50 cursor-pointer"
+                        aria-expanded="{{ $showSchedulePicker ? 'true' : 'false' }}"
+                        aria-controls="composer-scheduled-at"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75" aria-hidden="true">
+                            <circle cx="12" cy="12" r="9"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/>
+                        </svg>
+                        <span>{{ $showSchedulePicker ? 'Hide schedule' : 'Send later' }}</span>
                     </button>
 
                     <span class="hidden sm:inline-block text-[11px] text-ink-tertiary font-mono">

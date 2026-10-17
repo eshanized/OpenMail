@@ -74,11 +74,20 @@ class ComposerService
         $messageId = $email->getHeaders()->get('Message-ID')?->getBodyAsString() ?? (string) Str::uuid();
         $mimeString = $email->toString();
 
+        // MIME is the durable source of truth for attachments; never retain
+        // short-lived Livewire upload paths in long-lived delivery records.
+        $storedData = $data;
+        foreach ($storedData['attachments'] ?? [] as $index => $attachment) {
+            if (is_array($attachment)) {
+                unset($storedData['attachments'][$index]['path']);
+            }
+        }
+
         $pendingSend = PendingSend::create([
             'user_id' => $userId,
             'idempotency_key' => $idempotencyKey,
             'message_id' => trim($messageId, '<> '),
-            'message_json' => $data,
+            'message_json' => $storedData,
             'mime_message' => $mimeString,
             'send_at' => $scheduledAt ?? now()->addSeconds($delaySeconds),
             'is_scheduled' => $scheduledAt !== null,

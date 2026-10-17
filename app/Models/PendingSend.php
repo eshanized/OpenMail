@@ -49,6 +49,7 @@ class PendingSend extends Model
         'message_json',
         'mime_message',
         'send_at',
+        'is_scheduled',
         'status',
         'claim_token',
         'claimed_at',
@@ -65,6 +66,7 @@ class PendingSend extends Model
     protected $casts = [
         'message_json' => 'array',
         'send_at' => 'datetime',
+        'is_scheduled' => 'boolean',
         'claimed_at' => 'datetime',
         'delivered_at' => 'datetime',
         'status' => 'string',

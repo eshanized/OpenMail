@@ -8,7 +8,6 @@ use App\Services\ImapConnectionTester;
 use App\Services\OutboundConnectionGuard;
 use App\Services\SmtpConnectionTester;
 use InvalidArgumentException;
-use Mockery;
 use Tests\TestCase;
 
 class ConnectionTesterSecurityTest extends TestCase

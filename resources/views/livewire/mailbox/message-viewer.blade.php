@@ -383,27 +383,67 @@
                             <p class="text-xs text-error">{{ $message }}</p>
                         @enderror
 
-                        <div class="flex flex-wrap gap-2">
-                            <button
-                                type="button"
-                                wire:click="generateAiSummary"
-                                wire:loading.attr="disabled"
-                                wire:target="generateAiSummary,generateAiReply"
-                                class="inline-flex items-center gap-2 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-white hover:bg-primary-hover disabled:opacity-50"
-                            >
-                                <span wire:loading.remove wire:target="generateAiSummary">Summarize email</span>
-                                <span wire:loading wire:target="generateAiSummary">Summarizing…</span>
-                            </button>
-                            <button
-                                type="button"
-                                wire:click="generateAiReply"
-                                wire:loading.attr="disabled"
-                                wire:target="generateAiSummary,generateAiReply"
-                                class="inline-flex items-center gap-2 rounded-lg border border-border bg-surface-raised px-3.5 py-2 text-xs font-semibold text-ink-secondary hover:bg-hover hover:text-ink disabled:opacity-50"
-                            >
-                                <span wire:loading.remove wire:target="generateAiReply">Draft a reply</span>
-                                <span wire:loading wire:target="generateAiReply">Drafting…</span>
-                            </button>
+                        <div class="flex flex-col gap-3">
+                            <div class="flex flex-wrap gap-2">
+                                <button
+                                    type="button"
+                                    wire:click="generateAiSummary"
+                                    wire:loading.attr="disabled"
+                                    wire:target="generateAiSummary,generateAiReply,generateAiActionItems,translateEmail"
+                                    class="inline-flex items-center gap-2 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-white hover:bg-primary-hover disabled:opacity-50"
+                                >
+                                    <span wire:loading.remove wire:target="generateAiSummary">Summarize email</span>
+                                    <span wire:loading wire:target="generateAiSummary">Summarizing…</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    wire:click="generateAiActionItems"
+                                    wire:loading.attr="disabled"
+                                    wire:target="generateAiSummary,generateAiReply,generateAiActionItems,translateEmail"
+                                    class="inline-flex items-center gap-2 rounded-lg border border-border bg-surface-raised px-3.5 py-2 text-xs font-semibold text-ink-secondary hover:bg-hover hover:text-ink disabled:opacity-50"
+                                >
+                                    <span wire:loading.remove wire:target="generateAiActionItems">Extract action items</span>
+                                    <span wire:loading wire:target="generateAiActionItems">Extracting…</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    wire:click="generateAiReply"
+                                    wire:loading.attr="disabled"
+                                    wire:target="generateAiSummary,generateAiReply,generateAiActionItems,translateEmail"
+                                    class="inline-flex items-center gap-2 rounded-lg border border-border bg-surface-raised px-3.5 py-2 text-xs font-semibold text-ink-secondary hover:bg-hover hover:text-ink disabled:opacity-50"
+                                >
+                                    <span wire:loading.remove wire:target="generateAiReply">Draft a reply</span>
+                                    <span wire:loading wire:target="generateAiReply">Drafting…</span>
+                                </button>
+                            </div>
+
+                            <div class="flex flex-col gap-2 sm:flex-row sm:items-end">
+                                <div class="min-w-0 flex-1 sm:max-w-xs">
+                                    <label for="ai-target-language" class="mb-1 block text-xs font-medium text-ink-secondary">Translate into</label>
+                                    <input
+                                        id="ai-target-language"
+                                        type="text"
+                                        wire:model="aiTargetLanguage"
+                                        maxlength="64"
+                                        autocomplete="off"
+                                        placeholder="e.g. Bengali"
+                                        class="w-full rounded-lg border border-border bg-surface-raised px-3 py-2 text-xs text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                                    >
+                                    @error('aiTargetLanguage')
+                                        <p class="mt-1 text-xs text-error">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <button
+                                    type="button"
+                                    wire:click="translateEmail"
+                                    wire:loading.attr="disabled"
+                                    wire:target="generateAiSummary,generateAiReply,generateAiActionItems,translateEmail"
+                                    class="inline-flex items-center justify-center rounded-lg border border-border bg-surface-raised px-3.5 py-2 text-xs font-semibold text-ink-secondary hover:bg-hover hover:text-ink disabled:opacity-50"
+                                >
+                                    <span wire:loading.remove wire:target="translateEmail">Translate email</span>
+                                    <span wire:loading wire:target="translateEmail">Translating…</span>
+                                </button>
+                            </div>
                         </div>
 
                         @if($aiError)
@@ -417,6 +457,28 @@
                                     <button type="button" wire:click="$set('aiSummary', null)" class="text-[11px] text-ink-tertiary hover:text-ink">Dismiss</button>
                                 </div>
                                 <div class="whitespace-pre-wrap break-words text-sm leading-6 text-ink">{{ $aiSummary }}</div>
+                            </div>
+                        @endif
+
+                        @if($aiActionItems)
+                            <div class="rounded-xl border border-border bg-surface-raised p-4">
+                                <div class="mb-2 flex items-center justify-between gap-2">
+                                    <h3 class="text-xs font-semibold text-ink">Potential action items</h3>
+                                    <button type="button" wire:click="$set('aiActionItems', null)" class="text-[11px] text-ink-tertiary hover:text-ink">Dismiss</button>
+                                </div>
+                                <p class="mb-2 text-[11px] text-ink-tertiary">AI may infer or omit context. Verify each item against the original email before acting.</p>
+                                <div class="whitespace-pre-wrap break-words text-sm leading-6 text-ink">{{ $aiActionItems }}</div>
+                            </div>
+                        @endif
+
+                        @if($aiTranslation)
+                            <div class="rounded-xl border border-border bg-surface-raised p-4">
+                                <div class="mb-2 flex items-center justify-between gap-2">
+                                    <h3 class="text-xs font-semibold text-ink">Translation · {{ $aiTargetLanguage }}</h3>
+                                    <button type="button" wire:click="$set('aiTranslation', null)" class="text-[11px] text-ink-tertiary hover:text-ink">Dismiss</button>
+                                </div>
+                                <p class="mb-2 text-[11px] text-ink-tertiary">Check names, dates, numbers, and technical terms against the source.</p>
+                                <div class="whitespace-pre-wrap break-words text-sm leading-6 text-ink">{{ $aiTranslation }}</div>
                             </div>
                         @endif
                     </div>

@@ -70,6 +70,12 @@
             }
             this.$wire.scheduleSend();
         },
+        async rewriteDraft() {
+            if (this.tiptapEditor) {
+                await this.$wire.syncBodyFromEditor(this.tiptapEditor.getHTML());
+            }
+            await this.$wire.rewriteWithAi();
+        },
         handleKeydown(event) {
             if (!this.open) return;
             if (event.key === 'Escape') {
@@ -333,8 +339,85 @@
                                     :default-signature="$defaultSignature"
                                 />
                             @endif
+
+                            @if(config('openmail.ai.enabled'))
+                                <button
+                                    type="button"
+                                    wire:click="toggleAiRewritePanel"
+                                    wire:loading.attr="disabled"
+                                    class="inline-flex items-center gap-1.5 rounded border border-primary/25 bg-primary/5 px-2.5 py-1 text-[11px] font-medium text-primary transition-colors hover:bg-primary/10 disabled:opacity-50"
+                                    aria-expanded="{{ $showAiRewritePanel ? 'true' : 'false' }}"
+                                    aria-controls="composer-ai-rewrite-panel"
+                                >
+                                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z"/>
+                                    </svg>
+                                    AI rewrite
+                                </button>
+                            @endif
                         </div>
                     </div>
+                    @if(config('openmail.ai.enabled') && $showAiRewritePanel)
+                        <section id="composer-ai-rewrite-panel" class="mb-3 space-y-3 rounded-xl border border-primary/20 bg-primary/[0.03] p-3" aria-labelledby="composer-ai-rewrite-title">
+                            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                <div>
+                                    <h3 id="composer-ai-rewrite-title" class="text-xs font-semibold text-ink">AI draft rewrite</h3>
+                                    <p class="mt-0.5 text-[11px] text-ink-tertiary">Rewrites only the current subject and draft text. Recipients, attachments, and the send action are not shared with the AI rewrite request.</p>
+                                </div>
+                                <div class="w-full sm:w-44">
+                                    <label for="composer-ai-tone" class="mb-1 block text-[11px] font-medium text-ink-secondary">Writing tone</label>
+                                    <select
+                                        id="composer-ai-tone"
+                                        wire:model="aiRewriteTone"
+                                        class="w-full rounded-lg border border-border bg-surface-raised px-2.5 py-1.5 text-xs text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                                    >
+                                        <option value="professional">Professional</option>
+                                        <option value="concise">Concise</option>
+                                        <option value="friendly">Friendly</option>
+                                        <option value="formal">Formal</option>
+                                        <option value="empathetic">Empathetic</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <label class="flex items-start gap-2.5 rounded-lg border border-border bg-surface-raised p-3">
+                                <input type="checkbox" wire:model="aiRewriteConsent" class="mt-0.5 rounded border-border-strong text-primary focus:ring-primary">
+                                <span class="text-xs leading-5 text-ink-secondary">
+                                    I confirm the draft subject and body may be sent to my administrator-configured AI endpoint for this rewrite.
+                                    <span class="mt-0.5 block text-[11px] text-ink-tertiary">Only use an endpoint you trust. The result will replace the editor text for review, not send the email.</span>
+                                </span>
+                            </label>
+                            @error('aiRewriteConsent')
+                                <p class="text-xs text-error">{{ $message }}</p>
+                            @enderror
+                            @error('aiRewriteTone')
+                                <p class="text-xs text-error">{{ $message }}</p>
+                            @enderror
+                            @if($aiRewriteError)
+                                <div role="alert" class="rounded-lg border border-error/25 bg-error/5 p-3 text-xs leading-5 text-error">{{ $aiRewriteError }}</div>
+                            @endif
+
+                            <div class="flex flex-wrap justify-end gap-2">
+                                <button
+                                    type="button"
+                                    wire:click="toggleAiRewritePanel"
+                                    wire:loading.attr="disabled"
+                                    class="rounded-lg border border-border px-3 py-2 text-xs font-medium text-ink-secondary hover:bg-hover disabled:opacity-50"
+                                >Cancel</button>
+                                <button
+                                    type="button"
+                                    @click="rewriteDraft()"
+                                    wire:loading.attr="disabled"
+                                    wire:target="rewriteWithAi"
+                                    class="inline-flex items-center gap-2 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-white hover:bg-primary-hover disabled:opacity-50"
+                                >
+                                    <span wire:loading.remove wire:target="rewriteWithAi">Rewrite draft</span>
+                                    <span wire:loading wire:target="rewriteWithAi">Rewriting…</span>
+                                </button>
+                            </div>
+                        </section>
+                    @endif
+
                     <div class="border border-border rounded overflow-hidden bg-surface-raised flex flex-col focus-within:border-primary transition-colors" wire:ignore>
                         <div x-ref="toolbar" class="tiptap-toolbar-container border-b border-border overflow-x-auto scrollbar-thin"></div>
                         <div x-ref="editor" class="tiptap-editor"></div>

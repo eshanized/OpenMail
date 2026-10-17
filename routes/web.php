@@ -27,6 +27,10 @@ Route::middleware(['auth'])->group(function () {
         return view('scheduled-sends-page');
     })->name('scheduled-sends');
 
+    Route::get('/templates', function () {
+        return view('templates-page');
+    })->name('email-templates');
+
     Route::get('/settings', SettingsPage::class)
         ->middleware('throttle:api.settings')
         ->name('settings');

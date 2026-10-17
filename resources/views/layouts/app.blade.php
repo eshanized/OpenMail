@@ -246,6 +246,10 @@
         </template>
     </div>
 
+    @auth
+        @include('components.command-palette')
+    @endauth
+
     @livewireScripts
     @stack('scripts')
 </body>

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Cache;
 use Mockery;
 use ReflectionProperty;
 use Tests\TestCase;
+use Webklex\PHPIMAP\Attachment;
 use Webklex\PHPIMAP\Client;
 use Webklex\PHPIMAP\Folder;
 use Webklex\PHPIMAP\Message;
@@ -83,8 +84,9 @@ class ImapMailboxServiceCoverageTest extends TestCase
         $query->shouldReceive('getMessageByUid')->with(8)->once()->andReturn($missingAttachmentMessage);
 
         $message = Mockery::mock(Message::class);
+        $attachment = Mockery::mock(Attachment::class);
         $attachments = Mockery::mock(AttachmentCollection::class);
-        $attachments->shouldReceive('get')->with(1)->once()->andReturn('downloadable-attachment');
+        $attachments->shouldReceive('get')->with(1)->once()->andReturn($attachment);
         $message->shouldReceive('getAttachments')->once()->andReturn($attachments);
         $query->shouldReceive('getMessageByUid')->with(9)->once()->andReturn($message);
         $folder->shouldReceive('query')->twice()->andReturn($query);
@@ -92,7 +94,7 @@ class ImapMailboxServiceCoverageTest extends TestCase
 
         $service = $this->serviceFor($client);
         $this->assertNull($service->getAttachment('INBOX', 8, 0));
-        $this->assertSame('downloadable-attachment', $service->getAttachment('INBOX', 9, 1));
+        $this->assertSame($attachment, $service->getAttachment('INBOX', 9, 1));
     }
 
     public function test_get_message_count_returns_total_unread_and_uidvalidity(): void

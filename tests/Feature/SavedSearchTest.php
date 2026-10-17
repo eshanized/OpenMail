@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Livewire\Mailbox\SavedSearches;
 use App\Livewire\Mailbox\SaveSearchButton;
+use App\Livewire\Mailbox\SavedSearches;
 use App\Models\SavedSearch;
 use App\Models\User;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -110,9 +111,17 @@ class SavedSearchTest extends TestCase
                 'has_attachment' => true,
             ]));
 
-        Livewire::actingAs($other)
-            ->test(SavedSearches::class)
-            ->call('runSearch', $search->id)
-            ->assertNotFound();
+        try {
+            Livewire::actingAs($other)
+                ->test(SavedSearches::class)
+                ->call('runSearch', $search->id);
+
+            $this->fail('A user must not run another user\'s saved search.');
+        } catch (ModelNotFoundException) {
+            $this->assertDatabaseHas('saved_searches', [
+                'id' => $search->id,
+                'user_id' => $owner->id,
+            ]);
+        }
     }
 }

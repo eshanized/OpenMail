@@ -13,7 +13,6 @@ use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
-use Symfony\Component\Mime\Email;
 
 class ScheduledSendTest extends TestCase
 {
@@ -71,12 +70,18 @@ class ScheduledSendTest extends TestCase
             $this->assertNotEmpty($send->mime_message);
             $this->assertArrayNotHasKey('path', $send->message_json['attachments'][0]);
 
-            // A scheduled send must not depend on the temporary upload existing later.
-            unlink($path);
-            $restoredEmail = Email::fromString($send->mime_message);
+            // The persisted raw MIME must still contain the attachment bytes and
+            // filename after the temporary upload is removed.
+            $this->assertStringContainsString('report.txt', $send->mime_message);
+            $encodedMime = preg_replace('/\\s+/', '', $send->mime_message);
+            $this->assertStringContainsString(
+                base64_encode('attachment content that must survive until scheduled delivery'),
+                $encodedMime
+            );
 
-            $this->assertCount(1, $restoredEmail->getAttachments());
-            $this->assertSame('report.txt', $restoredEmail->getAttachments()[0]->getFilename());
+            unlink($path);
+            $this->assertFileDoesNotExist($path);
+            $this->assertStringContainsString('report.txt', $send->mime_message);
         } finally {
             if (is_file($path)) {
                 unlink($path);

@@ -49,7 +49,7 @@ class AiAssistantService
             mb_strlen($language) > 64
             || preg_match('/^[\\p{L}\\p{M}][\\p{L}\\p{M}\\s()\\-]{1,63}$/u', $language) !== 1
         ) {
-            throw new \\InvalidArgumentException('A valid target language is required.');
+            throw new \InvalidArgumentException('A valid target language is required.');
         }
 
         return $this->complete(
@@ -63,7 +63,7 @@ class AiAssistantService
         $allowedTones = ['professional', 'concise', 'friendly', 'formal', 'empathetic'];
 
         if (! in_array($tone, $allowedTones, true)) {
-            throw new \\InvalidArgumentException('The requested writing tone is not supported.');
+            throw new \InvalidArgumentException('The requested writing tone is not supported.');
         }
 
         return $this->complete(

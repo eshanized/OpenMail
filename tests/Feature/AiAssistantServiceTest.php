@@ -69,6 +69,16 @@ class AiAssistantServiceTest extends TestCase
         app(AiAssistantService::class)->summarize('Subject', 'sender@example.test', 'Body');
     }
 
+    public function test_remote_http_endpoint_is_rejected_to_protect_api_keys(): void
+    {
+        $this->configureAi();
+        config(['openmail.ai.base_url' => 'http://ai.example.test/v1']);
+        Http::preventStrayRequests();
+
+        $this->expectException(RuntimeException::class);
+        app(AiAssistantService::class)->summarize('Subject', 'sender@example.test', 'Body');
+    }
+
     public function test_invalid_endpoint_with_userinfo_or_fragment_is_rejected(): void
     {
         $this->configureAi();

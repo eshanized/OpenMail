@@ -4,6 +4,7 @@
         inboxUrl: @js(route('mailbox.folder', ['folderPath' => 'INBOX'])),
         settingsUrl: @js(route('settings')),
         scheduledUrl: @js(route('scheduled-sends')),
+        snoozedUrl: @js(route('snoozed-messages')),
         templatesUrl: @js(route('email-templates'))
     })"
     @keydown.window="handleKeydown($event)"

@@ -1,4 +1,5 @@
 <div
+    data-openmail-composer
     x-data="{
         open: false,
         showCc: false,

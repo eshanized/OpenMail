@@ -78,14 +78,14 @@ class SecurityTab extends Component
         // Simple user agent parsing
         if (str_contains($userAgent, 'Windows')) {
             $os = 'Windows';
-        } elseif (str_contains($userAgent, 'Mac')) {
-            $os = 'macOS';
-        } elseif (str_contains($userAgent, 'Linux')) {
-            $os = 'Linux';
         } elseif (str_contains($userAgent, 'Android')) {
             $os = 'Android';
         } elseif (str_contains($userAgent, 'iPhone') || str_contains($userAgent, 'iPad')) {
             $os = 'iOS';
+        } elseif (str_contains($userAgent, 'Mac')) {
+            $os = 'macOS';
+        } elseif (str_contains($userAgent, 'Linux')) {
+            $os = 'Linux';
         } else {
             $os = 'Unknown OS';
         }

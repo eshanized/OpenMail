@@ -18,7 +18,8 @@ class MailTransportService
 {
     public function __construct(
         protected ?TransportInterface $transport = null
-    ) {}
+    ) {
+    }
 
     /**
      * Get or initialize the Symfony Mailer transport.
@@ -68,11 +69,11 @@ class MailTransportService
             return $this->deliver($mimeOrEmail);
         }
 
-        if (!is_string($mimeOrEmail) || trim($mimeOrEmail) === '') {
+        if (! is_string($mimeOrEmail) || trim($mimeOrEmail) === '') {
             throw new \InvalidArgumentException('A non-empty MIME message is required.');
         }
 
-        if (!$user) {
+        if (! $user) {
             throw new \InvalidArgumentException('A sender is required to deliver a persisted MIME message.');
         }
 
@@ -212,17 +213,17 @@ class MailTransportService
 
         // Recipients
         $toAddresses = $this->parseAddresses($data['to'] ?? '');
-        if (!empty($toAddresses)) {
+        if (! empty($toAddresses)) {
             $email->to(...$toAddresses);
         }
 
         $ccAddresses = $this->parseAddresses($data['cc'] ?? '');
-        if (!empty($ccAddresses)) {
+        if (! empty($ccAddresses)) {
             $email->cc(...$ccAddresses);
         }
 
         $bccAddresses = $this->parseAddresses($data['bcc'] ?? '');
-        if (!empty($bccAddresses)) {
+        if (! empty($bccAddresses)) {
             $email->bcc(...$bccAddresses);
         }
 
@@ -234,7 +235,7 @@ class MailTransportService
         $textBody = $data['bodyText'] ?? $this->htmlToText($htmlBody);
 
         $email->text($textBody);
-        if (!empty($htmlBody)) {
+        if (! empty($htmlBody)) {
             $email->html($htmlBody);
         }
 
@@ -257,14 +258,14 @@ class MailTransportService
         $email->getHeaders()->add(new IdentificationHeader('Message-ID', $cleanId));
 
         // Threading headers: In-Reply-To and References
-        if (!empty($data['in_reply_to'])) {
+        if (! empty($data['in_reply_to'])) {
             $inReplyTo = trim($data['in_reply_to'], '<>');
             $email->getHeaders()->add(new IdentificationHeader('In-Reply-To', $inReplyTo));
         }
 
-        if (!empty($data['references'])) {
+        if (! empty($data['references'])) {
             $refs = array_filter(array_map(fn ($r) => trim($r, '<>'), explode(' ', $data['references'])));
-            if (!empty($refs)) {
+            if (! empty($refs)) {
                 $email->getHeaders()->add(new IdentificationHeader('References', $refs));
             }
         }
@@ -422,7 +423,7 @@ class MailTransportService
         if ($header instanceof IdentificationHeader) {
             $ids = $header->getIds();
 
-            return !empty($ids) ? $ids[0] : (string) Str::uuid();
+            return ! empty($ids) ? $ids[0] : (string) Str::uuid();
         }
 
         return (string) Str::uuid();

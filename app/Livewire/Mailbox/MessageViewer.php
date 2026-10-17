@@ -704,7 +704,7 @@ class MessageViewer extends Component
             $this->showFollowUpPicker = false;
             $this->followUpAt = '';
             $this->resetValidation('followUpAt');
-        } catch (\\Throwable $exception) {
+        } catch (\Throwable $exception) {
             Log::warning('Follow-up reminder creation failed', [
                 'user_id' => auth()->id(),
                 'folder' => $this->folderPath,

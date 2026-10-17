@@ -860,7 +860,7 @@ class MessageViewer extends Component
 
                 if (
                     mb_strlen($language) > 64
-                    || preg_match('/^[\\p{L}\\p{M}][\\p{L}\\p{M}\\s()\\-]{1,63}$/u', $language) !== 1
+                    || preg_match('/^[\p{L}\p{M}][\p{L}\p{M}\s()\-]{1,63}$/u', $language) !== 1
                 ) {
                     $this->addError('aiTargetLanguage', 'Enter a language name, such as Bengali or English.');
 

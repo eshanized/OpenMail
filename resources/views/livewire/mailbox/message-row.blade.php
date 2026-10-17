@@ -10,7 +10,7 @@
 @endphp
 <div
     data-uid="{{ $message->uid }}"
-    class="message-row message-row-card border-b border-border-subtle last:border-b-0 flex items-start sm:items-center transition-colors duration-75 group cursor-pointer sm:cursor-default
+    class="message-row message-row-card border-b border-border-subtle last:border-b-0 flex items-start sm:items-center transition-colors duration-150 group cursor-pointer sm:cursor-default
         {{ !$message->is_seen ? 'message-row-unread bg-surface-raised' : 'hover:bg-hover' }}
         {{ !$selected ? '' : '!bg-selected' }}
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/30"
@@ -48,7 +48,7 @@
     </div>
 
     {{-- Desktop: Avatar --}}
-    <div class="message-row-avatar rounded avatar-gradient-{{ $avatarIdx }} hidden sm:flex items-center justify-center font-semibold shrink-0 mr-2 ml-1">
+    <div class="message-row-avatar rounded-xl avatar-gradient-{{ $avatarIdx }} hidden sm:flex items-center justify-center font-semibold shrink-0 mr-2 ml-1">
         {{ $avatarChar }}
     </div>
 

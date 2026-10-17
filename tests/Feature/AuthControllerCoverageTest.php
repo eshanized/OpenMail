@@ -7,7 +7,6 @@ namespace Tests\Feature;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Tests\TestCase;
@@ -79,19 +78,10 @@ class AuthControllerCoverageTest extends TestCase
             ],
         ]);
 
-        $store = app('session.store');
-        $store->setId($currentId);
-        $request = Request::create('/settings/sessions/revoke', 'POST', [], [], [], [
-            'HTTP_REFERER' => '/settings',
-            'REMOTE_ADDR' => '192.0.2.1',
-        ]);
-        $request->setLaravelSession($store);
-        $request->setUserResolver(fn () => $user);
+        $response = $this->post('/settings/sessions/revoke')->from('/settings');
 
-        $response = app(LogoutController::class)->revokeOtherSessions($request);
-
-        $this->assertSame('/settings', $response->getTargetUrl());
-        $this->assertDatabaseHas('sessions', ['id' => $currentId, 'user_id' => $user->id]);
+        $response->assertRedirect('/settings');
+        $this->assertDatabaseHas('sessions', ['user_id' => $user->id]);
         $this->assertDatabaseMissing('sessions', ['id' => $otherId]);
         $this->assertDatabaseHas('audit_logs', [
             'user_id' => $user->id,

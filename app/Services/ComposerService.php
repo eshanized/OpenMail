@@ -217,25 +217,18 @@ class ComposerService
         $user = User::find($send->user_id);
         $data = $send->message_json ?? [];
 
-        // 2. Prefer the persisted MIME payload so temporary upload paths are not needed
-        // when a scheduled message is delivered hours or days after composition.
+        // 2. Prefer raw persisted MIME so attachment bytes survive expiration of
+        // temporary upload paths and Bcc remains exclusively in the SMTP envelope.
         $transportService = $this->transportService ?? app(MailTransportService::class);
 
         if (is_string($send->mime_message) && $send->mime_message !== '') {
-            $email = Email::fromString($send->mime_message);
-            $bccAddresses = $transportService->parseAddresses((string) ($data['bcc'] ?? ''));
-
-            // Bcc is intentionally absent from serialized MIME headers; restore it only
-            // to the in-memory envelope recipients used by the SMTP transport.
-            if ($bccAddresses !== []) {
-                $email->bcc(...$bccAddresses);
-            }
+            $mimeString = $send->mime_message;
+            $delivery = $transportService->sendMime($mimeString, $user, $data);
         } else {
             $email = $transportService->buildCanonicalEmail($data, $user, $send->message_id);
+            $mimeString = $email->toString();
+            $delivery = $transportService->sendMime($email);
         }
-
-        // 3. Deliver via SMTP transport
-        $delivery = $transportService->sendMime($email);
 
         if (! empty($delivery['success'])) {
             // SMTP accepted delivery!
@@ -244,7 +237,7 @@ class ComposerService
 
             // 4. Independently synchronize with IMAP Sent folder
             try {
-                $mimeString = $delivery['mime_string'] ?? $email->toString();
+                $mimeString = $delivery['mime_string'] ?? $mimeString;
                 $sentFolderUid = $this->imapService->appendToSent($mimeString);
                 $sentSynced = $sentFolderUid !== null;
             } catch (\Throwable $e) {

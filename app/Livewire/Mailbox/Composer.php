@@ -73,6 +73,7 @@ class Composer extends Component
 
     protected $listeners = [
         'openComposer' => 'openComposer',
+        'applyAiDraft' => 'applyAiDraft',
     ];
 
     protected function rules(): array
@@ -203,6 +204,25 @@ class Composer extends Component
 
         $this->dispatch('load-template-content', html: $this->bodyHtml);
         $this->dispatch('toast', 'Template inserted. Review the message before sending.', 'success');
+    }
+
+    public function applyAiDraft(string $to, string $subject, string $body): void
+    {
+        if (! filter_var(trim($to), FILTER_VALIDATE_EMAIL)) {
+            $this->dispatch('toast', 'AI reply could not be applied because the sender address is invalid.', 'warning');
+
+            return;
+        }
+
+        $this->resetForm();
+        $this->isOpen = true;
+        $this->mode = 'compose';
+        $this->to = trim($to);
+        $this->subject = mb_substr(trim($subject), 0, 255);
+        $this->body = trim($body);
+        $this->bodyText = trim($body);
+        $this->bodyHtml = nl2br(e(trim($body)));
+        $this->dispatch('load-template-content', html: $this->bodyHtml);
     }
 
     public function openComposer(array $params = []): void

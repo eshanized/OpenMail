@@ -7,8 +7,8 @@ namespace Tests\Feature;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
@@ -79,7 +79,7 @@ class AuthControllerCoverageTest extends TestCase
             ],
         ]);
 
-        $store = session();
+        $store = app('session.store');
         $store->setId($currentId);
         $request = Request::create('/settings/sessions/revoke', 'POST', [], [], [], [
             'HTTP_REFERER' => '/settings',

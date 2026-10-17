@@ -14,6 +14,7 @@ use Webklex\PHPIMAP\Client;
 use Webklex\PHPIMAP\Folder;
 use Webklex\PHPIMAP\Message;
 use Webklex\PHPIMAP\Query\WhereQuery;
+use Webklex\PHPIMAP\Support\AttachmentCollection;
 
 class ImapMailboxServiceCoverageTest extends TestCase
 {
@@ -76,24 +77,14 @@ class ImapMailboxServiceCoverageTest extends TestCase
         $query = Mockery::mock(WhereQuery::class);
         $query->shouldReceive('setFetchBody')->with(true)->twice()->andReturnSelf();
         $missingAttachmentMessage = Mockery::mock(Message::class);
-        $missingAttachments = new class
-        {
-            public function get(int $index): ?string
-            {
-                return null;
-            }
-        };
+        $missingAttachments = Mockery::mock(AttachmentCollection::class);
+        $missingAttachments->shouldReceive('get')->with(0)->once()->andReturn(null);
         $missingAttachmentMessage->shouldReceive('getAttachments')->once()->andReturn($missingAttachments);
         $query->shouldReceive('getMessageByUid')->with(8)->once()->andReturn($missingAttachmentMessage);
 
         $message = Mockery::mock(Message::class);
-        $attachments = new class
-        {
-            public function get(int $index): ?string
-            {
-                return $index === 1 ? 'downloadable-attachment' : null;
-            }
-        };
+        $attachments = Mockery::mock(AttachmentCollection::class);
+        $attachments->shouldReceive('get')->with(1)->once()->andReturn('downloadable-attachment');
         $message->shouldReceive('getAttachments')->once()->andReturn($attachments);
         $query->shouldReceive('getMessageByUid')->with(9)->once()->andReturn($message);
         $folder->shouldReceive('query')->twice()->andReturn($query);

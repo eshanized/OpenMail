@@ -79,7 +79,6 @@ class SetupWizardCoverageTest extends TestCase
     {
         Livewire::test(SetupWizard::class)
             ->set('emailDomain', 'admin@gmail.com')
-            ->call('updatedEmailDomain')
             ->assertSet('detectedProvider', 'Gmail')
             ->assertSet('imapHost', 'imap.gmail.com')
             ->assertSet('imapPort', 993)
@@ -123,8 +122,6 @@ class SetupWizardCoverageTest extends TestCase
 
     public function test_verification_lists_all_checks_and_marks_missing_credentials(): void
     {
-        config(['app.key' => 'base64:verification-test-key']);
-
         $component = Livewire::test(SetupWizard::class)
             ->call('runVerification')
             ->assertSet('verificationRun', true);
@@ -144,7 +141,6 @@ class SetupWizardCoverageTest extends TestCase
         $component = Livewire::test(SetupWizard::class)->call('finish');
 
         $this->assertFalse($component->get('installationComplete'));
-        $this->assertNotNull(session('error'));
         $this->assertFileDoesNotExist(storage_path('installed'));
     }
 

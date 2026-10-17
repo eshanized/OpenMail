@@ -125,7 +125,8 @@ class MailTransportServiceTest extends TestCase
         $transport = Mockery::mock(TransportInterface::class);
         $transport->shouldReceive('send')->once()->with(Mockery::type(Email::class))->andReturn(null);
         $service = new MailTransportService($transport);
-        $email = $service->buildCanonicalEmail(['to' => 'to@example.test', 'subject' => 'Hello'], null, 'delivery-id@example.test');\n        $email->from('sender@example.test');
+        $email = $service->buildCanonicalEmail(['to' => 'to@example.test', 'subject' => 'Hello'], null, 'delivery-id@example.test');
+        $email->from('sender@example.test');\n        $email->from('sender@example.test');
 
         $result = $service->deliver($email);
 
@@ -144,7 +145,7 @@ class MailTransportServiceTest extends TestCase
         Log::shouldReceive('warning')->once();
 
         $service = new MailTransportService($transport);
-        $result = $service->deliver((new MailTransportService)->buildCanonicalEmail(['to' => 'to@example.test'], null)->from('sender@example.test'));
+        $result = $service->deliver((new MailTransportService)->buildCanonicalEmail(['to' => 'to@example.test'], null)->from('sender@example.test')->from('sender@example.test'));
 
         $this->assertFalse($result['success']);
         $this->assertSame('rejection', $result['category']);
@@ -158,7 +159,7 @@ class MailTransportServiceTest extends TestCase
         Log::shouldReceive('warning')->once();
 
         $service = new MailTransportService($transport);
-        $result = $service->deliver((new MailTransportService)->buildCanonicalEmail(['to' => 'to@example.test'], null)->from('sender@example.test'));
+        $result = $service->deliver((new MailTransportService)->buildCanonicalEmail(['to' => 'to@example.test'], null)->from('sender@example.test')->from('sender@example.test'));
 
         $this->assertFalse($result['success']);
         $this->assertSame('uncertain', $result['category']);
@@ -172,7 +173,7 @@ class MailTransportServiceTest extends TestCase
         Log::shouldReceive('error')->once();
 
         $service = new MailTransportService($transport);
-        $result = $service->deliver((new MailTransportService)->buildCanonicalEmail(['to' => 'to@example.test'], null)->from('sender@example.test'));
+        $result = $service->deliver((new MailTransportService)->buildCanonicalEmail(['to' => 'to@example.test'], null)->from('sender@example.test')->from('sender@example.test'));
 
         $this->assertFalse($result['success']);
         $this->assertSame('rejection', $result['category']);

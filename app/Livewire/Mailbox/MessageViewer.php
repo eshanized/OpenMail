@@ -3,11 +3,13 @@
 namespace App\Livewire\Mailbox;
 
 use App\Models\MessageMetadata;
+use App\Services\AiAssistantService;
 use App\Services\ImapMailboxService;
 use App\Services\LabelService;
 use App\Services\MessageSanitizer;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Mockery\LegacyMockInterface;
 use Webklex\PHPIMAP\Attribute;
@@ -54,6 +56,16 @@ class MessageViewer extends Component
     public bool $isFlagged = false;
 
     public array $attachments = [];
+
+    public bool $showAiAssistant = false;
+
+    public bool $aiDataSharingConfirmed = false;
+
+    public bool $aiBusy = false;
+
+    public ?string $aiSummary = null;
+
+    public ?string $aiError = null;
 
     public function mount(string $folderPath, int $uid): void
     {
@@ -558,6 +570,103 @@ class MessageViewer extends Component
             'html_body' => $this->sanitizedHtml,
             'text_body' => $this->textBody,
         ];
+    }
+
+    public function toggleAiAssistant(): void
+    {
+        if (! app(AiAssistantService::class)->isEnabled()) {
+            $this->dispatch('toast', 'AI assistance is disabled or not configured by the administrator.', 'info');
+
+            return;
+        }
+
+        $this->showAiAssistant = ! $this->showAiAssistant;
+        $this->aiError = null;
+    }
+
+    public function generateAiSummary(): void
+    {
+        $this->runAiAction('summary');
+    }
+
+    public function generateAiReply(): void
+    {
+        $this->runAiAction('reply');
+    }
+
+    protected function runAiAction(string $task): void
+    {
+        if (! in_array($task, ['summary', 'reply'], true)) {
+            return;
+        }
+
+        if (! $this->aiDataSharingConfirmed) {
+            $this->addError('aiDataSharingConfirmed', 'Confirm that this message may be shared with the configured AI endpoint.');
+
+            return;
+        }
+
+        $assistant = app(AiAssistantService::class);
+        if (! $assistant->isEnabled()) {
+            $this->aiError = 'AI assistance is disabled or not configured by the administrator.';
+
+            return;
+        }
+
+        $this->aiBusy = true;
+        $this->aiError = null;
+
+        try {
+            // Reload from the authenticated mailbox so client-mutated Livewire properties
+            // are not used as the source of email content sent to the AI provider.
+            $this->loadMessage();
+
+            if (! $this->message || $this->uid <= 0) {
+                $this->aiError = 'This message is no longer available.';
+
+                return;
+            }
+
+            $content = trim((string) ($this->textBody ?: strip_tags($this->sanitizedHtml ?? '')));
+            $content = html_entity_decode($content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $content = preg_replace('/[\\t ]+/u', ' ', $content) ?? $content;
+            $content = trim($content);
+
+            if ($content === '') {
+                $this->aiError = 'This message has no readable text to analyze.';
+
+                return;
+            }
+
+            if ($task === 'summary') {
+                $this->aiSummary = $assistant->summarize($this->subject, $this->fromAddress, $content);
+                $this->dispatch('toast', 'Email summary is ready.', 'success');
+
+                return;
+            }
+
+            if (! filter_var($this->fromAddress, FILTER_VALIDATE_EMAIL)) {
+                $this->aiError = 'The sender address is not valid enough to prepare a reply.';
+
+                return;
+            }
+
+            $draft = $assistant->draftReply($this->subject, $this->fromAddress, $content);
+            $replySubject = preg_match('/^re:/i', $this->subject) ? $this->subject : 'Re: '.$this->subject;
+
+            // This event only fills an editable composer. It never sends the message.
+            $this->dispatch('applyAiDraft', to: $this->fromAddress, subject: $replySubject, body: $draft);
+            $this->dispatch('toast', 'AI reply draft created. Review it before sending.', 'success');
+        } catch (\Throwable $exception) {
+            Log::warning('Message AI action failed', [
+                'user_id' => auth()->id(),
+                'task' => $task,
+                'exception' => $exception::class,
+            ]);
+            $this->aiError = 'The AI request failed. Check provider configuration and try again.';
+        } finally {
+            $this->aiBusy = false;
+        }
     }
 
     public function render()

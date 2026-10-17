@@ -31,6 +31,10 @@ Route::middleware(['auth'])->group(function () {
         return view('templates-page');
     })->name('email-templates');
 
+    Route::get('/snoozed', function () {
+        return view('snoozed-messages-page');
+    })->name('snoozed-messages');
+
     Route::get('/settings', SettingsPage::class)
         ->middleware('throttle:api.settings')
         ->name('settings');

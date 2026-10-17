@@ -116,7 +116,7 @@ class MessageSecurityAnalyzer
      */
     protected function analyzeLinks(string $html): array
     {
-        if (trim($html) === '' || !class_exists(DOMDocument::class)) {
+        if (trim($html) === '' || ! class_exists(DOMDocument::class)) {
             return [];
         }
 
@@ -130,7 +130,7 @@ class MessageSecurityAnalyzer
             $seen = [];
 
             foreach ($links as $link) {
-                if (!$link instanceof DOMElement) {
+                if (! $link instanceof DOMElement) {
                     continue;
                 }
 
@@ -139,7 +139,7 @@ class MessageSecurityAnalyzer
                 $scheme = strtolower((string) ($parts['scheme'] ?? ''));
                 $host = strtolower(rtrim((string) ($parts['host'] ?? ''), '.'));
 
-                if (!in_array($scheme, ['http', 'https'], true) || $host === '') {
+                if (! in_array($scheme, ['http', 'https'], true) || $host === '') {
                     continue;
                 }
 
@@ -149,7 +149,7 @@ class MessageSecurityAnalyzer
 
                 if (filter_var($host, FILTER_VALIDATE_IP) !== false) {
                     $key = 'ip:'.$host;
-                    if (!isset($seen[$key])) {
+                    if (! isset($seen[$key])) {
                         $signals[] = [
                             'level' => 'warning',
                             'title' => 'Link points directly to an IP address',
@@ -163,7 +163,7 @@ class MessageSecurityAnalyzer
 
                 if (str_contains($host, 'xn--')) {
                     $key = 'idn:'.$host;
-                    if (!isset($seen[$key])) {
+                    if (! isset($seen[$key])) {
                         $signals[] = [
                             'level' => 'warning',
                             'title' => 'Internationalized link domain',
@@ -175,7 +175,7 @@ class MessageSecurityAnalyzer
 
                 if ($displayHost !== '' && $displayHost !== $normalizedHost) {
                     $key = 'mismatch:'.$displayHost.'>'.$normalizedHost;
-                    if (!isset($seen[$key])) {
+                    if (! isset($seen[$key])) {
                         $signals[] = [
                             'level' => 'warning',
                             'title' => 'Visible link and destination differ',
@@ -211,7 +211,7 @@ class MessageSecurityAnalyzer
         }
 
         // Only treat text that looks like a hostname as a visible URL.
-        if (!str_contains($text, '.') || !preg_match('/^[a-z0-9.-]+(?::\d+)?(?:\/.*)?$/i', $text)) {
+        if (! str_contains($text, '.') || ! preg_match('/^[a-z0-9.-]+(?::\d+)?(?:\/.*)?$/i', $text)) {
             return '';
         }
 
@@ -229,7 +229,7 @@ class MessageSecurityAnalyzer
 
     protected function domainFromAddress(string $email): string
     {
-        if (!filter_var(trim($email), FILTER_VALIDATE_EMAIL)) {
+        if (! filter_var(trim($email), FILTER_VALIDATE_EMAIL)) {
             return '';
         }
 

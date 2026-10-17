@@ -421,7 +421,8 @@ class Composer extends Component
             $result = app(ComposerService::class)->scheduleMessage(
                 (int) auth()->id(),
                 $this->getComposerData(),
-                $scheduledAt
+                $scheduledAt,
+                hash('sha256', 'openmail:schedule:'.auth()->id().':'.$this->compositionId)
             );
 
             AuditService::send('schedule_send', [

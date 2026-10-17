@@ -8,6 +8,7 @@ use App\Services\ComposerService;
 use App\Services\ContactAutocompleteService;
 use App\Services\MessageSanitizer;
 use App\Services\SignatureService;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Livewire\Component;
@@ -62,6 +63,10 @@ class Composer extends Component
     public ?int $pendingSendId = null;
 
     public int $undoSendDelay = 10;
+
+    public bool $showSchedulePicker = false;
+
+    public string $scheduledAt = '';
 
     protected $listeners = [
         'openComposer' => 'openComposer',
@@ -292,6 +297,86 @@ class Composer extends Component
                 'trace' => $e->getTraceAsString(),
             ]);
             $this->dispatch('toast', 'Failed to send message: '.$e->getMessage(), 'error');
+        } finally {
+            $this->sending = false;
+        }
+    }
+
+    public function toggleSchedulePicker(): void
+    {
+        $this->showSchedulePicker = ! $this->showSchedulePicker;
+
+        if ($this->showSchedulePicker && $this->scheduledAt === '') {
+            $this->scheduledAt = CarbonImmutable::now(config('app.timezone'))
+                ->addHour()
+                ->startOfMinute()
+                ->format('Y-m-d\\TH:i');
+        }
+    }
+
+    public function scheduleSend(): void
+    {
+        if (empty(trim($this->body)) && ! empty(trim($this->bodyHtml))) {
+            $this->body = strip_tags($this->bodyHtml);
+        }
+
+        if (empty(trim($this->bodyHtml)) && ! empty(trim($this->body))) {
+            $this->bodyHtml = $this->body;
+        }
+
+        $this->validate();
+        $this->validate([
+            'scheduledAt' => ['required', 'date_format:Y-m-d\\TH:i'],
+        ]);
+
+        $scheduledAt = CarbonImmutable::createFromFormat(
+            '!Y-m-d\\TH:i',
+            $this->scheduledAt,
+            config('app.timezone')
+        );
+
+        if (! $scheduledAt || $scheduledAt->lessThanOrEqualTo(CarbonImmutable::now(config('app.timezone'))->addMinute())) {
+            $this->addError('scheduledAt', 'Choose a time at least one minute from now.');
+
+            return;
+        }
+
+        if ($scheduledAt->greaterThan(CarbonImmutable::now(config('app.timezone'))->addYear())) {
+            $this->addError('scheduledAt', 'Messages can be scheduled up to one year ahead.');
+
+            return;
+        }
+
+        $this->sending = true;
+
+        try {
+            $result = app(ComposerService::class)->scheduleMessage(
+                (int) auth()->id(),
+                $this->getComposerData(),
+                $scheduledAt
+            );
+
+            AuditService::send('schedule_send', [
+                'subject' => $this->subject,
+                'to' => $this->to,
+                'mode' => $this->mode,
+                'scheduled_at' => $result['send_at'],
+                'pending_send_id' => $result['pending_send_id'],
+            ]);
+
+            $this->dispatch('toast', 'Message scheduled successfully.', 'success');
+            $this->dispatch('composer-sent');
+            $this->dispatch('clear-draft-storage', ['compositionId' => $this->compositionId]);
+            $this->showSchedulePicker = false;
+            $this->resetForm();
+            $this->isOpen = false;
+        } catch (\\Throwable $e) {
+            Log::error('Scheduled email creation failed', [
+                'user_id' => auth()->id(),
+                'error' => $e->getMessage(),
+            ]);
+
+            $this->dispatch('toast', 'Could not schedule this message. Review the selected time and try again.', 'error');
         } finally {
             $this->sending = false;
         }
@@ -569,6 +654,8 @@ class Composer extends Component
         $this->attachments = [];
         $this->replyToMessage = null;
         $this->draftUid = null;
+        $this->showSchedulePicker = false;
+        $this->scheduledAt = '';
         $this->showCc = false;
         $this->showBcc = false;
         $this->compositionId = (string) Str::uuid();

@@ -120,7 +120,7 @@ class MessageSecurityAnalyzer
             return [];
         }
 
-        $document = new DOMDocument;
+        $document = new DOMDocument();
         $previous = libxml_use_internal_errors(true);
 
         try {

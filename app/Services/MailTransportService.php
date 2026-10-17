@@ -165,7 +165,7 @@ class MailTransportService
 
     protected function extractMessageIdFromMime(string $mimeString): string
     {
-        if (preg_match('/^Message-ID:\\s*<?([^>\\r\\n]+)>?/im', $mimeString, $matches)) {
+        if (preg_match('/^Message-ID:\s*<?([^>\r\n]+)>?/im', $mimeString, $matches)) {
             return trim($matches[1]);
         }
 

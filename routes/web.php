@@ -39,6 +39,10 @@ Route::middleware(['auth'])->group(function () {
         return view('saved-searches-page');
     })->name('saved-searches');
 
+    Route::get('/delivery-activity', function () {
+        return view('delivery-activity-page');
+    })->name('delivery-activity');
+
     Route::get('/settings', SettingsPage::class)
         ->middleware('throttle:api.settings')
         ->name('settings');

@@ -76,7 +76,7 @@ Designed for deployment on shared hosting (cPanel) or VPS, it includes a WordPre
 
 ## Requirements
 
-- PHP 8.2+ (with extensions: `mbstring`, `xml`, `ctype`, `json`, `iconv`, `intl`, `bcmath`, `pdo_mysql`)
+- PHP 8.4.1+ (with extensions: `mbstring`, `xml`, `ctype`, `json`, `iconv`, `intl`, `bcmath`, `pdo_mysql`)
 - MySQL 8.0+ / MariaDB 10.6+ (for full-text search)
 - Composer 2.x
 - Node.js 18+ (for asset builds)

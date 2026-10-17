@@ -14,6 +14,8 @@ return new class extends Migration
             $table->string('folder_path', 255);
             $table->unsignedBigInteger('uid');
             $table->string('message_id', 255)->nullable();
+            $table->string('subject', 255)->nullable();
+            $table->string('sender', 320)->nullable();
             $table->timestamp('wake_at');
             $table->string('status', 24)->default('snoozed');
             $table->timestamps();

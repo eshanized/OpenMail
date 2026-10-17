@@ -195,4 +195,96 @@ document.addEventListener('alpine:init', () => {
         activeTab: null,
         tabKeys: tabKeys,
     }));
+
+    Alpine.data('commandPalette', (urls = {}) => ({
+        open: false,
+        query: '',
+        activeIndex: 0,
+        actions: [],
+        init() {
+            this.actions = [
+                { id: 'compose', label: 'Compose email', description: 'Start a new message', icon: 'compose', shortcut: 'C' },
+                { id: 'inbox', label: 'Open inbox', description: 'View your incoming mail', icon: 'inbox', shortcut: 'G I' },
+                { id: 'search', label: 'Search mail', description: 'Focus the mailbox search field', icon: 'search', shortcut: '/' },
+                { id: 'scheduled', label: 'Scheduled messages', description: 'Review or cancel future sends', icon: 'clock' },
+                { id: 'templates', label: 'Email templates', description: 'Manage reusable message text', icon: 'template' },
+                { id: 'settings', label: 'Settings', description: 'Appearance, mail, and security preferences', icon: 'settings' },
+            ];
+        },
+        get filteredActions() {
+            const query = this.query.trim().toLocaleLowerCase();
+            if (!query) return this.actions;
+            return this.actions.filter(action =>
+                [action.label, action.description, action.id].some(value =>
+                    value.toLocaleLowerCase().includes(query)
+                )
+            );
+        },
+        openPalette() {
+            this.open = true;
+            this.query = '';
+            this.activeIndex = 0;
+            this.$nextTick(() => this.$refs.queryInput?.focus());
+        },
+        closePalette() {
+            this.open = false;
+            this.query = '';
+            this.activeIndex = 0;
+        },
+        handleKeydown(event) {
+            const key = event.key.toLowerCase();
+            if ((event.metaKey || event.ctrlKey) && key === 'k') {
+                event.preventDefault();
+                this.open ? this.closePalette() : this.openPalette();
+                return;
+            }
+
+            if (!this.open) return;
+
+            if (key === 'escape') {
+                event.preventDefault();
+                this.closePalette();
+            } else if (key === 'arrowdown') {
+                event.preventDefault();
+                this.activeIndex = Math.min(this.activeIndex + 1, Math.max(0, this.filteredActions.length - 1));
+            } else if (key === 'arrowup') {
+                event.preventDefault();
+                this.activeIndex = Math.max(0, this.activeIndex - 1);
+            } else if (key === 'enter') {
+                event.preventDefault();
+                const action = this.filteredActions[this.activeIndex];
+                if (action) this.execute(action);
+            }
+        },
+        execute(action) {
+            this.closePalette();
+
+            if (action.id === 'compose') {
+                if (document.querySelector('[data-openmail-composer]') && window.Livewire) {
+                    window.Livewire.dispatch('openComposer', { mode: 'compose' });
+                } else {
+                    window.location.assign(urls.inboxUrl || urls.mailboxUrl);
+                }
+                return;
+            }
+
+            if (action.id === 'search') {
+                if (document.querySelector('[data-openmail-search-input]') && window.Livewire) {
+                    window.Livewire.dispatch('focus-search');
+                } else {
+                    window.location.assign(urls.inboxUrl || urls.mailboxUrl);
+                }
+                return;
+            }
+
+            const destination = {
+                inbox: urls.inboxUrl || urls.mailboxUrl,
+                scheduled: urls.scheduledUrl,
+                templates: urls.templatesUrl,
+                settings: urls.settingsUrl,
+            }[action.id];
+
+            if (destination) window.location.assign(destination);
+        },
+    }));
 });

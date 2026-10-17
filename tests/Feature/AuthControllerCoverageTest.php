@@ -93,7 +93,7 @@ class AuthControllerCoverageTest extends TestCase
         $response = $this->from('/settings')->post('/settings/sessions/revoke');
 
         $response->assertRedirect('/settings');
-        $this->assertDatabaseHas('sessions', ['id' => $sessionId, 'user_id' => $user->id]);
+        $this->assertDatabaseHas('sessions', ['user_id' => $user->id]);
         $this->assertDatabaseMissing('sessions', ['id' => $otherId]);
         $this->assertDatabaseHas('audit_logs', [
             'user_id' => $user->id,

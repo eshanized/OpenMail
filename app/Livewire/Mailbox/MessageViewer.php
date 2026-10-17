@@ -763,6 +763,7 @@ class MessageViewer extends Component
             $this->aiError = 'The AI request failed. Check provider configuration and try again.';
         } finally {
             $this->aiBusy = false;
+            $this->aiDataSharingConfirmed = false;
         }
     }
 

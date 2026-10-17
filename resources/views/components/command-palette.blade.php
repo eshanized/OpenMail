@@ -29,7 +29,6 @@
         x-transition.opacity
         class="fixed inset-0 z-[100] flex items-start justify-center bg-black/40 px-3 pt-[12vh] backdrop-blur-[2px] sm:px-6"
         @click.self="closePalette()"
-        @keydown.window="handleKeydown($event)"
         role="presentation"
     >
         <section

@@ -55,6 +55,13 @@
             }
             this.$wire.send();
         },
+        schedule() {
+            window.dispatchEvent(new CustomEvent('composer-commit-recipients'));
+            if (this.tiptapEditor) {
+                this.$wire.syncBodyFromEditor(this.tiptapEditor.getHTML());
+            }
+            this.$wire.scheduleSend();
+        },
         handleKeydown(event) {
             if (!this.open) return;
             if (event.key === 'Escape') {
@@ -427,7 +434,7 @@
                         </div>
                         <button
                             type="button"
-                            wire:click="scheduleSend"
+                            @click="schedule()"
                             wire:loading.attr="disabled"
                             wire:target="scheduleSend"
                             class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded bg-primary hover:bg-primary-hover text-white text-xs font-medium transition-colors disabled:opacity-50 cursor-pointer"

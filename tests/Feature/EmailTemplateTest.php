@@ -76,7 +76,8 @@ class EmailTemplateTest extends TestCase
             ->assertSee('Welcome')
             ->assertDontSee('Private message')
             ->call('editTemplate', $privateTemplate->id)
-            ->assertNotFound();
+            ->assertDispatched('toast')
+            ->assertSet('editingTemplateId', null);
 
         Livewire::actingAs($owner)
             ->test(Composer::class)

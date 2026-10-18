@@ -1788,7 +1788,8 @@ select.glass-input {
 @media (max-width: 1023px) {
     .mailbox-workspace > aside { width: min(18rem, 88vw); }
     .mailbox-three-pane { grid-template-columns: minmax(0, 1fr); }
-    .mailbox-three-pane-reader { display: none; }
+    .mailbox-three-pane-list { display: none; }
+    .mailbox-three-pane-reader { display: block; }
 }
 @media (max-width: 639px) {
     .auth-main { justify-content: flex-start; padding: 2.25rem 1rem 1.5rem; }
@@ -1806,4 +1807,19 @@ select.glass-input {
 @media (prefers-reduced-motion: reduce) {
     .auth-input, .auth-submit, .mailbox-message-list .message-row-card { transition: none !important; }
     .auth-submit:hover { transform: none; }
+}
+
+
+/* Consistent framing for the secondary mail workspaces. */
+.utility-workspace { max-width: 76rem; margin-inline: auto; }
+.utility-workspace > div:first-child { margin-bottom: 1.25rem; padding-bottom: 1rem; border-color: var(--color-border); }
+.utility-workspace > div:first-child h1 { color: var(--color-ink); font-size: clamp(1.35rem, 2vw, 1.8rem); font-weight: 720; letter-spacing: -0.045em; line-height: 1.2; }
+.utility-workspace > div:first-child p { color: var(--color-ink-secondary); line-height: 1.65; }
+.utility-workspace .rounded-xl.border.border-border.bg-surface-raised { border-radius: 1rem; box-shadow: 0 2px 8px rgb(28 25 23 / 0.035); }
+.utility-workspace .rounded-xl.border-dashed { border-radius: 1rem; }
+.utility-workspace button:focus-visible, .utility-workspace a:focus-visible { outline: 2px solid color-mix(in srgb, var(--color-primary) 72%, transparent); outline-offset: 2px; }
+
+@media (max-width: 639px) {
+    .utility-workspace > div:first-child { gap: 0.75rem; }
+    .utility-workspace .rounded-xl.border.border-border.bg-surface-raised { border-radius: 0.85rem; }
 }

@@ -55,15 +55,15 @@ jobs:
           ref_name = os.environ["GITHUB_REF_NAME"]
           version = ref_name[1:] if ref_name.startswith("v") else ref_name
           changelog = Path("CHANGELOG.md").read_text()
-          heading = re.compile(rf"(?m)^## \\[{re.escape(version)}\\](?:[ \\t]+-[^\\n]*)?[ \\t]*$")
+          heading = re.compile(rf"(?m)^## \[{re.escape(version)}\](?:[ \t]+-[^\n]*)?[ \t]*$")
           match = heading.search(changelog)
           if match is None:
               raise SystemExit(f"No changelog section found for release {version}")
 
-          next_heading = re.search(r"(?m)^## \\[", changelog[match.end():])
+          next_heading = re.search(r"(?m)^## \[", changelog[match.end():])
           end = match.end() + next_heading.start() if next_heading else len(changelog)
           notes = changelog[match.start():end].strip()
-          Path("release-notes.md").write_text(notes + "\\n")
+          Path("release-notes.md").write_text(notes + "\n")
           print(f"Prepared {len(notes.splitlines())} lines of release notes for {version}")
           PY
 

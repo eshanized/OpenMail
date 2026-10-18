@@ -41,7 +41,7 @@ class InstallationLock
 
     public function isInstalled(): bool
     {
-        return file_exists($this->lockFile);
+        return is_file($this->lockFile);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -77,6 +77,7 @@ class InstallationLock
             throw new RuntimeException('Unable to encode the installation lock metadata.');
         }
 
+        $lockExistedBefore = is_file($this->lockFile);
         $directory = dirname($this->lockFile);
         if (! is_dir($directory) && ! @mkdir($directory, 0755, true) && ! is_dir($directory)) {
             throw new RuntimeException('Unable to create the installation state directory. Check storage permissions.');
@@ -121,6 +122,11 @@ class InstallationLock
 
         if (file_exists($tmpFile)) {
             @unlink($tmpFile);
+        }
+
+        // Do not leave a partial lock behind; isInstalled() must remain false.
+        if (! $lockExistedBefore && is_file($this->lockFile)) {
+            @unlink($this->lockFile);
         }
 
         // Preserve progress state on failure; the UI/CLI must not report success.

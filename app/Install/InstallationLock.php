@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Install;
 
+use RuntimeException;
+
 class InstallationLock
 {
     private string $lockFile;
@@ -56,10 +58,11 @@ class InstallationLock
     }
 
     /**
-     * Atomically write the installation lock file.
+     * Persist the installation lock and fail loudly if the filesystem refuses it.
      *
-     * Uses rename() for atomicity where available (most POSIX filesystems).
-     * Falls back to exclusive flock on the same file as a safety net.
+     * A successful return from this method is the installer's durable signal that
+     * setup is complete. Never clear progress or report success unless the lock
+     * can be read back from the exact path checked by the install middleware.
      */
     public function markInstalled(array $metadata = []): void
     {
@@ -70,34 +73,71 @@ class InstallationLock
 
         $payload = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
-        // Strategy 1: write to tmp then rename (atomic on POSIX)
-        $tmpFile = $this->lockFile.'.tmp.'.getmypid().'.'.microtime(true);
-
-        if (@file_put_contents($tmpFile, $payload) !== false && @rename($tmpFile, $this->lockFile)) {
-            // Success – clean up progress file
-            $this->removeProgress();
-
-            return;
+        if (! is_string($payload)) {
+            throw new RuntimeException('Unable to encode the installation lock metadata.');
         }
 
-        // Strategy 2: exclusive flock
+        $directory = dirname($this->lockFile);
+        if (! is_dir($directory) && ! @mkdir($directory, 0755, true) && ! is_dir($directory)) {
+            throw new RuntimeException('Unable to create the installation state directory. Check storage permissions.');
+        }
+
+        // Strategy 1: write to a temporary file, then atomically rename it.
+        $tmpFile = $this->lockFile.'.tmp.'.getmypid().'.'.bin2hex(random_bytes(6));
+        $written = @file_put_contents($tmpFile, $payload, LOCK_EX);
+
+        if ($written === strlen($payload) && @rename($tmpFile, $this->lockFile)) {
+            if ($this->lockContains($payload)) {
+                $this->removeProgress();
+
+                return;
+            }
+        }
+
+        // Strategy 2: fall back to an exclusive write on filesystems where rename fails.
         $fp = @fopen($this->lockFile, 'c+');
         if ($fp !== false) {
+            $persisted = false;
+
             if (flock($fp, LOCK_EX)) {
-                ftruncate($fp, 0);
-                rewind($fp);
-                fwrite($fp, $payload);
-                fflush($fp);
+                $ready = ftruncate($fp, 0) && rewind($fp);
+                $bytesWritten = $ready ? fwrite($fp, $payload) : false;
+                $persisted = $bytesWritten === strlen($payload) && fflush($fp);
                 flock($fp, LOCK_UN);
             }
+
             fclose($fp);
+
+            if ($persisted && $this->lockContains($payload)) {
+                if (file_exists($tmpFile)) {
+                    @unlink($tmpFile);
+                }
+
+                $this->removeProgress();
+
+                return;
+            }
         }
 
-        // Clean up
         if (file_exists($tmpFile)) {
             @unlink($tmpFile);
         }
-        $this->removeProgress();
+
+        // Preserve progress state on failure; the UI/CLI must not report success.
+        throw new RuntimeException(
+            'Unable to persist the installation lock file. Ensure the storage directory is writable by PHP, then retry setup.'
+        );
+    }
+
+    private function lockContains(string $expectedPayload): bool
+    {
+        if (! is_file($this->lockFile) || ! is_readable($this->lockFile)) {
+            return false;
+        }
+
+        $contents = @file_get_contents($this->lockFile);
+
+        return is_string($contents) && $contents === $expectedPayload;
     }
 
     public function markFailed(string $reason = ''): void

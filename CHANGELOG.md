@@ -4,23 +4,64 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-### Changed
-- **Runtime Compatibility**: OpenMail 2.0.0 requires PHP 8.4.1 or newer to match its locked Symfony dependencies; the installer, CI matrix, and deployment documentation enforce the same minimum.
+No unreleased changes yet.
+
+## [2.0.0] - 2026-10-18
+
+OpenMail 2.0 is a major productivity, privacy, reliability, and user-experience release. It expands the self-hosted IMAP/SMTP workspace while keeping the Laravel/Livewire architecture and shared-hosting deployment model.
 
 ### Added
-- **Durable Send Later**: Persist scheduled email delivery in the existing delivery state machine, expose a scheduled-message queue, and allow users to cancel future messages back to Drafts.
-- **Scheduled MIME Durability**: Deliver the persisted MIME payload so attachment delivery does not depend on temporary browser-upload paths still existing at the scheduled time; restore Bcc recipients only to the SMTP envelope.
-- **Email Productivity**: Add user-scoped templates, snooze/return, saved searches, and a keyboard command palette.
-- **Delivery Activity**: Add a user-scoped, status-filterable delivery history with explicit warnings for uncertain SMTP outcomes and without exposing raw transport error text.
-- **Follow-up Reminders**: Add per-message reminders with a selectable due date, due/upcoming list, and complete/dismiss actions scoped to the owning user.
-- **Message Security Indicators**: Add evidence-limited sender, authentication-header, link, and attachment indicators without claiming that a message is safe.
-- **Installable PWA Shell**: Add a manifest, icon, and static-only service worker that does not cache private mailbox content.
 
+- **Durable Send Later**: Schedule a message for future delivery and inspect it in a dedicated scheduled queue. Scheduled work is persisted rather than relying on the browser remaining open, and eligible messages can be cancelled back to Drafts.
+- **Safer scheduled MIME delivery**: Persist the prepared MIME message so future delivery does not depend on temporary browser-upload paths remaining available. Keep Bcc recipients in the SMTP envelope rather than exposing them as message headers.
+- **Per-user email templates**: Create, manage, and insert reusable templates from the rich-text composer. Template records and actions are scoped to their owner.
+- **Snooze and return**: Hide a message until a chosen wake time, use quick snooze presets, and manage snoozed messages from a dedicated view.
+- **Saved searches**: Save a search with its filters, revisit it from a personal saved-search library, and manage saved searches without sharing them across accounts.
+- **Follow-up reminders**: Schedule an in-app reminder for a message, review due and upcoming reminders, and complete or dismiss them. Reminders are displayed in OpenMail; this release does not send push notifications for them.
+- **Delivery activity**: Review a user-scoped, filterable history of delivery attempts and outcomes. Uncertain SMTP results are called out explicitly, and raw transport error details are not exposed in the user-facing history.
+- **Explainable email security indicators**: Surface evidence-based sender, authentication-header, link, and attachment signals with meaningful limitations. These indicators are risk context, not a guarantee that a message is safe.
+- **Keyboard-first command palette**: Navigate key mail workflows and access actions such as search and compose from a global command palette, with additional keyboard shortcuts.
+- **Installable PWA shell**: Add web app metadata, an application icon, and a service worker for static application assets. Private mailbox content, authenticated pages, and message bodies are not cached by the service worker.
+- **Responsive mailbox workspace**: Introduce a three-pane workspace and improve the responsive behavior of navigation, message lists, and the reader across desktop, tablet, and mobile sizes.
+- **Expanded regression coverage**: Add and extend tests for scheduled delivery, cancellation, persisted MIME, template and search ownership, snooze/reminder lifecycles, delivery history, security signals, installer behavior, and responsive layout regressions.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+### Changed
 
----
+- **Runtime requirement**: PHP **8.4.1 or newer** is now required. This aligns the Composer constraints, locked Symfony dependencies, installer checks, CI, and deployment documentation. PHP 8.2 and 8.3 are not supported by this release.
+- **Premium interface refresh**: Refine the mailbox, navigation bar, folder sidebar, message list, reader, composer, sign-in page, settings, setup wizard, and secondary productivity pages. Use more consistent spacing, visual hierarchy, focus states, controls, and responsive layouts.
+- **More efficient folder counts**: Prefer a single IMAP STATUS request for folder count data, retaining fallback behavior for providers that do not return the expected status fields.
+- **Stronger delivery state handling**: Use explicit send states, idempotency keys, stable Message-IDs, atomic worker claims, bounded processing batches, retry backoff, and stale-claim recovery to make queued delivery more resilient to retries and worker interruptions.
+- **More reliable configuration writes**: Write .env changes atomically where the filesystem supports it and apply restrictive file permissions.
+- **Clearer CI gates**: Run PHP formatting and dependency security audits as required checks rather than silently allowing those checks to fail. Add broader installation, mail transport, authorization, and security regression tests.
+- **GitHub-native project automation**: Move continuous integration and release packaging to GitHub Actions, and keep the production archive workflow aligned with the bundled dependencies and compiled frontend assets.
+
+### Security and privacy
+
+- **No external AI analysis**: OpenMail 2.0 ships without AI/LLM features or an AI-provider integration. Email bodies and drafts are not sent to third-party AI services for analysis.
+- **Outbound connection protection**: Harden IMAP/SMTP connection validation against unsafe network destinations, including loopback, private-network, and cloud metadata targets.
+- **Consistent ownership checks**: Strengthen server-side ownership enforcement for user-managed templates, saved searches, snoozed messages, follow-up reminders, and delivery history, as well as existing mailbox actions.
+- **Safer rendering and transport**: Continue to sanitize message HTML and URLs, block remote images until the user consents, protect Bcc recipients from message-header leakage, and avoid exposing raw transport diagnostics in normal UI responses.
+- **Installation lock verification**: Do not treat installation as complete unless the installation marker can be written and read back successfully. If the filesystem refuses the write, report an actionable error instead of silently sending users back to the setup wizard.
+- **Stricter dependency review**: Keep Composer and npm security audits in the CI quality gate.
+
+### Fixed
+
+- **Scheduled attachments**: Avoid persisting temporary upload file paths for messages that will be delivered later; deliver the durable MIME payload instead.
+- **Bcc privacy**: Preserve Bcc delivery via the SMTP envelope without adding Bcc as a visible MIME header.
+- **Scheduling consistency**: Make scheduling retries idempotent, synchronize rich-editor content before scheduling, keep overdue pending messages available for recovery, and show only appropriate cancellable items in the scheduled queue.
+- **Template authorization errors**: Reject requests for templates owned by another user safely rather than returning a server error.
+- **Saved-search filtering**: Preserve explicitly selected unread filters when saving and restoring searches.
+- **Signature selection**: Resolve ties when promoting the default signature deterministically.
+- **Mailbox responsiveness**: Fix a CSS cascade regression where desktop grid rules overrode the intended tablet/mobile mailbox layout.
+- **Repeated setup prompt**: Remove the misleading setup-wizard prompt from the installed sign-in page, unify installation-state checks, and fail clearly if the installation marker cannot be persisted.
+
+### Upgrade notes
+
+- Back up the database, application files, .env, and persistent storage contents before upgrading.
+- Confirm the host runs PHP 8.4.1 or newer before deploying OpenMail 2.0. The updated dependency lock is not compatible with PHP 8.2 or 8.3.
+- Deploy the production release archive (which includes compiled frontend assets and production dependencies), preserve the existing .env and persistent storage, and run database migrations with php artisan migrate --force before using the upgraded application.
+- Do not delete storage/installed as an upgrade step. It is the installation marker; deleting it makes the application enter first-install mode again.
+- OpenMail remains a self-hosted IMAP/SMTP client. The PWA work provides an installable shell, not offline access to private mailbox content. Multi-account isolation, shared inboxes/roles, and other roadmap-only features are not claimed as part of this release.
 
 ## [1.1.0] - 2026-10-16
 

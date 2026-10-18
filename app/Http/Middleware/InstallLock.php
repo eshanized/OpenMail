@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Install\InstallationLock;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -10,7 +11,7 @@ class InstallLock
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $installed = file_exists(storage_path('installed'));
+        $installed = app(InstallationLock::class)->isInstalled();
 
         // If app IS installed and user tries /install → abort 404
         if ($request->is('install*') && $installed) {

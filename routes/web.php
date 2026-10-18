@@ -5,13 +5,14 @@ use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\CspReportController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SetupController;
+use App\Install\InstallationLock;
 use App\Livewire\Settings\SettingsPage;
 use App\Models\Label;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    if (! file_exists(storage_path('installed'))) {
+    if (! app(InstallationLock::class)->isInstalled()) {
         return redirect('/install');
     }
 

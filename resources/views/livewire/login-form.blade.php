@@ -60,8 +60,4 @@
         </button>
     </form>
 
-    <div class="auth-setup-link">
-        <span>Setting up OpenMail for the first time?</span>
-        <a href="{{ route('install') }}">Open setup wizard <span aria-hidden="true">→</span></a>
-    </div>
 </div>

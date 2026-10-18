@@ -27,7 +27,7 @@
         })();
     </script>
 </head>
-<body class="auth-body antialiased">
+<body class="auth-body bg-surface antialiased">
     <main class="auth-layout min-h-[100dvh] flex">
         <section class="auth-brand-panel hidden lg:flex lg:w-[44%] xl:w-[46%] flex-col justify-between p-10 xl:p-14" aria-label="About OpenMail">
             <a href="/" class="auth-brand-lockup inline-flex items-center gap-3 w-fit" aria-label="OpenMail home">
@@ -98,7 +98,7 @@
                 <span>{{ config('app.name', 'OpenMail') }}</span>
             </div>
 
-            <div class="auth-card w-full">
+            <div class="auth-card w-full bg-surface-raised border border-border">
                 <div class="auth-card-heading">
                     <span class="auth-card-kicker">WELCOME BACK</span>
                     <h2>Sign in to your inbox</h2>

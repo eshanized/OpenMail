@@ -68,7 +68,7 @@ class InstallationLock
     {
         $data = array_merge([
             'installed_at' => now()->toIso8601String(),
-            'version' => config('app.version', '1.0.0'),
+            'version' => config('app.version', '2.0.0'),
         ], $metadata);
 
         $payload = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);

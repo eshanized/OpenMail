@@ -131,5 +131,8 @@ OpenMail 2.0 is a major productivity, privacy, reliability, and user-experience 
 - **Content Security Policy (CSP)**: Hardened CSP headers with cryptographic nonces and violation reporting endpoint.
 - **Zero-Daemon Architecture**: Database-backed sessions and cache eliminating the need for Redis, Memcached, or long-running workers on shared hosting.
 
+[Unreleased]: https://github.com/eshanized/OpenMail/compare/v2.0.0...master
+[2.0.0]: https://github.com/eshanized/OpenMail/compare/v1.0.1...v2.0.0
+[1.1.0]: https://github.com/eshanized/OpenMail/compare/v1.0.1...master
 [1.0.1]: https://github.com/eshanized/OpenMail/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/eshanized/OpenMail/releases/tag/v1.0.0

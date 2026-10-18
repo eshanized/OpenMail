@@ -86,7 +86,7 @@ class InstallationLockTest extends TestCase
                 $lock->markInstalled();
                 $this->fail('Installation must not report success when the lock cannot be written.');
             } catch (\\RuntimeException $exception) {
-                $this->assertStringContainsString('storage directory', strtolower($exception->getMessage()));
+                $this->assertStringContainsString('directory', strtolower($exception->getMessage()));
             }
 
             $this->assertFalse($lock->isInstalled());

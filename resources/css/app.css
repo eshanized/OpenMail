@@ -1787,7 +1787,11 @@ select.glass-input {
 /* Respect system motion settings across the refreshed surfaces. */
 @media (max-width: 1023px) {
     .mailbox-workspace > aside { width: min(18rem, 88vw); }
-    .mailbox-three-pane { grid-template-columns: minmax(0, 1fr); }
+    .mailbox-three-pane {
+        display: block;
+        overflow: auto;
+        grid-template-columns: minmax(0, 1fr);
+    }
     .mailbox-three-pane-list { display: none; }
     .mailbox-three-pane-reader { display: block; }
 }

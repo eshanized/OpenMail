@@ -47,4 +47,12 @@ class InstallerTest extends TestCase
 
         $response->assertStatus(404);
     }
+
+    public function test_root_routes_to_login_once_installation_is_persisted(): void
+    {
+        app(InstallationLock::class)->markInstalled();
+
+        $this->get('/')->assertRedirect('/login');
+        $this->get('/install')->assertNotFound();
+    }
 }

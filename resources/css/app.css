@@ -1823,3 +1823,13 @@ select.glass-input {
     .utility-workspace > div:first-child { gap: 0.75rem; }
     .utility-workspace .rounded-xl.border.border-border.bg-surface-raised { border-radius: 0.85rem; }
 }
+
+
+/* Keep search first in the compact reading-pane layout as well. */
+.mailbox-three-pane-list .mailbox-toolbar-row .mailbox-search-container { order: 0; }
+@media (max-height: 820px) and (min-width: 1024px) {
+    .auth-brand-content { margin-block: 2rem; }
+    .auth-preview { margin-top: 1.5rem; }
+    .auth-feature-list { gap: 0.8rem; margin-top: 1.5rem; }
+    .auth-brand-title { font-size: clamp(2.45rem, 3.7vw, 3.65rem); }
+}

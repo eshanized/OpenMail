@@ -55,4 +55,14 @@ class InstallerTest extends TestCase
         $this->get('/')->assertRedirect('/login');
         $this->get('/install')->assertNotFound();
     }
+
+    public function test_login_page_does_not_advertise_setup_after_installation(): void
+    {
+        app(InstallationLock::class)->markInstalled();
+
+        $this->get('/login')
+            ->assertOk()
+            ->assertDontSee('Open setup wizard')
+            ->assertDontSee('Setting up OpenMail for the first time?');
+    }
 }

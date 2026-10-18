@@ -258,4 +258,22 @@ class UiPolishTest extends TestCase
         $response->assertSee('Sign out');
         $response->assertSee($this->user->email);
     }
+
+
+    #[Test]
+    public function test_mobile_mailbox_pane_restores_block_layout_after_desktop_grid_rules(): void
+    {
+        $cssPath = base_path('resources/css/app.css');
+        $this->assertFileExists($cssPath);
+        $cssContent = file_get_contents($cssPath);
+
+        $mobileBreakpoint = strrpos($cssContent, '@media (max-width: 1023px)');
+        $this->assertNotFalse($mobileBreakpoint, 'The final tablet/mobile mailbox breakpoint must exist.');
+
+        $mobileRules = substr($cssContent, $mobileBreakpoint);
+        $this->assertStringContainsString('.mailbox-three-pane {', $mobileRules);
+        $this->assertStringContainsString('display: block;', $mobileRules);
+        $this->assertStringContainsString('overflow: auto;', $mobileRules);
+    }
+
 }

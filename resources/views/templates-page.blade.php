@@ -5,7 +5,7 @@
 @endsection
 
 @section('mailbox-content')
-    <div class="mx-auto w-full max-w-5xl space-y-4">
+    <div class="utility-workspace mx-auto w-full max-w-5xl space-y-4">
         <div class="flex flex-col gap-2 border-b border-border pb-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
                 <a href="{{ route('mailbox') }}" wire:navigate class="mb-1 inline-flex items-center gap-1.5 text-xs text-ink-tertiary hover:text-ink">

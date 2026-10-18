@@ -73,63 +73,55 @@
     }
 }" x-init="initThreadMode()">
 
-    {{-- Mailbox Header & Folder Info --}}
-    <div class="mailbox-page-header mb-5 flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-border">
-        <div class="flex items-center gap-3">
-            <h1 class="text-2xl sm:text-[1.7rem] font-semibold tracking-tight text-ink flex items-center gap-2">
-                <span>{{ ucfirst(strtolower($folderPath)) }}</span>
-            </h1>
-            @php
-                $unreadCount = $folderStats['unread'] ?? 0;
-                $totalCount = $folderStats['total'] ?? 0;
-            @endphp
-            @if($unreadCount > 0)
-                <span class="mailbox-unread-count text-xs font-semibold text-primary">
-                    {{ $unreadCount }} unread
-                </span>
-                <span class="text-ink-tertiary text-xs">&middot;</span>
-            @endif
-            <span class="mailbox-total-count text-xs text-ink-tertiary">
-                {{ $totalCount }} messages
-            </span>
+    {{-- Mailbox heading and primary toolbar --}}
+    <div class="mailbox-page-header mb-4 flex flex-col gap-3 pb-4 border-b border-border">
+        <div class="mailbox-title-row flex items-center justify-between gap-3">
+            <div class="flex min-w-0 items-center gap-3">
+                <h1 class="text-2xl sm:text-[1.7rem] font-semibold tracking-tight text-ink flex items-center gap-2">
+                    <span>{{ ucfirst(strtolower($folderPath)) }}</span>
+                </h1>
+                @php
+                    $unreadCount = $folderStats['unread'] ?? 0;
+                    $totalCount = $folderStats['total'] ?? 0;
+                @endphp
+                @if($unreadCount > 0)
+                    <span class="mailbox-unread-count text-xs font-semibold text-primary">{{ $unreadCount }} unread</span>
+                @endif
+                <span class="mailbox-total-count text-xs text-ink-tertiary whitespace-nowrap">{{ $totalCount }} messages</span>
+            </div>
         </div>
 
-        {{-- Primary Action + Search + Thread Toggle --}}
-        <div class="flex items-center gap-2 w-full md:w-auto">
-            <button
-                @click="openComposer"
-                aria-label="Compose new email"
-                class="mailbox-primary-action inline-flex items-center gap-2 rounded-xl bg-primary hover:bg-primary-hover
-                       px-4 py-2.5 text-sm font-semibold text-white
-                       transition-colors duration-100
-                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40
-                       cursor-pointer shrink-0"
-            >
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
-                </svg>
-                <span>Compose</span>
-            </button>
-
-            {{-- Search bar --}}
-            <div class="mailbox-search-container flex-1 sm:w-72 min-w-0">
+        <div class="mailbox-toolbar-row flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div class="mailbox-search-container flex-1 min-w-0 sm:min-w-[12rem]">
                 <livewire:mailbox.search-bar />
             </div>
 
-            {{-- Thread toggle --}}
-            <button
-                wire:click="toggleThreadMode"
-                class="px-2.5 py-1.5 rounded text-xs font-medium transition-colors duration-100 flex items-center gap-1.5 border cursor-pointer shrink-0
-                    {{ $threadMode === 'threaded'
-                        ? 'bg-primary-subtle text-primary border-primary/25'
-                        : 'text-ink-secondary border-border hover:bg-hover hover:text-ink' }}"
-                title="Toggle thread view (t)"
-            >
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/>
-                </svg>
-                <span>{{ $threadMode === 'threaded' ? 'Threaded' : 'Flat' }}</span>
-            </button>
+            <div class="flex items-center gap-2 sm:shrink-0">
+                <button
+                    type="button"
+                    @click="openComposer"
+                    aria-label="Compose new email"
+                    class="mailbox-primary-action inline-flex items-center justify-center gap-2 rounded-xl bg-primary hover:bg-primary-hover px-4 py-2.5 text-sm font-semibold text-white transition-colors duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 cursor-pointer shrink-0"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                    </svg>
+                    <span>Compose</span>
+                </button>
+
+                <button
+                    type="button"
+                    wire:click="toggleThreadMode"
+                    class="px-3 py-2 rounded-full text-xs font-medium transition-colors duration-100 inline-flex items-center gap-1.5 border cursor-pointer shrink-0 {{ $threadMode === 'threaded' ? 'bg-primary-subtle text-primary border-primary/25' : 'text-ink-secondary border-border hover:bg-hover hover:text-ink' }}"
+                    title="Toggle thread view (t)"
+                    aria-label="Toggle threaded message view"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.6" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/>
+                    </svg>
+                    <span>{{ $threadMode === 'threaded' ? 'Threaded' : 'Flat' }}</span>
+                </button>
+            </div>
         </div>
     </div>
 

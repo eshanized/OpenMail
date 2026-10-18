@@ -60,7 +60,7 @@
     {{-- Application header — minimal, recedes behind content --}}
     <nav class="app-topbar bg-surface-raised border-b border-border sticky top-0 z-30 w-full shrink-0">
         <div class="w-full px-2.5 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-14 items-center gap-1.5 sm:gap-4">
+            <div class="flex justify-between h-16 items-center gap-1.5 sm:gap-4">
                 {{-- Left: Brand & Navigation --}}
                 <div class="flex items-center gap-1.5 sm:gap-3 min-w-0">
                     @hasSection('mobile-nav-toggle')

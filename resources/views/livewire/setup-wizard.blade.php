@@ -1,4 +1,4 @@
-<div>
+<div class="setup-workspace">
     {{-- Session resume banner --}}
     @if (Session::has('openmail:setup:wizard') && $currentStep > 1 && !$installationComplete)
         <div class="mb-5 p-3.5 bg-surface-sunken border border-border rounded flex items-center justify-between flex-wrap gap-3">

@@ -7,6 +7,7 @@ namespace Tests\Feature;
 use App\Install\InstallationLock;
 use App\Install\InstallationState;
 use Illuminate\Support\Facades\File;
+use RuntimeException;
 use Tests\TestCase;
 
 class InstallationLockTest extends TestCase
@@ -85,7 +86,7 @@ class InstallationLockTest extends TestCase
             try {
                 $lock->markInstalled();
                 $this->fail('Installation must not report success when the lock cannot be written.');
-            } catch (\\RuntimeException $exception) {
+            } catch (RuntimeException $exception) {
                 $this->assertStringContainsString('directory', strtolower($exception->getMessage()));
             }
 

@@ -67,7 +67,6 @@ class InstallationLockTest extends TestCase
         $this->assertFileDoesNotExist(storage_path('framework/install_progress.json'));
     }
 
-
     public function test_mark_installed_throws_when_the_lock_file_cannot_be_persisted(): void
     {
         $temporaryRoot = sys_get_temp_dir().'/openmail-lock-test-'.bin2hex(random_bytes(8));

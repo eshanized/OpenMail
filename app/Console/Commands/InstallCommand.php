@@ -229,10 +229,10 @@ class InstallCommand extends Command
         Setting::set('app_domain', $appDomain ?? '');
         Setting::set('app_timezone', $appTimezone);
         Setting::set('installed_at', now()->toIso8601String());
-        Setting::set('installed_version', '1.0.0');
+        Setting::set('installed_version', config('app.version', '2.0.0'));
 
         $this->lock->markInstalled([
-            'version' => '1.0.0',
+            'version' => config('app.version', '2.0.0'),
             'org' => $appOrg ?? '',
             'admin_email' => $adminEmail,
             'installed_via' => 'cli',

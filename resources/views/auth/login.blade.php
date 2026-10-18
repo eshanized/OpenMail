@@ -109,7 +109,7 @@
 
                 <div class="auth-security-note">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 3v5c0 4.5-3 7.5-7 10-4-2.5-7-5.5-7-10V6l7-3z"/></svg>
-                    <span>Your session is protected with secure cookies.</span>
+                    <span>Your sign-in is handled by your own OpenMail server.</span>
                 </div>
             </div>
 

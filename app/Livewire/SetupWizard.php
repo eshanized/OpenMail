@@ -588,11 +588,11 @@ class SetupWizard extends Component
             Setting::set('app_domain', $this->appDomain);
             Setting::set('app_timezone', $this->appTimezone);
             Setting::set('installed_at', now()->toIso8601String());
-            Setting::set('installed_version', '1.0.0');
+            Setting::set('installed_version', config('app.version', '2.0.0'));
 
             // Lock the installation
             $lock->markInstalled([
-                'version' => '1.0.0',
+                'version' => config('app.version', '2.0.0'),
                 'org' => $this->appOrg,
                 'admin_email' => $this->adminEmail,
             ]);

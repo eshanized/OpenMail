@@ -66,6 +66,37 @@ class InstallationLockTest extends TestCase
         $this->assertFileDoesNotExist(storage_path('framework/install_progress.json'));
     }
 
+
+    public function test_mark_installed_throws_when_the_lock_file_cannot_be_persisted(): void
+    {
+        $temporaryRoot = sys_get_temp_dir().'/openmail-lock-test-'.bin2hex(random_bytes(8));
+        mkdir($temporaryRoot, 0700, true);
+
+        // A regular file cannot serve as the storage directory, so both the
+        // atomic write and the fallback write must fail without changing app storage.
+        $invalidStoragePath = $temporaryRoot.'/storage-is-a-file';
+        file_put_contents($invalidStoragePath, 'not a directory');
+        $originalStoragePath = $this->app->storagePath();
+
+        try {
+            $this->app->useStoragePath($invalidStoragePath);
+            $lock = new InstallationLock;
+
+            try {
+                $lock->markInstalled();
+                $this->fail('Installation must not report success when the lock cannot be written.');
+            } catch (\\RuntimeException $exception) {
+                $this->assertStringContainsString('storage directory', strtolower($exception->getMessage()));
+            }
+
+            $this->assertFalse($lock->isInstalled());
+        } finally {
+            $this->app->useStoragePath($originalStoragePath);
+            @unlink($invalidStoragePath);
+            @rmdir($temporaryRoot);
+        }
+    }
+
     public function test_legacy_text_lock_file_is_supported(): void
     {
         File::put(storage_path('installed'), '2026-01-02T03:04:05Z');

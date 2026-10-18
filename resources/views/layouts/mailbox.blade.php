@@ -14,7 +14,7 @@
 @endsection
 
 @section('content')
-<div class="mailbox-workspace flex-1 flex overflow-hidden w-full h-[calc(100vh-3.5rem)] min-h-[calc(100dvh-3.5rem)] relative"
+<div class="mailbox-workspace flex-1 flex overflow-hidden w-full h-[calc(100vh-4rem)] min-h-[calc(100dvh-4rem)] relative"
      x-data="{
          sidebarOpen: false,
          closeSidebar() {
